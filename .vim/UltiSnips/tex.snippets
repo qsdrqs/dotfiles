@@ -1,0 +1,120 @@
+snippet \[ "mathline" A 
+\[${1:fomular}\
+endsnippet
+
+snippet $ "Math" 
+$${1}$`!p
+if t[2] and t[2][0] not in [',', '.', '?', '-', ' ']:
+    snip.rv = ' '
+else:
+    snip.rv = ''
+`$2
+endsnippet
+
+snippet '([A-Za-z])(\d)' "auto subscript" wrA
+`!p snip.rv = match.group(1)`_`!p snip.rv = match.group(2)`
+endsnippet
+
+snippet '([A-Za-z])_(\d\d)' "auto subscript2" wrA
+`!p snip.rv = match.group(1)`_{`!p snip.rv = match.group(2)`}
+endsnippet
+
+snippet beg "begin_end"
+\begin{$1}
+$2
+\end{$1}
+endsnippet
+
+snippet ^ "superscript" iA
+^{$1}$0
+endsnippet
+
+snippet _ "lowerscript" iA
+_{$1}$0
+endsnippet
+
+snippet qq "qquad"
+\qquad $1
+endsnippet
+
+snippet dqq "double qquad"
+\qquad\qquad $1
+endsnippet
+
+snippet \dfrac "\dfrac" iA
+\dfrac{$1}{$2}$0
+endsnippet
+
+# 若输入 ‘/’，则检查符号前的字符是否为数字或者字母，
+# 将数字或字母作为分子扩展为Latex分数形式然后在分母部分等待输入
+snippet '((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/' "Fraction" wr
+\\frac{`!p snip.rv = match.group(1)`}{$1}$0
+endsnippet
+
+snippet lst "lstlisting"
+\begin{lstlisting}[language=${1:language}]
+	$0
+\end{lstlisting}
+endsnippet
+
+snippet lsti "lstinputlisting"
+\lstinputlisting[language=${1:language}]{${2:filepath}}
+endsnippet
+
+snippet ~a "alpha" A
+\alpha 
+endsnippet
+
+snippet ~T "alpha" A
+\Theta 
+endsnippet
+
+snippet ~D "Delta" A
+\Delta 
+endsnippet
+
+snippet x "times"
+\times 
+endsnippet
+
+snippet if "pseudocode if"
+\If{$$1$}
+	$0
+\EndIf
+endsnippet
+
+snippet fori "pseudocode for"
+\For{$${1:i} = ${2:1} \to ${3:n} $}
+	$0
+\EndFor
+endsnippet
+
+snippet st "pseudocode state"
+\State $$1$
+endsnippet
+
+snippet ret "pseudocode return"
+\State \Return $$1$
+endsnippet
+
+snippet elif "pseudocode else if"
+\ElsIf
+endsnippet
+
+snippet els "pseudocode else"
+\Else
+endsnippet
+
+snippet = "pseudocode ="
+\gets
+endsnippet
+
+snippet while "pseudocode while"
+\While{$$1$}
+	$0
+\EndWhile
+endsnippet
+
+snippet sq "sqrt"
+\sqrt{$1}
+endsnippet

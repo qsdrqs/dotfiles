@@ -1,0 +1,5 @@
+*.pyc
+*sync-conflict*
+.vim/plugged
+.vim/sessions
+.netrwist

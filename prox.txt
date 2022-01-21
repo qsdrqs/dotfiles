@@ -1,0 +1,3 @@
+1. coc config
+2. vim-translator
+3. git config

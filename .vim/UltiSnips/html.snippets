@@ -1,0 +1,18 @@
+snippet t "Simple tag" b
+<${1:tag}>
+	${2:${VISUAL}}
+</${1/([\w:._-]+).*/$1/}>
+endsnippet
+
+snippet ti "Inline tag" b
+<${1:tag}>${2:${VISUAL}}</${1/([\w:._-]+).*/$1/}>
+endsnippet
+
+snippet log "log in console"
+console.log($1);
+endsnippet
+
+snippet br "br"
+<br />
+
+endsnippet

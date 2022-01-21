@@ -1,0 +1,50 @@
+ll
+open_with nvim
+search down
+search zip
+search desk
+search user
+rename qsdrqs_
+search qsdrqs
+search ssh
+z hw1
+z test ve
+z test
+search ve
+search linux
+rename CMakeLists.txt_
+rename CMakeLists.txt
+mk
+search prime
+search mymnt
+search windows
+rename question1.tex
+search wind
+rename question3.tex
+z hw
+open_with code
+search ms
+search pcam
+search pacm
+scout -ftsea f
+
+search 
+rename 1.cpp
+rename 2.cpp
+search osm
+search /ost
+search ostream
+search 1.e
+rename 1.i
+search 1.i
+rename 1.c
+rename 2.c
+scout -ftsea k
+search test
+search demo
+/
+search vue
+cd 
+rename config
+rename index
+delete
