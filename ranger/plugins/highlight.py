@@ -10,7 +10,7 @@ Created on 12/30/2020
 import ranger.gui.context
 import ranger.gui.widgets.browsercolumn
 
-my_keys = ['msdoc', 'pdf', 'msppt', 'msxls']
+my_keys = ['msdoc', 'pdf', 'msppt', 'msxls', 'apk']
 
 # Set them to False
 for key in my_keys:
@@ -37,6 +37,10 @@ def new_hook_before_drawing(fsobject, color_list):
         # xls
         if full_name.split('.')[-1] in ['xls','xlsx']:
             color_list.append('msxls')
+        # apk
+        if full_name.split('.')[-1] in ['apk']:
+            color_list.append('apk')
+
 
 
     return OLD_HOOK_BEFORE_DRAWING(fsobject, color_list)

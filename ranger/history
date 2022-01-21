@@ -1,3 +1,5 @@
+search win
+mkdir 
 ll
 open_with nvim
 search down
@@ -45,6 +47,4 @@ search demo
 /
 search vue
 cd 
-rename config
-rename index
 delete
