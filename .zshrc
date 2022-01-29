@@ -210,6 +210,7 @@ alias ra="ranger"
 alias zshrc="$EDITOR ~/.zshrc"
 alias vimrc="$EDITOR ~/.vimrc"
 alias vimplug="$EDITOR ~/.vimrc.plugs"
+alias nvimplug="$EDITOR ~/.nvimrc.lua"
 
 export PROX=127.0.0.1
 alias prox="export http_proxy=http://$PROX:1081\

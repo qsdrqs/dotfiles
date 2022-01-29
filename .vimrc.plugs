@@ -176,6 +176,7 @@ let g:airline_theme='dark'
 " autocmd VimEnter * call timer_start(50, 'LazyLoadAirline')
 "
 "Disable some extensions
+"
 "let g:airline_extensions =['tabline', 'bookmark', 'gutentags', 'ycm', 'syntastic', 'keymap', 'netrw', 'quickfix', 'po', 'term', 'undotree', 'vimtex', 'vista', 'whitespace']
 let g:airline_extensions =['tabline', 'bookmark', 'branch', 'gutentags', 'keymap', 'netrw', 'quickfix', 'po', 'term', 'undotree', 'vimtex', 'vista', 'fugitiveline', 'coc', 'virtualenv', 'ctrlspace']
 let g:airline_powerline_fonts = 1
@@ -225,8 +226,6 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 "与airline配合
 "Plug 'majutsushi/tagbar'
 Plug 'Yggdroot/LeaderF'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
 
 Plug 'Yggdroot/indentLine' ", {'for': ['python','json','c','java', 'cpp']} Python缩进竖线
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
@@ -611,7 +610,6 @@ let g:UltiSnipsExpandTrigger="<c-n>"
 nmap <leader><leader> :CocCommand<CR>
 vmap <leader><leader> :CocCommand<CR>
 " TextEdit might fail if hidden is not set.
-set hidden "不加的话会导致跳转不能跨文件，详见:h hidden
 
 nmap <F1> :CocCommand java.debug.vimspector.start<CR>
 nmap <leader><F1> :CocList mainClassListRun<CR>
@@ -680,25 +678,10 @@ endfunction
 
 nnoremap gh :CocCommand clangd.switchSourceHeader<CR>
 
-" Some servers have issues with backup files, see #649.(has closed)
-set nobackup
-set nowritebackup
-
 " Give more space for displaying messages.
 if !has('nvim') "原生vim需要一行显示echodoc
   set cmdheight=2
 endif
-
-" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
-" delays and poor user experience.
-set updatetime=300
-
-" Don't pass messages to |ins-completion-menu|.
-set shortmess+=c
-
-" Always show the signcolumn, otherwise it would shift the text each time
-" diagnostics appear/become resolved.
-set signcolumn=yes
 
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
@@ -898,31 +881,6 @@ autocmd FileType qf nnoremap <silent><buffer> P :PreviewClose<cr>
 
 "-------------------undotree-----------------------"{{{
 "undotree 使undo在关闭后仍然保存修改历史
-if has('nvim')
-  if(!isdirectory(expand("~/.cache/nvim/backup")) || !isdirectory(expand("~/.cache/nvim/undo")))
-    silent !mkdir -p ~/.cache/nvim/backup
-    silent !mkdir -p ~/.cache/nvim/undo
-  endif
-  "silent !mkdir -p ~/.cache/vim/sessions
-  set backupdir=~/.cache/nvim/backup,.
-  set directory=~/.cache/nvim/backup,.
-  if has('persistent_undo')
-    set undofile
-    set undodir=~/.cache/nvim/undo,.
-  endif
-else
-  if(!isdirectory(expand("~/.cache/vim/backup")) || !isdirectory(expand("~/.cache/vim/undo")))
-    silent !mkdir -p ~/.cache/vim/backup
-    silent !mkdir -p ~/.cache/vim/undo
-  endif
-  "silent !mkdir -p ~/.cache/vim/sessions
-  set backupdir=~/.cache/vim/backup,.
-  set directory=~/.cache/vim/backup,.
-  if has('persistent_undo')
-    set undofile
-    set undodir=~/.cache/vim/undo,.
-  endif
-endif
 
 
 "-------------------rainbow-----------------------"{{{

@@ -1,4 +1,3 @@
-
 "              __     _____ __  __ ____   ____
 "              \ \   / /_ _|  \/  |  _ \ / ___|
 "               \ \ / / | || |\/| | |_) | |
@@ -117,6 +116,7 @@ noremap Y y$
 "inoremap <C-k> <Up>
 inoremap <expr><C-j> pumvisible() ? "\<Down>" : "\<C-j>"
 inoremap <expr><C-k> pumvisible() ? "\<Up>" : "\<C-k>"
+inoremap <expr><tab> pumvisible() ? "\<CR>" : "\<tab>"
 
 "中文符号的补全
 inoremap “ “”<Left>
@@ -147,25 +147,41 @@ nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
 
 
 "-------------------colorscheme-----------------------"{{{
-colorscheme monokai
+"colorscheme monokai
+colorscheme ghdark
 set termguicolors
 let g:molokai_transparent=1
 "-------------------colorscheme-----------------------"}}}
 
 "-------------------加载插件-----------------------"{{{
+" nvim lua 插件加载
+function! TriggerPlugins() "加载插件配置以及一些原生vim插件
+  luafile $HOME/.config/nvim/packer_compiled.lua
+  lua lazyLoadPlugins()
+endfunction
+
 "运行无插件vim
 if get(g:, 'vim_startup', 0) == 1
 
 elseif exists('g:vscode')
 
 else
-  if filereadable(expand("~/.vimrc.plugs"))
-    "set statusline=%{coc#status()}%{virtualenv#statusline()}
-    source ~/.vimrc.plugs
+  if has('nvim')
+    if file_readable(expand("~/.nvimrc.lua"))
+      set pp+=$HOME/.local/share/nvim/plugins/
+      luafile ~/.nvimrc.lua
+      nnoremap <leader>p :call TriggerPlugins()<CR>
+      "call TriggerPlugins()
+      "source ~/.vimrc.plugs
+    endif
   else
-    "自定义的内容
+    if filereadable(expand("~/.vimrc.plugs"))
+      "set statusline=%{coc#status()}%{virtualenv#statusline()}
+      source ~/.vimrc.plugs
+    endif
   endif
 endif
+
 
 "-------------------加载插件-----------------------"}}}
 
@@ -184,8 +200,6 @@ set clipboard=unnamedplus               "默认使用系统剪贴板
 set showcmd
 "屏幕下方保留5行"可以用zz将所在行居中
 set scrolloff=5
-"在行尾加分号（不是很好用）
-"nnoremap ;; A;
 packadd termdebug
 
 "-------------------specify type-----------------------"{{{
@@ -198,12 +212,11 @@ autocmd BufRead *.lc set filetype=haskell
 
 "-------------------specify type-----------------------"}}}
 
-hi Normal ctermbg=NONE
+"hi Normal ctermbg=NONE
 if has("autocmd")
     au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif "可以保存退出时的光标位置"
 endif
-
-set omnifunc=syntaxcomplete#Complete
+set completeopt=menu,menuone,noinsert
 
 set mouse=a
 set fileformat=unix
@@ -220,7 +233,7 @@ let b:tab2=0
 "TODO:改成函数返回参数的，通过返回值来设定tab大小
 autocmd BufWinEnter * call Tab_len()
 function Tab_len()
-for i in ['js', 'vue', 'vim']
+for i in ['js', 'vue', 'vim', 'lua']
   if &filetype == i
     set shiftwidth=2
 " 让 vim 把连续数量的空格视为一个制表符
@@ -250,6 +263,7 @@ set autoindent "自动缩进"
 "使空格和缩进显示字符
 set list
 set listchars=tab:▸\ ,trail:▫
+   
 "hi NonText ctermfg=16 guifg=#4a4a59
 "hi SpecialKey ctermfg=15 guifg=#4a4a59
 
@@ -264,7 +278,7 @@ autocmd BufReadPost *.tex setlocal spell spelllang=en_us,cjk
 set magic
 set backspace=indent,eol,start          "Make backspace behave like every other editor
 
-set guifont=FiraCode\ Nerd\ Font\ 9.5
+set guifont=FiraCode\ Nerd\ Font
 set guioptions-=m
 
 "---------------------Search---------------------------------"
@@ -287,13 +301,39 @@ if !has('nvim')
   let &t_EI = "\<Esc>[2 q"
 endif
 
-highlight Comment cterm=italic gui=italic
-highlight Function cterm=bold gui=bold
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 
 "au BufRead *.html set filetype=htmlm4 "使得html内联的css和js能够高亮"
+"--------------persistent undo------------------"{{{
+if has('nvim')
+  if(!isdirectory(expand("~/.cache/nvim/backup")) || !isdirectory(expand("~/.cache/nvim/undo")))
+    silent !mkdir -p ~/.cache/nvim/backup
+    silent !mkdir -p ~/.cache/nvim/undo
+  endif
+  "silent !mkdir -p ~/.cache/vim/sessions
+  set backupdir=~/.cache/nvim/backup,.
+  set directory=~/.cache/nvim/backup,.
+  if has('persistent_undo')
+    set undofile
+    set undodir=~/.cache/nvim/undo,.
+  endif
+else
+  if(!isdirectory(expand("~/.cache/vim/backup")) || !isdirectory(expand("~/.cache/vim/undo")))
+    silent !mkdir -p ~/.cache/vim/backup
+    silent !mkdir -p ~/.cache/vim/undo
+  endif
+  "silent !mkdir -p ~/.cache/vim/sessions
+  set backupdir=~/.cache/vim/backup,.
+  set directory=~/.cache/vim/backup,.
+  if has('persistent_undo')
+    set undofile
+    set undodir=~/.cache/vim/undo,.
+  endif
+endif
+"--------------persistent undo------------------"}}}
+
 "-------------------netrw-----------------------"{{{
 "let g:netrw_liststyle= 3
 
@@ -302,8 +342,31 @@ set diffopt=vertical
 
 set synmaxcol=0 " 取消最大行数限制
 
-"-------------------杂项-----------------------"}}}
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
 
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+set signcolumn=yes
+
+" Some servers have issues with backup files, see coc.nvim #649.(has closed)
+set nobackup
+set nowritebackup
+
+set hidden "不加的话会导致跳转不能跨文件，详见:h hidden
+
+set noswapfile " 不需要swapfile，因为有自动保存
+
+
+"-------------------杂项-----------------------"}}}
+"
+"-------------------Syntax highlight-----------------------"{{{
+" quick fix
+highlight Comment cterm=italic gui=italic
+highlight Function cterm=bold gui=bold
+
+
+"-------------------Syntax highlight-----------------------"}}}
 
 "-------------------加载项目自定义配置-----------------------"{{{
 "function! LoadProjectCustomConfig()

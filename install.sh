@@ -4,6 +4,7 @@ echo installing
 # move vim files
 ln -s ./dotfiles/.vimrc ../.vimrc
 ln -s ./dotfiles/.vimrc.plugs ../.vimrc.plugs
+ln -s ./dotfiles/.nvim.lua ../.nvim.lua
 ln -s ./dotfiles/.vim ../
 
 # move nvim files

@@ -85,4 +85,7 @@
         }
     },
     "git.addGBlameToVirtualText": false,
+    "diagnostic.virtualText": true,
+    "diagnostic.virtualTextCurrentLineOnly": false,
+    "diagnostic.messageTarget": "echo"
 }
