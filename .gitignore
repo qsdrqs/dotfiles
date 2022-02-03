@@ -2,6 +2,7 @@
 *sync-conflict*
 .vim/plugged
 .vim/sessions
+.vim/view
 .netrwist
 bookmarks
 history

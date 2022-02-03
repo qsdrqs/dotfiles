@@ -133,12 +133,13 @@ inoremap <C-l> <Right>
 inoremap <C-h> <Left>
 
 "Termdebug
-"if has('nvim')
-"  nnoremap \t :set splitbelow<CR>:15split term://zsh<cr>i
-"else
-"  nnoremap \t :set splitbelow<CR>:terminal ++rows=15<CR>
-"endif
-nnoremap <localleader>t :set splitbelow<CR>:split term://zsh<cr>i
+if has('nvim')
+  "nnoremap \t :set splitbelow<CR>:15split term://zsh<cr>i
+  nnoremap <localleader>t :set splitbelow<CR>:split<cr>:term<cr>i
+else
+  "nnoremap \t :set splitbelow<CR>:terminal ++rows=15<CR>
+  nnoremap \t :set splitbelow<CR>:terminal<CR>
+endif
 
 "lazygit
 nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
@@ -157,7 +158,10 @@ let g:molokai_transparent=1
 " nvim lua 插件加载
 function! TriggerPlugins() "加载插件配置以及一些原生vim插件
   luafile $HOME/.config/nvim/packer_compiled.lua
+  let line_num = line(".")
   lua lazyLoadPlugins()
+  exec line_num
+  let g:loadplugins = 1
 endfunction
 
 "运行无插件vim
@@ -174,6 +178,10 @@ else
       "call TriggerPlugins()
       "source ~/.vimrc.plugs
     endif
+    " folds by treesitter
+    set foldmethod=expr
+    set foldexpr=nvim_treesitter#foldexpr()
+    set foldlevel=99
   else
     if filereadable(expand("~/.vimrc.plugs"))
       "set statusline=%{coc#status()}%{virtualenv#statusline()}
@@ -202,15 +210,17 @@ set showcmd
 set scrolloff=5
 packadd termdebug
 
-"-------------------specify type-----------------------"{{{
+"-------------------file type-----------------------"{{{
 "for asm
 autocmd BufRead *.s set filetype=asm
 "for tex class
+autocmd BufRead *.tex set filetype=tex
 autocmd BufRead *.cls set filetype=tex
 "for elsa
 autocmd BufRead *.lc set filetype=haskell
 
-"-------------------specify type-----------------------"}}}
+
+"-------------------file type-----------------------"}}}
 
 "hi Normal ctermbg=NONE
 if has("autocmd")
@@ -278,7 +288,7 @@ autocmd BufReadPost *.tex setlocal spell spelllang=en_us,cjk
 set magic
 set backspace=indent,eol,start          "Make backspace behave like every other editor
 
-set guifont=FiraCode\ Nerd\ Font
+"set guifont=FiraCode\ Nerd\ Font
 set guioptions-=m
 
 "---------------------Search---------------------------------"
@@ -356,7 +366,32 @@ set nowritebackup
 set hidden "不加的话会导致跳转不能跨文件，详见:h hidden
 
 set noswapfile " 不需要swapfile，因为有自动保存
+"
+" check one time after 4s of inactivity in normal mode
+set autoread
+au CursorHold * checktime
+set updatetime=300
 
+if filereadable("/usr/bin/python3")
+  " 省去寻找python位置的时间，加快nvim加载python文件的速度
+  let g:python3_host_prog = expand('/usr/bin/python3')
+end
+
+if has('nvim')
+  " highlight on yank
+  au TextYankPost * silent! lua vim.highlight.on_yank()
+end
+
+try
+  silent! loadview
+  augroup remember_folds
+    autocmd!
+    autocmd BufWinLeave * silent! mkview
+    autocmd BufWinEnter * silent! loadview
+  augroup END
+catch
+  echo "no view"
+endtry
 
 "-------------------杂项-----------------------"}}}
 "
@@ -374,5 +409,12 @@ highlight Function cterm=bold gui=bold
 "autocmd BufEnter * call LoadProjectCustomConfig()
 if filereadable(expand(getcwd() . "/custom.vim"))
   source custom.vim
+endif
+
+command! SessionSave mksession! .session.vim
+
+if filereadable(expand(getcwd() . "/.session.vim")) && len(argv()) == 0
+  source .session.vim
+  autocmd VimLeavePre * :mksession! .session.vim
 endif
 "-------------------加载项目自定义配置-----------------------"}}}

@@ -243,7 +243,7 @@ endif
 "vim中直接编译运行
 Plug 'skywind3000/asynctasks.vim'
 Plug 'skywind3000/asyncrun.vim'
-let g:asyncrun_open = 7
+let g:asyncrun_open = 6
 nnoremap <silent><leader>at :Leaderf --nowrap task<CR>
 nnoremap <silent><leader>ae :AsyncTaskEdit<cr>
 let g:asynctasks_confirm=0

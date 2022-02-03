@@ -650,7 +650,7 @@ hi! Function guifg=#D2A8FF
 hi! Repeat guifg=#FF7B72
 hi! Define guifg=#FF7B72
 hi! Todo guibg=#FFBD2A guifg=#FFFFFF
-hi! Whitespace guifg=#3b4450
+hi! Whitespace guifg=#677586
 hi! Visual gui=bold guibg=#163356
 "hi! Search  guibg=#4d4b31 guifg=NONE
 hi! Search  guibg=#3c3b26 guifg=NONE
@@ -658,3 +658,4 @@ hi! link specialkey Whitespace
 hi! Type guifg=#FFA657 gui=NONE
 hi! PreProc guifg=#77bdfb
 hi! link Operator Repeat
+hi! link NonText Whitespace
