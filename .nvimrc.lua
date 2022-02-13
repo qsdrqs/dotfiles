@@ -7,7 +7,8 @@
 
 -- vim.cmd [[packadd packer.nvim]]
 local fn = vim.fn
-local install_path = fn.stdpath('data')..'/plugins/pack/packer/start/packer.nvim'
+local plugins_path = fn.stdpath('data')..'/plugins'
+local install_path = plugins_path .. '/pack/packer/start/packer.nvim'
 if fn.empty(fn.glob(install_path)) > 0 then
   packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
 end
@@ -35,7 +36,7 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<leader>b', '<cmd>Telescope buffers<cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>rg', '<cmd>Telescope grep_string <cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { noremap = true, silent = true })
-      -- print("Telescope loaded")
+      vim.api.nvim_set_keymap('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { noremap = true, silent = true })
     end
   }
 
@@ -84,14 +85,14 @@ require('packer').startup({function(use)
           '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
 
           -- 💀
-          '-jar', os.getenv("HOME") .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
+          '-jar', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
           -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
           -- Must point to the                                                     Change this to
           -- eclipse.jdt.ls installation                                           the actual version
 
 
           -- 💀
-          '-configuration', os.getenv("HOME") .. '/.local/share/nvim/lsp_servers/jdtls/config_linux',
+          '-configuration', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/config_linux",
           -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^
           -- Must point to the                      Change to one of `linux`, `win` or `mac`
           -- eclipse.jdt.ls installation            Depending on your system.
@@ -125,7 +126,7 @@ require('packer').startup({function(use)
         -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
         init_options = {
           bundles = {
-            vim.fn.glob(os.getenv("HOME") .. "/.local/share/nvim/dapinstall/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-0.35.0.jar")
+            vim.fn.glob(vim.fn.stdpath('data') .. "/dapinstall/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-0.35.0.jar")
           }
         },
 
@@ -134,8 +135,7 @@ require('packer').startup({function(use)
           -- you make during a debug session immediately.
           -- Remove the option if you do not want that.
           require('jdtls').setup_dap({ hotcodereplace = 'auto' })
-          require("aerial").on_attach(client, bufnr)
-          lsp_map()
+          common_on_attach(client,bufnr)
         end,
       }
       vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
@@ -145,9 +145,28 @@ require('packer').startup({function(use)
   use {
     'neovim/nvim-lspconfig',
     config = function()
+      vim.lsp.set_log_level('trace')
+
       local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
       local lspconfig = require('lspconfig')
+
+      function common_on_attach(client,bufnr)
+        require("aerial").on_attach(client, bufnr)
+        lsp_map()
+        require 'illuminate'.on_attach(client)
+      end
+
+      function showDocument()
+        local clients = vim.lsp.get_active_clients()
+        if next(clients) ~= nil then
+          vim.lsp.buf.hover()
+        elseif vim.o.filetype == "help" or vim.o.filetype == "vim" or vim.o.filetype == "lua" then
+          vim.cmd("execute 'h '.expand('<cword>')")
+        else
+          vim.cmd("execute '!' . &keywordprg . ' ' . expand('<cword>')")
+        end
+      end
 
       function lsp_map(client, bufnr)
         local opts = { noremap=true, silent=true }
@@ -158,7 +177,7 @@ require('packer').startup({function(use)
         -- See `:help vim.lsp.*` for documentation on any of the below functions
         vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
         vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-        vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+        -- vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
         vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
         vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
         vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
@@ -171,66 +190,93 @@ require('packer').startup({function(use)
         vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
       end
 
-      lspconfig["pyright"].setup {
-        cmd = {os.getenv("HOME") .. "/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio"},
-        capabilities = capabilities,
-        on_attach = function(client, bufnr)
-          require("aerial").on_attach(client, bufnr)
-          lsp_map()
-        end,
-        flags = {
-          -- This will be the default in neovim 0.7+
-          debounce_text_changes = 150,
-        },
-      }
-
-      lspconfig["texlab"].setup {
-        cmd = {os.getenv("HOME") .. "/.local/share/nvim/lsp_servers/latex/texlab"},
-        filetypes = { "tex", "bib" },
-        capabilities = capabilities,
-        on_attach = function(client, bufnr)
-          require("aerial").on_attach(client, bufnr)
-          lsp_map()
-        end,
-        flags = {
-          -- This will be the default in neovim 0.7+
-          debounce_text_changes = 150,
-        },
-        settings = {
-          texlab = {
-            build = {
-              onSave = true -- Automatically build latex on save
-            }
-          },
-          chktex = {
-            onEdit = false,
-            onOpenAndSave = true
-          }
-        },
-        handlers = {
-          ["textDocument/publishDiagnostics"] = vim.lsp.with(
-          vim.lsp.diagnostic.on_publish_diagnostics, {
-            -- Disable virtual_text
-            virtual_text = false,
-          }),
-        },
-      }
-
-      local servers = { 'clangd' }
+      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>d', '<cmd>lua showDocument()<CR>', { noremap=true, silent=true })
+      local servers = { 'clangd' , 'pyright', 'texlab', 'sumneko_lua' }
       for _, lsp in ipairs(servers) do
-        lspconfig[lsp].setup {
+        local common_config = {
           -- on_attach = my_custom_on_attach,
           capabilities = capabilities,
           on_attach = function(client, bufnr)
-            require("aerial").on_attach(client, bufnr)
-            lsp_map()
+            common_on_attach(client,bufnr)
           end,
           flags = {
             -- This will be the default in neovim 0.7+
             debounce_text_changes = 150,
           },
         }
+
+        if lsp == 'pyright' then
+          common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio"}
+        elseif lsp == "texlab" then
+          common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/latex/texlab"}
+          common_config.on_attach = function(client, bufnr)
+            common_on_attach(client,bufnr)
+            vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>v', '<cmd>TexlabForward<cr>', { noremap=true, silent=true })
+            vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>b', '<cmd>TexlabBuild<cr>', { noremap=true, silent=true })
+          end
+          common_config.settings = {
+            texlab = {
+              auxDirectory = "latex.out",
+              build = {
+                onSave = true, -- Automatically build latex on save
+                args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" }
+                -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" }
+              },
+              forwardSearch = {
+                executable = "zathura",
+                args = {
+                  '--synctex-forward',
+                  '%l:1:%f',
+                  '%p',
+                },
+              },
+            },
+            chktex = {
+              onEdit = false,
+              onOpenAndSave = true
+            }
+          }
+          common_config.handlers = {
+            ["textDocument/publishDiagnostics"] = vim.lsp.with(
+            vim.lsp.diagnostic.on_publish_diagnostics, {
+              -- Disable virtual_text
+              virtual_text = false,
+            }),
+          }
+        elseif lsp == "sumneko_lua" then
+          local runtime_path = vim.split(package.path, ';')
+          table.insert(runtime_path, "lua/?.lua")
+          table.insert(runtime_path, "lua/?/init.lua")
+
+          common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/sumneko_lua/extension/server/bin/lua-language-server"}
+          common_config.autostart = false
+          common_config.settings = {
+            Lua = {
+              runtime = {
+                -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+                version = 'LuaJIT',
+                -- Setup your lua path
+                path = runtime_path,
+              },
+              diagnostics = {
+                -- Get the language server to recognize the `vim` global
+                globals = {'vim'},
+              },
+              workspace = {
+                -- Make the server aware of Neovim runtime files
+                library = vim.api.nvim_get_runtime_file("", true),
+              },
+              -- Do not send telemetry data containing a randomized but unique identifier
+              telemetry = {
+                enable = false,
+              },
+            },
+          }
+        end
+
+        lspconfig[lsp].setup(common_config)
       end
+
 
       local opts = { noremap=true, silent=true }
       vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
@@ -247,17 +293,13 @@ require('packer').startup({function(use)
       -- vim.cmd [[au CursorHold <buffer> lua vim.diagnostic.open_float()]]
     end
   }
-  
+
   use {'kyazdani42/nvim-web-devicons'}
   use {
     'nvim-treesitter/nvim-treesitter',
     run = ':TSUpdate',
     config = function()
       require("nvim-treesitter.configs").setup {
-        highlight = {
-          -- ...
-        },
-        -- ...
         rainbow = {
           enable = true,
           disable = { }, -- list of languages you want to disable the plugin for
@@ -270,7 +312,7 @@ require('packer').startup({function(use)
 
       require 'nvim-treesitter.configs'.setup {
         -- One of "all", "maintained" (parsers with maintainers), or a list of languages
-        ensure_installed = "maintained",
+        ensure_installed = {"c", "cpp", "lua", "vim"},
 
         -- Install languages synchronously (only applied to `ensure_installed`)
         sync_install = false,
@@ -302,6 +344,37 @@ require('packer').startup({function(use)
     'windwp/nvim-autopairs',
     config = function()
       require('nvim-autopairs').setup{}
+      local npairs = require'nvim-autopairs'
+      local Rule   = require'nvim-autopairs.rule'
+
+      npairs.add_rules {
+        Rule(' ', ' ')
+        :with_pair(function (opts)
+          local pair = opts.line:sub(opts.col - 1, opts.col)
+          if vim.o.filetype == "markdown" then
+            return vim.tbl_contains({ '()', '{}' }, pair)
+          end
+          return vim.tbl_contains({ '()', '[]', '{}' }, pair)
+        end),
+        Rule('( ', ' )')
+        :with_pair(function() return false end)
+        :with_move(function(opts)
+          return opts.prev_char:match('.%)') ~= nil
+        end)
+        :use_key(')'),
+        Rule('{ ', ' }')
+        :with_pair(function() return false end)
+        :with_move(function(opts)
+          return opts.prev_char:match('.%}') ~= nil
+        end)
+        :use_key('}'),
+        Rule('[ ', ' ]')
+        :with_pair(function() return false end)
+        :with_move(function(opts)
+          return opts.prev_char:match('.%]') ~= nil
+        end)
+        :use_key(']')
+      }
     end
   }
 
@@ -332,7 +405,55 @@ require('packer').startup({function(use)
           }
         }
       })
-      vim.api.nvim_set_keymap("n", "<leader>af", ":lua formatBuf()<cr>", {noremap = true, silent = true})
+      vim.api.nvim_set_keymap("n", "<leader>af", "<cmd>lua formatBuf('n')<CR>", {noremap = true, silent = true })
+      vim.api.nvim_set_keymap("v", "<leader>af", "<cmd>lua formatBuf('v')<CR>", {noremap = true, silent = true })
+
+      -- formatters
+      function formatBuf(vmode)
+        local modes = {"i", "s"}
+        local mode = vim.fn.mode()
+
+        for _,v in pairs(modes) do
+          if mode == v then
+            return
+          end
+        end
+
+        local no_lsp_formatters = {'python'}
+        for _,v in pairs(no_lsp_formatters) do
+          if vim.o.filetype == v then
+            vim.cmd("Format")
+            return
+          end
+        end
+        if vmode == 'v' then
+          vim.lsp.buf.range_formatting()
+        else
+          vim.lsp.buf.formatting()
+        end
+      end
+
+      function formatTriggerHandler()
+        if vim.g.format_on_save == 1 then
+          vim.defer_fn(formatBuf, 1000)
+        end
+      end
+
+      function formatTrigger()
+        if not vim.g.format_on_save or vim.g.format_on_save == 0 then
+          vim.g.format_on_save = 1
+          print("Format On Save: ON")
+        elseif vim.g.format_on_save == 1 then
+          vim.g.format_on_save = 0
+          print("Format On Save: OFF")
+        end
+      end
+
+
+      -- defer 1000 ms for formatters
+      vim.cmd[[ au BufWritePost * silent lua formatTriggerHandler()]]
+      -- vim.cmd[[ au BufWritePost <buffer> silent lua vim.defer_fn(formatBuf, 1000) ]]
+      vim.cmd[[ command! AFTrigger lua formatTrigger() ]]
     end
   }
 
@@ -471,13 +592,11 @@ require('packer').startup({function(use)
 
       vim.api.nvim_set_keymap('n', '<leader>s', '<cmd>UltiSnipsEdit<cr>', { noremap = true, silent = true })
       -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-      --[[
       cmp.setup.cmdline('/', {
       sources = {
       { name = 'buffer' }
       },
       })
-      ]]
 
       -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
       cmp.setup.cmdline(':', {
@@ -490,21 +609,6 @@ require('packer').startup({function(use)
       })
     end
   }
-  use {
-    'SirVer/ultisnips',
-    requires = {{'honza/vim-snippets', rtp = '.'}},
-    opt = true,
-    config = function()
-      vim.g.UltiSnipsExpandTrigger = '<Plug>(ultisnips_expand)'
-      vim.g.UltiSnipsJumpForwardTrigger = '<Plug>(ultisnips_jump_forward)'
-      vim.g.UltiSnipsJumpBackwardTrigger = '<Plug>(ultisnips_jump_backward)'
-      vim.g.UltiSnipsListSnippets = '<c-x><c-s>'
-      vim.g.UltiSnipsRemoveSelectModeMappings = 0
-      vim.g.UltiSnipsEditSplit="vertical"
-      vim.g.UltiSnipsSnippetDirectories={ os.getenv("HOME") .. '/.vim/UltiSnips' }
-    end
-  }
-
 
   use {
     "lukas-reineke/indent-blankline.nvim",
@@ -536,6 +640,7 @@ require('packer').startup({function(use)
       }
 
       require('telescope').load_extension('projects')
+
     end
   }
 
@@ -545,6 +650,7 @@ require('packer').startup({function(use)
       vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>v', '<cmd>AerialToggle!<CR>', {})
       require('telescope').load_extension('aerial')
       require("aerial").setup({
+        backends = { "lsp", "treesitter", "markdown" },
         guides = {
           -- When the child item has a sibling below it
           mid_item = "├─",
@@ -555,6 +661,7 @@ require('packer').startup({function(use)
           -- Raw indentation
           whitespace = "  ",
         },
+        max_width = 200,
       })
     end
   }
@@ -663,6 +770,7 @@ require('packer').startup({function(use)
           'class',
           'function',
           'method',
+          'namespace',
           -- 'for', -- These won't appear in the context
           -- 'while',
           -- 'if',
@@ -682,10 +790,123 @@ require('packer').startup({function(use)
         -- rust = true, 
       }
     }
+    vim.cmd[[hi TreesitterContext guibg=#0D2341]]
   end
-}
+  }
+
+  use {
+    'akinsho/bufferline.nvim',
+    config = function()
+      require("bufferline").setup{
+        options = {
+          separator_style = "slant",
+          diagnostics = "nvim_lsp",
+
+          diagnostics_indicator = function(count, level, diagnostics_dict, context)
+            local s = " "
+            for e, n in pairs(diagnostics_dict) do
+              local sym = e == "error" and " "
+              or (e == "warning" and "  " or " " )
+              s = s .. n .. sym
+            end
+            return s
+          end
+        }
+      }
+    end
+  }
+  use {
+    'nvim-lualine/lualine.nvim',
+    requires = { 'kyazdani42/nvim-web-devicons' },
+    config = function()
+      local custom_auto = require'lualine.themes.auto'
+      custom_auto.normal.a.bg= "#242932"
+      custom_auto.normal.a.fg= "#B0B6C1"
+
+      -- lsp info, from https://github.com/nvim-lualine/lualine.nvim/blob/master/examples/evil_lualine.lua
+      local lsp_info =  {
+        -- Lsp server name .
+        function()
+          local msg = 'No Active Lsp'
+          local buf_ft = vim.api.nvim_buf_get_option(0, 'filetype')
+          local clients = vim.lsp.get_active_clients()
+          if next(clients) == nil then
+            return msg
+          end
+          for _, client in ipairs(clients) do
+            local filetypes = client.config.filetypes
+            -- if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
+            return client.name
+            -- end
+          end
+          return msg
+        end,
+        icon = ' ',
+        color = {gui = 'bold'}
+      }
+
+      -- TODO: copilot
+
+      require('lualine').setup {
+        options = {
+          icons_enabled = true,
+          theme = custom_auto,
+          component_separators = { left = ')', right = '('},
+          section_separators = { left = '', right = ''},
+          disabled_filetypes = {},
+          always_divide_middle = true,
+        },
+        sections = {
+          lualine_a = {'filename'},
+          lualine_b = {'branch', 'diff', 'diagnostics'},
+          lualine_c = {lsp_info},
+          lualine_x = {'encoding', 'fileformat', 'filetype'},
+          lualine_y = {'progress'},
+          lualine_z = {'location'}
+        },
+        inactive_sections = {
+          lualine_a = {},
+          lualine_b = {},
+          lualine_c = {'filename'},
+          lualine_x = {'location'},
+          lualine_y = {},
+          lualine_z = {}
+        },
+        tabline = {},
+        extensions = {}
+      }
+
+
+    end
+  }
+
+  use {
+    'RRethy/vim-illuminate',
+    config = function()
+      vim.api.nvim_command [[ hi def LspReferenceText guibg=#193b25]]
+      vim.api.nvim_command [[ hi def link LspReferenceWrite LspReferenceText ]]
+      vim.api.nvim_command [[ hi def link LspReferenceRead LspReferenceText ]]
+    end
+  }
+
+  use {'dstein64/vim-startuptime'}
 
   -- vim plugins
+  use {
+    'SirVer/ultisnips',
+    requires = {{'honza/vim-snippets', rtp = '.'}},
+    opt = true,
+    config = function()
+      vim.g.UltiSnipsExpandTrigger = '<Plug>(ultisnips_expand)'
+      vim.g.UltiSnipsJumpForwardTrigger = '<Plug>(ultisnips_jump_forward)'
+      vim.g.UltiSnipsJumpBackwardTrigger = '<Plug>(ultisnips_jump_backward)'
+      vim.g.UltiSnipsListSnippets = '<c-x><c-s>'
+      vim.g.UltiSnipsRemoveSelectModeMappings = 0
+      vim.g.UltiSnipsEditSplit="vertical"
+      vim.g.UltiSnipsSnippetDirectories={ os.getenv("HOME") .. '/.vim/UltiSnips' }
+    end
+  }
+
   use {
     'Lucklyric/copilot.vim',
     opt = true,
@@ -710,8 +931,11 @@ require('packer').startup({function(use)
   }
   use {
     'machakann/vim-sandwich',
+    opt = true,
     config = function()
       vim.cmd[[
+      runtime macros/sandwich/keymap/surround.vim
+
       xmap is <Plug>(textobj-sandwich-query-i)
       xmap as <Plug>(textobj-sandwich-query-a)
       omap is <Plug>(textobj-sandwich-query-i)
@@ -725,6 +949,8 @@ require('packer').startup({function(use)
     end
   }
   use 'sakshamgupta05/vim-todo-highlight'
+
+  use {'MTDL9/vim-log-highlighting', opt = true}
 
   use {
     'skywind3000/asynctasks.vim',
@@ -751,6 +977,14 @@ require('packer').startup({function(use)
     opt = true,
   }
 
+  use {
+    'mg979/vim-visual-multi',
+    opt = true,
+    config = function()
+      vim.g.VM_theme = 'codedark'
+    end
+  }
+
  --管理gtags，集中存放tags
   use {'ludovicchabant/vim-gutentags', opt = true}
   use {
@@ -770,8 +1004,16 @@ require('packer').startup({function(use)
       -- change focus to quickfix window after search (optional).
       vim.g.gutentags_plus_switch = 1
       vim.cmd("set statusline+=%{gutentags#statusline()}")
+
+      function loadGtags()
+        require('packer').loader('vim-gutentags gutentags_plus', '<bang>' == '!')
+        vim.cmd("edit %")
+      end
+      vim.cmd("command! LoadGtags lua loadGtags()")
+
     end
   }
+
   -- dap
   use {
     "mfussenegger/nvim-dap",
@@ -826,6 +1068,7 @@ require('packer').startup({function(use)
       }
       dap.configurations.c = dap.configurations.cpp
       dap.configurations.rust = dap.configurations.cpp
+      dap.configurations.asm = dap.configurations.cpp
 
       -- Python
       dap.adapters.python = {
@@ -979,10 +1222,6 @@ require('packer').startup({function(use)
     end
   }
 
-  if packer_bootstrap then
-    require('packer').sync()
-  end
-
 end,
 config = {
   profile = {
@@ -1011,6 +1250,9 @@ function lazyLoadPlugins()
   require('packer').loader('vCoolor.vim', '<bang>' == '!')
   require('packer').loader('vim-fugitive', '<bang>' == '!')
   require('packer').loader('nvim-treesitter-context', '<bang>' == '!')
+  require('packer').loader('vim-sandwich', '<bang>' == '!')
+  require('packer').loader('vim-visual-multi', '<bang>' == '!')
+  require('packer').loader('vim-log-highlighting', '<bang>' == '!')
 end
 --------------------------------------------------------------------------------------
 ----------------------------Constant Plugins------------------------------------------
@@ -1080,41 +1322,10 @@ autosave.setup({
   clean_command_line_interval = 0,
   debounce_delay = 135
 })
+--------------------------------------------------------------------------------------
 
-function formatBuf()
-
-  if not vim.g.loadplugins then
-    return
-  end
-
-  local modes = {"i", "s"}
-  local mode = vim.api.nvim_eval("mode()")
-  for _,v in pairs(modes) do
-    if mode == v then
-      return
-    end
-  end
-
-  local no_lsp_formatters = {'python'}
-  for _,v in pairs(no_lsp_formatters) do
-    if vim.o.filetype == v then
-      vim.cmd("Format")
-      return
-    end
-  end
-  vim.lsp.buf.formatting()
-end
-
-function loadGtags()
-  require('packer').loader('vim-gutentags gutentags_plus', '<bang>' == '!')
-  vim.cmd("edit %")
-end
-vim.cmd("command! LoadGtags lua loadGtags()")
-
-
-
--- defer 1000 ms for formatters
--- vim.cmd[[ au BufWritePost <buffer> silent lua vim.defer_fn(formatBuf, 1000) ]]
-
+----------------------------Common Functions------------------------------------------
+-- vCoolor.vim won't disable mappings if it is loaded after the plugin
+vim.g.vcoolor_disable_mappings = 1
 --------------------------------------------------------------------------------------
 vim.api.nvim_set_keymap('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { noremap = true, silent = true })

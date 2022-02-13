@@ -38,8 +38,8 @@ exec_always --no-startup-id ~/init/*
 exec_always --no-startup-id fcitx5 #输入法
 exec_always --no-startup-id variety #desktop
 #exec_always --no-startup-id dunst #通知程序
-exec_always --no-startup-id picom --experimental-backends #beauty
-#exec_always --no-startup-id picom #beauty
+#exec_always --no-startup-id picom --experimental-backends #模糊渲染器
+exec_always --no-startup-id picom #渲染器
 #exec_always --no-startup-id albert #alt+d call
 
 
@@ -114,7 +114,8 @@ bindsym $mod+x exec --no-startup-id xournalpp
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
 # I use firefox
-bindsym $mod+p exec --no-startup-id firefox-developer-edition --no-startup-id
+# bindsym $mod+p exec --no-startup-id firefox-developer-edition --no-startup-id
+bindsym $mod+p exec --no-startup-id firefox --no-startup-id
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed

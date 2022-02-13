@@ -5,7 +5,10 @@ echo installing
 ln -s ./dotfiles/.vimrc ../.vimrc
 ln -s ./dotfiles/.vimrc.plugs ../.vimrc.plugs
 ln -s ./dotfiles/.nvimrc.lua ../.nvimrc.lua
-ln -s ./dotfiles/.vim ../
+
+if [[ ! -d ../.vim ]];then
+    mkdir -p ../.vim
+fi
 
 # move nvim files
 if [[ ! -d ../.config/nvim ]];then
@@ -13,20 +16,13 @@ if [[ ! -d ../.config/nvim ]];then
 fi
 for FILE in `ls ./.vim`
 do
-    if [[ -d $FILE ]];then
-        ln -s ../../.vim/$FILE ../.config/nvim/
-    else
-        ln -s ../../.vim/$FILE ../.config/nvim/$FILE
-    fi
+    ln -s ../dotfiles/.vim/$FILE ../.vim/
+    ln -s ../../.vim/$FILE ../.config/nvim/
 done
 ln -s ../../.vimrc ../.config/nvim/init.vim
 
 # move zsh files
-ln -s ./dotfiles/.oh-my-zsh ../
 ln -s ./dotfiles/.zshrc ../.zshrc
-
-echo '#ZSH_THEME="spaceship"
-ZSH_THEME="powerlevel10k/powerlevel10k"' > ../theme.zsh
 
 # move ranger files
 if [[ -d ../.config/ranger ]] && [[ ! -L ../.config/ranger ]];then

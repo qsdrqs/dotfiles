@@ -126,8 +126,25 @@ ubuntu
 command-not-found
 #找文件 (CTRL-T, CTRL-R, ALT-C):
 fzf
-#fzf-tab
+fzf-tab
 )
+
+function zsh_install(){
+    # oh-my-zsh
+    git clone https://github.com/ohmyzsh/ohmyzsh ~/.oh-my-zsh
+    # plugins
+    git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab &
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions &
+    git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git \
+        ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/fast-syntax-highlighting &
+
+    # themes
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k &
+    git clone https://github.com/denysdovhan/spaceship-prompt ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt &
+
+    echo "#ZSH_THEME=\"spaceship-prompt/spaceship\"\nZSH_THEME=\"powerlevel10k/powerlevel10k\"" > ../theme.zsh
+
+}
 
 #To make zsh colorful by grc
 [[ -s "/etc/grc.zsh"  ]] && source /etc/grc.zsh
@@ -142,7 +159,6 @@ fi
 
 #init zsh
 source $ZSH/oh-my-zsh.sh
-source $ZSH/custom/plugins/fzf-tab/fzf-tab.zsh
 
 # 光标形状随模式改变
 function zle-keymap-select {

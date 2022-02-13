@@ -157,11 +157,20 @@ let g:molokai_transparent=1
 "-------------------加载插件-----------------------"{{{
 " nvim lua 插件加载
 function! TriggerPlugins() "加载插件配置以及一些原生vim插件
-  luafile $HOME/.config/nvim/packer_compiled.lua
+  if has('win32')
+    luafile $HOME/AppData/Local/nvim/packer_compiled.lua
+  else
+    luafile $HOME/.config/nvim/packer_compiled.lua
+  end
   let line_num = line(".")
   lua lazyLoadPlugins()
   exec line_num
   let g:loadplugins = 1
+
+  " source again
+  if filereadable(expand(getcwd() . "/.custom.vim"))
+    source .custom.vim
+  endif
 endfunction
 
 "运行无插件vim
@@ -172,7 +181,12 @@ elseif exists('g:vscode')
 else
   if has('nvim')
     if file_readable(expand("~/.nvimrc.lua"))
-      set pp+=$HOME/.local/share/nvim/plugins/
+      if has('win32')
+        set pp+=$HOME/AppData/Local/nvim-data/plugins/
+      else
+        set pp+=$HOME/.local/share/nvim/plugins/
+      end
+
       luafile ~/.nvimrc.lua
       nnoremap <leader>p :call TriggerPlugins()<CR>
       "call TriggerPlugins()
@@ -369,7 +383,6 @@ set noswapfile " 不需要swapfile，因为有自动保存
 "
 " check one time after 4s of inactivity in normal mode
 set autoread
-au CursorHold * checktime
 set updatetime=300
 
 if filereadable("/usr/bin/python3")
@@ -393,6 +406,8 @@ catch
   echo "no view"
 endtry
 
+nmap <leader>x :bd!<cr>
+
 "-------------------杂项-----------------------"}}}
 "
 "-------------------Syntax highlight-----------------------"{{{
@@ -407,8 +422,8 @@ highlight Function cterm=bold gui=bold
 "function! LoadProjectCustomConfig()
 "endfunction
 "autocmd BufEnter * call LoadProjectCustomConfig()
-if filereadable(expand(getcwd() . "/custom.vim"))
-  source custom.vim
+if filereadable(expand(getcwd() . "/.custom.vim"))
+  source .custom.vim
 endif
 
 command! SessionSave mksession! .session.vim
@@ -417,4 +432,5 @@ if filereadable(expand(getcwd() . "/.session.vim")) && len(argv()) == 0
   source .session.vim
   autocmd VimLeavePre * :mksession! .session.vim
 endif
+let g:UltiSnipsJumpForwardTrigger = "<C-n>"
 "-------------------加载项目自定义配置-----------------------"}}}
