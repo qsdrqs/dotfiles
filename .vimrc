@@ -167,9 +167,9 @@ function! TriggerPlugins() "加载插件配置以及一些原生vim插件
   exec line_num
   let g:loadplugins = 1
 
-  " source again
-  if filereadable(expand(getcwd() . "/.custom.vim"))
-    source .custom.vim
+  " source again to load plugin configs
+  if filereadable(expand(getcwd() . "/.exrc"))
+    source .exrc
   endif
 endfunction
 
@@ -188,14 +188,15 @@ else
       end
 
       luafile ~/.nvimrc.lua
-      nnoremap <leader>p :call TriggerPlugins()<CR>
-      "call TriggerPlugins()
+      nnoremap <leader><leader> :call TriggerPlugins()<CR>
+      " call TriggerPlugins()
+
+      " call plugins if no args
+      if len(argv()) == 0
+        call TriggerPlugins()
+      endif
       "source ~/.vimrc.plugs
     endif
-    " folds by treesitter
-    set foldmethod=expr
-    set foldexpr=nvim_treesitter#foldexpr()
-    set foldlevel=99
   else
     if filereadable(expand("~/.vimrc.plugs"))
       "set statusline=%{coc#status()}%{virtualenv#statusline()}
@@ -204,9 +205,7 @@ else
   endif
 endif
 
-
 "-------------------加载插件-----------------------"}}}
-
 "-------------------杂项-----------------------"{{{
 
 set nocompatible
@@ -302,7 +301,7 @@ autocmd BufReadPost *.tex setlocal spell spelllang=en_us,cjk
 set magic
 set backspace=indent,eol,start          "Make backspace behave like every other editor
 
-"set guifont=FiraCode\ Nerd\ Font
+set guifont=FiraCode\ Nerd\ Font
 set guioptions-=m
 
 "---------------------Search---------------------------------"
@@ -392,21 +391,26 @@ end
 
 if has('nvim')
   " highlight on yank
-  au TextYankPost * silent! lua vim.highlight.on_yank()
+  au TextYankPost * silent! lua vim.highlight.on_yank{}
 end
 
-try
-  silent! loadview
-  augroup remember_folds
-    autocmd!
-    autocmd BufWinLeave * silent! mkview
-    autocmd BufWinEnter * silent! loadview
-  augroup END
-catch
-  echo "no view"
-endtry
+for i in ['c', 'cpp', 'lua', 'python']
+  if &filetype == i
+    silent! loadview
+    augroup remember_folds
+      autocmd!
+      autocmd BufWinLeave * silent! mkview
+      autocmd BufWinEnter * silent! loadview
+    augroup END
+  endif
+endfor
 
-nmap <leader>x :bd!<cr>
+if mapcheck("<leader>x") == ""
+  nmap <leader>x :bd!<CR>
+endif
+
+" 加载项目自定义配置(为了兼容使用.exrc)
+set exrc
 
 "-------------------杂项-----------------------"}}}
 "
@@ -415,22 +419,8 @@ nmap <leader>x :bd!<cr>
 highlight Comment cterm=italic gui=italic
 highlight Function cterm=bold gui=bold
 
+highlight FloatBorder guifg=#525869 guibg=#1F2335
 
 "-------------------Syntax highlight-----------------------"}}}
 
-"-------------------加载项目自定义配置-----------------------"{{{
-"function! LoadProjectCustomConfig()
-"endfunction
-"autocmd BufEnter * call LoadProjectCustomConfig()
-if filereadable(expand(getcwd() . "/.custom.vim"))
-  source .custom.vim
-endif
-
-command! SessionSave mksession! .session.vim
-
-if filereadable(expand(getcwd() . "/.session.vim")) && len(argv()) == 0
-  source .session.vim
-  autocmd VimLeavePre * :mksession! .session.vim
-endif
-let g:UltiSnipsJumpForwardTrigger = "<C-n>"
-"-------------------加载项目自定义配置-----------------------"}}}
+let g:neovide_cursor_animation_length=0

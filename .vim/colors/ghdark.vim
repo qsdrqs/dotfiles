@@ -167,7 +167,7 @@ call s:ghhl("MatchParen", "none", "base3")
 call s:ghhl("Normal", "base5", "base0")
 call s:ghhl("Pmenu", "base4", "base1")
 call s:ghhl("PmenuSel", "base4", "base2")
-call s:ghhl("Search", "base0", "base5")
+"call s:ghhl("Search", "base0", "base5")
 call s:ghhl("SignColumn", "none", "base0")
 call s:ghhl("StatusLine", "base5", "base2")
 call s:ghhl("StatusLineNC", "base3", "base1")
@@ -224,7 +224,7 @@ hi! link SignifySignAdd Signify
 hi! link SignifySignChange Signify
 hi! link SignifySignDelete Signify
 hi! link SpecialChar Special
-hi! link Special GhLightBlue
+"hi! link Special GhLightBlue
 hi! link SpecialKey GhBase3
 hi! link SpecialKey Ignore
 hi! link Statement GhRed
@@ -659,3 +659,5 @@ hi! Type guifg=#FFA657 gui=NONE
 hi! PreProc guifg=#77bdfb
 hi! link Operator Repeat
 hi! link NonText Whitespace
+hi IncSearch term=reverse cterm=reverse ctermfg=193 ctermbg=16 gui=reverse guifg=#C4BE89 guibg=#000000
+hi! link Special Preproc

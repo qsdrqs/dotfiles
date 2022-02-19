@@ -29,6 +29,7 @@ fi
 
 setopt nonomatch
 source $HOME/dotfiles/z/z.sh
+export _Z_SRC=$HOME/dotfiles/z/z.sh
 ZSH_DISABLE_COMPFIX=true
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -142,7 +143,7 @@ function zsh_install(){
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k &
     git clone https://github.com/denysdovhan/spaceship-prompt ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt &
 
-    echo "#ZSH_THEME=\"spaceship-prompt/spaceship\"\nZSH_THEME=\"powerlevel10k/powerlevel10k\"" > ../theme.zsh
+    echo "#ZSH_THEME=\"spaceship-prompt/spaceship\"\nZSH_THEME=\"powerlevel10k/powerlevel10k\"" > $HOME/theme.zsh
 
 }
 
