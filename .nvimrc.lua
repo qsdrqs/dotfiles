@@ -905,7 +905,7 @@ require('packer').startup({function(use)
           'class',
           'function',
           'method',
-          'namespace',
+          -- 'namespace',
           'struct',
           -- 'for', -- These won't appear in the context
           -- 'while',
@@ -1078,7 +1078,7 @@ require('packer').startup({function(use)
       'kyazdani42/nvim-web-devicons', -- optional, for file icon
     },
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>n', '<cmd>NvimTreeToggle<CR>', { noremap = true, silent = true})
+      vim.api.nvim_set_keymap('n', '<leader>n', '<cmd>NvimTreeFindFileToggle<CR>', { noremap = true, silent = true})
       vim.g.nvim_tree_git_hl = 1
       require'nvim-tree'.setup {
         diagnostics = {
@@ -1426,11 +1426,13 @@ require('packer').startup({function(use)
 
   use {
     "lambdalisue/suda.vim",
+    opt = false,
     config = function()
     end
   }
   use {
     'mbbill/undotree',
+    opt = false,
     config = function()
       vim.api.nvim_set_keymap('n', 'U', '<cmd>UndotreeToggle<cr>', { noremap = true, silent = true })
     end
@@ -1455,6 +1457,7 @@ require('packer').startup({function(use)
   }
   use {
     'sakshamgupta05/vim-todo-highlight',
+    opt = false,
     config = function()
     end
   }

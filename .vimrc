@@ -251,6 +251,7 @@ set backspace=indent,eol,start          "Make backspace behave like every other 
 
 set guifont=FiraCode\ Nerd\ Font
 set guioptions-=m
+let g:neovide_cursor_animation_length=0
 
 "---------------------Search---------------------------------"
 set hlsearch
@@ -423,4 +424,3 @@ else
 endif
 
 "-------------------加载插件-----------------------"}}}
-let g:neovide_cursor_animation_length=0
