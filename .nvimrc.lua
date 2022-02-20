@@ -451,6 +451,7 @@ require('packer').startup({function(use)
   -- use { 'hrsh7th/cmp-vsnip',  }
   -- use { 'hrsh7th/vim-vsnip',  }
   use { 'hrsh7th/cmp-nvim-lua',  }
+  use { 'hrsh7th/cmp-path', }
   use { 'hrsh7th/cmp-buffer',  }
   use { 'hrsh7th/cmp-cmdline',  }
   use { 'hrsh7th/cmp-omni',  }
@@ -632,6 +633,7 @@ require('packer').startup({function(use)
         sources = cmp.config.sources({
           { name = 'ultisnips' }, -- For ultisnips users.
           { name = 'omni' },
+          { name = 'path' },
           { name = 'nvim_lsp' },
           -- { name = 'vsnip' }, -- For vsnip users.
           { name = 'nvim_lua' },
@@ -683,7 +685,7 @@ require('packer').startup({function(use)
 
         -- Install languages synchronously (only applied to `ensure_installed`)
         sync_install = false,
-        
+
 
         -- List of parsers to ignore installing
         -- ignore_install = { "javascript" },
@@ -906,6 +908,7 @@ require('packer').startup({function(use)
           'function',
           'method',
           'namespace',
+          'struct',
           -- 'for', -- These won't appear in the context
           -- 'while',
           -- 'if',
@@ -936,7 +939,15 @@ require('packer').startup({function(use)
         options = {
           separator_style = "slant",
           diagnostics = "nvim_lsp",
-
+          max_name_length = 100,
+          name_formatter = function(buf)  -- buf contains a "name", "path" and "bufnr"
+            -- remove extension from markdown files for example
+            if buf.bufnr == vim.fn.bufnr() then
+              return vim.fn.fnamemodify(vim.fn.expand("%"), ":~:.")
+            else
+              return buf.name
+            end
+          end,
           diagnostics_indicator = function(count, level, diagnostics_dict, context)
             local s = " "
             for e, n in pairs(diagnostics_dict) do
@@ -1018,7 +1029,7 @@ require('packer').startup({function(use)
           always_divide_middle = true,
         },
         sections = {
-          lualine_a = {{'filename', path = 1}},
+          lualine_a = {{'filename', path = 0}},
           lualine_b = {'branch', 'diff', 'diagnostics'},
           lualine_c = {{"aerial", sep = " > "}},
           lualine_x = {lsp_info, {require('auto-session-library').current_session_name}},
@@ -1056,6 +1067,7 @@ require('packer').startup({function(use)
     'RRethy/vim-illuminate',
     opt = true,
     config = function()
+      vim.g.Illuminate_delay = 300
       vim.api.nvim_command [[ hi def LspReferenceText guibg=#193b25]]
       vim.api.nvim_command [[ hi def link LspReferenceWrite LspReferenceText ]]
       vim.api.nvim_command [[ hi def link LspReferenceRead LspReferenceText ]]
@@ -1454,7 +1466,11 @@ require('packer').startup({function(use)
       ]]
     end
   }
-  use 'sakshamgupta05/vim-todo-highlight'
+  use {
+    'sakshamgupta05/vim-todo-highlight',
+    config = function()
+    end
+  }
 
   use {'MTDL9/vim-log-highlighting', opt = true}
 
@@ -1836,14 +1852,14 @@ end
 ----------------------------Lazy Load-------------------------------------------------
 function lazyLoadPlugins()
   require('packer').loader('nvim-treesitter', '<bang>' == '!')
+  require('packer').loader('nvim-treesitter-context', '<bang>' == '!')
+  require('packer').loader('nvim-ts-rainbow', '<bang>' == '!')
+  require('packer').loader('indent-blankline.nvim', '<bang>' == '!')
   require('packer').loader('copilot.vim', '<bang>' == '!')
   require('packer').loader('ultisnips cmp-nvim-ultisnips vim-snippets', '<bang>' == '!')
   require('packer').loader('asynctasks.vim asyncrun.vim telescope-asynctasks.nvim', '<bang>' == '!')
   require('packer').loader('vCoolor.vim', '<bang>' == '!')
   require('packer').loader('vim-fugitive', '<bang>' == '!')
-  require('packer').loader('nvim-treesitter-context', '<bang>' == '!')
-  require('packer').loader('nvim-ts-rainbow', '<bang>' == '!')
-  require('packer').loader('indent-blankline.nvim', '<bang>' == '!')
   require('packer').loader('vim-sandwich', '<bang>' == '!')
   require('packer').loader('vim-visual-multi', '<bang>' == '!')
   require('packer').loader('vim-log-highlighting', '<bang>' == '!')
@@ -1943,9 +1959,16 @@ autocmd BufNewFile * call LoadSkeletons()
 -- register.nvim
 vim.g.registers_window_border = "single"
 
---------------------------------------------------------------------------------------
+-- highlight NOTE:
+vim.g.todo_highlight_config = {
+  NOTE = {
+    gui_fg_color = '#2AFF2C',
+    gui_bg_color = 'NONE',
+    cterm_fg_color = 'white',
+    cterm_bg_color = '214'
+  }
+}
 
-----------------------------Common Functions------------------------------------------
 -- vCoolor.vim won't disable mappings if it is loaded after the plugin
 vim.g.vcoolor_disable_mappings = 1
 --------------------------------------------------------------------------------------

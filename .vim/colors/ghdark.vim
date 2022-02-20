@@ -661,3 +661,6 @@ hi! link Operator Repeat
 hi! link NonText Whitespace
 hi IncSearch term=reverse cterm=reverse ctermfg=193 ctermbg=16 gui=reverse guifg=#C4BE89 guibg=#000000
 hi! link Special Preproc
+if has('nvim')
+  hi! PmenuSel guifg=None guibg=#393F47
+endif

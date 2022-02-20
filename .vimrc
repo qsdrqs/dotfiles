@@ -154,58 +154,6 @@ set termguicolors
 let g:molokai_transparent=1
 "-------------------colorscheme-----------------------"}}}
 
-"-------------------加载插件-----------------------"{{{
-" nvim lua 插件加载
-function! TriggerPlugins() "加载插件配置以及一些原生vim插件
-  if has('win32')
-    luafile $HOME/AppData/Local/nvim/packer_compiled.lua
-  else
-    luafile $HOME/.config/nvim/packer_compiled.lua
-  end
-  let line_num = line(".")
-  lua lazyLoadPlugins()
-  exec line_num
-  let g:loadplugins = 1
-
-  " source again to load plugin configs
-  if filereadable(expand(getcwd() . "/.exrc"))
-    source .exrc
-  endif
-endfunction
-
-"运行无插件vim
-if get(g:, 'vim_startup', 0) == 1
-
-elseif exists('g:vscode')
-
-else
-  if has('nvim')
-    if file_readable(expand("~/.nvimrc.lua"))
-      if has('win32')
-        set pp+=$HOME/AppData/Local/nvim-data/plugins/
-      else
-        set pp+=$HOME/.local/share/nvim/plugins/
-      end
-
-      luafile ~/.nvimrc.lua
-      nnoremap <leader><leader> :call TriggerPlugins()<CR>
-      " call TriggerPlugins()
-
-      " call plugins if no args
-      if len(argv()) == 0
-        call TriggerPlugins()
-      endif
-      "source ~/.vimrc.plugs
-    endif
-  else
-    if filereadable(expand("~/.vimrc.plugs"))
-      "set statusline=%{coc#status()}%{virtualenv#statusline()}
-      source ~/.vimrc.plugs
-    endif
-  endif
-endif
-
-"-------------------加载插件-----------------------"}}}
 "-------------------杂项-----------------------"{{{
 
 set nocompatible
@@ -423,4 +371,56 @@ highlight FloatBorder guifg=#525869 guibg=#1F2335
 
 "-------------------Syntax highlight-----------------------"}}}
 
+"-------------------加载插件-----------------------"{{{
+" nvim lua 插件加载
+function! TriggerPlugins() "加载插件配置以及一些原生vim插件
+  if has('win32')
+    luafile $HOME/AppData/Local/nvim/packer_compiled.lua
+  else
+    luafile $HOME/.config/nvim/packer_compiled.lua
+  end
+  let line_num = line(".")
+  lua lazyLoadPlugins()
+  exec line_num
+  let g:loadplugins = 1
+
+  " source again to load plugin configs
+  if filereadable(expand(getcwd() . "/.exrc"))
+    source .exrc
+  endif
+endfunction
+
+"运行无插件vim
+if get(g:, 'vim_startup', 0) == 1
+
+elseif exists('g:vscode')
+
+else
+  if has('nvim')
+    if file_readable(expand("~/.nvimrc.lua"))
+      if has('win32')
+        set pp+=$HOME/AppData/Local/nvim-data/plugins/
+      else
+        set pp+=$HOME/.local/share/nvim/plugins/
+      end
+
+      luafile ~/.nvimrc.lua
+      nnoremap <leader><leader> :call TriggerPlugins()<CR>
+      " call TriggerPlugins()
+
+      " call plugins if no args
+      if len(argv()) == 0
+        call TriggerPlugins()
+      endif
+      "source ~/.vimrc.plugs
+    endif
+  else
+    if filereadable(expand("~/.vimrc.plugs"))
+      "set statusline=%{coc#status()}%{virtualenv#statusline()}
+      source ~/.vimrc.plugs
+    endif
+  endif
+endif
+
+"-------------------加载插件-----------------------"}}}
 let g:neovide_cursor_animation_length=0
