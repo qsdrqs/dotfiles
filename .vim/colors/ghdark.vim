@@ -226,7 +226,7 @@ hi! link SignifySignDelete Signify
 hi! link SpecialChar Special
 "hi! link Special GhLightBlue
 hi! link SpecialKey GhBase3
-hi! link SpecialKey Ignore
+"hi! link SpecialKey Ignore
 hi! link Statement GhRed
 hi! link StatusLineTermNC StatusLineNC
 hi! link StatusLineTerm StatusLine
@@ -664,3 +664,4 @@ hi! link Special Preproc
 if has('nvim')
   hi! PmenuSel guifg=None guibg=#393F47
 endif
+hi! link helpSectionDelim Comment
