@@ -160,7 +160,9 @@ call s:ghhl("CursorLineNr", "lightblue", "base2")
 call s:ghhl("DiffAdd", "green", "base0")
 call s:ghhl("DiffChange", "orange", "base0")
 call s:ghhl("DiffDelete", "red", "base0")
-call s:ghhl("ErrorMsg", "red", "base1")
+call s:ghhl("DiffText", "blue", "base0")
+
+"call s:ghhl("ErrorMsg", "red", "base1")
 call s:ghhl("Error", "none", "red")
 call s:ghhl("Folded", "blue", "base1")
 call s:ghhl("MatchParen", "none", "base3")
@@ -208,7 +210,7 @@ hi! link LocalType Type
 hi! link Macro PreProc
 hi! link ModeMsg GhBase4
 hi! link MoreMsg GhBase4
-hi! link MsgArea Title
+hi! link MsgArea GhBase4
 hi! link Noise Delimiter
 hi! link NonText GhBase3
 hi! link NonText Ignore
@@ -239,7 +241,7 @@ hi! link TabLineSel StatusLine
 hi! link TabLine StatusLineNC
 hi! link Tag Special
 hi! link Terminal Normal
-hi! link Title GhBase4
+hi! link Title markdownH1
 hi! link Type GhRed
 
 " ALE
@@ -278,6 +280,12 @@ call s:ghhl("CocErrorHighlight", "none", "none", "undercurl,bold")
 hi! link CocWarningHighlight CocErrorHighlight
 hi! link CocInfoHighlight CocErrorHighlight
 hi! link CocHintHighlight CocErrorHighlight
+
+" Nvim LSP
+hi! link DiagnosticUnderlineError ErrorMsg
+hi! link DiagnosticUnderlineWarn WarningMsg
+hi! link DiagnosticUnderlineInfo GhLightBlue
+hi! link DiagnosticUnderlineHint GhBase3
 
 " CSS
 
@@ -428,7 +436,7 @@ hi! link jsTernaryIfOperator jsDot
 
 " markdown
 
-call s:ghhl("markdownH1", "base5", "none", "bold")
+call s:ghhl("markdownH1", "blue", "none", "bold")
 hi! link markdownH2 markdownH1
 hi! link markdownH3 markdownH1
 hi! link markdownH4 markdownH1
@@ -442,6 +450,10 @@ hi! link markdownUrl GhBlueItalic
 hi! link markdownLinkUrl markdownUrl
 hi! link markdownBold GhBold
 hi! link markdownItalic GhItalic
+hi! link SpellBad ErrorMsg
+hi! link SpellCap WarningMsg
+hi! link SpellLocal WarningMsg
+hi! link SpellRare GhLightBlue
 
 " python
 hi! link pythonClass GhOrange
@@ -665,3 +677,5 @@ if has('nvim')
   hi! PmenuSel guifg=None guibg=#393F47
 endif
 hi! link helpSectionDelim Comment
+hi! ErrorMsg guifg=#fa7970 guibg=None guisp=#Fa7970 gui=underline
+hi! WarningMsg guifg=#faa356 guibg=None guisp=#faa356 gui=underline

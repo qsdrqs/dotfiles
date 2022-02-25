@@ -144,6 +144,9 @@ endif
 "lazygit
 nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
 
+" text obj
+
+
 "-------------------键位映射-----------------------"}}}
 
 
@@ -276,6 +279,7 @@ endif
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+let &t_8u = "\<Esc>[58;2;%lu;%lu;%lum"
 
 "au BufRead *.html set filetype=htmlm4 "使得html内联的css和js能够高亮"
 "--------------persistent undo------------------"{{{
@@ -358,6 +362,9 @@ if mapcheck("<leader>x") == ""
   nmap <leader>x :bd!<CR>
 endif
 
+" open all folds by default
+set foldlevel=99
+
 " 加载项目自定义配置(为了兼容使用.exrc)
 set exrc
 
@@ -410,7 +417,7 @@ else
       " call TriggerPlugins()
 
       " call plugins if no args
-      if len(argv()) == 0
+      if len(argv()) == 0 || isdirectory(argv()[0])
         call TriggerPlugins()
       endif
       "source ~/.vimrc.plugs
