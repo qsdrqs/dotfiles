@@ -2141,7 +2141,7 @@ end
 --------------------------------------------------------------------------------------
 
 ----------------------------Lazy Load-------------------------------------------------
---TODO: performance improvment
+--TODO: performance improvement
 function lazyLoadPlugins()
   require('impatient')
 
