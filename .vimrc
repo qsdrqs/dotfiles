@@ -438,6 +438,9 @@ else
 
       luafile ~/.nvimrc.lua
       nnoremap <leader><leader> :call TriggerPlugins()<CR>
+
+      "NOTE: 如果长期打开该选项,
+      "可以使得 opt_default=false 来加快nvim加载速度(约50ms)
       call TriggerPlugins()
 
       " call plugins if no args

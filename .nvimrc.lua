@@ -5,7 +5,6 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-require('impatient')
 vim.cmd [[packadd packer.nvim]]
 local fn = vim.fn
 local plugins_path = fn.stdpath('data')..'/plugins'
@@ -575,6 +574,7 @@ require('packer').startup({function(use)
   }
   use {
     'hrsh7th/cmp-cmdline',
+    opt = true,
     keys = {"/", ":"},
     config = function()
       local status_ok, cmp = pcall(require, "cmp")
@@ -1280,6 +1280,7 @@ require('packer').startup({function(use)
 
   use {
     'kevinhwang91/rnvimr',
+    opt = true,
     keys = "<leader>ra",
     config = function()
       vim.api.nvim_set_keymap('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', { noremap = true, silent = true})
@@ -1331,6 +1332,7 @@ require('packer').startup({function(use)
 
   use {
     'famiu/bufdelete.nvim',
+    opt = true,
     keys = '<leader>x',
     config = function()
       vim.api.nvim_set_keymap('n', '<leader>x', '<cmd>Bdelete!<CR>', { noremap = true, silent = true})
@@ -1633,6 +1635,9 @@ require('packer').startup({function(use)
       require("which-key").setup {
         -- your configuration comes here
         -- or leave it empty to use the default settings
+        plugins = {
+          registers = false,
+        },
         window = {
           border = "single"
         }
@@ -1686,6 +1691,7 @@ require('packer').startup({function(use)
   }
   use {
     'lfv89/vim-interestingwords',
+    opt = true,
     keys = "<leader>h",
     config = function()
       vim.api.nvim_set_keymap('n', '<leader>h', "<cmd>call InterestingWords('n')<cr>", { noremap = true, silent = true })
@@ -1785,10 +1791,15 @@ require('packer').startup({function(use)
 
   use {
     'tpope/vim-fugitive',
+    opt = true,
+    cmd = {"G", "Gclog", "Flog"}
   }
 
   use {
-    'rbong/vim-flog'
+    'rbong/vim-flog',
+    opt = true,
+    cmd = {"Flog"},
+    requires = {{'tpope/vim-fugitive'}}
   }
 
   use {
@@ -1832,8 +1843,7 @@ require('packer').startup({function(use)
       vim.cmd [[ au FileType dap-repl lua require('dap.ext.autocompl').attach() ]]
 
       vim.cmd [[
-      "nnoremap <silent> <F2> :lua require'dap'.terminate({},{terminateDebuggee=true},term_dap())<CR>
-      nnoremap <silent> <F2> :lua require'dap'.terminate()<CR>
+      nnoremap <silent> <F2> :lua require'dap'.terminate({},{terminateDebuggee=true},term_dap())<CR>
       nnoremap <silent> <F5> :lua require'dap'.continue()<CR>
       nnoremap <silent> <leader><F5> :lua require'dap'.run_to_cursor()<CR>
       nnoremap <silent> <F6> :lua require'dap'.pause()<CR>
@@ -2131,81 +2141,93 @@ end
 --------------------------------------------------------------------------------------
 
 ----------------------------Lazy Load-------------------------------------------------
+--TODO: performance improvment
 function lazyLoadPlugins()
+  require('impatient')
+
+  require('packer').loader(
   -- begin basic
-  require('packer').loader('plenary.nvim', '<bang>' == '!')
-  require('packer').loader('nvim-web-devicons', '<bang>' == '!')
+  'plenary.nvim',
+  'nvim-web-devicons',
   -- end basic
 
   -- begin telescope
-  require('packer').loader('telescope.nvim', '<bang>' == '!')
-  require('packer').loader('project.nvim', '<bang>' == '!')
-  require('packer').loader('telescope-fzf-native.nvim', '<bang>' == '!')
-  require('packer').loader('telescope-vim-bookmarks.nvim', '<bang>' == '!')
+  'telescope.nvim',
+  'project.nvim',
+  'telescope-fzf-native.nvim',
+  'telescope-vim-bookmarks.nvim',
   -- end telescope
 
   -- begin LSP & CMP
-  require('packer').loader('formatter.nvim', '<bang>' == '!')
-  require('packer').loader('nvim-cmp', '<bang>' == '!')
-  require('packer').loader('ultisnips cmp-nvim-ultisnips vim-snippets', '<bang>' == '!')
-  require('packer').loader('cmp-nvim-lsp cmp-nvim-lua cmp-path cmp-buffer cmp-omni cmp-dictionary', '<bang>' == '!')
-  require('packer').loader('nvim-lsp-installer', '<bang>' == '!')
-  require('packer').loader('nvim-lspconfig nvim-jdtls', '<bang>' == '!')
-  require('packer').loader('lsp_signature.nvim', '<bang>' == '!')
-  require('packer').loader('fidget.nvim', '<bang>' == '!')
-  require('packer').loader('nvim-lightbulb', '<bang>' == '!')
-  require('packer').loader('trouble.nvim', '<bang>' == '!')
-  require('packer').loader('copilot.vim', '<bang>' == '!')
-  require('packer').loader('vim-illuminate', '<bang>' == '!')
+  'formatter.nvim',
+  'nvim-cmp',
+  'ultisnips',
+  'cmp-nvim-ultisnips',
+  'vim-snippets',
+  'cmp-nvim-lsp',
+  'cmp-nvim-lua',
+  'cmp-path',
+  'cmp-buffer',
+  'cmp-omni',
+  'cmp-dictionary',
+  'nvim-lsp-installer',
+  'nvim-lspconfig nvim-jdtls',
+  'lsp_signature.nvim',
+  'fidget.nvim',
+  'nvim-lightbulb',
+  'trouble.nvim',
+  'copilot.vim',
+  'vim-illuminate',
   -- end LSP & CMP
 
   -- begin treesitter (slow performance)
-  require('packer').loader('nvim-treesitter', '<bang>' == '!')
-  require('packer').loader('nvim-treesitter-context', '<bang>' == '!')
-  require('packer').loader('nvim-ts-rainbow', '<bang>' == '!')   -- performance issue
-  require('packer').loader('indent-blankline.nvim', '<bang>' == '!')
-  require('packer').loader('nvim-treesitter-textobjects', '<bang>' == '!')
-  require('packer').loader('nvim-ts-autotag', '<bang>' == '!')
+  'nvim-treesitter',
+  'nvim-treesitter-context',
+  'nvim-ts-rainbow',   -- performance issue
+  'indent-blankline.nvim',
+  'nvim-treesitter-textobjects',
+  'nvim-ts-autotag',
   -- end treesitter
 
   -- begin misc
-  require('packer').loader('nvim-autopairs', '<bang>' == '!')
-  require('packer').loader('vim-sandwich', '<bang>' == '!')
-  require('packer').loader('vim-visual-multi', '<bang>' == '!')
-  require('packer').loader('auto-session', '<bang>' == '!')
-  require('packer').loader('bufdelete.nvim', '<bang>' == '!')
-  require('packer').loader('aerial.nvim', '<bang>' == '!')
-  require('packer').loader('Comment.nvim', '<bang>' == '!')
-  require('packer').loader('hop.nvim', '<bang>' == '!')
-  require('packer').loader('which-key.nvim', '<bang>' == '!')
-  require('packer').loader('asynctasks.vim asyncrun.vim telescope-asynctasks.nvim', '<bang>' == '!')
+  'nvim-autopairs',
+  'vim-sandwich',
+  'vim-visual-multi',
+  'auto-session',
+  'bufdelete.nvim',
+  'aerial.nvim',
+  'Comment.nvim',
+  'hop.nvim',
+  'which-key.nvim',
+  'asynctasks.vim asyncrun.vim telescope-asynctasks.nvim',
   -- end misc
 
   -- begin git
-  require('packer').loader('gitsigns.nvim', '<bang>' == '!')
-  require('packer').loader('vim-fugitive', '<bang>' == '!')
-  require('packer').loader('vim-flog', '<bang>' == '!')
+  'gitsigns.nvim',
   -- end git
 
   -- begin UI
-  require('packer').loader('lualine.nvim', '<bang>' == '!')
-  require('packer').loader('bufferline.nvim', '<bang>' == '!')
-  require('packer').loader('nvim-colorizer.lua', '<bang>' == '!')
-  require('packer').loader('vCoolor.vim', '<bang>' == '!')
-  require('packer').loader('vim-log-highlighting', '<bang>' == '!')
-  require('packer').loader('alpha-nvim', '<bang>' == '!')
-  require('packer').loader('nvim-tree.lua', '<bang>' == '!')
-  require('packer').loader('nvim-scrollview', '<bang>' == '!')
-  require('packer').loader('nvim-hlslens', '<bang>' == '!')
-  require('packer').loader('dressing.nvim', '<bang>' == '!')
+  'lualine.nvim',
+  'bufferline.nvim',
+  'nvim-colorizer.lua',
+  'vCoolor.vim',
+  'vim-log-highlighting',
+  'alpha-nvim',
+  'nvim-tree.lua',
+  'nvim-scrollview',
+  'nvim-hlslens',
+  'dressing.nvim',
   -- end UI
 
   -- begin DAP
-  require('packer').loader('nvim-dap', '<bang>' == '!')
-  require('packer').loader('nvim-dap-ui', '<bang>' == '!')
-  require('packer').loader('nvim-dap-virtual-text', '<bang>' == '!')
-  require('packer').loader('DAPInstall.nvim', '<bang>' == '!')
+  'nvim-dap',
+  'nvim-dap-ui',
+  'nvim-dap-virtual-text',
+  'DAPInstall.nvim',
   -- end DAP
+
+  '<bang>' == '!')
+
 end
 --------------------------------------------------------------------------------------
 ----------------------------Constant Plugins------------------------------------------
