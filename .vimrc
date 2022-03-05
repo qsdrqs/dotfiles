@@ -27,6 +27,7 @@ if has('nvim') || has('gui_running')
   nnoremap <silent><leader><m-n> :tabnew<cr>
   nnoremap <silent><leader><m-c> :tabclose<cr>
   nnoremap <silent><leader><m-o> :tabonly<cr>
+  nnoremap <silent><leader><m-s> :tab split<cr>
 else
   nnoremap <silent>1 :tabn 1<cr>
   nnoremap <silent>2 :tabn 2<cr>
@@ -41,6 +42,7 @@ else
   nnoremap <silent><leader>n :tabnew<cr>
   nnoremap <silent><leader>c :tabclose<cr>
   nnoremap <silent><leader>o :tabonly<cr>
+  nnoremap <silent><leader>s :tab split<cr>
 endif
 
 "----------------------------------------------------------------------
@@ -180,8 +182,8 @@ autocmd BufRead *.s set filetype=asm
 "for tex class
 autocmd BufRead *.tex set filetype=tex
 autocmd BufRead *.cls set filetype=tex
-"for elsa
-autocmd BufRead *.lc set filetype=haskell
+"for log
+autocmd BufRead *.log set filetype=log
 
 
 "-------------------file type-----------------------"}}}
@@ -335,6 +337,7 @@ set noswapfile " 不需要swapfile，因为有自动保存
 "
 " check one time after 4s of inactivity in normal mode
 set autoread
+autocmd CursorHold * silent! checktime
 set updatetime=300
 
 if filereadable("/usr/bin/python3")
@@ -368,6 +371,17 @@ set foldlevel=99
 " 加载项目自定义配置(为了兼容使用.exrc)
 set exrc
 
+" zsh shell
+set shell=zsh
+
+" show current syntax highlighting
+function! Syn()
+  for id in synstack(line("."), col("."))
+    echo synIDattr(id, "name")
+  endfor
+endfunction
+command! -nargs=0 Syn call Syn()
+
 "-------------------杂项-----------------------"}}}
 "
 "-------------------Syntax highlight-----------------------"{{{
@@ -377,6 +391,16 @@ highlight Function cterm=bold gui=bold
 
 highlight FloatBorder guifg=#525869 guibg=#1F2335
 
+augroup custom_highlight
+  au Syntax * syn match Todo  /\v\.<TODO:/ containedin=.*Comment.*
+  au Syntax * syn match Fixme  /\v<FIXME:/ containedin=.*Comment.*
+  au Syntax * syn match Note  /\v<NOTE:/ containedin=.*Comment.*
+  au Syntax * syn match searchme /\v<searchme:/ containedin=.*
+augroup END
+hi! Todo guifg=#26302B guibg=#FFBD2A
+hi! Fixme guifg=#26302B guibg=#F06292
+hi! Note guifg=#2AFF2C guibg=#0d1117
+hi! searchme guifg=#F06292 guibg=#0d1117 gui=bold
 "-------------------Syntax highlight-----------------------"}}}
 
 "-------------------加载插件-----------------------"{{{
@@ -414,7 +438,7 @@ else
 
       luafile ~/.nvimrc.lua
       nnoremap <leader><leader> :call TriggerPlugins()<CR>
-      " call TriggerPlugins()
+      call TriggerPlugins()
 
       " call plugins if no args
       if len(argv()) == 0 || isdirectory(argv()[0])
@@ -429,5 +453,4 @@ else
     endif
   endif
 endif
-
 "-------------------加载插件-----------------------"}}}

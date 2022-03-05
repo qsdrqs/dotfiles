@@ -44,7 +44,10 @@ export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 export ZSH="$HOME/.oh-my-zsh"
 
 #Make alacritty compatible with SSH
-export TERM="xterm-256color"
+#export TERM="xterm-256color"
+if [[ -x `command -v kitty` ]]; then
+    alias ssh="kitty +kitten ssh"
+fi
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME

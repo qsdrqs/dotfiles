@@ -140,7 +140,7 @@ call s:ghhl("GhBase3", "base3")
 call s:ghhl("GhBase4", "base4")
 call s:ghhl("GhBase5", "base5")
 call s:ghhl("GhRed", "red")
-call s:ghhl("GhPurpUnder", "purp", "none", "underline")
+call s:ghhl("GhPurpUnder", "purp", "none", "undercurl")
 call s:ghhl("GhOrange", "orange")
 call s:ghhl("GhLightBlue", "lightblue")
 call s:ghhl("GhBlue", "blue")
@@ -157,10 +157,10 @@ call s:ghhl("vCursor", "base0", "purp")
 call s:ghhl("CursorColumn", "none", "base1")
 call s:ghhl("CursorLine", "none", "base1")
 call s:ghhl("CursorLineNr", "lightblue", "base2")
-call s:ghhl("DiffAdd", "green", "base0")
-call s:ghhl("DiffChange", "orange", "base0")
-call s:ghhl("DiffDelete", "red", "base0")
-call s:ghhl("DiffText", "blue", "base0")
+"call s:ghhl("DiffAdd", "green", "base0")
+"call s:ghhl("DiffChange", "orange", "base0")
+"call s:ghhl("DiffDelete", "red", "base0")
+"call s:ghhl("DiffText", "orange", "base0")
 
 "call s:ghhl("ErrorMsg", "red", "base1")
 call s:ghhl("Error", "none", "red")
@@ -334,9 +334,10 @@ hi! link cssUnitDecorators Normal
 
 " diff
 
-hi! link diffAdded DiffAdd
+hi! diffAdded guifg=#7ce38b guibg=#0d1117
+hi! diffRemoved guifg=#fa7970 guibg=#0d1117
+hi! diffChanged guifg=#faa356 guibg=#0d1117
 hi! link diffBDiffer WarningMsg
-hi! link diffChanged DiffChange
 hi! link diffCommon WarningMsg
 hi! link diffDiffer WarningMsg
 hi! link diffFile Directory
@@ -345,7 +346,6 @@ hi! link diffIndexLine Number
 hi! link diffIsA WarningMsg
 hi! link diffNoEOL WarningMsg
 hi! link diffOnly WarningMsg
-hi! link diffRemoved DiffDelete
 
 " Git commit
 
@@ -677,5 +677,11 @@ if has('nvim')
   hi! PmenuSel guifg=None guibg=#393F47
 endif
 hi! link helpSectionDelim Comment
-hi! ErrorMsg guifg=#fa7970 guibg=None guisp=#Fa7970 gui=underline
-hi! WarningMsg guifg=#faa356 guibg=None guisp=#faa356 gui=underline
+if has('nvim')
+hi! ErrorMsg guifg=#fa7970 guibg=None guisp=#Fa7970 gui=undercurl
+hi! WarningMsg guifg=#faa356 guibg=None guisp=#faa356 gui=undercurl
+hi! DiffChange guifg=None guibg=#462D10
+hi! DiffAdd guifg=None guibg=#104731
+hi! DiffDelete guifg=None guibg=#4C111F
+hi! DiffText guifg=None guibg=#7A5614
+endif

@@ -5,7 +5,8 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
--- vim.cmd [[packadd packer.nvim]]
+require('impatient')
+vim.cmd [[packadd packer.nvim]]
 local fn = vim.fn
 local plugins_path = fn.stdpath('data')..'/plugins'
 local install_path = plugins_path .. '/pack/packer/start/packer.nvim'
@@ -16,21 +17,57 @@ end
 require('packer').startup({function(use)
   -- Packer can manage itself
   use {'wbthomason/packer.nvim', opt = false}
+  use {'lewis6991/impatient.nvim', opt = false}
   use {'nvim-lua/plenary.nvim' }
   use {
     'nvim-telescope/telescope.nvim',
     requires = { {'nvim-lua/plenary.nvim'} },
     config = function()
-      require('telescope').setup {
-        defaults = {
-          mappings = {
-            i = {
-              ["<C-j>"] = "move_selection_next",
-              ["<C-k>"] = "move_selection_previous",
+      local action_set = require "telescope.actions.set"
+
+      local function move_selection_next_5(prompt_bufnr)
+        action_set.shift_selection(prompt_bufnr, 5)
+      end
+
+      local function move_selection_previous_5(prompt_bufnr)
+        action_set.shift_selection(prompt_bufnr, -5)
+      end
+
+      local status_ok, trouble = pcall(require, "trouble.providers.telescope")
+      if status_ok then
+        require('telescope').setup {
+          defaults = {
+            mappings = {
+              i = {
+                ["<C-j>"] = "move_selection_next",
+                ["<c-t>"] = trouble.open_with_trouble,
+                ["<C-k>"] = "move_selection_previous",
+              },
+              n = {
+                ["<c-t>"] = trouble.open_with_trouble,
+                ["K"] = move_selection_previous_5,
+                ["J"] = move_selection_next_5,
+              },
             }
           }
         }
-      }
+      else
+        require('telescope').setup {
+          defaults = {
+            mappings = {
+              i = {
+                ["<C-j>"] = "move_selection_next",
+                ["<C-k>"] = "move_selection_previous",
+              },
+              n = {
+                ["K"] = move_selection_previous_5,
+                ["J"] = move_selection_next_5,
+              },
+            }
+          }
+        }
+
+      end
 
       vim.api.nvim_set_keymap('n', '<leader>f', '<cmd>Telescope find_files<cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>b', '<cmd>Telescope buffers<cr>', { noremap = true, silent = true })
@@ -38,6 +75,7 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { noremap = true, silent = true })
     end
   }
 
@@ -45,6 +83,35 @@ require('packer').startup({function(use)
     'kevinhwang91/nvim-bqf',
     opt = false,
   } -- better quick fix
+
+  use {
+    'kevinhwang91/nvim-hlslens',
+    config = function()
+      local kopts = {noremap = true, silent = true}
+
+      vim.api.nvim_set_keymap('n', 'n',
+      [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]],
+      kopts)
+      vim.api.nvim_set_keymap('n', 'N',
+      [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]],
+      kopts)
+      vim.api.nvim_set_keymap('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+
+      vim.api.nvim_set_keymap('x', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('x', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('x', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('x', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+
+      require'hlslens'.setup {
+        calm_down = false,
+        nearest_only = true,
+        nearest_float_when = 'auto'
+      }
+    end
+  }
 
   use {
     'williamboman/nvim-lsp-installer',
@@ -173,7 +240,6 @@ require('packer').startup({function(use)
         if status_ok then
           illuminate.on_attach(client, bufnr)
         end
-
       end
 
       function showDocument()
@@ -209,7 +275,7 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
       vim.api.nvim_set_keymap('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
 
-      local servers = { 'clangd' , 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls' }
+      local servers = { 'clangd' , 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
         local common_config = {
           -- on_attach = my_custom_on_attach,
@@ -221,12 +287,32 @@ require('packer').startup({function(use)
             -- This will be the default in neovim 0.7+
             debounce_text_changes = 150,
           },
+          handlers = {
+          },
         }
 
         if lsp == 'pyright' then common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio"}
-        elseif lsp == 'clangd' then common_config.cmd = {"clangd", "--header-insertion-decorators=0"}
+        elseif lsp == 'clangd' then common_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never"}
         elseif lsp == "rust_analyzer" then common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/rust/rust-analyzer"}
         elseif lsp == 'vimls' then common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/vim/node_modules/.bin/vim-language-server", "--stdio"}
+        elseif lsp == 'hls' then
+          common_config.on_attach = function(client, bufnr) 
+            common_on_attach(client,bufnr)
+            vim.cmd [[ autocmd InsertLeave,TextChanged <buffer> lua vim.lsp.codelens.refresh() ]]
+            vim.lsp.codelens.refresh()
+          end
+          common_config.handlers["textDocument/codeLens"] = function(err, result, ctx, _)
+            if not result or not next(result) then
+              vim.lsp.codelens.on_codelens(err, result, ctx, _)
+            else
+              for _, item in ipairs(result) do
+                if item.command then
+                  item.command.title = "     🔑 " .. item.command.title
+                end
+              end
+              vim.lsp.codelens.on_codelens(err, result, ctx, _)
+            end
+          end
         elseif lsp == "texlab" then
           common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/latex/texlab" }
           common_config.on_attach = function(client, bufnr)
@@ -239,8 +325,8 @@ require('packer').startup({function(use)
               auxDirectory = "latex.out",
               build = {
                 onSave = true, -- Automatically build latex on save
-                -- args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
-                args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+                args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+                -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
               },
               forwardSearch = {
                 executable = "zathura",
@@ -256,13 +342,11 @@ require('packer').startup({function(use)
               onOpenAndSave = true
             }
           }
-          common_config.handlers = {
-            ["textDocument/publishDiagnostics"] = vim.lsp.with(
+          common_config.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
             vim.lsp.diagnostic.on_publish_diagnostics, {
               -- Disable virtual_text
               virtual_text = false,
-            }),
-          }
+            })
         elseif lsp == "sumneko_lua" then
           local runtime_path = vim.split(package.path, ';')
           table.insert(runtime_path, "lua/?.lua")
@@ -306,10 +390,6 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<leader>d', '<cmd>lua showDocument()<CR>', opts)
 
 
-      vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-      vim.lsp.diagnostic.on_publish_diagnostics, {
-        -- Disable signs
-      })
 
       -- vim.cmd [[au CursorHold <buffer> lua vim.diagnostic.open_float()]]
 
@@ -338,6 +418,10 @@ require('packer').startup({function(use)
         local hl = "DiagnosticSign" .. type
         vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
       end
+
+      -- code len
+      vim.api.nvim_set_keymap('n', '<leader>cl', '<cmd>lua vim.lsp.codelens.run()<CR>', opts)
+      vim.cmd [[hi! link LspCodeLens specialkey]]
 
     end
   }
@@ -483,7 +567,12 @@ require('packer').startup({function(use)
   use { 'hrsh7th/cmp-path', }
   use { 'hrsh7th/cmp-buffer',  }
   use { 'hrsh7th/cmp-omni',  }
-  use { 'f3fora/cmp-spell', }
+  use {
+    'uga-rosa/cmp-dictionary',
+    config = function()
+      require("cmp_dictionary").setup({ dic = { ["markdown,tex"] = { "/usr/share/dict/words" } }, })
+    end
+  }
   use {
     'hrsh7th/cmp-cmdline',
     keys = {"/", ":"},
@@ -688,7 +777,7 @@ require('packer').startup({function(use)
           { name = 'ultisnips' }, -- For ultisnips users.
           { name = 'nvim_lsp' },
           { name = 'omni' },
-          { name = 'spell' },
+          { name = 'dictionary', keyword_length = 2 },
           { name = 'path' },
           -- { name = 'vsnip' }, -- For vsnip users.
           { name = 'nvim_lua' },
@@ -741,6 +830,12 @@ require('packer').startup({function(use)
           -- Instead of true it can also be a list of languages
           additional_vim_regex_highlighting = true,
         },
+      }
+
+      -- disable comment hightlight
+      require"nvim-treesitter.highlight".set_custom_captures {
+        -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
+        ["comment"] = "NONE",
       }
 
     end
@@ -898,6 +993,7 @@ require('packer').startup({function(use)
           whitespace = "  ",
         },
         max_width = 200,
+        disable_max_lines = -1,
       })
     end
   }
@@ -977,6 +1073,11 @@ require('packer').startup({function(use)
           map('x', 'ih', ':<C-U>Gitsigns select_hunk<CR>')
         end
       }
+      vim.cmd [[
+      hi! link GitSignsAdd diffAdded
+      hi! link GitSignsChange diffChanged
+      hi! link GitSignsDelete diffRemoved
+      ]]
     end
   }
 
@@ -1071,9 +1172,9 @@ require('packer').startup({function(use)
     requires = { 'kyazdani42/nvim-web-devicons' },
     config = function()
       local custom_auto = require'lualine.themes.auto'
-      custom_auto.normal.a.bg = "#242932"
-      custom_auto.normal.a.fg = "#B0B6C1"
+      custom_auto.normal.a.fg = "#C4CBD7"
       custom_auto.normal.b.fg = "#9CA5B3"
+      custom_auto.normal.c.bg = "#21262D"
       custom_auto.inactive = {
         a = { fg = '#c6c6c6', bg = '#080808' },
         b = { fg = '#c6c6c6', bg = '#080808' },
@@ -1160,7 +1261,7 @@ require('packer').startup({function(use)
           lualine_c = {gtagsHandler,{"aerial", sep = " > "}},
           lualine_x = {lsp_info, auto_session_name()},
           lualine_y = { 'fileformat', 'filetype', copilot},
-          lualine_z = {'%l/%L,%c', 'encoding'}
+          lualine_z = {'%l/%L,%c', 'encoding' }
         },
         inactive_sections = {
           lualine_a = {},
@@ -1191,7 +1292,7 @@ require('packer').startup({function(use)
     'RRethy/vim-illuminate',
     config = function()
       vim.g.Illuminate_delay = 300
-      vim.g.Illuminate_ftblacklist = {'NvimTree', 'help'}
+      vim.g.Illuminate_ftblacklist = {"NvimTree", "alpha", "dapui_scopes", "dapui_breakpoints", "help"}
       vim.api.nvim_command [[ hi def LspReferenceText guibg=#193b25]]
       vim.api.nvim_command [[ hi def link LspReferenceWrite LspReferenceText ]]
       vim.api.nvim_command [[ hi def link LspReferenceRead LspReferenceText ]]
@@ -1512,6 +1613,7 @@ require('packer').startup({function(use)
           toggle_fold = {"zc", "zo"}, -- toggle fold of current file
         },
       }
+
     end
   }
 
@@ -1542,7 +1644,7 @@ require('packer').startup({function(use)
     'dstein64/nvim-scrollview',
     config = function()
       vim.g.scrollview_current_only = 1
-      vim.g.scrollview_excluded_filetypes = {"NvimTree", "alpha"}
+      vim.g.scrollview_excluded_filetypes = {"NvimTree", "alpha", "dapui_scopes"}
     end
   }
 
@@ -1552,6 +1654,15 @@ require('packer').startup({function(use)
   }
 
   -- vim plugins
+  use {"dstein64/vim-startuptime", opt = false}
+  use {
+    'voldikss/vim-translator',
+    keys = "<leader>y",
+    config = function()
+      vim.api.nvim_set_keymap('n', '<leader>y', "<cmd>TranslateW<cr>", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('v', '<leader>y', "<cmd>TranslateW<cr>", { noremap = true, silent = true })
+    end
+  }
   use {
     'iamcco/markdown-preview.nvim',
     run = "cd app && yarn install",
@@ -1641,12 +1752,6 @@ require('packer').startup({function(use)
       ]]
     end
   }
-  use {
-    'sakshamgupta05/vim-todo-highlight',
-    opt = false,
-    config = function()
-    end
-  }
 
   use {'MTDL9/vim-log-highlighting', }
 
@@ -1654,7 +1759,7 @@ require('packer').startup({function(use)
     'GustavoKatel/telescope-asynctasks.nvim',
     config = function()
       -- Fuzzy find over current tasks
-      vim.api.nvim_set_keymap('n', '<leader><leader>', '<cmd>lua require("telescope").extensions.asynctasks.all()<cr>', { noremap = true, silent = true })
+      vim.cmd[[command! AsyncTaskTelescope lua require("telescope").extensions.asynctasks.all()]]
     end
   }
 
@@ -1680,6 +1785,10 @@ require('packer').startup({function(use)
 
   use {
     'tpope/vim-fugitive',
+  }
+
+  use {
+    'rbong/vim-flog'
   }
 
   use {
@@ -1723,7 +1832,8 @@ require('packer').startup({function(use)
       vim.cmd [[ au FileType dap-repl lua require('dap.ext.autocompl').attach() ]]
 
       vim.cmd [[
-      nnoremap <silent> <F2> :lua require'dap'.terminate({},{terminateDebuggee=true},term_dap())<CR>
+      "nnoremap <silent> <F2> :lua require'dap'.terminate({},{terminateDebuggee=true},term_dap())<CR>
+      nnoremap <silent> <F2> :lua require'dap'.terminate()<CR>
       nnoremap <silent> <F5> :lua require'dap'.continue()<CR>
       nnoremap <silent> <leader><F5> :lua require'dap'.run_to_cursor()<CR>
       nnoremap <silent> <F6> :lua require'dap'.pause()<CR>
@@ -2005,9 +2115,6 @@ require('packer').startup({function(use)
 
 end,
 config = {
-  profile = {
-    enable = true
-  },
   compile_path = require 'packer.util'.join_paths(vim.fn.stdpath('config'), 'packer_compiled.lua'),
   package_root   = require 'packer.util'.join_paths(vim.fn.stdpath('data'), 'plugins', 'pack'),
   opt_default = true,
@@ -2041,7 +2148,7 @@ function lazyLoadPlugins()
   require('packer').loader('formatter.nvim', '<bang>' == '!')
   require('packer').loader('nvim-cmp', '<bang>' == '!')
   require('packer').loader('ultisnips cmp-nvim-ultisnips vim-snippets', '<bang>' == '!')
-  require('packer').loader('cmp-nvim-lsp cmp-nvim-lua cmp-path cmp-buffer cmp-omni cmp-spell', '<bang>' == '!')
+  require('packer').loader('cmp-nvim-lsp cmp-nvim-lua cmp-path cmp-buffer cmp-omni cmp-dictionary', '<bang>' == '!')
   require('packer').loader('nvim-lsp-installer', '<bang>' == '!')
   require('packer').loader('nvim-lspconfig nvim-jdtls', '<bang>' == '!')
   require('packer').loader('lsp_signature.nvim', '<bang>' == '!')
@@ -2077,6 +2184,7 @@ function lazyLoadPlugins()
   -- begin git
   require('packer').loader('gitsigns.nvim', '<bang>' == '!')
   require('packer').loader('vim-fugitive', '<bang>' == '!')
+  require('packer').loader('vim-flog', '<bang>' == '!')
   -- end git
 
   -- begin UI
@@ -2088,6 +2196,7 @@ function lazyLoadPlugins()
   require('packer').loader('alpha-nvim', '<bang>' == '!')
   require('packer').loader('nvim-tree.lua', '<bang>' == '!')
   require('packer').loader('nvim-scrollview', '<bang>' == '!')
+  require('packer').loader('nvim-hlslens', '<bang>' == '!')
   require('packer').loader('dressing.nvim', '<bang>' == '!')
   -- end UI
 
@@ -2189,21 +2298,12 @@ autocmd BufNewFile * call LoadSkeletons()
 -- register.nvim
 vim.g.registers_window_border = "single"
 
--- highlight NOTE:
-vim.g.todo_highlight_config = {
-  NOTE = {
-    gui_fg_color = '#2AFF2C',
-    gui_bg_color = 'NONE',
-    cterm_fg_color = 'white',
-    cterm_bg_color = '214'
-  }
-}
-
 -- vCoolor.vim won't disable mappings if it is loaded after the plugin
 vim.g.vcoolor_disable_mappings = 1
 -- same as interesting words
 vim.g.interestingWordsDefaultMappings = 0
 --------------------------------------------------------------------------------------
 if vim.fn.expand('%:t') == '.nvimrc.lua' then
-  vim.api.nvim_set_keymap('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { noremap = true, silent = true })
+  vim.api.nvim_set_keymap('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { noremap = true, silent = false })
+  -- vim.cmd[[ au BufWritePost .nvimrc.lua source % | PackerCompile ]]
 end
