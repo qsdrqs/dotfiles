@@ -190,7 +190,7 @@ autocmd BufRead *.log set filetype=log
 
 "hi Normal ctermbg=NONE
 if has("autocmd")
-    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif "可以保存退出时的光标位置"
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif " 恢复退出时的光标位置，见:h mark
 endif
 set completeopt=menu,menuone,noinsert
 
@@ -405,15 +405,19 @@ hi! searchme guifg=#F06292 guibg=#0d1117 gui=bold
 
 "-------------------加载插件-----------------------"{{{
 " nvim lua 插件加载
-function! TriggerPlugins() "加载插件配置以及一些原生vim插件
+function! TriggerPlugins(reserve_line) "加载插件配置以及一些原生vim插件
   if has('win32')
     luafile $HOME/AppData/Local/nvim/packer_compiled.lua
   else
     luafile $HOME/.config/nvim/packer_compiled.lua
   end
-  let line_num = line(".")
-  lua lazyLoadPlugins()
-  exec line_num
+  if a:reserve_line == 1
+    let line_num = line(".")
+    lua lazyLoadPlugins()
+    exec line_num
+  else
+    lua lazyLoadPlugins()
+  end
   let g:loadplugins = 1
 
   " source again to load plugin configs
@@ -437,15 +441,16 @@ else
       end
 
       luafile ~/.nvimrc.lua
-      nnoremap <leader><leader> :call TriggerPlugins()<CR>
+      nnoremap <leader><leader> :call TriggerPlugins(1)<CR>
 
       "NOTE: 如果长期打开该选项,
       "可以使得 opt_default=false 来加快nvim加载速度(约50ms)
-      call TriggerPlugins()
+      "TODO: 性能提升
+      "call TriggerPlugins(0) | exe "normal! g'\""
 
       " call plugins if no args
       if len(argv()) == 0 || isdirectory(argv()[0])
-        call TriggerPlugins()
+        call TriggerPlugins(0)
       endif
       "source ~/.vimrc.plugs
     endif

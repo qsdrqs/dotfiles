@@ -74,6 +74,8 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { noremap = true, silent = true })
     end
   }
@@ -1723,7 +1725,19 @@ require('packer').startup({function(use)
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
 
-      vim.api.nvim_set_keymap('i', '<C-e>', 'copilot#Dismiss()', { noremap = true, silent = true, expr = true })
+      function copilot_dismiss()
+        local copilot_keys = vim.fn["copilot#Dismiss"]()
+        local t = function(str)
+          return vim.api.nvim_replace_termcodes(str, true, true, true)
+        end
+
+        if copilot_keys ~= "" then
+          vim.api.nvim_feedkeys(copilot_keys, "i", true)
+        else
+          vim.api.nvim_feedkeys(t("<End>"), "i", true)
+        end
+      end
+      vim.api.nvim_set_keymap('i', '<C-e>', "<Cmd>lua copilot_dismiss()<CR>", { noremap = true, silent = true})
     end
   }
 
@@ -1766,6 +1780,7 @@ require('packer').startup({function(use)
     config = function()
       -- Fuzzy find over current tasks
       vim.cmd[[command! AsyncTaskTelescope lua require("telescope").extensions.asynctasks.all()]]
+      vim.api.nvim_set_keymap('n', '<leader>at', '<cmd>AsyncTaskTelescope<cr>', { noremap = true, silent = true })
     end
   }
 
@@ -1792,7 +1807,7 @@ require('packer').startup({function(use)
   use {
     'tpope/vim-fugitive',
     opt = true,
-    cmd = {"G", "Gclog", "Flog"}
+    cmd = {"G", "Gclog"}
   }
 
   use {
