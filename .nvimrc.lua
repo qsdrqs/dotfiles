@@ -846,6 +846,8 @@ require('packer').startup({function(use)
 
   use {
     'nvim-treesitter/playground',
+    opt = true,
+    cmd = {"TSPlaygroundToggle"},
     config = function()
       require "nvim-treesitter.configs".setup{
         playground = {
@@ -1664,6 +1666,7 @@ require('packer').startup({function(use)
   use {"dstein64/vim-startuptime", opt = false}
   use {
     'voldikss/vim-translator',
+    opt = true,
     keys = "<leader>y",
     config = function()
       vim.api.nvim_set_keymap('n', '<leader>y', "<cmd>TranslateW<cr>", { noremap = true, silent = true })
@@ -1701,7 +1704,7 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<leader>H', "<cmd>call UncolorAllWords()<cr>", { noremap = true, silent = true })
     end
   }
-  use {'pgilad/vim-skeletons', }
+  use {'pgilad/vim-skeletons', opt = true }
   use {
     'SirVer/ultisnips',
     requires = {{'honza/vim-snippets', rtp = '.'}},
@@ -1825,13 +1828,14 @@ require('packer').startup({function(use)
   }
 
  --管理gtags，集中存放tags
-  use {'ludovicchabant/vim-gutentags', }
+  use {'ludovicchabant/vim-gutentags', opt = true, }
   use {
     'skywind3000/gutentags_plus',
+    opt = true,
     config = function()
       -- enable gtags module
       -- vim.g.gutentags_modules = {'ctags', 'gtags_cscope'}
-      vim.g.gutentags_modules = {'gtags_cscope'}
+      vim.g.gutentags_modules = {'ctags'}
 
       -- config project root markers.
       vim.g.gutentags_project_root = {'.root', '.svn', '.git', '.hg', '.project', '.exrc'}
@@ -2242,8 +2246,8 @@ function lazyLoadPlugins()
   -- end DAP
 
   '<bang>' == '!')
-
 end
+
 --------------------------------------------------------------------------------------
 ----------------------------Constant Plugins------------------------------------------
 
@@ -2313,11 +2317,11 @@ autosave.setup({
   debounce_delay = 135
 })
 
-function loadGtags()
+function loadTags()
   require('packer').loader('vim-gutentags gutentags_plus', '<bang>' == '!')
   vim.cmd("edit %")
 end
-vim.cmd("command! LoadGtags lua loadGtags()")
+vim.cmd("command! LoadTags lua loadTags()")
 
 -- auto load vim-skeletons
 vim.cmd [[
