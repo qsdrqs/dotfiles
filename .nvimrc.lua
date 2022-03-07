@@ -1504,7 +1504,7 @@ require('packer').startup({function(use)
             shortcut = tostring(i + start - 1 - #special_shortcuts)
           end
 
-          local file_button_el = file_button(fn, " " .. shortcut, short_fn)
+          local file_button_el = file_button(fn, shortcut, short_fn)
           tbl[i] = file_button_el
         end
         return {
