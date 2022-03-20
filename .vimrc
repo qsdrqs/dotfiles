@@ -135,9 +135,10 @@ inoremap <C-l> <Right>
 inoremap <C-h> <Left>
 
 "Termdebug
+let $NOTMUX = 1
 if has('nvim')
   "nnoremap \t :set splitbelow<CR>:15split term://zsh<cr>i
-  nnoremap <localleader>t :set splitbelow<CR>:split<cr>:term<cr>i
+  noremap <localleader>t :set splitbelow<CR>:18split<cr>:term<cr>i
 else
   "nnoremap \t :set splitbelow<CR>:terminal ++rows=15<CR>
   nnoremap \t :set splitbelow<CR>:terminal<CR>
@@ -145,9 +146,6 @@ endif
 
 "lazygit
 nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
-
-" text obj
-
 
 "-------------------键位映射-----------------------"}}}
 
@@ -206,30 +204,34 @@ set smarttab
 
 let b:tab2=0
 
-"TODO:改成函数返回参数的，通过返回值来设定tab大小
+set shiftwidth=4
+" " 让 vim 把连续数量的空格视为一个制表符
+set softtabstop=4
+" " 设置编辑时制表符占用空格数
+set tabstop=4
+" 设置格式化时制表符占用空格数
+
+" 自定义缩进空格个数
+let g:tablist = {
+  \'js': 2,
+  \'vue': 2,
+  \'vim': 2,
+  \'lua': 2,
+\}
 autocmd BufWinEnter * call Tab_len()
 function Tab_len()
-for i in ['js', 'vue', 'vim', 'lua']
-  if &filetype == i
-    set shiftwidth=2
-" 让 vim 把连续数量的空格视为一个制表符
-    set softtabstop=2
-" " 设置编辑时制表符占用空格数
-    set tabstop=2
-" 设置格式化时制表符占用空格数
-    let b:tab2=1
-  endif
-endfor
+  for key in keys(g:tablist)
+    if &filetype == key
+      let b:tab_len = g:tablist[key]
+      exec "set shiftwidth=".b:tab_len
+      " 让 vim 把连续数量的空格视为一个制表符
+      exec "set softtabstop=".b:tab_len
+      " " 设置编辑时制表符占用空格数
+      exec "set tabstop=".b:tab_len
+      " 设置格式化时制表符占用空格数
+    endif
+  endfor
 endfunction
-
-if b:tab2==0
-  set shiftwidth=4
-  " " 让 vim 把连续数量的空格视为一个制表符
-  set softtabstop=4
-  " " 设置编辑时制表符占用空格数
-  set tabstop=4
-  " 设置格式化时制表符占用空格数
-endif
 
 set expandtab
 set smartindent "智能缩进"
@@ -257,12 +259,14 @@ set backspace=indent,eol,start          "Make backspace behave like every other 
 set guifont=FiraCode\ Nerd\ Font
 set guioptions-=m
 let g:neovide_cursor_animation_length=0
+let g:neovide_refresh_rate=60
+
 
 "---------------------Search---------------------------------"
 set hlsearch
 set incsearch
 exec "nohlsearch"
-nnoremap <silent><C-l> :<C-u>nohlsearch<CR><C-l>
+nnoremap <silent><C-l> :nohlsearch<CR>:syntax sync fromstart<CR>
 set ignorecase smartcase
 "搜索时忽略大小写，但在有一个或以上大写字母时仍保持对大小写敏感
 "---------------------Search---------------------------------"
@@ -443,9 +447,6 @@ else
       luafile ~/.nvimrc.lua
       nnoremap <leader><leader> :call TriggerPlugins(1)<CR>
 
-      "NOTE: 如果长期打开该选项,
-      "可以使得 opt_default=false 来加快nvim加载速度(约50ms)
-      "TODO: 性能提升
       "call TriggerPlugins(0) | exe "normal! g'\""
 
       " call plugins if no args

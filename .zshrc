@@ -13,17 +13,19 @@ call_tmux(){
     fi
 }
 
-if [[ -x `command -v tmux` ]] && [[ $TMUX == "" ]]; then
-    if [[ -e "$HOME/wsl" ]]; then
-        export session_name="wsl"
-        call_tmux $session_name
-    elif [[ "$SSH_CONNECTION" != ""  ]]; then
-        export session_name="ssh"
-        call_tmux $session_name
-    #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then
-        #export session_name="kde"
-        #export position=`pwd`
-        #call_tmux $session_name $position
+if [[ $NOTMUX != 1 ]]; then
+    if [[ -x `command -v tmux` ]] && [[ $TMUX == "" ]]; then
+        if [[ -e "$HOME/wsl" ]]; then
+            export session_name="wsl"
+            call_tmux $session_name
+        elif [[ "$SSH_CONNECTION" != ""  ]]; then
+            export session_name="ssh"
+            call_tmux $session_name
+            #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then
+            #export session_name="kde"
+            #export position=`pwd`
+            #call_tmux $session_name $position
+        fi
     fi
 fi
 
@@ -281,25 +283,12 @@ glorep() {
 export RANGER_LOAD_DEFAULT_RC=FALSE
 
 #vi-mode
-# TODO:看看文档找找更好的办法
 function vi-forward-7-char {
-    zle vi-forward-char
-    zle vi-forward-char
-    zle vi-forward-char
-    zle vi-forward-char
-    zle vi-forward-char
-    zle vi-forward-char
-    zle vi-forward-char
+    zle vi-forward-char -n 7
 }
 
 function vi-backward-7-char {
-    zle vi-backward-char
-    zle vi-backward-char
-    zle vi-backward-char
-    zle vi-backward-char
-    zle vi-backward-char
-    zle vi-backward-char
-    zle vi-backward-char
+    zle vi-backward-char -n 7
 }
 
 zle -N vi-forward-7-char

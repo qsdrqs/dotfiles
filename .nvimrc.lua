@@ -5,7 +5,8 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-vim.cmd [[packadd packer.nvim]]
+-- vim.cmd [[packadd packer.nvim]]
+local status_ok, impatient = pcall(require, "impatient")
 local fn = vim.fn
 local plugins_path = fn.stdpath('data')..'/plugins'
 local install_path = plugins_path .. '/pack/packer/start/packer.nvim'
@@ -81,12 +82,23 @@ require('packer').startup({function(use)
   }
 
   use {
+    'nvim-telescope/telescope-rg.nvim',
+    opt = true,
+    keys = "<leader>gG",
+    config = function()
+      vim.api.nvim_set_keymap('n', '<leader>gG', '<cmd>lua require("telescope").extensions.live_grep_raw.live_grep_raw()<cr>', { noremap = true, silent = true })
+    end
+  }
+
+
+  use {
     'kevinhwang91/nvim-bqf',
     opt = false,
   } -- better quick fix
 
   use {
     'kevinhwang91/nvim-hlslens',
+    opt = true,
     config = function()
       local kopts = {noremap = true, silent = true}
 
@@ -209,17 +221,6 @@ require('packer').startup({function(use)
         end,
       }
       vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
-    end
-  }
-
-  use {
-    'windwp/nvim-ts-autotag',
-    config = function()
-      require'nvim-treesitter.configs'.setup {
-        autotag = {
-          enable = true,
-        }
-      }
     end
   }
 
@@ -560,7 +561,7 @@ require('packer').startup({function(use)
   }
 
   -- complete
-  use { 'quangnguyen30192/cmp-nvim-ultisnips',  }
+  use { 'quangnguyen30192/cmp-nvim-ultisnips', opt = true }
   use { 'hrsh7th/cmp-nvim-lsp',  }
   -- use { 'hrsh7th/cmp-vsnip',  }
   -- use { 'hrsh7th/vim-vsnip',  }
@@ -571,7 +572,8 @@ require('packer').startup({function(use)
   use {
     'uga-rosa/cmp-dictionary',
     config = function()
-      require("cmp_dictionary").setup({ dic = { ["markdown,tex"] = { "/usr/share/dict/words" } }, })
+      require("cmp_dictionary").setup({ dic = { ["markdown,tex,text"] = { "/usr/share/dict/words" } }, })
+      require("cmp_dictionary").update()
     end
   }
   use {
@@ -779,11 +781,11 @@ require('packer').startup({function(use)
           { name = 'ultisnips' }, -- For ultisnips users.
           { name = 'nvim_lsp' },
           { name = 'omni' },
-          { name = 'dictionary', keyword_length = 2 },
+          { name = 'dictionary', keyword_length = 2, max_item_count = 10 },
           { name = 'path' },
           -- { name = 'vsnip' }, -- For vsnip users.
           { name = 'nvim_lua' },
-          { name = 'buffer' },
+          { name = 'buffer' , max_item_count = 10 },
           -- { name = 'luasnip' }, -- For luasnip users.
           -- { name = 'snippy' }, -- For snippy users.
         }),
@@ -796,6 +798,8 @@ require('packer').startup({function(use)
       }
 
       -- vim.api.nvim_set_keymap('i', '<C-x><C-o>', '<Cmd>lua require("cmp").complete()<CR>', { noremap = true, silent = true })
+      vim.cmd[[ command! CmpDisable lua require('cmp').setup{enabled=false} ]]
+      vim.cmd[[ command! CmpEnable lua require('cmp').setup{enabled=true} ]]
     end
   }
 
@@ -835,10 +839,10 @@ require('packer').startup({function(use)
       }
 
       -- disable comment hightlight
-      require"nvim-treesitter.highlight".set_custom_captures {
-        -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
-        ["comment"] = "NONE",
-      }
+      -- require"nvim-treesitter.highlight".set_custom_captures {
+      --   -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
+      --   ["comment"] = "NONE",
+      -- }
 
     end
 
@@ -874,6 +878,7 @@ require('packer').startup({function(use)
 
   use {
     'nvim-treesitter/nvim-treesitter-textobjects',
+    opt = true,
     config = function()
       require'nvim-treesitter.configs'.setup {
         textobjects = {
@@ -909,6 +914,7 @@ require('packer').startup({function(use)
 
   use {
     "lukas-reineke/indent-blankline.nvim",
+    opt = true,
     -- TODO: start hilight list
     config = function()
       vim.cmd [[
@@ -943,6 +949,7 @@ require('packer').startup({function(use)
   }
   use {
     "p00f/nvim-ts-rainbow",
+    opt = true,
     config = function()
       require("nvim-treesitter.configs").setup {
         rainbow = {
@@ -957,6 +964,61 @@ require('packer').startup({function(use)
 
     end
   }
+
+  use {
+    'windwp/nvim-ts-autotag',
+    opt = true,
+    config = function()
+      require'nvim-treesitter.configs'.setup {
+        autotag = {
+          enable = true,
+        }
+      }
+    end
+  }
+
+  use {
+    'romgrk/nvim-treesitter-context',
+    opt = true,
+    config = function()
+      require'treesitter-context'.setup{
+        enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+        throttle = true, -- Throttles plugin updates (may improve performance)
+        max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+        patterns = { -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
+        -- For all filetypes
+        -- Note that setting an entry here replaces all other patterns for this entry.
+        -- By setting the 'default' entry below, you can control which nodes you want to
+        -- appear in the context window.
+        default = {
+          'class',
+          'function',
+          'method',
+          'namespace',
+          'struct',
+          -- 'for', -- These won't appear in the context
+          -- 'while',
+          -- 'if',
+          -- 'switch',
+          -- 'case',
+        },
+        -- Example for a specific filetype.
+        -- If a pattern is missing, *open a PR* so everyone can benefit.
+        --   rust = {
+        --       'impl_item',
+        --   },
+      },
+      exact_patterns = {
+        -- Example for a specific filetype with Lua patterns
+        -- Treat patterns.rust as a Lua pattern (i.e "^impl_item$" will
+        -- exactly match "impl_item" only)
+        -- rust = true, 
+      }
+    }
+    vim.cmd[[hi TreesitterContext guibg=#0D2341]]
+  end
+  }
+
 
   -- cd to project root
   use {
@@ -1095,50 +1157,9 @@ require('packer').startup({function(use)
   }
 
   use {
-    'romgrk/nvim-treesitter-context',
-    config = function()
-      require'treesitter-context'.setup{
-        enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-        throttle = true, -- Throttles plugin updates (may improve performance)
-        max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-        patterns = { -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
-        -- For all filetypes
-        -- Note that setting an entry here replaces all other patterns for this entry.
-        -- By setting the 'default' entry below, you can control which nodes you want to
-        -- appear in the context window.
-        default = {
-          'class',
-          'function',
-          'method',
-          'namespace',
-          'struct',
-          -- 'for', -- These won't appear in the context
-          -- 'while',
-          -- 'if',
-          -- 'switch',
-          -- 'case',
-        },
-        -- Example for a specific filetype.
-        -- If a pattern is missing, *open a PR* so everyone can benefit.
-        --   rust = {
-        --       'impl_item',
-        --   },
-      },
-      exact_patterns = {
-        -- Example for a specific filetype with Lua patterns
-        -- Treat patterns.rust as a Lua pattern (i.e "^impl_item$" will
-        -- exactly match "impl_item" only)
-        -- rust = true, 
-      }
-    }
-    vim.cmd[[hi TreesitterContext guibg=#0D2341]]
-  end
-  }
-
-  use {
     'akinsho/bufferline.nvim',
     config = function()
-      require("bufferline").setup{
+      require("bufferline").setup {
         options = {
           separator_style = "slant",
           diagnostics = "nvim_lsp",
@@ -1213,7 +1234,7 @@ require('packer').startup({function(use)
       if vim.g.wait_init ~= 1 then
         vim.defer_fn(function()
           vim.g.wait_init = 1
-        end, 500)
+        end, 2000)
       end
 
       local copilot = function()
@@ -1233,7 +1254,7 @@ require('packer').startup({function(use)
           if vim.api.nvim_eval("gutentags#statusline()") == "" then
             return ''
           else
-            return "Gtags Indexing..."
+            return "Tags Indexing..."
           end
         else
           return ''
@@ -1376,11 +1397,13 @@ require('packer').startup({function(use)
     'rmagatti/auto-session',
     config = function()
       require('auto-session').setup {
-        log_level = 'info',
+        log_level = 'error',
         auto_session_suppress_dirs = {'~/'},
         auto_session_create_enabled = false,
         auto_session_enable_last_session = true,
         auto_restore_enabled = false,
+        post_restore_cmds = {'silent !kill -s SIGWINCH $PPID'},
+        pre_save_cmds = {"NvimTreeClose"},
       }
     end
   }
@@ -1651,6 +1674,7 @@ require('packer').startup({function(use)
 
   use {
     'dstein64/nvim-scrollview',
+    opt = true,
     config = function()
       vim.g.scrollview_current_only = 1
       vim.g.scrollview_excluded_filetypes = {"NvimTree", "alpha", "dapui_scopes"}
@@ -1663,6 +1687,7 @@ require('packer').startup({function(use)
   }
 
   -- vim plugins
+  use {'junegunn/vim-easy-align', opt = true, cmd = "EasyAlign"}
   use {"dstein64/vim-startuptime", opt = false}
   use {
     'voldikss/vim-translator',
@@ -1675,6 +1700,7 @@ require('packer').startup({function(use)
   }
   use {
     'iamcco/markdown-preview.nvim',
+    opt = true,
     run = "cd app && yarn install",
     ft = {"markdown"},
     config = function()
@@ -1707,6 +1733,7 @@ require('packer').startup({function(use)
   use {'pgilad/vim-skeletons', opt = true }
   use {
     'SirVer/ultisnips',
+    opt = true,
     requires = {{'honza/vim-snippets', rtp = '.'}},
     config = function()
       vim.g.UltiSnipsExpandTrigger = '<Plug>(ultisnips_expand)'
@@ -1722,6 +1749,7 @@ require('packer').startup({function(use)
 
   use {
     'github/copilot.vim',
+    opt = true,
     config = function()
       vim.g.copilot_echo_num_completions = 1
       vim.g.copilot_no_tab_map = true
@@ -1759,6 +1787,7 @@ require('packer').startup({function(use)
   }
   use {
     'machakann/vim-sandwich',
+    opt = true,
     config = function()
       vim.cmd[[
       runtime macros/sandwich/keymap/surround.vim
@@ -1776,11 +1805,15 @@ require('packer').startup({function(use)
     end
   }
 
-  use {'MTDL9/vim-log-highlighting', }
+  use {'MTDL9/vim-log-highlighting', opt = true}
 
   use {
     'GustavoKatel/telescope-asynctasks.nvim',
+    opt = true,
+    keys = {"<leader>at", "<leader>ae"},
+    cmd = "AsyncTaskTelescope",
     config = function()
+      require('packer').loader('asynctasks.vim', 'asyncrun.vim', '<bang>' == '!')
       -- Fuzzy find over current tasks
       vim.cmd[[command! AsyncTaskTelescope lua require("telescope").extensions.asynctasks.all()]]
       vim.api.nvim_set_keymap('n', '<leader>at', '<cmd>AsyncTaskTelescope<cr>', { noremap = true, silent = true })
@@ -1790,6 +1823,7 @@ require('packer').startup({function(use)
 
   use {
     'skywind3000/asynctasks.vim',
+    opt = true,
     requires = {{'skywind3000/asyncrun.vim'}},
     config = function()
       vim.g.asyncrun_open = 6
@@ -1799,8 +1833,12 @@ require('packer').startup({function(use)
     end
   }
 
+  use {'skywind3000/asyncrun.vim', opt = true}
+
   use {
     'KabbAmine/vCoolor.vim',
+    opt = true,
+    keys = "<leader>cp",
     config = function()
       vim.g.vcoolor_disable_mappings = 1
       vim.api.nvim_set_keymap('n', '<leader>cp', '<cmd>VCoolor<cr>', { noremap = true, silent = true })
@@ -1817,11 +1855,14 @@ require('packer').startup({function(use)
     'rbong/vim-flog',
     opt = true,
     cmd = {"Flog"},
-    requires = {{'tpope/vim-fugitive'}}
+    config = function()
+      require('packer').loader('vim-fugitive', '<bang>' == '!')
+    end
   }
 
   use {
     'mg979/vim-visual-multi',
+    opt = true,
     config = function()
       vim.g.VM_theme = 'neon'
     end
@@ -1835,7 +1876,7 @@ require('packer').startup({function(use)
     config = function()
       -- enable gtags module
       -- vim.g.gutentags_modules = {'ctags', 'gtags_cscope'}
-      vim.g.gutentags_modules = {'ctags'}
+      vim.g.gutentags_modules = {'gtags_cscope'}
 
       -- config project root markers.
       vim.g.gutentags_project_root = {'.root', '.svn', '.git', '.hg', '.project', '.exrc'}
@@ -1861,19 +1902,18 @@ require('packer').startup({function(use)
       dap.defaults.fallback.terminal_win_cmd = 'vertical rightbelow 50new'
       vim.cmd [[ au FileType dap-repl lua require('dap.ext.autocompl').attach() ]]
 
-      vim.cmd [[
-      nnoremap <silent> <F2> :lua require'dap'.terminate({},{terminateDebuggee=true},term_dap())<CR>
-      nnoremap <silent> <F5> :lua require'dap'.continue()<CR>
-      nnoremap <silent> <leader><F5> :lua require'dap'.run_to_cursor()<CR>
-      nnoremap <silent> <F6> :lua require'dap'.pause()<CR>
-      nnoremap <silent> <F10> :lua require'dap'.step_over()<CR>
-      nnoremap <silent> <F11> :lua require'dap'.step_into()<CR>
-      nnoremap <silent> <F12> :lua require'dap'.step_out()<CR>
-      nnoremap <silent> <F9> :lua require'dap'.toggle_breakpoint()<CR>
-      nnoremap <silent> <leader><F9> :lua require'dap'.clear_breakpoints()<CR>
-      nnoremap <silent> <F7> <Cmd>lua require("dapui").eval()<CR>
-      vnoremap <silent> <F7> <Cmd>lua require("dapui").eval()<CR>
-      ]]
+      vim.api.nvim_set_keymap('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F5>', '<Cmd>lua require"dap".continue()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader><F5>', '<Cmd>lua require"dap".run_to_cursor()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F6>', '<Cmd>lua require"dap".pause()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F6>',  '<Cmd>lua require"dap".pause()<CR>' , { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F10>', '<Cmd>lua require"dap".step_over()<CR>' , { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F11>', '<Cmd>lua require"dap".step_into()<CR>' , { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F12>', '<Cmd>lua require"dap".step_out()<CR>' , { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F9>',  '<Cmd>lua require"dap".toggle_breakpoint()<CR>' , { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader><F9>', '<Cmd>lua require"dap".clear_breakpoints()<CR>' , { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('v', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { noremap = true, silent = true })
 
       -- C/C++
       dap.adapters.cppdbg = {
@@ -1940,8 +1980,8 @@ require('packer').startup({function(use)
       dap.configurations.cpp = {
         {
           name = "Launch file",
-          type = "cppdbg",
-          -- type = "codelldb",
+          -- type = "cppdbg",
+          type = "codelldb",
           request = "launch",
           --[[
           program = function()
@@ -1960,8 +2000,8 @@ require('packer').startup({function(use)
         },
         {
           name = "Attach file",
-          type = "cppdbg",
-          -- type = "codelldb",
+          -- type = "cppdbg",
+          type = "codelldb",
           request = "attach",
           --[[
           program = function()
@@ -2130,23 +2170,11 @@ require('packer').startup({function(use)
     end
   }
 
-  use {
-    'Pocco81/DAPInstall.nvim',
-    config = function()
-      local dap_install = require("dap-install")
-
-      dap_install.setup({
-        installation_path = vim.fn.stdpath("data") .. "/dapinstall/",
-      })
-
-    end
-  }
-
 end,
 config = {
   compile_path = require 'packer.util'.join_paths(vim.fn.stdpath('config'), 'packer_compiled.lua'),
   package_root   = require 'packer.util'.join_paths(vim.fn.stdpath('data'), 'plugins', 'pack'),
-  opt_default = true,
+  opt_default = false,
 }})
 
 -----------------------------dap------------------------------------------------------
@@ -2160,47 +2188,11 @@ end
 --------------------------------------------------------------------------------------
 
 ----------------------------Lazy Load-------------------------------------------------
---TODO: performance improvement
 function lazyLoadPlugins()
-  require('impatient')
 
   require('packer').loader(
-  -- begin basic
-  'plenary.nvim',
-  'nvim-web-devicons',
-  -- end basic
-
-  -- begin telescope
-  'telescope.nvim',
-  'project.nvim',
-  'telescope-fzf-native.nvim',
-  'telescope-vim-bookmarks.nvim',
-  -- end telescope
-
-  -- begin LSP & CMP
-  'formatter.nvim',
-  'nvim-cmp',
-  'ultisnips',
-  'cmp-nvim-ultisnips',
-  'vim-snippets',
-  'cmp-nvim-lsp',
-  'cmp-nvim-lua',
-  'cmp-path',
-  'cmp-buffer',
-  'cmp-omni',
-  'cmp-dictionary',
-  'nvim-lsp-installer',
-  'nvim-lspconfig nvim-jdtls',
-  'lsp_signature.nvim',
-  'fidget.nvim',
-  'nvim-lightbulb',
-  'trouble.nvim',
-  'copilot.vim',
-  'vim-illuminate',
-  -- end LSP & CMP
 
   -- begin treesitter (slow performance)
-  'nvim-treesitter',
   'nvim-treesitter-context',
   'nvim-ts-rainbow',   -- performance issue
   'indent-blankline.nvim',
@@ -2208,45 +2200,50 @@ function lazyLoadPlugins()
   'nvim-ts-autotag',
   -- end treesitter
 
-  -- begin misc
-  'nvim-autopairs',
+  -- begin vim plugins
+  'ultisnips',
+  'cmp-nvim-ultisnips',
+  'copilot.vim',
   'vim-sandwich',
-  'vim-visual-multi',
-  'auto-session',
-  'bufdelete.nvim',
-  'aerial.nvim',
-  'Comment.nvim',
-  'hop.nvim',
-  'which-key.nvim',
-  'asynctasks.vim asyncrun.vim telescope-asynctasks.nvim',
-  -- end misc
-
-  -- begin git
-  'gitsigns.nvim',
-  -- end git
-
-  -- begin UI
-  'lualine.nvim',
-  'bufferline.nvim',
-  'nvim-colorizer.lua',
-  'vCoolor.vim',
   'vim-log-highlighting',
-  'alpha-nvim',
-  'nvim-tree.lua',
-  'nvim-scrollview',
-  'nvim-hlslens',
-  'dressing.nvim',
-  -- end UI
+  'vim-visual-multi',
+  -- end vim plugins
 
-  -- begin DAP
-  'nvim-dap',
-  'nvim-dap-ui',
-  'nvim-dap-virtual-text',
-  'DAPInstall.nvim',
-  -- end DAP
+  -- begin misc
+  'nvim-hlslens',
+  'nvim-scrollview',
+  -- end misc
 
   '<bang>' == '!')
 end
+
+function loadTags()
+  require('packer').loader('vim-gutentags gutentags_plus', '<bang>' == '!')
+  vim.cmd("edit %")
+end
+vim.cmd("command! LoadTags lua loadTags()")
+
+-- auto load vim-skeletons
+vim.cmd [[
+function! LoadSkeletons()
+  packadd ultisnips
+  packadd vim-skeletons
+  call skeletons#InsertSkeleton()
+endfunction
+
+let g:skeletons#autoRegister = 1
+let g:skeletons#skeletonsDir = "~/.vim/skeletons"
+autocmd BufNewFile * call LoadSkeletons()
+]]
+
+-- register.nvim
+vim.g.registers_window_border = "single"
+
+-- vCoolor.vim won't disable mappings if it is loaded after the plugin
+vim.g.vcoolor_disable_mappings = 1
+-- same as interesting words
+vim.g.interestingWordsDefaultMappings = 0
+
 
 --------------------------------------------------------------------------------------
 ----------------------------Constant Plugins------------------------------------------
@@ -2317,32 +2314,6 @@ autosave.setup({
   debounce_delay = 135
 })
 
-function loadTags()
-  require('packer').loader('vim-gutentags gutentags_plus', '<bang>' == '!')
-  vim.cmd("edit %")
-end
-vim.cmd("command! LoadTags lua loadTags()")
-
--- auto load vim-skeletons
-vim.cmd [[
-function! LoadSkeletons()
-  packadd ultisnips
-  packadd vim-skeletons
-  call skeletons#InsertSkeleton()
-endfunction
-
-let g:skeletons#autoRegister = 1
-let g:skeletons#skeletonsDir = "~/.vim/skeletons"
-autocmd BufNewFile * call LoadSkeletons()
-]]
-
--- register.nvim
-vim.g.registers_window_border = "single"
-
--- vCoolor.vim won't disable mappings if it is loaded after the plugin
-vim.g.vcoolor_disable_mappings = 1
--- same as interesting words
-vim.g.interestingWordsDefaultMappings = 0
 --------------------------------------------------------------------------------------
 if vim.fn.expand('%:t') == '.nvimrc.lua' then
   vim.api.nvim_set_keymap('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { noremap = true, silent = false })
