@@ -160,7 +160,7 @@ zle -N zle-keymap-select
 echo -ne '\e[5 q'
 # 加快加载速度
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
 #init zsh
@@ -332,11 +332,8 @@ unset LS_COLORS
 GITSTATUS_LOG_LEVEL=DEBUG
 compdef vman="man"
 
-pyenvon(){
-    if [[ -x `command -v pyenv` ]]; then
-        eval "$(pyenv init -)"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv virtualenv-init -)"
-        export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-    fi
-}
+# pyenv: not load by default due to performance issue
+if [[ -x `command -v pyenv` ]]; then
+    #eval "$(pyenv init -)"
+    #eval "$(pyenv virtualenv-init -)"
+fi

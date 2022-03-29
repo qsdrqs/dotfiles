@@ -47,6 +47,7 @@ exec_always --no-startup-id flameshot
 #exec_always --no-startup-id --no-startup-id $HOME/.config/polybar/launch.sh
 exec_always --no-startup-id --no-startup-id plasmashell
 # exec_always --no-startup-id env= QT_IM_MODULE=fcitx telegram-desktop -startintray -- %u
+exec_always --no-startup-id keepassxc %f
 exec_always --no-startup-id /usr/lib/org_kde_powerdevil
 
 #set $refresh_i3status killall -SIGUSR1 i3status

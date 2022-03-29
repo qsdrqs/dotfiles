@@ -277,7 +277,7 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
       vim.api.nvim_set_keymap('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
 
-      local servers = { 'clangd' , 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
+      local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
         local common_config = {
           -- on_attach = my_custom_on_attach,
@@ -564,7 +564,7 @@ require('packer').startup({function(use)
   use { 'quangnguyen30192/cmp-nvim-ultisnips', opt = true }
   use { 'hrsh7th/cmp-nvim-lsp',  }
   -- use { 'hrsh7th/cmp-vsnip',  }
-  -- use { 'hrsh7th/vim-vsnip',  }
+  use { 'hrsh7th/vim-vsnip',  }
   use { 'hrsh7th/cmp-nvim-lua',  }
   use { 'hrsh7th/cmp-path', }
   use { 'hrsh7th/cmp-buffer',  }
@@ -696,10 +696,12 @@ require('packer').startup({function(use)
         snippet = {
           -- REQUIRED - you must specify a snippet engine
           expand = function(args)
-            -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+            -- Use vsnip to handles snips provided by lsp. Ultisnips has problems.
+            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+
             -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
             -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
           end,
         },
         mapping = {
@@ -728,23 +730,25 @@ require('packer').startup({function(use)
               end
             end,
             i = function(fallback)
+              local copilot_keys = vim.fn["copilot#Accept"]()
               if cmp.visible() then
                 -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                 cmp.confirm()
+              elseif copilot_keys ~= "" then
+                vim.api.nvim_feedkeys(copilot_keys, "i", true)
+              elseif vim.fn["vsnip#jumpable"](1) == 1 then
+                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-next)"), 'm', true)
               elseif vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
                 vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
               else
-                local copilot_keys = vim.fn["copilot#Accept"]()
-                if copilot_keys ~= "" then
-                    vim.api.nvim_feedkeys(copilot_keys, "i", true)
-                else
-                    vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
-                    -- fallback()
-                end
+                vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
+                -- fallback()
               end
             end,
             s = function(fallback)
-              if vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
+              if vim.fn["vsnip#jumpable"](1) == 1 then
+                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-next)"), 'm', true)
+              elseif vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
                 vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
               else
                 fallback()
@@ -762,6 +766,8 @@ require('packer').startup({function(use)
             i = function(fallback)
               if cmp.visible() then
                 cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
+              elseif vim.fn["vsnip#jumpable"](-1) == 1 then
+                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-prev)"), 'm', true)
               elseif vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
                 return vim.api.nvim_feedkeys( t("<Plug>(ultisnips_jump_backward)"), 'm', true)
               else
@@ -769,7 +775,9 @@ require('packer').startup({function(use)
               end
             end,
             s = function(fallback)
-              if vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
+              if vim.fn["vsnip#jumpable"](-1) == 1 then
+                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-prev)"), 'm', true)
+              elseif vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
                 return vim.api.nvim_feedkeys( t("<Plug>(ultisnips_jump_backward)"), 'm', true)
               else
                 fallback()
@@ -839,10 +847,10 @@ require('packer').startup({function(use)
       }
 
       -- disable comment hightlight
-      -- require"nvim-treesitter.highlight".set_custom_captures {
-      --   -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
-      --   ["comment"] = "NONE",
-      -- }
+      require"nvim-treesitter.highlight".set_custom_captures {
+        -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
+        ["comment"] = "NONE",
+      }
 
     end
 
@@ -1385,9 +1393,9 @@ require('packer').startup({function(use)
     end
   }
 
+  use {'MattesGroeger/vim-bookmarks', opt = true}
   use {
     'tom-anders/telescope-vim-bookmarks.nvim',
-    requires = {{'MattesGroeger/vim-bookmarks'}},
     config = function()
       require('telescope').load_extension('vim_bookmarks')
     end
@@ -1708,7 +1716,7 @@ require('packer').startup({function(use)
 
       vim.cmd[[
       function! Mkdp_handler(url)
-        exec "silent !firefox -new-window " . a:url
+        exec "silent !firefox-developer-edition -new-window " . a:url
       endfunction
       ]]
 
@@ -1902,7 +1910,8 @@ require('packer').startup({function(use)
       dap.defaults.fallback.terminal_win_cmd = 'vertical rightbelow 50new'
       vim.cmd [[ au FileType dap-repl lua require('dap.ext.autocompl').attach() ]]
 
-      vim.api.nvim_set_keymap('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { noremap = true, silent = true })
+      -- vim.api.nvim_set_keymap('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<F5>', '<Cmd>lua require"dap".continue()<CR>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader><F5>', '<Cmd>lua require"dap".run_to_cursor()<CR>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<F6>', '<Cmd>lua require"dap".pause()<CR>', { noremap = true, silent = true })
@@ -1980,8 +1989,8 @@ require('packer').startup({function(use)
       dap.configurations.cpp = {
         {
           name = "Launch file",
-          -- type = "cppdbg",
-          type = "codelldb",
+          type = "cppdbg",
+          -- type = "codelldb",
           request = "launch",
           --[[
           program = function()
@@ -2000,8 +2009,8 @@ require('packer').startup({function(use)
         },
         {
           name = "Attach file",
-          -- type = "cppdbg",
-          type = "codelldb",
+          type = "cppdbg",
+          -- type = "codelldb",
           request = "attach",
           --[[
           program = function()
@@ -2207,6 +2216,8 @@ function lazyLoadPlugins()
   'vim-sandwich',
   'vim-log-highlighting',
   'vim-visual-multi',
+  'vim-bookmarks',
+
   -- end vim plugins
 
   -- begin misc
@@ -2313,7 +2324,6 @@ autosave.setup({
   clean_command_line_interval = 0,
   debounce_delay = 135
 })
-
 --------------------------------------------------------------------------------------
 if vim.fn.expand('%:t') == '.nvimrc.lua' then
   vim.api.nvim_set_keymap('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { noremap = true, silent = false })
