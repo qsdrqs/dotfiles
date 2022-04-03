@@ -382,8 +382,8 @@ endif
 
 
 "Plug 'uiiaoo/java-syntax.vim' "java高亮
-Plug 'qsdrqs/java-syntax.vim'
-Plug 'sheerun/vim-polyglot' "高亮着色
+"Plug 'qsdrqs/java-syntax.vim'
+"Plug 'sheerun/vim-polyglot' "高亮着色
 let g:polyglot_disabled = ['latex','html','vue']
 
 "Nerd Font 图标

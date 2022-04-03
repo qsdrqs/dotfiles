@@ -145,81 +145,129 @@ require('packer').startup({function(use)
 
   use {
     'mfussenegger/nvim-jdtls',
+    after = 'nvim-lspconfig',
     config = function()
+      -- compatible with fidget
+      local function progress_report(_, result, ctx)
+        local lsp = vim.lsp
+        local info = {
+          client_id = ctx.client_id,
+        }
+
+        local kind = "report"
+        if result.complete then
+          kind = "end"
+        elseif result.workDone == 0 then
+          kind = "begin"
+        elseif result.workDone > 0 and result.workDone < result.totalWork then
+          kind = "report"
+        else
+          kind = "end"
+        end
+
+        local percentage = 0
+        if result.totalWork > 0 and result.workDone >= 0 then
+          percentage = result.workDone / result.totalWork * 100
+        end
+
+        local msg = {
+          token = result.id,
+          value = {
+            kind = kind,
+            percentage = percentage,
+            title = result.subTask,
+            message = result.subTask,
+          },
+        }
+        -- print(vim.inspect(result.subTask))
+        if result.subTask then
+          lsp.handlers["$/progress"](nil, msg, info)
+        end
+      end
+
       -- java
-      jdt_config = {
-        -- The command that starts the language server
-        -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
-        cmd = {
-
-          -- 💀
-          'java', -- or '/path/to/java11_or_newer/bin/java'
-          -- depends on if `java` is in your $PATH env variable and if it points to the right version.
-
-          '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-          '-Dosgi.bundles.defaultStartLevel=4',
-          '-Declipse.product=org.eclipse.jdt.ls.core.product',
-          '-Dlog.protocol=true',
-          '-Dlog.level=ALL',
-          '-Xms1g',
-          '--add-modules=ALL-SYSTEM',
-          '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-          '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-
-          -- 💀
-          '-jar', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
-          -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
-          -- Must point to the                                                     Change this to
-          -- eclipse.jdt.ls installation                                           the actual version
-
-
-          -- 💀
-          '-configuration', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/config_linux",
-          -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^
-          -- Must point to the                      Change to one of `linux`, `win` or `mac`
-          -- eclipse.jdt.ls installation            Depending on your system.
-
-
-          -- 💀
-          -- See `data directory configuration` section in the README
-          '-data', os.getenv("HOME") .. '/.cache/jdtls/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-
-        },
+      jdt_config = lsp_common_config
+      jdt_config.cmd = {
 
         -- 💀
-        -- This is the default if not provided, you can remove it. Or adjust as needed.
-        -- One dedicated LSP server & client will be started per unique root_dir
-        root_dir = require('jdtls.setup').find_root({'.git', 'mvnw', 'gradlew'}),
+        'java', -- or '/path/to/java11_or_newer/bin/java'
+        -- depends on if `java` is in your $PATH env variable and if it points to the right version.
 
-        -- Here you can configure eclipse.jdt.ls specific settings
-        -- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
-        -- for a list of options
-        settings = {
-          java = {
-          }
-        },
+        '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+        '-Dosgi.bundles.defaultStartLevel=4',
+        '-Declipse.product=org.eclipse.jdt.ls.core.product',
+        '-Dlog.protocol=true',
+        '-Dlog.level=ALL',
+        '-Xms1g',
+        '--add-modules=ALL-SYSTEM',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
 
-        -- Language server `initializationOptions`
-        -- You need to extend the `bundles` with paths to jar files
-        -- if you want to use additional eclipse.jdt.ls plugins.
-        --
-        -- See https://github.com/mfussenegger/nvim-jdtls#java-debug-installation
-        --
-        -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
-        init_options = {
-          bundles = {
-            vim.fn.glob(vim.fn.stdpath('data') .. "/dapinstall/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-0.35.0.jar")
-          }
-        },
+        -- 💀
+        '-jar', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
+        -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
+        -- Must point to the                                                     Change this to
+        -- eclipse.jdt.ls installation                                           the actual version
 
-        on_attach = function(client, bufnr)
-          -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
-          -- you make during a debug session immediately.
-          -- Remove the option if you do not want that.
-          require('jdtls').setup_dap({ hotcodereplace = 'auto' })
-          common_on_attach(client,bufnr)
-        end,
+
+        -- 💀
+        '-configuration', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/config_linux",
+        -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^
+        -- Must point to the                      Change to one of `linux`, `win` or `mac`
+        -- eclipse.jdt.ls installation            Depending on your system.
+
+
+        -- 💀
+        -- See `data directory configuration` section in the README
+        '-data', os.getenv("HOME") .. '/.cache/jdtls/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+
       }
+
+      -- 💀
+      -- This is the default if not provided, you can remove it. Or adjust as needed.
+      -- One dedicated LSP server & client will be started per unique root_dir
+      jdt_config.root_dir = require('jdtls.setup').find_root({'.git', 'mvnw', 'gradlew'})
+
+      -- Here you can configure eclipse.jdt.ls specific settings
+      -- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
+      -- for a list of options
+      jdt_config.settings = {
+        java = {
+          completion = {
+            overwrite = true,
+            guessMethodArguments = true,
+          },
+          selectionRange = {
+            enabled = true,
+          },
+        }
+      }
+
+      -- progress_report
+      jdt_config.handlers["language/progressReport"] = progress_report
+      -- disable default progress report
+      jdt_config.handlers['language/status'] = function() end
+
+      -- Language server `initializationOptions`
+      -- You need to extend the `bundles` with paths to jar files
+      -- if you want to use additional eclipse.jdt.ls plugins.
+      --
+      -- See https://github.com/mfussenegger/nvim-jdtls#java-debug-installation
+      --
+      -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
+      jdt_config.init_options = {
+        bundles = {
+          vim.fn.glob(vim.fn.stdpath('data') .. "/dapinstall/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-0.35.0.jar")
+        }
+      }
+
+      jdt_config.on_attach = function(client, bufnr)
+        -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
+        -- you make during a debug session immediately.
+        -- Remove the option if you do not want that.
+        require('jdtls').setup_dap({ hotcodereplace = 'auto' })
+        common_on_attach(client,bufnr)
+      end
       vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
     end
   }
@@ -277,33 +325,32 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
       vim.api.nvim_set_keymap('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
 
+      lsp_common_config = {
+        -- on_attach = my_custom_on_attach,
+        capabilities = capabilities,
+        on_attach = function(client, bufnr)
+          common_on_attach(client,bufnr)
+        end,
+        flags = {
+          -- This will be the default in neovim 0.7+
+          debounce_text_changes = 150,
+        },
+      }
       local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
-        local common_config = {
-          -- on_attach = my_custom_on_attach,
-          capabilities = capabilities,
-          on_attach = function(client, bufnr)
-            common_on_attach(client,bufnr)
-          end,
-          flags = {
-            -- This will be the default in neovim 0.7+
-            debounce_text_changes = 150,
-          },
-          handlers = {
-          },
-        }
 
-        if lsp == 'pyright' then common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio"}
-        elseif lsp == 'clangd' then common_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never"}
-        elseif lsp == "rust_analyzer" then common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/rust/rust-analyzer"}
-        elseif lsp == 'vimls' then common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/vim/node_modules/.bin/vim-language-server", "--stdio"}
+        if lsp == 'pyright' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio"}
+        elseif lsp == 'clangd' then lsp_common_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never"}
+        elseif lsp == "rust_analyzer" then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/rust/rust-analyzer"}
+        elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/vim/node_modules/.bin/vim-language-server", "--stdio"}
         elseif lsp == 'hls' then
-          common_config.on_attach = function(client, bufnr) 
+          lsp_common_config.on_attach = function(client, bufnr) 
             common_on_attach(client,bufnr)
             vim.cmd [[ autocmd InsertLeave,TextChanged <buffer> lua vim.lsp.codelens.refresh() ]]
             vim.lsp.codelens.refresh()
           end
-          common_config.handlers["textDocument/codeLens"] = function(err, result, ctx, _)
+          lsp_common_config.handlers = {}
+          lsp_common_config.handlers["textDocument/codeLens"] = function(err, result, ctx, _)
             if not result or not next(result) then
               vim.lsp.codelens.on_codelens(err, result, ctx, _)
             else
@@ -316,13 +363,13 @@ require('packer').startup({function(use)
             end
           end
         elseif lsp == "texlab" then
-          common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/latex/texlab" }
-          common_config.on_attach = function(client, bufnr)
+          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/latex/texlab" }
+          lsp_common_config.on_attach = function(client, bufnr)
             common_on_attach(client,bufnr)
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>v', '<cmd>TexlabForward<cr>', { noremap=true, silent=true })
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>b', '<cmd>TexlabBuild<cr>', { noremap=true, silent=true })
           end
-          common_config.settings = {
+          lsp_common_config.settings = {
             texlab = {
               auxDirectory = "latex.out",
               build = {
@@ -344,7 +391,8 @@ require('packer').startup({function(use)
               onOpenAndSave = true
             }
           }
-          common_config.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+          lsp_common_config.handlers = {}
+          lsp_common_config.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
             vim.lsp.diagnostic.on_publish_diagnostics, {
               -- Disable virtual_text
               virtual_text = false,
@@ -354,9 +402,9 @@ require('packer').startup({function(use)
           table.insert(runtime_path, "lua/?.lua")
           table.insert(runtime_path, "lua/?/init.lua")
 
-          common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/sumneko_lua/extension/server/bin/lua-language-server"}
-          common_config.autostart = false
-          common_config.settings = {
+          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/sumneko_lua/extension/server/bin/lua-language-server"}
+          lsp_common_config.autostart = false
+          lsp_common_config.settings = {
             Lua = {
               runtime = {
                 -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
@@ -380,7 +428,7 @@ require('packer').startup({function(use)
           }
         end
 
-        lspconfig[lsp].setup(common_config)
+        lspconfig[lsp].setup(lsp_common_config)
       end
 
 
@@ -660,20 +708,22 @@ require('packer').startup({function(use)
       " blue
       highlight! CmpItemAbbrMatch guibg=NONE guifg=#569CD6 gui=bold
       highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#569CD6 gui=bold
+
+      highlight! CmpItemKind gui=italic
       " light blue
-      highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE
-      highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE
-      highlight! CmpItemKindEnum guibg=NONE guifg=#9CDCFE
+      highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE gui=italic
+      highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE gui=italic
+      highlight! CmpItemKindEnum guibg=NONE guifg=#9CDCFE gui=italic
       " pink
-      highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0
-      highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0
+      highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0 gui=italic
+      highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0 gui=italic
       " front
-      highlight! CmpItemKindText guibg=NONE guifg=#D4D4D4
-      highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4
-      highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4
+      highlight! CmpItemKindText guibg=NONE guifg=#D4D4D4 gui=italic
+      highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4 gui=italic
+      highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4 gui=italic
       " yellow
-      highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E
-      highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252
+      highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E gui=italic
+      highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252 gui=italic
       ]]
 
       cmp.setup{
@@ -681,6 +731,14 @@ require('packer').startup({function(use)
           format = function(entry, vim_item)
             -- Kind icons
             vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
+            -- limit width to 45
+            local abbr_len = string.len(vim_item.abbr)
+            local width = 45
+            if abbr_len > width then
+              vim_item.abbr = string.sub(vim_item.abbr, 1, width)
+            elseif abbr_len > width / 2 then
+              vim_item.abbr = vim_item.abbr .. string.rep(" ", width - abbr_len)
+            end
             -- Source
             --[[ vim_item.menu = ({
               buffer = "[Buffer]",
@@ -789,11 +847,11 @@ require('packer').startup({function(use)
           { name = 'ultisnips' }, -- For ultisnips users.
           { name = 'nvim_lsp' },
           { name = 'omni' },
-          { name = 'dictionary', keyword_length = 2, max_item_count = 10 },
+          { name = 'dictionary', keyword_length = 2 },
           { name = 'path' },
           -- { name = 'vsnip' }, -- For vsnip users.
           { name = 'nvim_lua' },
-          { name = 'buffer' , max_item_count = 10 },
+          { name = 'buffer' },
           -- { name = 'luasnip' }, -- For luasnip users.
           -- { name = 'snippy' }, -- For snippy users.
         }),
@@ -1694,6 +1752,23 @@ require('packer').startup({function(use)
     opt = false,
   }
 
+  use {
+    "folke/todo-comments.nvim",
+    requires = "nvim-lua/plenary.nvim",
+    config = function()
+      require("todo-comments").setup {
+        -- your configuration comes here
+      }
+    end
+  }
+
+  use {
+    "rcarriga/nvim-notify",
+    config = function()
+      vim.notify = require("notify")
+    end
+  }
+
   -- vim plugins
   use {'junegunn/vim-easy-align', opt = true, cmd = "EasyAlign"}
   use {"dstein64/vim-startuptime", opt = false}
@@ -1931,21 +2006,25 @@ require('packer').startup({function(use)
         command = vim.fn.stdpath('data') .. '/dapinstall/ccppr_vsc/extension/debugAdapters/bin/OpenDebugAD7',
       }
 
-      --[[
-      dap.adapters.codelldb = function(callback, config)
+
+      --[[ dap.adapters.codelldb = function(callback, config)
       -- specify in your configuration host = your_host , port = your_port
       callback({ type = "server", host = config.host, port = config.port })
-      end
-      ]]
+      end ]]
+
+      local dap = require('dap')
       dap.adapters.codelldb = function(on_adapter)
         local stdout = vim.loop.new_pipe(false)
         local stderr = vim.loop.new_pipe(false)
 
-        local cmd = vim.fn.stdpath('data') .. '/dapinstall/ccppr_lldb/extension/adapter/codelldb'
+        -- local cmd = vim.fn.stdpath('data') .. '/dapinstall/ccppr_lldb/extension/adapter/codelldb'
+        local cmd = "/home/qsdrqs/Downloads/codelldb/extension/adapter/codelldb"
+        local port = 12352
 
         local handle, pid_or_err
         local opts = {
           stdio = {nil, stdout, stderr},
+          args = {"--port", port},
           detached = true,
         }
         handle, pid_or_err = vim.loop.spawn(cmd, opts, function(code)
@@ -1957,18 +2036,18 @@ require('packer').startup({function(use)
           end
         end)
         assert(handle, "Error running codelldb: " .. tostring(pid_or_err))
+        vim.defer_fn(function()
+          on_adapter({
+            type = 'server',
+            host = '127.0.0.1',
+            port = port
+          })
+        end, 500)
         stdout:read_start(function(err, chunk)
           assert(not err, err)
           if chunk then
             local port = chunk:match('Listening on port (%d+)')
             if port then
-              vim.schedule(function()
-                on_adapter({
-                  type = 'server',
-                  host = '127.0.0.1',
-                  port = port
-                })
-              end)
             else
               vim.schedule(function()
                 require("dap.repl").append(chunk)
@@ -1989,9 +2068,10 @@ require('packer').startup({function(use)
       dap.configurations.cpp = {
         {
           name = "Launch file",
-          type = "cppdbg",
-          -- type = "codelldb",
+          -- type = "cppdbg",
+          type = "codelldb",
           request = "launch",
+          stopOnEntry = true,
           --[[
           program = function()
             return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')

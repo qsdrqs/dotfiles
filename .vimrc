@@ -389,6 +389,9 @@ function! Syn()
 endfunction
 command! -nargs=0 Syn call Syn()
 
+" 设置补全窗口最大高度为15，最小宽度为50
+set pumheight=15
+
 "-------------------杂项-----------------------"}}}
 "
 "-------------------Syntax highlight-----------------------"{{{
@@ -456,8 +459,8 @@ else
       if len(argv()) == 0 || isdirectory(argv()[0])
         call TriggerPlugins(0)
       endif
-      "source ~/.vimrc.plugs
     endif
+    "source ~/.vimrc.plugs
   else
     if filereadable(expand("~/.vimrc.plugs"))
       "set statusline=%{coc#status()}%{virtualenv#statusline()}
