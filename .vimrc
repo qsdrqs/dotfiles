@@ -4,6 +4,14 @@
 "                \ V /  | || |  | |  _ <| |___
 "                 \_/  |___|_|  |_|_| \_\\____|
 "
+"-------------------filetype-----------------------"{{{
+if has('nvim')
+  " disable filetype.vim and use filetype.lua
+  let g:did_load_filetypes = 0
+  let g:do_filetype_lua = 1
+endif
+"-------------------filetype-----------------------"}}}
+
 "-------------------键位映射-----------------------"{{{
 let &t_ut=''
 let mapleader = ' '                     "The default leader is \, but a space is much better. 尽量减少小指的负担
@@ -416,6 +424,10 @@ hi! searchme guifg=#F06292 guibg=#0d1117 gui=bold
 "-------------------加载插件-----------------------"{{{
 " nvim lua 插件加载
 function! TriggerPlugins(reserve_line) "加载插件配置以及一些原生vim插件
+  let max_line = 20000 " file exceed 20000 lines will disable treesitter
+  if line('$') > max_line
+    let b:treesitter_disable = 1
+  endif
   if has('win32')
     luafile $HOME/AppData/Local/nvim/packer_compiled.lua
   else
@@ -451,7 +463,7 @@ else
       end
 
       luafile ~/.nvimrc.lua
-      nnoremap <leader><leader> :call TriggerPlugins(1)<CR>
+      nnoremap <leader><leader> <CMD>call TriggerPlugins(1)<CR>
 
       "call TriggerPlugins(0) | exe "normal! g'\""
 
@@ -460,7 +472,7 @@ else
         call TriggerPlugins(0)
       endif
     endif
-    "source ~/.vimrc.plugs
+    " source ~/.vimrc.plugs
   else
     if filereadable(expand("~/.vimrc.plugs"))
       "set statusline=%{coc#status()}%{virtualenv#statusline()}

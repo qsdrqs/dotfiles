@@ -47,9 +47,10 @@ export ZSH="$HOME/.oh-my-zsh"
 
 #Make alacritty compatible with SSH
 #export TERM="xterm-256color"
-if [[ -x `command -v kitty` ]]; then
-    alias ssh="kitty +kitten ssh"
-fi
+# if [[ -x `command -v kitty` ]]; then
+#     alias ssh="kitty +kitten ssh"
+# fi
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -330,10 +331,12 @@ unset LS_COLORS
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 GITSTATUS_LOG_LEVEL=DEBUG
+autoload -Uz compinit
+compinit
 compdef vman="man"
 
 # pyenv: not load by default due to performance issue
 if [[ -x `command -v pyenv` ]]; then
-    #eval "$(pyenv init -)"
-    #eval "$(pyenv virtualenv-init -)"
+    # eval "$(pyenv init -)"
+    # eval "$(pyenv virtualenv-init -)"
 fi

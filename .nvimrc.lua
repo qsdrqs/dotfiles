@@ -180,7 +180,7 @@ require('packer').startup({function(use)
           },
         }
         -- print(vim.inspect(result.subTask))
-        if result.subTask then
+        if result.subTask and result.subTask ~= "" then
           lsp.handlers["$/progress"](nil, msg, info)
         end
       end
@@ -290,6 +290,9 @@ require('packer').startup({function(use)
         if status_ok then
           illuminate.on_attach(client, bufnr)
         end
+
+        -- Enable completion triggered by <c-x><c-o>
+        vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
       end
 
       function showDocument()
@@ -304,8 +307,6 @@ require('packer').startup({function(use)
       end
 
       local opts = { noremap=true, silent=true }
-      -- Enable completion triggered by <c-x><c-o>
-      vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
       -- Mappings.
       -- See `:help vim.lsp.*` for documentation on any of the below functions
@@ -403,7 +404,9 @@ require('packer').startup({function(use)
           table.insert(runtime_path, "lua/?/init.lua")
 
           lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/sumneko_lua/extension/server/bin/lua-language-server"}
-          lsp_common_config.autostart = false
+          if vim.fn.expand('%') == '.nvimrc.lua' then
+            lsp_common_config.autostart = false
+          end
           lsp_common_config.settings = {
             Lua = {
               runtime = {
@@ -472,7 +475,6 @@ require('packer').startup({function(use)
       -- code len
       vim.api.nvim_set_keymap('n', '<leader>cl', '<cmd>lua vim.lsp.codelens.run()<CR>', opts)
       vim.cmd [[hi! link LspCodeLens specialkey]]
-
     end
   }
 
@@ -651,6 +653,25 @@ require('packer').startup({function(use)
       })
     end
   }
+  use {
+    'tzachar/cmp-tabnine',
+    run='./install.sh',
+    config = function()
+      local tabnine = require('cmp_tabnine.config')
+      tabnine:setup({
+        max_lines = 1000;
+        max_num_results = 20;
+        sort = true;
+        run_on_every_keystroke = true;
+        snippet_placeholder = '...';
+        ignored_file_types = { -- default is not to ignore
+        -- uncomment to ignore in lua:
+        -- lua = true
+      };
+      show_prediction_strength = false;
+    })
+    end
+  }
 
   use {
     'ray-x/lsp_signature.nvim',
@@ -699,7 +720,8 @@ require('packer').startup({function(use)
         Struct = "",
         Event = "",
         Operator = "",
-        TypeParameter = ""
+        TypeParameter = "",
+        TabNine = ""
       }
 
       vim.cmd [[
@@ -709,7 +731,6 @@ require('packer').startup({function(use)
       highlight! CmpItemAbbrMatch guibg=NONE guifg=#569CD6 gui=bold
       highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#569CD6 gui=bold
 
-      highlight! CmpItemKind gui=italic
       " light blue
       highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE gui=italic
       highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE gui=italic
@@ -723,17 +744,26 @@ require('packer').startup({function(use)
       highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4 gui=italic
       " yellow
       highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E gui=italic
+      highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E gui=italic
       highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252 gui=italic
       ]]
 
       cmp.setup{
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        },
         formatting = {
           format = function(entry, vim_item)
             -- Kind icons
-            vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
-            -- limit width to 45
+            if entry.source.name == 'cmp_tabnine' then
+              vim_item.kind = "TabNine"
+            end
+            vim_item.kind = string.format('%s', kind_icons[vim_item.kind]) -- This concatonates the icons with the name of the item kind
+            -- tabnine
+            -- limit width to 50
             local abbr_len = string.len(vim_item.abbr)
-            local width = 45
+            local width = 50
             if abbr_len > width then
               vim_item.abbr = string.sub(vim_item.abbr, 1, width)
             elseif abbr_len > width / 2 then
@@ -743,12 +773,18 @@ require('packer').startup({function(use)
             --[[ vim_item.menu = ({
               buffer = "[Buffer]",
               nvim_lsp = "[LSP]",
-              luasnip = "[LuaSnip]",
+              luasnip = "[Snip]",
+              ultisnips = "[Snip]",
               nvim_lua = "[Lua]",
               latex_symbols = "[LaTeX]",
             })[entry.source.name] ]]
             return vim_item
-          end
+          end,
+          fields=  {
+            'kind',
+            'abbr',
+            'menu',
+          }
         },
 
         snippet = {
@@ -762,7 +798,7 @@ require('packer').startup({function(use)
             -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
           end,
         },
-        mapping = {
+        mapping = cmp.mapping.preset.insert {
           ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
           ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
           ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
@@ -845,6 +881,7 @@ require('packer').startup({function(use)
         },
         sources = cmp.config.sources({
           { name = 'ultisnips' }, -- For ultisnips users.
+          { name = 'cmp_tabnine' },
           { name = 'nvim_lsp' },
           { name = 'omni' },
           { name = 'dictionary', keyword_length = 2 },
@@ -857,7 +894,7 @@ require('packer').startup({function(use)
         }),
 
         completion = {
-          -- autocomplete = false,
+          -- autocomplete = true,
           completeopt = 'menu,menuone,noinsert'
         }
 
@@ -873,42 +910,49 @@ require('packer').startup({function(use)
     'nvim-treesitter/nvim-treesitter',
     run = ':TSUpdate',
     config = function()
+      if vim.b.treesitter_disable ~= 1 then
+        -- folds by treesitter
+        vim.cmd[[ set foldmethod=expr ]]
+        vim.o.foldexpr="nvim_treesitter#foldexpr()"
 
-      -- folds by treesitter
-      vim.cmd[[ set foldmethod=expr ]]
-      vim.o.foldexpr="nvim_treesitter#foldexpr()"
+        require 'nvim-treesitter.configs'.setup {
+          -- One of "all", or a list of languages
+          ensure_installed = {"c", "cpp", "lua", "vim"},
 
-      require 'nvim-treesitter.configs'.setup {
-        -- One of "all", "maintained" (parsers with maintainers), or a list of languages
-        ensure_installed = {"c", "cpp", "lua", "vim"},
-
-        -- Install languages synchronously (only applied to `ensure_installed`)
-        sync_install = false,
+          -- Install languages synchronously (only applied to `ensure_installed`)
+          sync_install = false,
 
 
-        -- List of parsers to ignore installing
-        -- ignore_install = { "javascript" },
+          -- List of parsers to ignore installing
+          -- ignore_install = { "javascript" },
 
-        highlight = {
-          -- `false` will disable the whole extension
-          enable = true,
+          highlight = {
+            -- `false` will disable the whole extension
+            enable = true,
 
-          -- list of language that will be disabled
-          disable = {},
+            -- list of language that will be disabled
+            disable = function(lang, bufnr) -- Disable in large C++ buffers
+              return vim.api.nvim_buf_line_count(bufnr) > 20000
+            end,
 
-          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-          -- Using this option may slow down your editor, and you may see some duplicate highlights.
-          -- Instead of true it can also be a list of languages
-          additional_vim_regex_highlighting = true,
-        },
-      }
+            -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+            -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+            -- Using this option may slow down your editor, and you may see some duplicate highlights.
+            -- Instead of true it can also be a list of languages
+            additional_vim_regex_highlighting = true,
+          },
+          indent = {
+            enable = true
+          },
+        }
 
-      -- disable comment hightlight
-      require"nvim-treesitter.highlight".set_custom_captures {
-        -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
-        ["comment"] = "NONE",
-      }
+
+        -- disable comment hightlight
+        require"nvim-treesitter.highlight".set_custom_captures {
+          -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
+          ["comment"] = "NONE",
+        }
+      end
 
     end
 
@@ -993,12 +1037,14 @@ require('packer').startup({function(use)
       highlight IndentBlanklineIndent5 guifg=#0000FF gui=nocombine
       highlight IndentBlanklineIndent6 guifg=#FF00FF gui=nocombine
       ]]
-
+      local ok, treesitter = pcall(require, 'nvim-treesitter')
+      if vim.b.treesitter_disable ~= 1 then
+        vim.g.indent_blankline_show_current_context = true
+        vim.g.indent_blankline_show_current_context_start = true
+      end
       require("indent_blankline").setup {
-        use_treesitter = true,
+        use_treesitter = false,
         space_char_blankline = " ",
-        show_current_context = true,
-        show_current_context_start = true,
         show_first_indent_level = true,
         context_highlight_list = {
           "IndentBlanklineIndent1",
@@ -1044,7 +1090,7 @@ require('packer').startup({function(use)
   }
 
   use {
-    'romgrk/nvim-treesitter-context',
+    'lewis6991/nvim-treesitter-context',
     opt = true,
     config = function()
       require'treesitter-context'.setup{
@@ -1085,6 +1131,14 @@ require('packer').startup({function(use)
   end
   }
 
+  use {
+    'm-demare/hlargs.nvim',
+    opt = true,
+    requires = { 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+      require('hlargs').setup()
+    end
+  }
 
   -- cd to project root
   use {
@@ -1107,13 +1161,26 @@ require('packer').startup({function(use)
     'stevearc/aerial.nvim',
     config = function()
       vim.api.nvim_set_keymap('n', '<leader>v', '<cmd>AerialToggle!<CR>', { noremap = true, silent = true })
-      backends = { "lsp", "treesitter", "markdown" }
       local status_ok, telescope = pcall(require, "telescope")
       if status_ok then
         telescope.load_extension('aerial')
       end
       require("aerial").setup({
-        backends = { "lsp", "treesitter", "markdown" },
+        backends = {
+          _ = {"lsp", "treesitter", "markdown"},
+        },
+        filter_kind = {
+          "Class",
+          "Constructor",
+          "Enum",
+          "Function",
+          "Interface",
+          "Module",
+          "Method",
+          "Struct",
+          "Namespace",
+          "Field",
+        },
         guides = {
           -- When the child item has a sibling below it
           mid_item = "├─",
@@ -1123,6 +1190,9 @@ require('packer').startup({function(use)
           nested_top = "│ ",
           -- Raw indentation
           whitespace = "  ",
+        },
+        icons = {
+          Namespace = "",
         },
         max_width = 200,
         disable_max_lines = -1,
@@ -1297,11 +1367,13 @@ require('packer').startup({function(use)
         color = {gui = 'bold'}
       }
 
-      if vim.g.wait_init ~= 1 then
-        vim.defer_fn(function()
+      vim.api.nvim_create_autocmd({"InsertEnter"}, {
+        pattern = '*',
+        callback = function()
           vim.g.wait_init = 1
-        end, 2000)
-      end
+        end,
+        once = true
+      })
 
       local copilot = function()
         if vim.g.wait_init == 1 then
@@ -1674,15 +1746,24 @@ require('packer').startup({function(use)
 
   use {
     'numToStr/Comment.nvim',
+    opt = true,
     config = function()
-      require('Comment').setup({
+      local function map(mode, lhs, rhs)
+        vim.api.nvim_set_keymap(mode, lhs, rhs, { noremap = true, silent = true })
+      end
+      map('n', '<C-_>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
+      map('n', '<C-b>', '<CMD>lua require("Comment.api").toggle_current_blockwise()<CR>')
 
-      })
+      -- Linewise toggle using C-/
+      map('x', '<C-_>', '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
+
+      -- Blockwise toggle using <leader>gb
+      map('x', '<c-b>', '<ESC><CMD>lua require("Comment.api").toggle_blockwise_op(vim.fn.visualmode())<CR>')
     end
   }
 
   use {
-    "folke/trouble.nvim",
+    "qsdrqs/trouble.nvim",
     requires = "kyazdani42/nvim-web-devicons",
     config = function()
       require("trouble").setup {
@@ -1782,6 +1863,17 @@ require('packer').startup({function(use)
     end
   }
   use {
+    'luochen1990/rainbow',
+    opt = true,
+    config = function()
+      -- same as vim rainbow
+      vim.g.rainbow_active = 1
+      vim.g.rainbow_conf = {
+        guifgs = {'#FF0000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF'}, -- table of hex strings
+      }
+    end
+  }
+  use {
     'iamcco/markdown-preview.nvim',
     opt = true,
     run = "cd app && yarn install",
@@ -1825,7 +1917,8 @@ require('packer').startup({function(use)
       vim.g.UltiSnipsListSnippets = '<c-x><c-s>'
       vim.g.UltiSnipsRemoveSelectModeMappings = 0
       vim.g.UltiSnipsEditSplit="vertical"
-      vim.g.UltiSnipsSnippetDirectories={ os.getenv("HOME") .. '/.vim/UltiSnips' }
+      vim.g.UltiSnipsSnippetDirectories={ os.getenv("HOME") .. '/.vim/UltiSnips', "UltiSnips"}
+      vim.g.UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit = os.getenv("HOME") .. '/.vim/UltiSnips'
       vim.api.nvim_set_keymap('n', '<leader>ss', '<cmd>UltiSnipsEdit<cr>', { noremap = true, silent = true })
     end
   }
@@ -1852,6 +1945,7 @@ require('packer').startup({function(use)
         end
       end
       vim.api.nvim_set_keymap('i', '<C-e>', "<Cmd>lua copilot_dismiss()<CR>", { noremap = true, silent = true})
+      vim.api.nvim_set_keymap('i', '<M-\\>', "<Cmd>Copilot panel<CR>", { noremap = true, silent = true})
     end
   }
 
@@ -2017,14 +2111,12 @@ require('packer').startup({function(use)
         local stdout = vim.loop.new_pipe(false)
         local stderr = vim.loop.new_pipe(false)
 
-        -- local cmd = vim.fn.stdpath('data') .. '/dapinstall/ccppr_lldb/extension/adapter/codelldb'
-        local cmd = "/home/qsdrqs/Downloads/codelldb/extension/adapter/codelldb"
-        local port = 12352
+        -- CHANGE THIS!
+        local cmd = vim.fn.stdpath('data') .. '/dapinstall/ccppr_lldb/extension/adapter/codelldb'
 
         local handle, pid_or_err
         local opts = {
           stdio = {nil, stdout, stderr},
-          args = {"--port", port},
           detached = true,
         }
         handle, pid_or_err = vim.loop.spawn(cmd, opts, function(code)
@@ -2036,18 +2128,18 @@ require('packer').startup({function(use)
           end
         end)
         assert(handle, "Error running codelldb: " .. tostring(pid_or_err))
-        vim.defer_fn(function()
-          on_adapter({
-            type = 'server',
-            host = '127.0.0.1',
-            port = port
-          })
-        end, 500)
         stdout:read_start(function(err, chunk)
           assert(not err, err)
           if chunk then
             local port = chunk:match('Listening on port (%d+)')
             if port then
+              vim.schedule(function()
+                on_adapter({
+                  type = 'server',
+                  host = '127.0.0.1',
+                  port = port
+                })
+              end)
             else
               vim.schedule(function()
                 require("dap.repl").append(chunk)
@@ -2279,17 +2371,29 @@ end
 ----------------------------Lazy Load-------------------------------------------------
 function lazyLoadPlugins()
 
+  if vim.b.treesitter_disable ~= 1 then
+    require('packer').loader(
+    -- begin treesitter (slow performance)
+    'nvim-ts-rainbow',   -- performance issue
+    'nvim-treesitter-context',
+    'nvim-treesitter-textobjects',
+    'nvim-ts-autotag',
+    'hlargs.nvim',
+    -- end treesitter
+    '<bang>' == '!')
+  else
+    require('packer').loader(
+    'rainbow',
+    '<bang>' == '!')
+    vim.schedule(function()
+      vim.fn["rainbow_main#load"]()
+    end)
+  end
+
   require('packer').loader(
 
-  -- begin treesitter (slow performance)
-  'nvim-treesitter-context',
-  'nvim-ts-rainbow',   -- performance issue
-  'indent-blankline.nvim',
-  'nvim-treesitter-textobjects',
-  'nvim-ts-autotag',
-  -- end treesitter
-
   -- begin vim plugins
+  'indent-blankline.nvim',
   'ultisnips',
   'cmp-nvim-ultisnips',
   'copilot.vim',
@@ -2303,6 +2407,7 @@ function lazyLoadPlugins()
   -- begin misc
   'nvim-hlslens',
   'nvim-scrollview',
+  'Comment.nvim',
   -- end misc
 
   '<bang>' == '!')
