@@ -257,7 +257,7 @@ require('packer').startup({function(use)
       -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
       jdt_config.init_options = {
         bundles = {
-          vim.fn.glob(vim.fn.stdpath('data') .. "/dapinstall/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-0.35.0.jar")
+          vim.fn.glob(vim.fn.stdpath('data') .. "/dapinstall/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
         }
       }
 
@@ -656,6 +656,7 @@ require('packer').startup({function(use)
   use {
     'tzachar/cmp-tabnine',
     run='./install.sh',
+    opt = true,
     config = function()
       local tabnine = require('cmp_tabnine.config')
       tabnine:setup({
@@ -883,7 +884,7 @@ require('packer').startup({function(use)
           { name = 'ultisnips' }, -- For ultisnips users.
           { name = 'cmp_tabnine' },
           { name = 'nvim_lsp' },
-          { name = 'omni' },
+          -- { name = 'omni' },
           { name = 'dictionary', keyword_length = 2 },
           { name = 'path' },
           -- { name = 'vsnip' }, -- For vsnip users.
@@ -1751,10 +1752,12 @@ require('packer').startup({function(use)
       local function map(mode, lhs, rhs)
         vim.api.nvim_set_keymap(mode, lhs, rhs, { noremap = true, silent = true })
       end
+      map('n', '<C-/>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
       map('n', '<C-_>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
       map('n', '<C-b>', '<CMD>lua require("Comment.api").toggle_current_blockwise()<CR>')
 
       -- Linewise toggle using C-/
+      map('x', '<C-/>', '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
       map('x', '<C-_>', '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
 
       -- Blockwise toggle using <leader>gb
@@ -1858,8 +1861,8 @@ require('packer').startup({function(use)
     opt = true,
     keys = "<leader>y",
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>y', "<cmd>TranslateW<cr>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('v', '<leader>y', "<cmd>TranslateW<cr>", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader>y', "<Plug>TranslateW", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('v', '<leader>y', "<Plug>TranslateWV", { noremap = true, silent = true })
     end
   }
   use {
@@ -2257,7 +2260,7 @@ require('packer').startup({function(use)
 
           -- If using the JDK9+ module system, this needs to be extended
           -- `nvim-jdtls` would automatically populate this property
-          modulePaths = {},
+          -- modulePaths = {},
           name = "Launch Java Debug",
           request = "launch",
           type = "java"
@@ -2401,7 +2404,6 @@ function lazyLoadPlugins()
   'vim-log-highlighting',
   'vim-visual-multi',
   'vim-bookmarks',
-
   -- end vim plugins
 
   -- begin misc
@@ -2411,6 +2413,12 @@ function lazyLoadPlugins()
   -- end misc
 
   '<bang>' == '!')
+
+  -- tabnine
+  local tabnine_path = vim.fn.stdpath('data') .. '/plugins/pack/packer/start/cmp-tabnine/binaries/4.4.6/x86_64-unknown-linux-musl/TabNine'
+  if vim.fn.filereadable(tabnine_path) then
+    require('packer').loader('cmp-tabnine', '<bang>' == '!')
+  end
 end
 
 function loadTags()

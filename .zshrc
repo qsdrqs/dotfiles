@@ -57,7 +57,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 # ZSH_THEME="spaceship"
 # ZSH_THEME="powerlevel10k/powerlevel10k"
-source ~/theme.zsh
+source $HOME/theme.zsh
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
@@ -153,9 +153,6 @@ function zsh_install(){
 
 }
 
-#To make zsh colorful by grc
-[[ -s "/etc/grc.zsh"  ]] && source /etc/grc.zsh
-
 # 光标形状随模式改变
 zle -N zle-keymap-select
 echo -ne '\e[5 q'
@@ -166,6 +163,9 @@ fi
 
 #init zsh
 source $ZSH/oh-my-zsh.sh
+
+#To make zsh colorful by grc
+[[ -s "/etc/grc.zsh"  ]] && source /etc/grc.zsh
 
 # 光标形状随模式改变
 function zle-keymap-select {
@@ -279,9 +279,6 @@ glorep() {
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-
-#ranger
-export RANGER_LOAD_DEFAULT_RC=FALSE
 
 #vi-mode
 function vi-forward-7-char {
