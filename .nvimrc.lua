@@ -69,7 +69,7 @@ require('packer').startup({function(use)
 
       end
 
-      vim.api.nvim_set_keymap('n', '<leader>f', '<cmd>Telescope find_files<cr>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader>f', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>b', '<cmd>Telescope buffers<cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { noremap = true, silent = true })
@@ -186,7 +186,7 @@ require('packer').startup({function(use)
       end
 
       -- java
-      jdt_config = lsp_common_config
+      local jdt_config = lsp_common_config
       jdt_config.cmd = {
 
         -- 💀
@@ -244,6 +244,7 @@ require('packer').startup({function(use)
       }
 
       -- progress_report
+      jdt_config.handlers = {}
       jdt_config.handlers["language/progressReport"] = progress_report
       -- disable default progress report
       jdt_config.handlers['language/status'] = function() end
@@ -268,7 +269,13 @@ require('packer').startup({function(use)
         require('jdtls').setup_dap({ hotcodereplace = 'auto' })
         common_on_attach(client,bufnr)
       end
-      vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
+      -- vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "java",
+        callback = function()
+          require('jdtls').start_or_attach(jdt_config)
+        end
+      })
     end
   }
 
@@ -276,6 +283,7 @@ require('packer').startup({function(use)
     'neovim/nvim-lspconfig',
     config = function()
       -- vim.lsp.set_log_level('trace')
+      vim.lsp.set_log_level('ERROR')
 
       local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
@@ -350,7 +358,6 @@ require('packer').startup({function(use)
             vim.cmd [[ autocmd InsertLeave,TextChanged <buffer> lua vim.lsp.codelens.refresh() ]]
             vim.lsp.codelens.refresh()
           end
-          lsp_common_config.handlers = {}
           lsp_common_config.handlers["textDocument/codeLens"] = function(err, result, ctx, _)
             if not result or not next(result) then
               vim.lsp.codelens.on_codelens(err, result, ctx, _)
@@ -1287,7 +1294,7 @@ require('packer').startup({function(use)
 
   -- colorizer
   use {
-    'norcalli/nvim-colorizer.lua',
+    'NvChad/nvim-colorizer.lua',
     config = function()
       require'colorizer'.setup()
     end
@@ -1923,6 +1930,12 @@ require('packer').startup({function(use)
       vim.g.UltiSnipsSnippetDirectories={ os.getenv("HOME") .. '/.vim/UltiSnips', "UltiSnips"}
       vim.g.UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit = os.getenv("HOME") .. '/.vim/UltiSnips'
       vim.api.nvim_set_keymap('n', '<leader>ss', '<cmd>UltiSnipsEdit<cr>', { noremap = true, silent = true })
+      vim.api.nvim_create_autocmd("BufRead", {
+        pattern = "*.snippets",
+        callback = function()
+          vim.bo.filetype = "snippets"
+        end
+      })
     end
   }
 
@@ -2269,7 +2282,7 @@ require('packer').startup({function(use)
 
       -- Dap load launch.json from vscode when avaliable
       if vim.fn.filereadable("./.vscode/launch.json") and vim.g.load_launchjs ~= 1 then
-        require('dap.ext.vscode').load_launchjs()
+        require('dap.ext.vscode').load_launchjs(nil, { cppdbg = {'c', 'cpp', 'asm'} })
         vim.g.load_launchjs = 1
       end
     end
@@ -2415,8 +2428,8 @@ function lazyLoadPlugins()
   '<bang>' == '!')
 
   -- tabnine
-  local tabnine_path = vim.fn.stdpath('data') .. '/plugins/pack/packer/start/cmp-tabnine/binaries/4.4.6/x86_64-unknown-linux-musl/TabNine'
-  if vim.fn.filereadable(tabnine_path) then
+  local tabnine_path = vim.fn.glob(vim.fn.stdpath('data') .. '/plugins/pack/packer/opt/cmp-tabnine/binaries/*/x86_64-unknown-linux-musl/TabNine')
+  if vim.fn.filereadable(tabnine_path) == 1 then
     require('packer').loader('cmp-tabnine', '<bang>' == '!')
   end
 end

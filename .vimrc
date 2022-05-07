@@ -146,7 +146,8 @@ inoremap <C-h> <Left>
 let $NOTMUX = 1
 if has('nvim')
   "nnoremap \t :set splitbelow<CR>:15split term://zsh<cr>i
-  noremap <localleader>t :set splitbelow<CR>:18split<cr>:term<cr>i
+  let termheight = float2nr(&lines * 0.20)
+  noremap <localleader>t :set splitbelow<CR>:exec termheight . 'split'<cr>:term<cr>i
 else
   "nnoremap \t :set splitbelow<CR>:terminal ++rows=15<CR>
   nnoremap \t :set splitbelow<CR>:terminal<CR>
@@ -239,6 +240,12 @@ function Tab_len()
       " 设置格式化时制表符占用空格数
     endif
   endfor
+endfunction
+
+function Delete8half()
+  exec "normal 8dd"
+  let halfcol = (col("$") - 1) / 2
+  exec 'normal 0d' . halfcol . 'l'
 endfunction
 
 set expandtab
