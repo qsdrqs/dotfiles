@@ -179,6 +179,10 @@ require('packer').startup({function(use)
             message = result.subTask,
           },
         }
+        local client = vim.lsp.get_client_by_id(info.client_id)
+        if msg.token and client then
+          client.messages.progress[msg.token] = client.messages.progress[msg.token] or {}
+        end
         -- print(vim.inspect(result.subTask))
         if result.subTask and result.subTask ~= "" then
           lsp.handlers["$/progress"](nil, msg, info)
@@ -244,10 +248,46 @@ require('packer').startup({function(use)
       }
 
       -- progress_report
-      jdt_config.handlers = {}
-      jdt_config.handlers["language/progressReport"] = progress_report
-      -- disable default progress report
-      jdt_config.handlers['language/status'] = function() end
+      jdt_config.handlers = {
+        ["language/progressReport"] = progress_report,
+        -- disable default progress report
+        ['language/status'] = function() end,
+        ['workspace/semanticTokens/refresh'] = function(err,  params, ctx, config)
+          vim.lsp.buf_request(0, 'textDocument/semanticTokens/full',
+            {
+              textDocument = vim.lsp.util.make_text_document_params(),
+              tick = vim.api.nvim_buf_get_changedtick(0)
+            }, nil)
+          return vim.NIL
+        end,
+        ['textDocument/semanticTokens/full'] = function(err,  result, ctx, config)
+          if err or not result or ctx.params.tick ~= vim.api.nvim_buf_get_changedtick(ctx.bufnr) then
+            return
+          end
+          -- temporary handler until native support lands
+          local bufnr = ctx.bufnr
+          local client = vim.lsp.get_client_by_id(ctx.client_id)
+          local legend = client.server_capabilities.semanticTokensProvider.legend
+          local token_types = legend.tokenTypes
+          local data = result.data
+
+          local ns = vim.api.nvim_create_namespace('nvim-lsp-semantic')
+          vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+          local prev_line, prev_start = nil, 0
+          for i = 1, #data, 5 do
+            local delta_line = data[i]
+            prev_line = prev_line and prev_line + delta_line or delta_line
+            local delta_start = data[i + 1]
+            prev_start = delta_line == 0 and prev_start + delta_start or delta_start
+            local token_type = token_types[data[i + 3] + 1]
+            local line = vim.api.nvim_buf_get_lines(bufnr, prev_line, prev_line + 1, false)[1]
+            local byte_start = vim.str_byteindex(line, prev_start)
+            local byte_end = vim.str_byteindex(line, prev_start + data[i + 2])
+            vim.api.nvim_buf_add_highlight(bufnr, ns, 'LspSemantic_' .. token_type, prev_line, byte_start, byte_end)
+            -- require('vim.lsp.log').debug(bufnr, ns, 'LspSemantic_' .. token_type, prev_line, byte_start, byte_end)
+          end
+        end
+      }
 
       -- Language server `initializationOptions`
       -- You need to extend the `bundles` with paths to jar files
@@ -345,10 +385,110 @@ require('packer').startup({function(use)
           debounce_text_changes = 150,
         },
       }
+      -- begin sematic token highlight support (may delete further)
+      lsp_common_config.handlers = {
+        ['workspace/semanticTokens/refresh'] = function(err,  params, ctx, config)
+          vim.lsp.buf_request(0, 'textDocument/semanticTokens/full',
+            {
+              textDocument = vim.lsp.util.make_text_document_params(),
+              tick = vim.api.nvim_buf_get_changedtick(0)
+            }, nil)
+          return vim.NIL
+        end,
+        ['textDocument/semanticTokens/full'] = function(err,  result, ctx, config)
+          if err or not result or ctx.params.tick ~= vim.api.nvim_buf_get_changedtick(ctx.bufnr) then
+            return
+          end
+          -- temporary handler until native support lands
+          local bufnr = ctx.bufnr
+          local client = vim.lsp.get_client_by_id(ctx.client_id)
+          local legend = client.server_capabilities.semanticTokensProvider.legend
+          local token_types = legend.tokenTypes
+          local data = result.data
+
+          local ns = vim.api.nvim_create_namespace('nvim-lsp-semantic')
+          vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+          local prev_line, prev_start = nil, 0
+          for i = 1, #data, 5 do
+            local delta_line = data[i]
+            prev_line = prev_line and prev_line + delta_line or delta_line
+            local delta_start = data[i + 1]
+            prev_start = delta_line == 0 and prev_start + delta_start or delta_start
+            local token_type = token_types[data[i + 3] + 1]
+            local line = vim.api.nvim_buf_get_lines(bufnr, prev_line, prev_line + 1, false)[1]
+            local byte_start = vim.str_byteindex(line, prev_start)
+            local byte_end = vim.str_byteindex(line, prev_start + data[i + 2])
+            vim.api.nvim_buf_add_highlight(bufnr, ns, 'LspSemantic_' .. token_type, prev_line, byte_start, byte_end)
+            -- require('vim.lsp.log').debug(bufnr, ns, 'LspSemantic_' .. token_type, prev_line, byte_start, byte_end)
+          end
+        end
+      }
+      vim.cmd [[highlight link LspSemantic_attribute Define]]
+      vim.cmd [[highlight link LspSemantic_enum Type]]
+      vim.cmd [[highlight link LspSemantic_function Function]]
+      vim.cmd [[highlight link LspSemantic_derive Define]]
+      vim.cmd [[highlight link LspSemantic_macro PreProc]]
+      vim.cmd [[highlight link LspSemantic_method Function]]
+      vim.cmd [[highlight link LspSemantic_namespace Type]]
+      vim.cmd [[highlight link LspSemantic_struct Type]]
+      vim.cmd [[highlight link LspSemantic_trait TraitType]]
+      vim.cmd [[highlight link LspSemantic_interface TraitType]]
+      vim.cmd [[highlight link LspSemantic_typeAlias Type]]
+      vim.cmd [[highlight link LspSemantic_union Type]]
+
+      vim.cmd [[highlight link LspSemantic_boolean Boolean]]
+      vim.cmd [[highlight link LspSemantic_character Character]]
+      vim.cmd [[highlight link LspSemantic_number Number]]
+      vim.cmd [[highlight link LspSemantic_string String]]
+      vim.cmd [[highlight link LspSemantic_escapeSequence Special]]
+      vim.cmd [[highlight link LspSemantic_formatSpecifier Operator]]
+
+      vim.cmd [[highlight link LspSemantic_operator Operator]]
+      vim.cmd [[highlight link LspSemantic_arithmetic Operator]]
+      vim.cmd [[highlight link LspSemantic_bitwise Operator]]
+      vim.cmd [[highlight link LspSemantic_comparison Operator]]
+      vim.cmd [[highlight link LspSemantic_logical Operator]]
+
+      vim.cmd [[highlight link LspSemantic_punctuation Operator]]
+      vim.cmd [[highlight link LspSemantic_attributeBracket Operator]]
+      vim.cmd [[highlight link LspSemantic_angle Operator]]
+      vim.cmd [[highlight link LspSemantic_brace Operator]]
+      vim.cmd [[highlight link LspSemantic_bracket Operator]]
+      vim.cmd [[highlight link LspSemantic_parenthesis Operator]]
+      vim.cmd [[highlight link LspSemantic_colon Operator]]
+      vim.cmd [[highlight link LspSemantic_comma Operator]]
+      vim.cmd [[highlight link LspSemantic_dot Operator]]
+      vim.cmd [[highlight link LspSemantic_semi Operator]]
+      vim.cmd [[highlight link LspSemantic_macroBang PreProc]]
+
+      vim.cmd [[highlight link LspSemantic_builtinAttribute Define]]
+      vim.cmd [[highlight link LspSemantic_builtinType Type]]
+      vim.cmd [[highlight link LspSemantic_comment Comment]]
+      vim.cmd [[highlight link LspSemantic_constParameter Parameter]]
+      vim.cmd [[highlight link LspSemantic_enumMember Constant]]
+      -- vim.cmd [[highlight link LspSemantic_generic Variable]]
+      vim.cmd [[highlight link LspSemantic_keyword Keyword]]
+      vim.cmd [[highlight link LspSemantic_label Label]]
+      vim.cmd [[highlight link LspSemantic_lifetime Noise]]
+      vim.cmd [[highlight link LspSemantic_parameter Parameter]]
+      vim.cmd [[highlight link LspSemantic_property Property]]
+      vim.cmd [[highlight link LspSemantic_selfKeyword Special]]
+      -- vim.cmd [[highlight link LspSemantic_toolModule  ]]
+      vim.cmd [[highlight link LspSemantic_typeParameter TraitType]]
+      -- vim.cmd [[highlight link LspSemantic_unresolvedReference Unresolved]]
+      -- vim.cmd [[highlight link LspSemantic_variable Variable]]
+      --
+      vim.cmd [[hi LspReferenceText cterm=underline gui=underline]]
+      vim.cmd [[hi LspReferenceRead cterm=underline gui=underline]]
+      vim.cmd [[hi LspReferenceWrite cterm=underline gui=underline]]
+      capabilities['workspace']['semanticTokens'] = {refreshSupport = true}
+      -- end sematic token highlight support
+
       local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
 
         if lsp == 'pyright' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio"}
+        elseif lsp == 'pylsp' then lsp_common_config.cmd = {'pylsp'}
         elseif lsp == 'clangd' then lsp_common_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never"}
         elseif lsp == "rust_analyzer" then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/rust/rust-analyzer"}
         elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/vim/node_modules/.bin/vim-language-server", "--stdio"}
@@ -589,7 +729,7 @@ require('packer').startup({function(use)
         if vmode == 'v' then
           vim.lsp.buf.range_formatting()
         else
-          vim.lsp.buf.formatting()
+          vim.lsp.buf.format{ async = true }
         end
       end
 
@@ -626,6 +766,7 @@ require('packer').startup({function(use)
   use { 'hrsh7th/cmp-path', }
   use { 'hrsh7th/cmp-buffer',  }
   use { 'hrsh7th/cmp-omni',  }
+  use { 'hrsh7th/cmp-nvim-lsp-signature-help', }
   use {
     'uga-rosa/cmp-dictionary',
     config = function()
@@ -686,7 +827,7 @@ require('packer').startup({function(use)
     config = function()
       require "lsp_signature".setup({
         bind = true, -- This is mandatory, otherwise border config won't get registered.
-        floating_window = true,
+        floating_window = false,
         floating_window_above_cur_line = false,
         handler_opts = {
           border = "rounded"
@@ -890,6 +1031,7 @@ require('packer').startup({function(use)
         sources = cmp.config.sources({
           { name = 'ultisnips' }, -- For ultisnips users.
           { name = 'cmp_tabnine' },
+          { name = 'nvim_lsp_signature_help' },
           { name = 'nvim_lsp' },
           -- { name = 'omni' },
           { name = 'dictionary', keyword_length = 2 },
@@ -1098,10 +1240,10 @@ require('packer').startup({function(use)
   }
 
   use {
-    'lewis6991/nvim-treesitter-context',
+    'nvim-treesitter/nvim-treesitter-context',
     opt = true,
     config = function()
-      require'treesitter-context'.setup{
+      require'treesitter-context'.setup {
         enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
         throttle = true, -- Throttles plugin updates (may improve performance)
         max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
@@ -1200,11 +1342,98 @@ require('packer').startup({function(use)
           whitespace = "  ",
         },
         icons = {
-          Namespace = "",
+          Namespace = " ",
         },
         max_width = 200,
         disable_max_lines = -1,
       })
+      -- winbar
+      local aerial = require('aerial')
+
+      -- Format the list representing the symbol path
+      -- Grab it from https://github.com/stevearc/aerial.nvim/blob/master/lua/lualine/components/aerial.lua
+      local function format_symbols(symbols, depth, separator, icons_enabled)
+        local parts = {}
+        depth = depth or #symbols
+
+        if depth > 0 then
+          symbols = { unpack(symbols, 1, depth) }
+        else
+          symbols = { unpack(symbols, #symbols + 1 + depth) }
+        end
+
+        for _, symbol in ipairs(symbols) do
+          if icons_enabled then
+            table.insert(parts, string.format("%s%s", symbol.icon, symbol.name))
+          else
+            table.insert(parts, symbol.name)
+          end
+        end
+
+        return table.concat(parts, separator)
+      end
+
+      winbar_aerial = function()
+        -- Get a list representing the symbol path by aerial.get_location (see
+        -- https://github.com/stevearc/aerial.nvim/blob/master/lua/aerial/init.lua#L127),
+        -- and format the list to get the symbol path.
+        -- Grab it from
+        -- https://github.com/stevearc/aerial.nvim/blob/master/lua/lualine/components/aerial.lua#L89
+        local winbar_aerial_ft_exclude = {"alpha"}
+
+        for _, ft in ipairs(winbar_aerial_ft_exclude) do
+          if vim.o.filetype == ft then
+            return ""
+          end
+        end
+
+        local symbols = aerial.get_location(true)
+        local symbol_path = format_symbols(symbols, nil, ' > ', true)
+
+        if symbol_path ~= "" then
+          return "> " .. symbol_path
+        end
+        return ""
+      end
+
+      filename_with_icon = function()
+        -- nvim-tree
+        if vim.o.filetype == "NvimTree" then
+          return vim.api.nvim_exec("pwd", true)
+        end
+
+        local path_with_slash = vim.fn.expand("%f")
+        path_with_slash = vim.split(path_with_slash, "/", {plain=true})
+        local icon = require("nvim-web-devicons").get_icon_by_filetype(vim.o.filetype)
+        local file_with_arrow
+
+        if #path_with_slash == 1 then
+          if icon ~= nil then
+            file_with_arrow = icon .. " " .. path_with_slash[1]
+          else
+            file_with_arrow = path_with_slash[1]
+          end
+          return file_with_arrow
+        end
+
+        file_with_arrow = path_with_slash[1]
+        for i, iter in pairs(path_with_slash) do
+          if i ~= 1 and i ~= #path_with_slash then
+            file_with_arrow = file_with_arrow .. " > " .. iter
+          elseif i == #path_with_slash then
+            if icon ~= nil then
+              file_with_arrow = file_with_arrow .. " > " .. icon .. " " .. iter
+            else
+              file_with_arrow = file_with_arrow .. " > " .. iter
+            end
+          end
+        end
+        return file_with_arrow
+      end
+
+      vim.cmd[[ hi AerialWinHL guifg=#77bdfb ]]
+      vim.o.winbar = "  %{%v:lua.filename_with_icon()%} %#AerialWinHL#%{%v:lua.winbar_aerial()%}"
+
     end
   }
 
@@ -1308,14 +1537,14 @@ require('packer').startup({function(use)
           separator_style = "slant",
           diagnostics = "nvim_lsp",
           max_name_length = 100,
-          name_formatter = function(buf)  -- buf contains a "name", "path" and "bufnr"
-            -- remove extension from markdown files for example
-            if buf.bufnr == vim.fn.bufnr() then
-              return vim.fn.fnamemodify(vim.fn.expand("%"), ":~:.")
-            else
-              return buf.name
-            end
-          end,
+          -- name_formatter = function(buf)  -- buf contains a "name", "path" and "bufnr"
+          --   -- remove extension from markdown files for example
+          --   if buf.bufnr == vim.fn.bufnr() then
+          --     return vim.fn.fnamemodify(vim.fn.expand("%"), ":~:.")
+          --   else
+          --     return buf.name
+          --   end
+          -- end,
           diagnostics_indicator = function(count, level, diagnostics_dict, context)
             local s = " "
             for e, n in pairs(diagnostics_dict) do
@@ -1353,11 +1582,11 @@ require('packer').startup({function(use)
       local lsp_info =  {
         -- Lsp server name .
         function()
-          local msg = 'No Active LSP'
+          local no_lsp = ''
           local buf_ft = vim.api.nvim_buf_get_option(0, 'filetype')
           local clients = vim.lsp.get_active_clients()
           if next(clients) == nil then
-            return msg
+            return no_lsp
           end
           for _, client in ipairs(clients) do
             local filetypes = client.config.filetypes
@@ -1368,7 +1597,7 @@ require('packer').startup({function(use)
           if clients[1].name ~= nil then
             return clients[1].name
           else
-            return msg
+            return no_lsp
           end
         end,
         icon = ' ',
@@ -1429,8 +1658,8 @@ require('packer').startup({function(use)
         sections = {
           lualine_a = {{'filename', path = 0}},
           lualine_b = {'branch', 'diff', 'diagnostics'},
-          lualine_c = {gtagsHandler,{"aerial", sep = " > "}},
-          lualine_x = {lsp_info, auto_session_name()},
+          lualine_c = {lsp_info, gtagsHandler},
+          lualine_x = {auto_session_name()},
           lualine_y = { 'fileformat', 'filetype', copilot},
           lualine_z = {'%l/%L,%c', 'encoding' }
         },
@@ -1465,10 +1694,14 @@ require('packer').startup({function(use)
     config = function()
       vim.g.Illuminate_delay = 300
       vim.g.Illuminate_ftblacklist = {"NvimTree", "alpha", "dapui_scopes", "dapui_breakpoints", "help"}
-      vim.api.nvim_command [[ hi def LspReferenceText guibg=#193b25]]
-      vim.api.nvim_command [[ hi def link LspReferenceWrite LspReferenceText ]]
-      vim.api.nvim_command [[ hi def link LspReferenceRead LspReferenceText ]]
-      vim.api.nvim_command [[ hi link illuminatedWord LspReferenceText ]]
+
+      function highlightIlluminate()
+        vim.cmd [[ hi LspReferenceText guibg=#193b25 gui=none ]]
+        vim.cmd [[ hi LspReferenceWrite guibg=#193b25 gui=none ]]
+        vim.cmd [[ hi LspReferenceRead guibg=#193b25 gui=none ]]
+        vim.cmd [[ hi illuminatedWord guibg=#193b25 gui=none ]]
+      end
+      vim.defer_fn(highlightIlluminate, 0)
     end
   }
 
@@ -1480,6 +1713,7 @@ require('packer').startup({function(use)
     config = function()
       vim.api.nvim_set_keymap('n', '<leader>n', '<cmd>NvimTreeFindFileToggle<CR>', { noremap = true, silent = true})
       vim.g.nvim_tree_git_hl = 1
+      vim.g.nvim_tree_group_empty = 1
       require'nvim-tree'.setup {
         disable_netrw = true,
         diagnostics = {
@@ -1761,14 +1995,16 @@ require('packer').startup({function(use)
       end
       map('n', '<C-/>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
       map('n', '<C-_>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
-      map('n', '<C-b>', '<CMD>lua require("Comment.api").toggle_current_blockwise()<CR>')
+      map('n', '<C-M-/>', '<CMD>lua require("Comment.api").toggle_current_blockwise()<CR>')
+      map('n', '<C-M-_>', '<CMD>lua require("Comment.api").toggle_current_blockwise()<CR>')
 
       -- Linewise toggle using C-/
       map('x', '<C-/>', '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
       map('x', '<C-_>', '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
 
       -- Blockwise toggle using <leader>gb
-      map('x', '<c-b>', '<ESC><CMD>lua require("Comment.api").toggle_blockwise_op(vim.fn.visualmode())<CR>')
+      map('x', '<c-m-/>', '<ESC><CMD>lua require("Comment.api").toggle_blockwise_op(vim.fn.visualmode())<CR>')
+      map('x', '<c-m-_>', '<ESC><CMD>lua require("Comment.api").toggle_blockwise_op(vim.fn.visualmode())<CR>')
     end
   }
 
@@ -1886,7 +2122,7 @@ require('packer').startup({function(use)
   use {
     'iamcco/markdown-preview.nvim',
     opt = true,
-    run = "cd app && yarn install",
+    run = function() vim.fn["mkdp#util#install"]() end,
     ft = {"markdown"},
     config = function()
       vim.g.mkdp_open_to_the_world = 1
@@ -2428,10 +2664,14 @@ function lazyLoadPlugins()
   '<bang>' == '!')
 
   -- tabnine
-  local tabnine_path = vim.fn.glob(vim.fn.stdpath('data') .. '/plugins/pack/packer/opt/cmp-tabnine/binaries/*/x86_64-unknown-linux-musl/TabNine')
-  if vim.fn.filereadable(tabnine_path) == 1 then
+  local tabnine_path = vim.fn.glob(vim.fn.stdpath('data') .. "/plugins/pack/packer/opt/cmp-tabnine/binaries/**/TabNine")
+  tabnine_path = vim.split(tabnine_path, '\n')
+  if table.getn(tabnine_path) ~= 0 then
     require('packer').loader('cmp-tabnine', '<bang>' == '!')
   end
+
+  -- autocmd
+  vim.api.nvim_exec("doautocmd User PluginsLoaded", true)
 end
 
 function loadTags()

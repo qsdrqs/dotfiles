@@ -678,8 +678,8 @@ if has('nvim')
 endif
 hi! link helpSectionDelim Comment
 if has('nvim')
-hi! ErrorMsg guifg=None guibg=None guisp=#Fa7970 gui=undercurl
-hi! WarningMsg guifg=None guibg=None guisp=#faa356 gui=undercurl
+hi! ErrorMsg guifg=#fa7970 guibg=None guisp=#Fa7970 gui=undercurl
+hi! WarningMsg guifg=#faa356 guibg=None guisp=#faa356 gui=undercurl
 hi! DiffChange guifg=None guibg=#462D10
 hi! DiffAdd guifg=None guibg=#104731
 hi! DiffDelete guifg=None guibg=#4C111F

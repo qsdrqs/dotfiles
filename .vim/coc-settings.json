@@ -6,7 +6,6 @@
     "suggest.noselect": false,
     "diagnostic.enable": true,
     //"suggest.maxCompleteItemCount": 20, //不太好
-    "java.home": "/usr/lib/jvm/default",
     "java.import.gradle.enabled": true,
     "java.import.maven.enabled": true,
     "java.autobuild.enabled": true,

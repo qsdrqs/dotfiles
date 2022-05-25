@@ -46,7 +46,7 @@ export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 export ZSH="$HOME/.oh-my-zsh"
 
 #Make alacritty compatible with SSH
-#export TERM="xterm-256color"
+export TERM="xterm-256color"
 # if [[ -x `command -v kitty` ]]; then
 #     alias ssh="kitty +kitten ssh"
 # fi
@@ -226,7 +226,6 @@ fi
 alias af="alias-finder"
 alias lg="lazygit"
 alias t="tmux"
-alias sp="sudo pacman"
 alias c="clear"
 alias n="neofetch"
 alias ra="ranger"
@@ -234,6 +233,12 @@ alias zshrc="$EDITOR ~/.zshrc"
 alias vimrc="$EDITOR ~/.vimrc"
 alias vimplug="$EDITOR ~/.vimrc.plugs"
 alias nvimplug="$EDITOR ~/.nvimrc.lua"
+
+# Arch
+alias sp="sudo pacman"
+
+# Gentoo
+alias sem="sudo emerge -av"
 
 export PROX=127.0.0.1
 alias prox="export http_proxy=http://$PROX:1081\
@@ -334,6 +339,6 @@ compdef vman="man"
 
 # pyenv: not load by default due to performance issue
 if [[ -x `command -v pyenv` ]]; then
-    # eval "$(pyenv init -)"
-    # eval "$(pyenv virtualenv-init -)"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
 fi

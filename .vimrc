@@ -104,13 +104,13 @@ nnoremap <left> :vertical resize-1<CR>
 "nnoremap <leader><leader> :w<CR>
 
 "快速翻页
-noremap H <nop>
 noremap J <nop>
 noremap K <nop>
+noremap J 7j
+noremap K 7k
+noremap H <nop>
 noremap L <nop>
 noremap H 7h
-noremap J 5j
-noremap K 5k
 noremap L 7l
 
 noremap <C-q> ^
@@ -191,8 +191,8 @@ autocmd BufRead *.tex set filetype=tex
 autocmd BufRead *.cls set filetype=tex
 "for log
 autocmd BufRead *.log set filetype=log
-
-
+"for config
+autocmd BufRead *.conf set filetype=config
 "-------------------file type-----------------------"}}}
 
 "hi Normal ctermbg=NONE
@@ -406,6 +406,14 @@ command! -nargs=0 Syn call Syn()
 
 " 设置补全窗口最大高度为15，最小宽度为50
 set pumheight=15
+
+if has('nvim')
+  " set winbar highlight
+  highlight WinBar guifg=#EEEEEE
+  highlight WinBarNC guifg=#8B949E
+  " set global statusline
+  set laststatus=3
+endif
 
 "-------------------杂项-----------------------"}}}
 "

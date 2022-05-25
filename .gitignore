@@ -4,5 +4,6 @@
 .vim/sessions
 .vim/view
 .netrwist
+tagged
 bookmarks
 history
