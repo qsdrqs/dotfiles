@@ -43,6 +43,8 @@ exec_always --no-startup-id picom #渲染器
 #exec_always --no-startup-id albert #alt+d call
 
 
+exec_always --no-startup-id $HOME/launch.sh
+exec_always --no-startup-id pulseaudio
 exec_always --no-startup-id flameshot
 #exec_always --no-startup-id --no-startup-id $HOME/.config/polybar/launch.sh
 exec_always --no-startup-id --no-startup-id plasmashell
@@ -116,8 +118,8 @@ bindsym $mod+x exec --no-startup-id xournalpp
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
 # I use firefox
- bindsym $mod+p exec --no-startup-id firefox-developer-edition --no-startup-id
-# bindsym $mod+p exec --no-startup-id firefox --no-startup-id
+# bindsym $mod+p exec --no-startup-id firefox-developer-edition --no-startup-id
+bindsym $mod+p exec --no-startup-id firefox --no-startup-id
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
@@ -260,10 +262,11 @@ bindsym $mod+m mode $sysd_des
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
-#bar {
-        #mode hide
-        #status_command polybar mypolybar
-#}
+bar {
+        mode dock
+        position top
+        status_command /home/qsdrqs/date.sh
+}
 
 gaps inner 7
 

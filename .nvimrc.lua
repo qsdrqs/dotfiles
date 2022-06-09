@@ -493,6 +493,7 @@ require('packer').startup({function(use)
         elseif lsp == "rust_analyzer" then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/rust/rust-analyzer"}
         elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/vim/node_modules/.bin/vim-language-server", "--stdio"}
         elseif lsp == 'hls' then
+          lsp_common_config.cmd = {"haskell-language-server-wrapper", "--lsp"}
           lsp_common_config.on_attach = function(client, bufnr) 
             common_on_attach(client,bufnr)
             vim.cmd [[ autocmd InsertLeave,TextChanged <buffer> lua vim.lsp.codelens.refresh() ]]
@@ -510,6 +511,10 @@ require('packer').startup({function(use)
               vim.lsp.codelens.on_codelens(err, result, ctx, _)
             end
           end
+          lsp_common_config.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+            vim.lsp.diagnostic.on_publish_diagnostics, {
+              virtual_text = true,
+            })
         elseif lsp == "texlab" then
           lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/latex/texlab" }
           lsp_common_config.on_attach = function(client, bufnr)
@@ -1293,10 +1298,12 @@ require('packer').startup({function(use)
   -- cd to project root
   use {
     "ahmedkhalf/project.nvim",
+    opt = true,
     config = function()
       require("project_nvim").setup {
         patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc" },
         detection_methods = { "lsp", "pattern" },
+        exclude_dirs = {'~'},
         -- your configuration comes here
         -- or leave it empty to use the default settings
         -- refer to the configuration section below
@@ -1379,13 +1386,6 @@ require('packer').startup({function(use)
         -- and format the list to get the symbol path.
         -- Grab it from
         -- https://github.com/stevearc/aerial.nvim/blob/master/lua/lualine/components/aerial.lua#L89
-        local winbar_aerial_ft_exclude = {"alpha"}
-
-        for _, ft in ipairs(winbar_aerial_ft_exclude) do
-          if vim.o.filetype == ft then
-            return ""
-          end
-        end
 
         local symbols = aerial.get_location(true)
         local symbol_path = format_symbols(symbols, nil, ' > ', true)
@@ -1397,12 +1397,20 @@ require('packer').startup({function(use)
       end
 
       filename_with_icon = function()
+        local winbar_aerial_ft_exclude = {}
+
+        for _, ft in ipairs(winbar_aerial_ft_exclude) do
+          if vim.o.filetype == ft then
+            return ""
+          end
+        end
+
         -- nvim-tree
         if vim.o.filetype == "NvimTree" then
           return vim.api.nvim_exec("pwd", true)
         end
 
-        local path_with_slash = vim.fn.expand("%f")
+        local path_with_slash = vim.fn.fnamemodify(vim.fn.expand("%"), ":~:.")
         path_with_slash = vim.split(path_with_slash, "/", {plain=true})
         local icon = require("nvim-web-devicons").get_icon_by_filetype(vim.o.filetype)
         local file_with_arrow
@@ -1712,8 +1720,6 @@ require('packer').startup({function(use)
     },
     config = function()
       vim.api.nvim_set_keymap('n', '<leader>n', '<cmd>NvimTreeFindFileToggle<CR>', { noremap = true, silent = true})
-      vim.g.nvim_tree_git_hl = 1
-      vim.g.nvim_tree_group_empty = 1
       require'nvim-tree'.setup {
         disable_netrw = true,
         diagnostics = {
@@ -1730,6 +1736,10 @@ require('packer').startup({function(use)
               { key = "<leader>", action = 'edit' },
             }
           }
+        },
+        renderer = {
+          highlight_git = true,
+          group_empty = true,
         }
       }
     end
@@ -2009,7 +2019,7 @@ require('packer').startup({function(use)
   }
 
   use {
-    "qsdrqs/trouble.nvim",
+    "bellini666/trouble.nvim",
     requires = "kyazdani42/nvim-web-devicons",
     config = function()
       require("trouble").setup {
@@ -2129,7 +2139,7 @@ require('packer').startup({function(use)
 
       vim.cmd[[
       function! Mkdp_handler(url)
-        exec "silent !firefox-developer-edition -new-window " . a:url
+        exec "silent !firefox -new-window " . a:url
       endfunction
       ]]
 

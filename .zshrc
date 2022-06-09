@@ -35,21 +35,24 @@ export _Z_SRC=$HOME/dotfiles/z/z.sh
 ZSH_DISABLE_COMPFIX=true
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
-# rust
-export PATH=$HOME/.local/bin:$HOME/.local/sbin:$HOME/.cargo/bin:$PATH
+export PATH=$PATH:$HOME/.local/bin:$HOME/.local/sbin
 # vman
 export PATH="$PATH:$HOME/.vim/plugged/vim-superman/bin"
 #haskell
 export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
+[ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env" # ghcup-env
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
 #Make alacritty compatible with SSH
-export TERM="xterm-256color"
-# if [[ -x `command -v kitty` ]]; then
-#     alias ssh="kitty +kitten ssh"
-# fi
+if [[ $TERM != "xterm-kitty" ]]; then
+    export TERM="xterm-256color"
+fi
+
+if [[ $TERM == "xterm-kitty" ]]; then
+    alias ssh="kitty +kitten ssh"
+fi
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -239,6 +242,7 @@ alias sp="sudo pacman"
 
 # Gentoo
 alias sem="sudo emerge -av"
+alias semd="sudo emerge --deselect --ask"
 
 export PROX=127.0.0.1
 alias prox="export http_proxy=http://$PROX:1081\

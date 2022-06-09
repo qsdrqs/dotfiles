@@ -7,7 +7,7 @@
 "-------------------filetype-----------------------"{{{
 if has('nvim')
   " disable filetype.vim and use filetype.lua
-  let g:did_load_filetypes = 0
+  "let g:did_load_filetypes = 0
   let g:do_filetype_lua = 1
 endif
 "-------------------filetype-----------------------"}}}
@@ -221,17 +221,17 @@ set tabstop=4
 " 设置格式化时制表符占用空格数
 
 " 自定义缩进空格个数
-let g:tablist = {
-  \'js': 2,
+let s:tablist = {
+  \'javascript': 2,
   \'vue': 2,
   \'vim': 2,
   \'lua': 2,
 \}
 autocmd BufWinEnter * call Tab_len()
 function Tab_len()
-  for key in keys(g:tablist)
+  for key in keys(s:tablist)
     if &filetype == key
-      let b:tab_len = g:tablist[key]
+      let b:tab_len = s:tablist[key]
       exec "set shiftwidth=".b:tab_len
       " 让 vim 把连续数量的空格视为一个制表符
       exec "set softtabstop=".b:tab_len
@@ -415,6 +415,9 @@ if has('nvim')
   set laststatus=3
 endif
 
+" limit textwidth in markdown and latex
+autocmd FileType markdown,tex set textwidth=80
+
 "-------------------杂项-----------------------"}}}
 "
 "-------------------Syntax highlight-----------------------"{{{
@@ -438,7 +441,9 @@ hi! searchme guifg=#F06292 guibg=#0d1117 gui=bold
 
 "-------------------加载插件-----------------------"{{{
 " nvim lua 插件加载
-function! TriggerPlugins(reserve_line) "加载插件配置以及一些原生vim插件
+function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim插件
+  " recover_line means whether to recover the line number after loading plugins
+  " because some plugins may change the line number.
   let max_line = 20000 " file exceed 20000 lines will disable treesitter
   if line('$') > max_line
     let b:treesitter_disable = 1
@@ -448,7 +453,7 @@ function! TriggerPlugins(reserve_line) "加载插件配置以及一些原生vim�
   else
     luafile $HOME/.config/nvim/packer_compiled.lua
   end
-  if a:reserve_line == 1
+  if a:recover_line == 1
     let line_num = line(".")
     lua lazyLoadPlugins()
     exec line_num
@@ -486,6 +491,9 @@ else
       if len(argv()) == 0 || isdirectory(argv()[0])
         call TriggerPlugins(0)
       endif
+
+      " call plugins if in filetype
+      autocmd Filetype gitcommit call TriggerPlugins(0)
     endif
     " source ~/.vimrc.plugs
   else
