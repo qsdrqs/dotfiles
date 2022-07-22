@@ -19,7 +19,9 @@ do
     ln -s ../dotfiles/.vim/$FILE ../.vim/
     ln -s ../../.vim/$FILE ../.config/nvim/
 done
-ln -s ../../.vimrc ../.config/nvim/init.vim
+ln -s $HOME/.vimrc $HOME/.config/nvim/init.vim
+# coc config for nvim
+ln -s $HOME/dotfiles/coc-settings.json $HOME/.local/share/nvim/coc-settings.json
 
 # move zsh files
 ln -s ./dotfiles/.zshrc ../.zshrc

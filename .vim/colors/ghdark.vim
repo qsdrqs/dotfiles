@@ -195,7 +195,11 @@ hi! link Exception Statement
 hi! link Float Number
 hi! link FunctionDef Function
 hi! link Function GhPurp
-hi! link Identifier GhBlue
+if has('nvim')
+  hi! Identifier guifg=#ecf2f8 guibg=none
+else
+  hi! link Identifier GhBlue
+endif
 hi! link Include Statement
 hi! link IncSearch Search
 hi! link Keyword GhRed
@@ -264,7 +268,7 @@ hi! link cDefine Keyword
 hi! link CocErrorSign ErrorMsg
 hi! link CocWarningSign WarningMsg
 hi! link CocInfoSign GhLightBlue
-hi! link CocHintSign GhPurp
+hi! CocHintSign guifg=#A3BFE0 guibg=#103764
 hi! link CocErrorFloat ErrorMsg
 hi! link CocWarningFloat WarningMsg
 hi! link CocInfoFloat GhLightBlue
@@ -275,6 +279,10 @@ hi! link CocDiagnosticsInfo GhLightBlue
 hi! link CocDiagnosticsHint GhPurp
 hi! link CocSelectedText GhRed
 hi! link CocCodeLens GhBase3
+hi! link CocSemProperty GhBlue
+hi! link CocSemClass GhOrange
+hi! CocSemTypeParameter guifg=#faa356 gui=bold
+hi! CocSemParameter guifg=#ef9062
 
 call s:ghhl("CocErrorHighlight", "none", "none", "undercurl,bold")
 hi! link CocWarningHighlight CocErrorHighlight

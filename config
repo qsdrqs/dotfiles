@@ -39,12 +39,10 @@ exec_always --no-startup-id fcitx5 #输入法
 exec_always --no-startup-id variety #desktop
 #exec_always --no-startup-id dunst #通知程序
 #exec_always --no-startup-id picom --experimental-backends #模糊渲染器
-exec_always --no-startup-id picom #渲染器
+#exec_always --no-startup-id picom #渲染器
 #exec_always --no-startup-id albert #alt+d call
 
 
-exec_always --no-startup-id $HOME/launch.sh
-exec_always --no-startup-id pulseaudio
 exec_always --no-startup-id flameshot
 #exec_always --no-startup-id --no-startup-id $HOME/.config/polybar/launch.sh
 exec_always --no-startup-id --no-startup-id plasmashell
@@ -83,6 +81,8 @@ bindsym $mod+j focus down
 bindsym $mod+k focus up
 bindsym $mod+l focus right
 
+# make window sticky
+bindsym $mod+Shift+s sticky toggle
 
 # alternatively, you can use the cursor keys:
 #bindsym $mod+Left focus left
@@ -265,6 +265,7 @@ bindsym $mod+m mode $sysd_des
 bar {
         mode dock
         position top
+        tray_output DP-1
         status_command /home/qsdrqs/date.sh
 }
 

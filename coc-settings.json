@@ -1,0 +1,9 @@
+{
+    "suggest.autoTrigger": "none",
+    "suggest.floatEnable": false,
+    "diagnostic.enable": false,
+    "signature.enable": false,
+    "notification.disabledProgressSources": ["*"],
+    "semanticTokens.filetypes": ["*"],
+    "clangd.inlayHints.enable": true
+}

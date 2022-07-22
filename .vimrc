@@ -4,14 +4,6 @@
 "                \ V /  | || |  | |  _ <| |___
 "                 \_/  |___|_|  |_|_| \_\\____|
 "
-"-------------------filetype-----------------------"{{{
-if has('nvim')
-  " disable filetype.vim and use filetype.lua
-  "let g:did_load_filetypes = 0
-  let g:do_filetype_lua = 1
-endif
-"-------------------filetype-----------------------"}}}
-
 "-------------------键位映射-----------------------"{{{
 let &t_ut=''
 let mapleader = ' '                     "The default leader is \, but a space is much better. 尽量减少小指的负担
