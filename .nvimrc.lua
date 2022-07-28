@@ -127,19 +127,9 @@ require('packer').startup({function(use)
   }
 
   use {
-    'williamboman/nvim-lsp-installer',
+    "williamboman/mason.nvim",
     config = function()
-      local lsp_installer = require("nvim-lsp-installer")
-
-      lsp_installer.settings({
-        ui = {
-          icons = {
-            server_installed = "✓",
-            server_pending = "➜",
-            server_uninstalled = "✗"
-          }
-        }
-      })
+      require("mason").setup()
     end
   }
 
@@ -208,14 +198,16 @@ require('packer').startup({function(use)
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
 
         -- 💀
-        '-jar', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
+        '-jar', vim.fn.stdpath('data') .. "/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
+        -- '-jar', os.getenv("HOME") .. "/.config/coc/extensions/coc-java-data/server/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
         -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
         -- Must point to the                                                     Change this to
         -- eclipse.jdt.ls installation                                           the actual version
 
 
         -- 💀
-        '-configuration', vim.fn.stdpath('data') .. "/lsp_servers/jdtls/config_linux",
+        '-configuration', vim.fn.stdpath('data') .. "/mason/packages/jdtls/config_linux",
+        -- '-configuration', os.getenv("HOME") .. "/.config/coc/extensions/coc-java-data/server/config_linux",
         -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^
         -- Must point to the                      Change to one of `linux`, `win` or `mac`
         -- eclipse.jdt.ls installation            Depending on your system.
@@ -263,7 +255,7 @@ require('packer').startup({function(use)
       -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
       jdt_config.init_options = {
         bundles = {
-          vim.fn.glob(vim.fn.stdpath('data') .. "/dapinstall/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
+          vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
         }
       }
 
@@ -289,8 +281,6 @@ require('packer').startup({function(use)
     config = function()
       -- vim.lsp.set_log_level('trace')
       vim.lsp.set_log_level('ERROR')
-
-      local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
       local lspconfig = require('lspconfig')
 
@@ -339,57 +329,75 @@ require('packer').startup({function(use)
       vim.api.nvim_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
       vim.api.nvim_set_keymap('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
 
-      lsp_common_config = {
-        -- on_attach = my_custom_on_attach,
-        capabilities = capabilities,
-        on_attach = function(client, bufnr)
-          common_on_attach(client,bufnr)
-        end,
-        flags = {
-          -- This will be the default in neovim 0.7+
-          debounce_text_changes = 150,
-        },
-      }
+      vim.diagnostic.config({
+        virtual_text = true,
+        virtual_lines = false
+      })
+      virtualLineEnabled = false
+
+      function ChangeDiagnostic()
+        if virtualLineEnabled == false then
+          vim.diagnostic.config({
+            virtual_text = false,
+            virtual_lines = true
+          })
+          virtualLineEnabled = true
+        else
+          vim.diagnostic.config({
+            virtual_text = true,
+            virtual_lines = false
+          })
+          virtualLineEnabled = false
+        end
+      end
 
       local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
+        local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+        lsp_common_config = {
+          -- on_attach = my_custom_on_attach,
+          capabilities = capabilities,
+          on_attach = function(client, bufnr)
+            common_on_attach(client,bufnr)
+          end,
+          flags = {
+            -- This will be the default in neovim 0.7+
+            debounce_text_changes = 150,
+          },
+          handlers = {
+            ["textDocument/codeLens"] = function(err, result, ctx, _)
+              if not result or not next(result) then
+                vim.lsp.codelens.on_codelens(err, result, ctx, _)
+              else
+                for _, item in ipairs(result) do
+                  if item.command then
+                    item.command.title = "     🔑 " .. item.command.title
+                  end
+                end
+                vim.lsp.codelens.on_codelens(err, result, ctx, _)
+              end
+            end
+          }
+        }
 
-        if lsp == 'pyright' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio"}
+        if lsp == 'pyright' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/pyright-langserver", "--stdio"}
         elseif lsp == 'pylsp' then lsp_common_config.cmd = {'pylsp'}
         elseif lsp == 'clangd' then
-          lsp_common_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never"}
           -- set offset encoding
           capabilities.offsetEncoding = 'utf-8'
         elseif lsp == "rust_analyzer" then
-          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/rust/rust-analyzer"}
+          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin//rust-analyzer"}
           -- set offset encoding
           capabilities.offsetEncoding = nil
-        elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/vim/node_modules/.bin/vim-language-server", "--stdio"}
+        elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/vim-language-server", "--stdio"}
         elseif lsp == 'hls' then
-          lsp_common_config.cmd = {"haskell-language-server-wrapper", "--lsp"}
-          lsp_common_config.on_attach = function(client, bufnr) 
+          lsp_common_config.on_attach = function(client, bufnr)
             common_on_attach(client,bufnr)
             vim.cmd [[ autocmd InsertLeave,TextChanged <buffer> lua vim.lsp.codelens.refresh() ]]
             vim.lsp.codelens.refresh()
           end
-          lsp_common_config.handlers["textDocument/codeLens"] = function(err, result, ctx, _)
-            if not result or not next(result) then
-              vim.lsp.codelens.on_codelens(err, result, ctx, _)
-            else
-              for _, item in ipairs(result) do
-                if item.command then
-                  item.command.title = "     🔑 " .. item.command.title
-                end
-              end
-              vim.lsp.codelens.on_codelens(err, result, ctx, _)
-            end
-          end
-          lsp_common_config.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-            vim.lsp.diagnostic.on_publish_diagnostics, {
-              virtual_text = true,
-            })
         elseif lsp == "texlab" then
-          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/latex/texlab" }
+          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/texlab" }
           lsp_common_config.on_attach = function(client, bufnr)
             common_on_attach(client,bufnr)
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>v', '<cmd>TexlabForward<cr>', { noremap=true, silent=true })
@@ -417,18 +425,12 @@ require('packer').startup({function(use)
               onOpenAndSave = true
             }
           }
-          lsp_common_config.handlers = {}
-          lsp_common_config.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-            vim.lsp.diagnostic.on_publish_diagnostics, {
-              -- Disable virtual_text
-              virtual_text = false,
-            })
         elseif lsp == "sumneko_lua" then
           local runtime_path = vim.split(package.path, ';')
           table.insert(runtime_path, "lua/?.lua")
           table.insert(runtime_path, "lua/?/init.lua")
 
-          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/lsp_servers/sumneko_lua/extension/server/bin/lua-language-server"}
+          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/lua-language-server"}
           if vim.fn.expand('%') == '.nvimrc.lua' then
             lsp_common_config.autostart = false
           end
@@ -460,7 +462,8 @@ require('packer').startup({function(use)
       end
 
 
-      vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+      vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua ChangeDiagnostic()<CR>', opts)
+      -- vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
       vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
       vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
       vim.api.nvim_set_keymap('n', '<space>q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
@@ -1928,8 +1931,8 @@ require('packer').startup({function(use)
       require'hop'.setup()
       vim.api.nvim_set_keymap('n', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
       vim.api.nvim_set_keymap('v', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
-      vim.api.nvim_set_keymap('n', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
-      vim.api.nvim_set_keymap('v', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
+      -- vim.api.nvim_set_keymap('n', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
+      -- vim.api.nvim_set_keymap('v', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
       vim.api.nvim_set_keymap('n', '<leader>l', "<cmd>lua require'hop'.hint_lines()<cr>", {})
       vim.api.nvim_set_keymap('v', '<leader>l', "<cmd>lua require'hop'.hint_lines()<cr>", {})
     end
@@ -1945,6 +1948,10 @@ require('packer').startup({function(use)
         },
         window = {
           border = "single"
+        },
+        triggers_blacklist = {
+          -- compatible with vim-oscyank
+          n = { "y" }
         }
       }
     end
@@ -1981,7 +1988,19 @@ require('packer').startup({function(use)
     end
   }
 
+  use {
+    "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+    config = function()
+      require("lsp_lines").setup()
+    end,
+  }
+
   -- vim plugins
+  use {
+    'ojroques/vim-oscyank',
+    opt = true,
+  }
+
   use {
     'neoclide/coc.nvim',
     opt = true,
@@ -2242,7 +2261,7 @@ require('packer').startup({function(use)
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
-        command = vim.fn.stdpath('data') .. '/dapinstall/ccppr_vsc/extension/debugAdapters/bin/OpenDebugAD7',
+        command = vim.fn.stdpath('data') .. '/mason/bin/OpenDebugAD7',
       }
 
 
@@ -2257,7 +2276,7 @@ require('packer').startup({function(use)
         port = "${port}",
         executable = {
           -- CHANGE THIS to your path!
-          command = vim.fn.stdpath('data') .. '/dapinstall/codelldb/extension/adapter/codelldb',
+          command = vim.fn.stdpath('data') .. '/mason/bin/codelldb',
           args = {"--port", "${port}"},
 
           -- On windows you may have to uncomment this:
@@ -2319,7 +2338,7 @@ require('packer').startup({function(use)
       -- Python
       dap.adapters.python = {
         type = 'executable';
-        command = os.getenv("HOME") .. '/.local/share/nvim/dapinstall/python/bin/python',
+        command = vim.fn.stdpath('data') .. '/mason/packages/debugpy/venv/bin/python',
         args = { '-m', 'debugpy.adapter' };
       }
       dap.configurations.python = {
@@ -2524,7 +2543,7 @@ function lazyLoadPlugins()
   -- tabnine
   local tabnine_path = vim.fn.glob(vim.fn.stdpath('data') .. "/plugins/pack/packer/opt/cmp-tabnine/binaries/**/TabNine")
   tabnine_path = vim.split(tabnine_path, '\n')
-  if table.getn(tabnine_path) ~= 0 then
+  if table.getn(tabnine_path) ~= 0 and tabnine_path[1] ~= "" then
     require('packer').loader('cmp-tabnine', '<bang>' == '!')
   end
 
@@ -2630,6 +2649,22 @@ autosave.setup({
   clean_command_line_interval = 0,
   debounce_delay = 135
 })
+
+-- osc52 support on ssh
+if os.getenv("SSH_CONNECTION") ~= nil then
+  vim.api.nvim_create_autocmd("TextYankPost", {
+    pattern = "*",
+    callback = function()
+      if have_load_osc52 == nil then
+        have_load_osc52 = 1
+        vim.cmd [[ packadd vim-oscyank ]]
+      end
+      vim.cmd [[if v:event.operator is 'y' && v:event.regname is '' | execute 'OSCYankReg "'  | endif]]
+    end
+  })
+  vim.g.oscyank_term = 'default'
+end
+
 --------------------------------------------------------------------------------------
 if vim.fn.expand('%:t') == '.nvimrc.lua' then
   vim.api.nvim_set_keymap('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { noremap = true, silent = false })

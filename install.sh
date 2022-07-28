@@ -21,6 +21,9 @@ do
 done
 ln -s $HOME/.vimrc $HOME/.config/nvim/init.vim
 # coc config for nvim
+if [[ ! -d $HOME/.local/share/nvim ]];then
+    mkdir -p $HOME/.local/share/nvim
+fi
 ln -s $HOME/dotfiles/coc-settings.json $HOME/.local/share/nvim/coc-settings.json
 
 # move zsh files
