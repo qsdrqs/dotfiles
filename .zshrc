@@ -205,7 +205,7 @@ else
     export VISUAL='vim'
 fi
 # 使用nvim作为默认pager
-export PAGER=nvimpager
+# export PAGER=nvimpager
 
 # python虚拟环境
 if [ -e "/usr/bin/virtualenvwrapper.sh" ]; then

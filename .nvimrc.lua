@@ -69,15 +69,14 @@ require('packer').startup({function(use)
 
       end
 
-      vim.api.nvim_set_keymap('n', '<leader>f', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>b', '<cmd>Telescope buffers<cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>f', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
+      vim.keymap.set('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { silent = true })
+      vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
     end
   }
 
@@ -86,7 +85,7 @@ require('packer').startup({function(use)
     opt = true,
     keys = "<leader>gG",
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>gG', '<cmd>lua require("telescope").extensions.live_grep_raw.live_grep_raw()<cr>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>gG', '<cmd>lua require("telescope").extensions.live_grep_raw.live_grep_raw()<cr>', { silent = true })
     end
   }
 
@@ -100,23 +99,23 @@ require('packer').startup({function(use)
     'kevinhwang91/nvim-hlslens',
     opt = true,
     config = function()
-      local kopts = {noremap = true, silent = true}
+      local kopts = {silent = true}
 
-      vim.api.nvim_set_keymap('n', 'n',
+      vim.keymap.set('n', 'n',
       [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]],
       kopts)
-      vim.api.nvim_set_keymap('n', 'N',
+      vim.keymap.set('n', 'N',
       [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]],
       kopts)
-      vim.api.nvim_set_keymap('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-      vim.api.nvim_set_keymap('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
-      vim.api.nvim_set_keymap('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-      vim.api.nvim_set_keymap('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
 
-      vim.api.nvim_set_keymap('x', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-      vim.api.nvim_set_keymap('x', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
-      vim.api.nvim_set_keymap('x', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-      vim.api.nvim_set_keymap('x', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('x', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('x', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('x', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.keymap.set('x', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
 
       require'hlslens'.setup {
         calm_down = false,
@@ -313,21 +312,21 @@ require('packer').startup({function(use)
 
       -- Mappings.
       -- See `:help vim.lsp.*` for documentation on any of the below functions
-      vim.api.nvim_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-      -- vim.api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-      vim.api.nvim_set_keymap('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
-      -- vim.api.nvim_set_keymap('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-      -- vim.api.nvim_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-      vim.api.nvim_set_keymap('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
-      vim.api.nvim_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>aa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>ar', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>al', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-      vim.api.nvim_set_keymap('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
+      vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+      -- vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+      vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
+      -- vim.keymap.set('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+      -- vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+      vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
+      vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+      vim.keymap.set('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+      vim.keymap.set('n', '<space>aa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+      vim.keymap.set('n', '<space>ar', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+      vim.keymap.set('n', '<space>al', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+      vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
+      vim.keymap.set('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+      vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+      vim.keymap.set('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
 
       vim.diagnostic.config({
         virtual_text = true,
@@ -386,7 +385,7 @@ require('packer').startup({function(use)
           -- set offset encoding
           capabilities.offsetEncoding = 'utf-8'
         elseif lsp == "rust_analyzer" then
-          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin//rust-analyzer"}
+          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/rust-analyzer"}
           -- set offset encoding
           capabilities.offsetEncoding = nil
         elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/vim-language-server", "--stdio"}
@@ -462,13 +461,13 @@ require('packer').startup({function(use)
       end
 
 
-      vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua ChangeDiagnostic()<CR>', opts)
-      -- vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-      vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
-      vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<space>Q', '<cmd>TroubleToggle workspace_diagnostics<CR>', opts)
-      vim.api.nvim_set_keymap('n', '<leader>d', '<cmd>lua showDocument()<CR>', opts)
+      vim.keymap.set('n', '<space>e', '<cmd>lua ChangeDiagnostic()<CR>', opts)
+      -- vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+      vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+      vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+      vim.keymap.set('n', '<space>q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
+      vim.keymap.set('n', '<space>Q', '<cmd>TroubleToggle workspace_diagnostics<CR>', opts)
+      vim.keymap.set('n', '<leader>d', '<cmd>lua showDocument()<CR>', opts)
 
 
 
@@ -501,7 +500,7 @@ require('packer').startup({function(use)
       end
 
       -- code len
-      vim.api.nvim_set_keymap('n', '<leader>cl', '<cmd>lua vim.lsp.codelens.run()<CR>', opts)
+      vim.keymap.set('n', '<leader>cl', '<cmd>lua vim.lsp.codelens.run()<CR>', opts)
       vim.cmd [[hi! link LspCodeLens specialkey]]
     end
   }
@@ -560,10 +559,8 @@ require('packer').startup({function(use)
   }
 
   use {
-    "Pocco81/AutoSave.nvim",
+    "Pocco81/auto-save.nvim",
     opt = false,
-    config = function()
-    end
   }
 
   use {
@@ -586,8 +583,8 @@ require('packer').startup({function(use)
           }
         }
       })
-      vim.api.nvim_set_keymap("n", "<leader>af", "<cmd>lua formatBuf('n')<CR>", {noremap = true, silent = true })
-      vim.api.nvim_set_keymap("v", "<leader>af", "<cmd>lua formatBuf('v')<CR>", {noremap = true, silent = true })
+      vim.keymap.set("n", "<leader>af", "<cmd>lua formatBuf('n')<CR>", { silent = true })
+      vim.keymap.set("v", "<leader>af", "<cmd>lua formatBuf('v')<CR>", { silent = true })
 
       -- formatters
       function formatBuf(vmode)
@@ -931,7 +928,7 @@ require('packer').startup({function(use)
 
       }
 
-      -- vim.api.nvim_set_keymap('i', '<C-x><C-o>', '<Cmd>lua require("cmp").complete()<CR>', { noremap = true, silent = true })
+      -- vim.keymap.set('i', '<C-x><C-o>', '<Cmd>lua require("cmp").complete()<CR>', { silent = true })
       vim.cmd[[ command! CmpDisable lua require('cmp').setup{enabled=false} ]]
       vim.cmd[[ command! CmpEnable lua require('cmp').setup{enabled=true} ]]
     end
@@ -1193,7 +1190,7 @@ require('packer').startup({function(use)
   use {
     'stevearc/aerial.nvim',
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>v', '<cmd>AerialToggle!<CR>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>v', '<cmd>AerialToggle!<CR>', { silent = true })
       local status_ok, telescope = pcall(require, "telescope")
       if status_ok then
         telescope.load_extension('aerial')
@@ -1374,7 +1371,7 @@ require('packer').startup({function(use)
           local gs = package.loaded.gitsigns
 
           local function map(mode, lhs, rhs, opts)
-            opts = vim.tbl_extend('force', {noremap = true, silent = true}, opts or {})
+            opts = vim.tbl_extend('force', {silent = true}, opts or {})
             vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
           end
 
@@ -1529,6 +1526,9 @@ require('packer').startup({function(use)
         end
       end
 
+      local function void()
+        return ' '
+      end
 
       require('lualine').setup {
         options = {
@@ -1555,7 +1555,6 @@ require('packer').startup({function(use)
           lualine_y = {},
           lualine_z = {}
         },
-
         tabline = {},
         extensions = {'quickfix', 'aerial', 'fugitive', 'nvim-tree', }
       }
@@ -1567,7 +1566,7 @@ require('packer').startup({function(use)
     opt = true,
     keys = "<leader>ra",
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', { noremap = true, silent = true})
+      vim.keymap.set('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', {silent = true})
       vim.g.rnvimr_enable_picker = 1
     end
   }
@@ -1595,7 +1594,7 @@ require('packer').startup({function(use)
       'kyazdani42/nvim-web-devicons', -- optional, for file icon
     },
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>n', '<cmd>NvimTreeFindFileToggle<CR>', { noremap = true, silent = true})
+      vim.keymap.set('n', '<leader>n', '<cmd>NvimTreeFindFileToggle<CR>', {silent = true})
       require'nvim-tree'.setup {
         disable_netrw = true,
         diagnostics = {
@@ -1626,7 +1625,7 @@ require('packer').startup({function(use)
     opt = true,
     keys = '<leader>x',
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>x', '<cmd>Bdelete!<CR>', { noremap = true, silent = true})
+      vim.keymap.set('n', '<leader>x', '<cmd>Bdelete!<CR>', {silent = true})
     end
   }
 
@@ -1877,7 +1876,7 @@ require('packer').startup({function(use)
     opt = true,
     config = function()
       local function map(mode, lhs, rhs)
-        vim.api.nvim_set_keymap(mode, lhs, rhs, { noremap = true, silent = true })
+        vim.keymap.set(mode, lhs, rhs, { silent = true })
       end
       map('n', '<C-/>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
       map('n', '<C-_>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
@@ -1929,12 +1928,12 @@ require('packer').startup({function(use)
     'phaazon/hop.nvim',
     config = function()
       require'hop'.setup()
-      vim.api.nvim_set_keymap('n', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
-      vim.api.nvim_set_keymap('v', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
-      -- vim.api.nvim_set_keymap('n', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
-      -- vim.api.nvim_set_keymap('v', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
-      vim.api.nvim_set_keymap('n', '<leader>l', "<cmd>lua require'hop'.hint_lines()<cr>", {})
-      vim.api.nvim_set_keymap('v', '<leader>l', "<cmd>lua require'hop'.hint_lines()<cr>", {})
+      vim.keymap.set('n', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
+      vim.keymap.set('v', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
+      -- vim.keymap.set('n', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
+      -- vim.keymap.set('v', '<leader>e', "<cmd>lua require'hop'.hint_words({hint_position = require'hop.hint'.HintPosition.END})<cr>", {})
+      vim.keymap.set('n', '<leader>l', "<cmd>lua require'hop'.hint_lines()<cr>", {})
+      vim.keymap.set('v', '<leader>l', "<cmd>lua require'hop'.hint_lines()<cr>", {})
     end
   }
   use {
@@ -1995,17 +1994,19 @@ require('packer').startup({function(use)
     end,
   }
 
-  -- vim plugins
   use {
-    'ojroques/vim-oscyank',
+    -- enable yank through ssh
+    'ojroques/nvim-osc52',
     opt = true,
   }
 
+  -- vim plugins
   use {
     'neoclide/coc.nvim',
     opt = true,
     run = 'yarn install --frozen-lockfile',
     config = function()
+      vim.keymap.set('n', '<leader><leader>', '<cmd>CocCommand<cr>', { silent = true })
     end
   }
 
@@ -2016,8 +2017,8 @@ require('packer').startup({function(use)
     opt = true,
     keys = "<leader>y",
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>y', "<Plug>TranslateW", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('v', '<leader>y', "<Plug>TranslateWV", { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>y', "<Plug>TranslateW", { silent = true })
+      vim.keymap.set('v', '<leader>y', "<Plug>TranslateWV", { silent = true })
     end
   }
   use {
@@ -2058,9 +2059,9 @@ require('packer').startup({function(use)
     opt = true,
     keys = "<leader>h",
     config = function()
-      vim.api.nvim_set_keymap('n', '<leader>h', "<cmd>call InterestingWords('n')<cr>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('v', '<leader>h', "<cmd>call InterestingWords('v')<cr>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader>H', "<cmd>call UncolorAllWords()<cr>", { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>h', "<cmd>call InterestingWords('n')<cr>", { silent = true })
+      vim.keymap.set('v', '<leader>h', "<cmd>call InterestingWords('v')<cr>", { silent = true })
+      vim.keymap.set('n', '<leader>H', "<cmd>call UncolorAllWords()<cr>", { silent = true })
     end
   }
   use {'pgilad/vim-skeletons', opt = true }
@@ -2077,7 +2078,7 @@ require('packer').startup({function(use)
       vim.g.UltiSnipsEditSplit="vertical"
       vim.g.UltiSnipsSnippetDirectories={ os.getenv("HOME") .. '/.vim/UltiSnips', "UltiSnips"}
       vim.g.UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit = os.getenv("HOME") .. '/.vim/UltiSnips'
-      vim.api.nvim_set_keymap('n', '<leader>ss', '<cmd>UltiSnipsEdit<cr>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>ss', '<cmd>UltiSnipsEdit<cr>', { silent = true })
       vim.api.nvim_create_autocmd("BufRead", {
         pattern = "*.snippets",
         callback = function()
@@ -2108,22 +2109,20 @@ require('packer').startup({function(use)
           vim.api.nvim_feedkeys(t("<End>"), "i", true)
         end
       end
-      vim.api.nvim_set_keymap('i', '<C-e>', "<Cmd>lua copilot_dismiss()<CR>", { noremap = true, silent = true})
-      vim.api.nvim_set_keymap('i', '<M-\\>', "<Cmd>Copilot panel<CR>", { noremap = true, silent = true})
+      vim.keymap.set('i', '<C-e>', "<Cmd>lua copilot_dismiss()<CR>", { silent = true})
+      vim.keymap.set('i', '<M-\\>', "<Cmd>Copilot panel<CR>", { silent = true})
     end
   }
 
   use {
     "lambdalisue/suda.vim",
     opt = false,
-    config = function()
-    end
   }
   use {
     'mbbill/undotree',
     opt = false,
     config = function()
-      vim.api.nvim_set_keymap('n', 'U', '<cmd>UndotreeToggle<cr>', { noremap = true, silent = true })
+      vim.keymap.set('n', 'U', '<cmd>UndotreeToggle<cr>', { silent = true })
     end
   }
   use {
@@ -2157,7 +2156,7 @@ require('packer').startup({function(use)
       require('packer').loader('asynctasks.vim', 'asyncrun.vim', '<bang>' == '!')
       -- Fuzzy find over current tasks
       vim.cmd[[command! AsyncTaskTelescope lua require("telescope").extensions.asynctasks.all()]]
-      vim.api.nvim_set_keymap('n', '<leader>at', '<cmd>AsyncTaskTelescope<cr>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>at', '<cmd>AsyncTaskTelescope<cr>', { silent = true })
     end
   }
 
@@ -2170,7 +2169,7 @@ require('packer').startup({function(use)
       vim.g.asyncrun_open = 6
       vim.g.asynctasks_term_pos = 'bottom'
       vim.g.asynctasks_term_rows = 14
-      vim.api.nvim_set_keymap('n', '<leader>ae', '<cmd>AsyncTaskEdit<cr>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>ae', '<cmd>AsyncTaskEdit<cr>', { silent = true })
     end
   }
 
@@ -2182,7 +2181,7 @@ require('packer').startup({function(use)
     keys = "<leader>cp",
     config = function()
       vim.g.vcoolor_disable_mappings = 1
-      vim.api.nvim_set_keymap('n', '<leader>cp', '<cmd>VCoolor<cr>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>cp', '<cmd>VCoolor<cr>', { silent = true })
     end
   }
 
@@ -2243,19 +2242,19 @@ require('packer').startup({function(use)
       dap.defaults.fallback.terminal_win_cmd = 'vertical rightbelow 50new'
       vim.cmd [[ au FileType dap-repl lua require('dap.ext.autocompl').attach() ]]
 
-      -- vim.api.nvim_set_keymap('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F5>', '<Cmd>lua require"dap".continue()<CR>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader><F5>', '<Cmd>lua require"dap".run_to_cursor()<CR>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F6>', '<Cmd>lua require"dap".pause()<CR>', { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F6>',  '<Cmd>lua require"dap".pause()<CR>' , { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F10>', '<Cmd>lua require"dap".step_over()<CR>' , { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F11>', '<Cmd>lua require"dap".step_into()<CR>' , { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F12>', '<Cmd>lua require"dap".step_out()<CR>' , { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F9>',  '<Cmd>lua require"dap".toggle_breakpoint()<CR>' , { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<leader><F9>', '<Cmd>lua require"dap".clear_breakpoints()<CR>' , { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('n', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { noremap = true, silent = true })
-      vim.api.nvim_set_keymap('v', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { noremap = true, silent = true })
+      -- vim.keymap.set('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { silent = true })
+      vim.keymap.set('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR>', { silent = true })
+      vim.keymap.set('n', '<F5>', '<Cmd>lua require"dap".continue()<CR>', { silent = true })
+      vim.keymap.set('n', '<leader><F5>', '<Cmd>lua require"dap".run_to_cursor()<CR>', { silent = true })
+      vim.keymap.set('n', '<F6>', '<Cmd>lua require"dap".pause()<CR>', { silent = true })
+      vim.keymap.set('n', '<F6>',  '<Cmd>lua require"dap".pause()<CR>' , { silent = true })
+      vim.keymap.set('n', '<F10>', '<Cmd>lua require"dap".step_over()<CR>' , { silent = true })
+      vim.keymap.set('n', '<F11>', '<Cmd>lua require"dap".step_into()<CR>' , { silent = true })
+      vim.keymap.set('n', '<F12>', '<Cmd>lua require"dap".step_out()<CR>' , { silent = true })
+      vim.keymap.set('n', '<F9>',  '<Cmd>lua require"dap".toggle_breakpoint()<CR>' , { silent = true })
+      vim.keymap.set('n', '<leader><F9>', '<Cmd>lua require"dap".clear_breakpoints()<CR>' , { silent = true })
+      vim.keymap.set('n', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { silent = true })
+      vim.keymap.set('v', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { silent = true })
 
       -- C/C++
       dap.adapters.cppdbg = {
@@ -2628,45 +2627,63 @@ end
 
 vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 
--- vim.api.nvim_set_var("suda_smart_edit", 1)
+-- vim.g.suda_smart_edit = 1
 
-local autosave = require("autosave")
-
-autosave.setup({
+require("auto-save").setup({
   enabled = true,
   --execution_message = "AutoSave: saved at " .. vim.fn.strftime("%H:%M:%S"),
-  execution_message = '',
-  events = {"InsertLeave", "TextChanged"},
-  -- events = {"CursorHold", "FocusLost", "BufLeave"},
-  conditions = {
-    exists = true,
-    filename_is_not = {},
-    filetype_is_not = {},
-    modifiable = true
+  execution_message = {
+    message = function() -- message to print on save
+      -- return ("AutoSave: saved at " .. vim.fn.strftime("%H:%M:%S"))
+      return ''
+    end,
+    dim = 0.18, -- dim the color of `message`
+    cleaning_interval = 1250, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
   },
+  trigger_events = {"InsertLeave", "TextChanged"},
+  -- events = {"CursorHold", "FocusLost", "BufLeave"},
+  condition = function(buf)
+    local fn = vim.fn
+    local utils = require("auto-save.utils.data")
+
+    if
+      fn.getbufvar(buf, "&modifiable") == 1 or
+      utils.not_in(fn.getbufvar(buf, "&filetype"), {}) then
+      return true -- met condition(s), can save
+    end
+    return false -- can't save
+  end,
   write_all_buffers = false,
   on_off_commands = true,
   clean_command_line_interval = 0,
-  debounce_delay = 135
+  debounce_delay = 135,
+  callbacks = { -- functions to be executed at different intervals
+    enabling = nil, -- ran when enabling auto-save
+    disabling = nil, -- ran when disabling auto-save
+    before_asserting_save = nil, -- ran before checking `condition`
+    before_saving = nil, -- ran before doing the actual save
+    after_saving = nil -- ran after doing the actual save
+  }
 })
 
 -- osc52 support on ssh
 if os.getenv("SSH_CONNECTION") ~= nil then
   vim.api.nvim_create_autocmd("TextYankPost", {
-    pattern = "*",
     callback = function()
       if have_load_osc52 == nil then
         have_load_osc52 = 1
-        vim.cmd [[ packadd vim-oscyank ]]
+        vim.cmd [[ packadd nvim-osc52 ]]
       end
-      vim.cmd [[if v:event.operator is 'y' && v:event.regname is '' | execute 'OSCYankReg "'  | endif]]
+      if vim.v.event.operator == 'y' and vim.v.event.regname == '' then
+        require('osc52').copy_register('"')
+      end
     end
   })
-  vim.g.oscyank_term = 'default'
+  -- vim.g.oscyank_term = 'default'
 end
 
 --------------------------------------------------------------------------------------
 if vim.fn.expand('%:t') == '.nvimrc.lua' then
-  vim.api.nvim_set_keymap('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { noremap = true, silent = false })
+  vim.keymap.set('n', '<leader>wq', '<cmd>source %<cr> <cmd>PackerCompile<CR>', { silent = false })
   -- vim.cmd[[ au BufWritePost .nvimrc.lua source % | PackerCompile ]]
 end

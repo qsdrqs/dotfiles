@@ -269,6 +269,7 @@ hi! link CocErrorSign ErrorMsg
 hi! link CocWarningSign WarningMsg
 hi! link CocInfoSign GhLightBlue
 hi! CocHintSign guifg=#A3BFE0 guibg=#103764
+hi! link CocHintVirtualText CocHintSign
 hi! link CocErrorFloat ErrorMsg
 hi! link CocWarningFloat WarningMsg
 hi! link CocInfoFloat GhLightBlue

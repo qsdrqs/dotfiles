@@ -90,8 +90,6 @@ nnoremap <up> :res +1<CR>
 nnoremap <down> :res -1<CR>
 nnoremap <left> :vertical resize-1<CR>
 
-
-
 "保存
 "nnoremap <leader><leader> :w<CR>
 
@@ -275,6 +273,8 @@ exec "nohlsearch"
 nnoremap <silent><C-l> :nohlsearch<CR>
 " syntax highlight 在光标小于1万行时从文件头开始分析
 autocmd BufEnter * if line('.') < 10000 | syntax sync fromstart | endif
+" syntax highlight 在文件大于20万行之后就关闭
+autocmd BufEnter * if line('$') > 200000 | syntax off | endif
 command! SyntaxFromStart syntax sync fromstart
 set ignorecase smartcase
 "搜索时忽略大小写，但在有一个或以上大写字母时仍保持对大小写敏感
