@@ -12,13 +12,13 @@ let g:github_colors = {
   \ "base1"        : ["#161b22", 235],
   \ "base2"        : ["#21262d", 237],
   \ "base3"        : ["#89929b", 243],
-  \ "base4"        : ["#c6cdd5", 249],
-  \ "base5"        : ["#ecf2f8", 252],
+  \ "base4"        : ["#ecf2f8", 252],
+  \ "base5"        : ["#C9D1D9", 249],
   \ "red"          : ["#fa7970", 210],
   \ "orange"       : ["#faa356", 178],
   \ "green"        : ["#7ce38b", 114],
   \ "lightblue"    : ["#a2d2fb", 153],
-  \ "blue"         : ["#77bdfb", 75],
+  \ "blue"         : ["#79C0FF", 75],
   \ "purp"         : ["#cea5fb", 183],
   \ "none"         : ["NONE", "NONE"]
   \ }
@@ -196,7 +196,7 @@ hi! link Float Number
 hi! link FunctionDef Function
 hi! link Function GhPurp
 if has('nvim')
-  hi! Identifier guifg=#ecf2f8 guibg=none
+  hi! Identifier guifg=#C9D1D9 guibg=none
 else
   hi! link Identifier GhBlue
 endif
@@ -268,7 +268,7 @@ hi! link cDefine Keyword
 hi! link CocErrorSign ErrorMsg
 hi! link CocWarningSign WarningMsg
 hi! link CocInfoSign GhLightBlue
-hi! CocHintSign guifg=#A3BFE0 guibg=#103764
+hi! CocHintSign guifg=#8B949E guibg=#262C32
 hi! link CocHintVirtualText CocHintSign
 hi! link CocErrorFloat ErrorMsg
 hi! link CocWarningFloat WarningMsg
@@ -282,6 +282,7 @@ hi! link CocSelectedText GhRed
 hi! link CocCodeLens GhBase3
 hi! link CocSemProperty GhBlue
 hi! link CocSemClass GhOrange
+hi! link CocSemStruct GhOrange
 hi! CocSemTypeParameter guifg=#faa356 gui=bold
 hi! CocSemParameter guifg=#ef9062
 
@@ -295,6 +296,11 @@ hi! link DiagnosticUnderlineError ErrorMsg
 hi! link DiagnosticUnderlineWarn WarningMsg
 hi! link DiagnosticUnderlineInfo GhLightBlue
 hi! link DiagnosticUnderlineHint GhBase3
+
+hi! link DiagnosticError ErrorMsg
+hi! link DiagnosticWarn WarningMsg
+hi! link DiagnosticInfo GhLightBlue
+hi! link DiagnosticHint GhBase3
 
 " CSS
 
@@ -694,3 +700,34 @@ hi! DiffAdd guifg=None guibg=#104731
 hi! DiffDelete guifg=None guibg=#4C111F
 hi! DiffText guifg=None guibg=#7A5614
 endif
+hi! UnderCursor guibg=#193b25 gui=none
+hi! Context guibg=#0D2341
+hi! FileName guifg=#C4CBD7
+highlight FloatBorder guifg=#525869 guibg=#1F2335
+hi! TextSuccess guifg=#7ce38b
+hi! BoldSuccess guifg=#7ce38b gui=bold
+hi! link TextInfo GhBlue
+hi! BoldInfo guifg=#a2d2fb gui=bold
+
+
+" nvim cmp
+highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
+" blue
+highlight! CmpItemAbbrMatch guibg=NONE guifg=#569CD6 gui=bold
+highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#569CD6 gui=bold
+
+" light blue
+highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE gui=italic
+highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE gui=italic
+highlight! CmpItemKindEnum guibg=NONE guifg=#9CDCFE gui=italic
+" pink
+highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0 gui=italic
+highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0 gui=italic
+" front
+highlight! CmpItemKindText guibg=NONE guifg=#D4D4D4 gui=italic
+highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4 gui=italic
+highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4 gui=italic
+" yellow
+highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E gui=italic
+highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E gui=italic
+highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252 gui=italic

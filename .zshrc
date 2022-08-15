@@ -159,6 +159,7 @@ function zsh_install(){
 # 光标形状随模式改变
 zle -N zle-keymap-select
 echo -ne '\e[5 q'
+
 # 加快加载速度
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
@@ -189,6 +190,12 @@ export FZF_DEFAULT_COMMAND='fd'
 #export FZF_DEFAULT_OPTS='--preview "[[ $(file --mime {}) =~ binary ]] && echo {} is a binary file || (ccat --color=always {} || highlight -O ansi -l {} || cat {}) 2> /dev/null | head -500"'
 export FZF_COMPLETION_TRIGGER='\'
 
+if [[ $LIGHT == 1 ]]; then
+    zstyle ':fzf-tab:*' default-color $'\033[38;5;240m'
+    zstyle ":fzf-tab:*" fzf-flags --height=70% --layout=reverse \
+        --color "fg:#970b16,hl:#87d5a2,fg+:#970b16,bg+:#919191,hl+:#87d5a2" \
+        --color "info:#83a598,prompt:#bdae93,spinner:#87d5a2,pointer:#83a598,marker:#fe8019,header:#665c54"
+fi
 
 # User configuration
 

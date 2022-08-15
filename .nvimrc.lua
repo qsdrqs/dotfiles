@@ -350,6 +350,17 @@ require('packer').startup({function(use)
         end
       end
 
+      local border = {
+        {"🭽", "FloatBorder"},
+        {"▔", "FloatBorder"},
+        {"🭾", "FloatBorder"},
+        {"▕", "FloatBorder"},
+        {"🭿", "FloatBorder"},
+        {"▁", "FloatBorder"},
+        {"🭼", "FloatBorder"},
+        {"▏", "FloatBorder"},
+      }
+
       local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
         local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
@@ -375,7 +386,9 @@ require('packer').startup({function(use)
                 end
                 vim.lsp.codelens.on_codelens(err, result, ctx, _)
               end
-            end
+            end,
+            ["textDocument/hover"] =  vim.lsp.with(vim.lsp.handlers.hover, {border = border}),
+            ["textDocument/signatureHelp"] =  vim.lsp.with(vim.lsp.handlers.signature_help, {border = border }),
           }
         }
 
@@ -474,17 +487,6 @@ require('packer').startup({function(use)
       -- vim.cmd [[au CursorHold <buffer> lua vim.diagnostic.open_float()]]
 
       -- UI Customization
-      local border = {
-        {"🭽", "FloatBorder"},
-        {"▔", "FloatBorder"},
-        {"🭾", "FloatBorder"},
-        {"▕", "FloatBorder"},
-        {"🭿", "FloatBorder"},
-        {"▁", "FloatBorder"},
-        {"🭼", "FloatBorder"},
-        {"▏", "FloatBorder"},
-      }
-
       -- To instead override globally
       local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
       function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
@@ -560,6 +562,7 @@ require('packer').startup({function(use)
 
   use {
     "Pocco81/auto-save.nvim",
+    commit = '8df684bcb3c5fff8fa9a772952763fc3f6eb75ad',
     opt = false,
   }
 
@@ -679,26 +682,6 @@ require('packer').startup({function(use)
       })
     end
   }
-  use {
-    'tzachar/cmp-tabnine',
-    run='./install.sh',
-    opt = true,
-    config = function()
-      local tabnine = require('cmp_tabnine.config')
-      tabnine:setup({
-        max_lines = 1000;
-        max_num_results = 20;
-        sort = true;
-        run_on_every_keystroke = true;
-        snippet_placeholder = '...';
-        ignored_file_types = { -- default is not to ignore
-        -- uncomment to ignore in lua:
-        -- lua = true
-      };
-      show_prediction_strength = false;
-    })
-    end
-  }
 
   use {
     'ray-x/lsp_signature.nvim',
@@ -750,30 +733,6 @@ require('packer').startup({function(use)
         TypeParameter = "",
         TabNine = ""
       }
-
-      vim.cmd [[
-      " gray
-      highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
-      " blue
-      highlight! CmpItemAbbrMatch guibg=NONE guifg=#569CD6 gui=bold
-      highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#569CD6 gui=bold
-
-      " light blue
-      highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE gui=italic
-      highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE gui=italic
-      highlight! CmpItemKindEnum guibg=NONE guifg=#9CDCFE gui=italic
-      " pink
-      highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0 gui=italic
-      highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0 gui=italic
-      " front
-      highlight! CmpItemKindText guibg=NONE guifg=#D4D4D4 gui=italic
-      highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4 gui=italic
-      highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4 gui=italic
-      " yellow
-      highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E gui=italic
-      highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E gui=italic
-      highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252 gui=italic
-      ]]
 
       cmp.setup{
         window = {
@@ -908,7 +867,6 @@ require('packer').startup({function(use)
         },
         sources = cmp.config.sources({
           { name = 'ultisnips' }, -- For ultisnips users.
-          { name = 'cmp_tabnine' },
           { name = 'nvim_lsp_signature_help' },
           { name = 'nvim_lsp' },
           -- { name = 'omni' },
@@ -970,11 +928,11 @@ require('packer').startup({function(use)
             additional_vim_regex_highlighting = true,
           },
           indent = {
-            enable = true
+            enable = false
           },
         }
 
-        -- disable comment hightlight
+        -- disable comment hightlight (for javadoc)
         require"nvim-treesitter.highlight".set_custom_captures {
           -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
           ["comment"] = "NONE",
@@ -1054,22 +1012,37 @@ require('packer').startup({function(use)
     opt = true,
     -- TODO: start highlight list
     config = function()
-      vim.cmd [[
-      highlight IndentBlanklineContextStart guisp=#FFFF00 gui=underline
+      if vim.g.colors_name == 'ghdark' then
+        vim.cmd [[
+        highlight IndentBlanklineContextStart guisp=#79C0FF gui=underline
 
-      highlight IndentBlanklineIndent1 guifg=#FF0000 gui=nocombine
-      highlight IndentBlanklineIndent2 guifg=#FFFF00 gui=nocombine
-      highlight IndentBlanklineIndent3 guifg=#00FF00 gui=nocombine
-      highlight IndentBlanklineIndent4 guifg=#00FFFF gui=nocombine
-      highlight IndentBlanklineIndent5 guifg=#0000FF gui=nocombine
-      highlight IndentBlanklineIndent6 guifg=#FF00FF gui=nocombine
-      ]]
+        highlight link IndentBlanklineIndent1 PreProc
+        highlight IndentBlanklineIndent2 guifg=#56D364 gui=nocombine
+        highlight link IndentBlanklineIndent3 Type
+        highlight link IndentBlanklineIndent4 Keyword
+        highlight IndentBlanklineIndent5 guifg=#FF9BCE gui=nocombine
+        highlight link IndentBlanklineIndent6 Function
+        ]]
+      else
+        vim.cmd [[
+        highlight IndentBlanklineContextStart guisp=#0969DA gui=underline
+
+        highlight IndentBlanklineIndent1 guifg=#0969DA gui=nocombine
+        highlight IndentBlanklineIndent2 guifg=#1A7F37 gui=nocombine
+        highlight IndentBlanklineIndent3 guifg=#9A6700 gui=nocombine
+        highlight IndentBlanklineIndent4 guifg=#CF222E gui=nocombine
+        highlight IndentBlanklineIndent5 guifg=#BF3989 gui=nocombine
+        highlight IndentBlanklineIndent6 guifg=#8250DF gui=nocombine
+        ]]
+      end
       local ok, treesitter = pcall(require, 'nvim-treesitter')
       if vim.b.treesitter_disable ~= 1 then
         vim.g.indent_blankline_show_current_context = true
         vim.g.indent_blankline_show_current_context_start = true
       end
       require("indent_blankline").setup {
+        -- char = '▏',
+        -- context_char = '▏',
         use_treesitter = false,
         space_char_blankline = " ",
         show_first_indent_level = true,
@@ -1090,16 +1063,29 @@ require('packer').startup({function(use)
     "p00f/nvim-ts-rainbow",
     opt = true,
     config = function()
-      require("nvim-treesitter.configs").setup {
-        rainbow = {
-          enable = true,
-          disable = { }, -- list of languages you want to disable the plugin for
-          extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
-          max_file_lines = nil, -- Do not enable for files with more than n lines, int
-          colors = {'#FF0000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF'}, -- table of hex strings
-          -- termcolors = {} -- table of colour name strings
+      if vim.g.colors_name == 'ghdark' then
+        require("nvim-treesitter.configs").setup {
+          rainbow = {
+            enable = true,
+            disable = { }, -- list of languages you want to disable the plugin for
+            extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
+            max_file_lines = nil, -- Do not enable for files with more than n lines, int
+            colors = {'#79C0FF', '#56D364', '#FFA657', '#FA7970', '#FF9BCE', '#D2A8FF'}, -- table of hex strings
+            -- termcolors = {} -- table of colour name strings
+          }
         }
-      }
+      else
+        require("nvim-treesitter.configs").setup {
+          rainbow = {
+            enable = true,
+            disable = { }, -- list of languages you want to disable the plugin for
+            extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
+            max_file_lines = nil, -- Do not enable for files with more than n lines, int
+            colors = {'#0969DA', '#1A7F37', '#9A6700', '#CF222E', '#BF3989', '#8250DF'},
+            -- termcolors = {} -- table of colour name strings
+          }
+        }
+      end
 
     end
   }
@@ -1152,9 +1138,10 @@ require('packer').startup({function(use)
         -- Treat patterns.rust as a Lua pattern (i.e "^impl_item$" will
         -- exactly match "impl_item" only)
         -- rust = true, 
-      }
+      },
+      mode = 'topline',
     }
-    vim.cmd[[hi TreesitterContext guibg=#0D2341]]
+    vim.cmd[[hi link TreesitterContext Context]]
   end
   }
 
@@ -1163,9 +1150,15 @@ require('packer').startup({function(use)
     opt = true,
     requires = { 'nvim-treesitter/nvim-treesitter' },
     config = function()
-      require('hlargs').setup {
-        color = '#ef9062',
-      }
+      if vim.g.colors_name == 'ghdark' then
+        require('hlargs').setup {
+          color = '#ef9062',
+        }
+      else
+        require('hlargs').setup {
+          color = '#E36209',
+        }
+      end
     end
   }
 
@@ -1174,8 +1167,9 @@ require('packer').startup({function(use)
     "ahmedkhalf/project.nvim",
     config = function()
       require("project_nvim").setup {
+        silent_chdir = true,
         patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc" },
-        detection_methods = { "lsp", "pattern" },
+        detection_methods = { "pattern" },
         exclude_dirs = {'~'},
         -- your configuration comes here
         -- or leave it empty to use the default settings
@@ -1312,8 +1306,9 @@ require('packer').startup({function(use)
         return file_with_arrow
       end
 
-      vim.cmd[[ hi AerialWinHL guifg=#77bdfb ]]
-      vim.o.winbar = "  %{%v:lua.filename_with_icon()%} %#AerialWinHL#%{%v:lua.winbar_aerial()%}"
+      vim.cmd[[ hi link AerialWinHLFields Constant ]]
+      vim.cmd[[ hi link AerialWinHLFile FileName ]]
+      vim.o.winbar = " %#AerialWinHLFile#%{%v:lua.filename_with_icon()%} %#AerialWinHLFields#%{%v:lua.winbar_aerial()%}"
 
     end
   }
@@ -1451,14 +1446,16 @@ require('packer').startup({function(use)
     requires = { 'kyazdani42/nvim-web-devicons' },
     config = function()
       local custom_auto = require'lualine.themes.auto'
-      custom_auto.normal.a.fg = "#C4CBD7"
-      custom_auto.normal.b.fg = "#9CA5B3"
-      custom_auto.normal.c.bg = "#21262D"
-      custom_auto.inactive = {
-        a = { fg = '#c6c6c6', bg = '#080808' },
-        b = { fg = '#c6c6c6', bg = '#080808' },
-        c = { fg = '#c6c6c6', bg = '#080808' },
-      }
+      if vim.g.colors_name == 'ghdark' then
+        custom_auto.normal.a.fg = "#C4CBD7"
+        custom_auto.normal.b.fg = "#9CA5B3"
+        custom_auto.normal.c.bg = "#21262D"
+        custom_auto.inactive = {
+          a = { fg = '#c6c6c6', bg = '#080808' },
+          b = { fg = '#c6c6c6', bg = '#080808' },
+          c = { fg = '#c6c6c6', bg = '#080808' },
+        }
+      end
       -- lsp info, from https://github.com/nvim-lualine/lualine.nvim/blob/master/examples/evil_lualine.lua
       local lsp_info =  {
         -- Lsp server name .
@@ -1579,10 +1576,10 @@ require('packer').startup({function(use)
       vim.g.Illuminate_ftblacklist = {"NvimTree", "alpha", "dapui_scopes", "dapui_breakpoints", "help"}
 
       function highlightIlluminate()
-        vim.cmd [[ hi LspReferenceText guibg=#193b25 gui=none ]]
-        vim.cmd [[ hi LspReferenceWrite guibg=#193b25 gui=none ]]
-        vim.cmd [[ hi LspReferenceRead guibg=#193b25 gui=none ]]
-        vim.cmd [[ hi illuminatedWord guibg=#193b25 gui=none ]]
+        vim.cmd [[ hi link LspReferenceText UnderCursor ]]
+        vim.cmd [[ hi link LspReferenceWrite UnderCursor ]]
+        vim.cmd [[ hi link LspReferenceRead UnderCursor ]]
+        vim.cmd [[ hi link illuminatedWord UnderCursor ]]
       end
       vim.defer_fn(highlightIlluminate, 0)
     end
@@ -2001,6 +1998,12 @@ require('packer').startup({function(use)
   }
 
   -- vim plugins
+  use {
+    -- auto adjust indent length and format (tab or space)
+    "tpope/vim-sleuth",
+    opt = false
+  }
+
   use {
     'neoclide/coc.nvim',
     opt = true,
@@ -2455,6 +2458,30 @@ require('packer').startup({function(use)
         dapui.close()
       end
 
+      -- Highlight
+      vim.cmd [[
+        hi! link DapUIVariable Normal
+        hi! link DapUIScope TextInfo
+        hi! link DapUIType Method
+        hi! link DapUIValue Normal
+        hi! link DapUIModifiedValue BoldInfo
+        hi! link DapUIDecoration DapUIVariable
+        hi! link DapUIThread TextSuccess
+        hi! link DapUIStoppedThread DapUIScope
+        hi! link DapUIFrameName Normal
+        hi! link DapUISource Method
+        hi! link DapUILineNumber DapUIScope
+        hi! link DapUIFloatBorder DapUIScope
+        hi! DapUIWatchesEmpty guifg=#F70067
+        hi! link DapUIWatchesValue TextSuccess
+        hi! DapUIWatchesError guifg=#F70067
+        hi! link DapUIBreakpointsPath DapUIScope
+        hi! link DapUIBreakpointsInfo TextSuccess
+        hi! link DapUIBreakpointsCurrentLine BoldSuccess
+        hi! link DapUIBreakpointsLine DapUILineNumber
+        hi! DapUIBreakpointsDisabledLine guifg=#424242
+      ]]
+
     end
   }
   use {
@@ -2539,14 +2566,7 @@ function lazyLoadPlugins()
 
   '<bang>' == '!')
 
-  -- tabnine
-  local tabnine_path = vim.fn.glob(vim.fn.stdpath('data') .. "/plugins/pack/packer/opt/cmp-tabnine/binaries/**/TabNine")
-  tabnine_path = vim.split(tabnine_path, '\n')
-  if table.getn(tabnine_path) ~= 0 and tabnine_path[1] ~= "" then
-    require('packer').loader('cmp-tabnine', '<bang>' == '!')
-  end
-
-  -- autocmd
+  -- autocmd TODO: Need to be fixed
   vim.api.nvim_exec("doautocmd User PluginsLoaded", true)
 end
 
@@ -2629,41 +2649,20 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 
 -- vim.g.suda_smart_edit = 1
 
-require("auto-save").setup({
+require("autosave").setup({
   enabled = true,
-  --execution_message = "AutoSave: saved at " .. vim.fn.strftime("%H:%M:%S"),
-  execution_message = {
-    message = function() -- message to print on save
-      -- return ("AutoSave: saved at " .. vim.fn.strftime("%H:%M:%S"))
-      return ''
-    end,
-    dim = 0.18, -- dim the color of `message`
-    cleaning_interval = 1250, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
+  execution_message = "",
+  events = {"InsertLeave", "TextChanged"},
+  conditions = {
+    exists = true,
+    filename_is_not = {},
+    filetype_is_not = {},
+    modifiable = true,
   },
-  trigger_events = {"InsertLeave", "TextChanged"},
-  -- events = {"CursorHold", "FocusLost", "BufLeave"},
-  condition = function(buf)
-    local fn = vim.fn
-    local utils = require("auto-save.utils.data")
-
-    if
-      fn.getbufvar(buf, "&modifiable") == 1 or
-      utils.not_in(fn.getbufvar(buf, "&filetype"), {}) then
-      return true -- met condition(s), can save
-    end
-    return false -- can't save
-  end,
   write_all_buffers = false,
-  on_off_commands = true,
+  on_off_commands = false,
   clean_command_line_interval = 0,
-  debounce_delay = 135,
-  callbacks = { -- functions to be executed at different intervals
-    enabling = nil, -- ran when enabling auto-save
-    disabling = nil, -- ran when disabling auto-save
-    before_asserting_save = nil, -- ran before checking `condition`
-    before_saving = nil, -- ran before doing the actual save
-    after_saving = nil -- ran after doing the actual save
-  }
+  debounce_delay = 135
 })
 
 -- osc52 support on ssh

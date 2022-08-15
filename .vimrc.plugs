@@ -276,6 +276,8 @@ let g:echodoc_enable_at_startup = 2
 
 Plug 'tpope/vim-vinegar' "使用-键进入netrw TODO: 阅读文档
 
+Plug 'tpope/vim-sleuth' " 自动调整缩进长度与格式
+
 Plug 'mattn/emmet-vim' "html代码块插件
 
 Plug 'airblade/vim-rooter' "切换vim工作路径

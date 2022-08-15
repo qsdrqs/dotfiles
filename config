@@ -42,7 +42,6 @@ exec_always --no-startup-id variety #desktop
 #exec_always --no-startup-id picom #渲染器
 #exec_always --no-startup-id albert #alt+d call
 
-
 exec_always --no-startup-id flameshot
 #exec_always --no-startup-id --no-startup-id $HOME/.config/polybar/launch.sh
 exec_always --no-startup-id --no-startup-id plasmashell
@@ -59,6 +58,10 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
+
+# hide window
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
 
 # start a terminal
 # bindsym $mod+Return exec --no-startup-id alacritty

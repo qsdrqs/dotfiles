@@ -9,7 +9,6 @@ let &t_ut=''
 let mapleader = ' '                     "The default leader is \, but a space is much better. 尽量减少小指的负担
 let maplocalleader = '\'
 
-
 "----------------------------------------------------------------------
 " LEADER  ALT+N 切换 tab
 "----------------------------------------------------------------------
@@ -150,7 +149,11 @@ nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
 
 "-------------------colorscheme-----------------------"{{{
 "colorscheme monokai
-colorscheme ghdark
+if $VIMLIGHT == 1
+  colorscheme ghlight
+else
+  colorscheme ghdark
+endif
 set termguicolors
 let g:molokai_transparent=1
 "-------------------colorscheme-----------------------"}}}
@@ -237,15 +240,14 @@ function Delete8half()
   exec 'normal 0d' . halfcol . 'l'
 endfunction
 
+" use tpope/vim-sleuth to auto detect and adjust
 set expandtab
-set smartindent "智能缩进"
 set cindent "C 语言风格缩进"
-set autoindent "自动缩进"
 
 "使空格和缩进显示字符
 set list
-set listchars=tab:▸\ ,trail:▫
-   
+set listchars=tab:▸⋅,trail:▫,lead:⋅
+
 "hi NonText ctermfg=16 guifg=#4a4a59
 "hi SpecialKey ctermfg=15 guifg=#4a4a59
 
@@ -416,8 +418,6 @@ autocmd FileType markdown,tex set textwidth=80
 highlight Comment cterm=italic gui=italic
 highlight Function cterm=bold gui=bold
 
-highlight FloatBorder guifg=#525869 guibg=#1F2335
-
 augroup custom_highlight
   au Syntax * syn match Todo  /\v\.<TODO:/ containedin=.*Comment.*
   au Syntax * syn match Fixme  /\v<FIXME:/ containedin=.*Comment.*
@@ -426,8 +426,8 @@ augroup custom_highlight
 augroup END
 hi! Todo guifg=#26302B guibg=#FFBD2A
 hi! Fixme guifg=#26302B guibg=#F06292
-hi! Note guifg=#2AFF2C guibg=#0d1117
-hi! searchme guifg=#F06292 guibg=#0d1117 gui=bold
+hi! Note guifg=#2AFF2C guibg=none
+hi! searchme guifg=#F06292 guibg=none gui=bold
 "-------------------Syntax highlight-----------------------"}}}
 
 "-------------------加载插件-----------------------"{{{
@@ -440,9 +440,9 @@ function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim�
     let b:treesitter_disable = 1
   endif
   if has('win32')
-    luafile $HOME/AppData/Local/nvim/packer_compiled.lua
+    source $HOME/AppData/Local/nvim/packer_compiled.lua
   else
-    luafile $HOME/.config/nvim/packer_compiled.lua
+    source $HOME/.config/nvim/packer_compiled.lua
   end
   if a:recover_line == 1
     let line_num = line(".")
