@@ -206,9 +206,12 @@ call s:_('ColorColumn',      '',              theme.bg_widget, '')
 call s:_('IndentGuidesEven', theme.fg_widget, '', '')
 call s:_('IndentGuidesOdd',  theme.fg_widget, '', '')
 
-call s:_('TabLine',          s:white,       s:black1, 'bold')
-call s:_('TabLineSel',       s:gh_link,     s:black1, 'bold')
-call s:_('TabLineFill',      'none',        s:black1, 'bold')
+" call s:_('TabLine',          s:white,       s:black1, 'bold')
+" call s:_('TabLineSel',       s:gh_link,     s:black1, 'bold')
+" call s:_('TabLineFill',      'none',        s:black1, 'bold')
+call s:_('TabLine',          s:white,       '', 'bold')
+call s:_('TabLineSel',       s:gh_link,     '', 'bold')
+call s:_('TabLineFill',      'none',        '', 'bold')
 
 let s:bg_current = theme.bg
 let s:bg_visible = theme.bg_subtle
@@ -365,15 +368,18 @@ call s:_('DiffChange',   '',             s:gh_add_bg2)
 call s:_('DiffText',     '',             s:gh_add_bg0)
 call s:_('DiffDelete',   '',             s:gh_danger_bg1)
 
-call s:_('DiffAdded',    s:gh_add_bg1, s:gh_add_bg1)
+call s:_('DiffAdded',    s:gh_add_fg, s:gh_add_bg1)
 "call s:_('DiffAdded',    theme.fg_light, s:gh_add_bg1)
 call s:_('DiffModified', theme.fg_light, s:gh_info_bg0)
-call s:_('DiffChanged', s:gh_search, s:gh_search)
-call s:_('DiffRemoved',  theme.fg_light, s:gh_danger_bg0)
+call s:_('DiffChanged', s:gh_orange, s:gh_search)
+call s:_('DiffRemoved',  s:gh_danger_fg, s:gh_danger_bg0)
 
-call s:_('DiffAddedGutter',    s:gh_add_fg, s:gh_add_bg1)
-call s:_('DiffModifiedGutter', s:gh_info_fg, s:gh_info_bg0)
+call s:_('DiffAddedGutter',    s:gh_add_bg1, s:gh_add_bg1)
+"call s:_('DiffAddedGutter',    s:gh_add_fg, s:gh_add_bg1)
+call s:_('DiffModifiedGutter', s:gh_search, s:gh_search)
+"call s:_('DiffModifiedGutter', s:gh_info_fg, s:gh_info_bg0)
 call s:_('DiffRemovedGutter',  s:gh_danger_fg, s:gh_danger_bg0)
+"call s:_('DiffRemovedGutter',  s:gh_danger_fg, s:gh_danger_bg0)
 
 "                                                                            }}}
 " Additionnal/Common groups                                         {{{1
@@ -487,7 +493,8 @@ hi! link CocHintVirtualText CocHintSign
 call s:_('FileName',           theme.fg_light,        '', 'bold')
 call s:_('TSConstMacro',           s:gh_red,        '', 'bold')
 hi! link CocSemMacro Define
-hi! FloatBorder guifg=#F4FAFF guibg=#D4EBFF
+hi! link CocSemProperty Symbol
+hi! FloatBorder guifg=#008BFF guibg=#D4EBFF
 
 " diagnostic
 hi! link DiagnosticError ErrorMsg

@@ -51,7 +51,7 @@ if [[ $TERM != "xterm-kitty" ]]; then
 fi
 
 if [[ $TERM == "xterm-kitty" ]]; then
-    alias ssh="kitty +kitten ssh"
+    #alias ssh="kitty +kitten ssh"
 fi
 
 # Set name of the theme to load --- if set to "random", it will

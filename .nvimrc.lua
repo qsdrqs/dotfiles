@@ -314,7 +314,7 @@ require('packer').startup({function(use)
       -- See `:help vim.lsp.*` for documentation on any of the below functions
       vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
       -- vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-      vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
+      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
       -- vim.keymap.set('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
       -- vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
       vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
@@ -478,8 +478,8 @@ require('packer').startup({function(use)
       -- vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
       vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
       vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
-      vim.keymap.set('n', '<space>q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
-      vim.keymap.set('n', '<space>Q', '<cmd>TroubleToggle workspace_diagnostics<CR>', opts)
+      vim.keymap.set('n', '<space>Q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
+      vim.keymap.set('n', '<space>q', '<cmd>TroubleToggle workspace_diagnostics<CR>', opts)
       vim.keymap.set('n', '<leader>d', '<cmd>lua showDocument()<CR>', opts)
 
 
@@ -882,7 +882,7 @@ require('packer').startup({function(use)
         completion = {
           -- autocomplete = true,
           completeopt = 'menu,menuone,noinsert'
-        }
+        },
 
       }
 
@@ -1168,8 +1168,8 @@ require('packer').startup({function(use)
     config = function()
       require("project_nvim").setup {
         silent_chdir = true,
-        patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc" },
-        detection_methods = { "pattern" },
+        patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc", "pom.xml" },
+        detection_methods = { "lsp", "pattern" },
         exclude_dirs = {'~'},
         -- your configuration comes here
         -- or leave it empty to use the default settings
@@ -1388,11 +1388,6 @@ require('packer').startup({function(use)
           map('x', 'ih', ':<C-U>Gitsigns select_hunk<CR>')
         end
       }
-      vim.cmd [[
-      hi! link GitSignsAdd diffAdded
-      hi! link GitSignsChange diffChanged
-      hi! link GitSignsDelete diffRemoved
-      ]]
     end
   }
 
@@ -2222,7 +2217,7 @@ require('packer').startup({function(use)
       vim.g.gutentags_modules = {'gtags_cscope'}
 
       -- config project root markers.
-      vim.g.gutentags_project_root = {'.root', '.svn', '.git', '.hg', '.project', '.exrc'}
+      vim.g.gutentags_project_root = {'.root', '.svn', '.git', '.hg', '.project', '.exrc', "pom.xml"}
 
       -- generate datebases in my cache directory, prevent gtags files polluting my project
       vim.g.gutentags_cache_dir = os.getenv("HOME") .. '/.cache/tags'

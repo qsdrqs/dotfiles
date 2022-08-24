@@ -149,7 +149,7 @@ nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
 
 "-------------------colorscheme-----------------------"{{{
 "colorscheme monokai
-if $VIMLIGHT == 1
+if $LIGHT == 1
   colorscheme ghlight
 else
   colorscheme ghdark
@@ -246,7 +246,7 @@ set cindent "C 语言风格缩进"
 
 "使空格和缩进显示字符
 set list
-set listchars=tab:▸⋅,trail:▫,lead:⋅
+set listchars=tab:▸-,trail:▫,lead:⋅
 
 "hi NonText ctermfg=16 guifg=#4a4a59
 "hi SpecialKey ctermfg=15 guifg=#4a4a59
@@ -426,8 +426,10 @@ augroup custom_highlight
 augroup END
 hi! Todo guifg=#26302B guibg=#FFBD2A
 hi! Fixme guifg=#26302B guibg=#F06292
-hi! Note guifg=#2AFF2C guibg=none
-hi! searchme guifg=#F06292 guibg=none gui=bold
+if has('nvim')
+  hi! Note guifg=#2AFF2C guibg=none
+  hi! searchme guifg=#F06292 guibg=none gui=bold
+endif
 "-------------------Syntax highlight-----------------------"}}}
 
 "-------------------加载插件-----------------------"{{{
@@ -473,7 +475,7 @@ else
         set pp+=$HOME/.local/share/nvim/plugins/
       end
 
-      luafile ~/.nvimrc.lua
+      source ~/.nvimrc.lua
       nnoremap <leader><leader> <CMD>call TriggerPlugins(1)<CR>
 
       "call TriggerPlugins(0) | exe "normal! g'\""
