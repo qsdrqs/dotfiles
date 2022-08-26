@@ -2268,7 +2268,7 @@ require('packer').startup({function(use)
       end ]]
 
       local dap = require('dap')
-      dap.adapters.codelldb = {
+      dap.adapters.lldb = {
         type = 'server',
         port = "${port}",
         executable = {
@@ -2285,7 +2285,7 @@ require('packer').startup({function(use)
         {
           name = "Launch file",
           -- type = "cppdbg",
-          type = "codelldb",
+          type = "lldb",
           request = "launch",
           -- stopOnEntry = true,
           --[[
@@ -2306,7 +2306,7 @@ require('packer').startup({function(use)
         {
           name = "Attach file",
           type = "cppdbg",
-          -- type = "codelldb",
+          -- type = "lldb",
           request = "attach",
           --[[
           program = function()
@@ -2457,14 +2457,14 @@ require('packer').startup({function(use)
       vim.cmd [[
         hi! link DapUIVariable Normal
         hi! link DapUIScope TextInfo
-        hi! link DapUIType Method
+        hi! link DapUIType Function
         hi! link DapUIValue Normal
         hi! link DapUIModifiedValue BoldInfo
-        hi! link DapUIDecoration DapUIVariable
+        hi! link DapUIDecoration DapUIScope
         hi! link DapUIThread TextSuccess
         hi! link DapUIStoppedThread DapUIScope
         hi! link DapUIFrameName Normal
-        hi! link DapUISource Method
+        hi! link DapUISource Function
         hi! link DapUILineNumber DapUIScope
         hi! link DapUIFloatBorder DapUIScope
         hi! DapUIWatchesEmpty guifg=#F70067

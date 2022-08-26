@@ -279,7 +279,7 @@ call s:_('URL',                  s:gh_url, '',        'underline')
 
 call s:_('Comment',              s:gh_grey, '',        '')
 call s:_('CommentBold',          s:gh_grey, '',        'bold')
-call s:_('SpecialComment',       '#7597c6', '',        'bold')
+call s:_('SpecialComment',       '#7597c6', '',        'bold,italic')
 hi! link CommentLabel   CommentBold
 hi! link CommentSection CommentBold
 hi! link Noise Comment

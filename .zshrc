@@ -249,7 +249,9 @@ alias sp="sudo pacman"
 
 # Gentoo
 alias sem="sudo emerge -av"
-alias semd="sudo emerge --deselect --ask"
+alias sem-deselect="sudo emerge --deselect --ask"
+alias sem-depclean="sudo emerge --ask --depclean"
+alias sem-update="sudo emerge --ask --verbose --update --deep --newuse @world"
 
 export PROX=127.0.0.1
 alias prox="export http_proxy=http://$PROX:1081\

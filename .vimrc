@@ -246,7 +246,7 @@ set cindent "C 语言风格缩进"
 
 "使空格和缩进显示字符
 set list
-set listchars=tab:▸-,trail:▫,lead:⋅
+set listchars=tab:▸⋅,trail:▫,lead:⋅
 
 "hi NonText ctermfg=16 guifg=#4a4a59
 "hi SpecialKey ctermfg=15 guifg=#4a4a59
