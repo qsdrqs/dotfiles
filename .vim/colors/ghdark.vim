@@ -269,6 +269,7 @@ hi! link CocErrorSign ErrorMsg
 hi! link CocWarningSign WarningMsg
 hi! link CocInfoSign GhLightBlue
 hi! CocHintSign guifg=#8B949E guibg=#262C32
+hi! link CocInlayHint CocHintSign
 hi! link CocHintVirtualText CocHintSign
 hi! link CocErrorFloat ErrorMsg
 hi! link CocWarningFloat WarningMsg
@@ -280,11 +281,14 @@ hi! link CocDiagnosticsInfo GhLightBlue
 hi! link CocDiagnosticsHint GhPurp
 hi! link CocSelectedText GhRed
 hi! link CocCodeLens GhBase3
-hi! link CocSemProperty GhBlue
+hi! link Property GhBlue
+hi! link CocSemProperty Property
 hi! link CocSemClass GhOrange
 hi! link CocSemStruct GhOrange
-hi! CocSemTypeParameter guifg=#faa356 gui=bold
-hi! CocSemParameter guifg=#ef9062
+hi! Parameter guifg=#ef9062
+hi! TypeParameter guifg=#faa356 gui=bold
+hi! link CocSemTypeParameter TypeParameter
+hi! link CocSemParameter Parameter
 
 call s:ghhl("CocErrorHighlight", "none", "none", "undercurl,bold")
 hi! link CocWarningHighlight CocErrorHighlight
@@ -301,6 +305,8 @@ hi! link DiagnosticError ErrorMsg
 hi! link DiagnosticWarn WarningMsg
 hi! link DiagnosticInfo GhLightBlue
 hi! link DiagnosticHint GhBase3
+
+hi! link LspInlayHint CocInlayHint
 
 " CSS
 
@@ -674,15 +680,16 @@ hi! link jsonQuote jsonString
 "custom
 hi! Comment guifg=#8B949E
 hi! Function guifg=#D2A8FF
-hi! Repeat guifg=#FF7B72
-hi! Define guifg=#FF7B72
+hi! Repeat guifg=#FA7970
+hi! Define guifg=#FA7970
 hi! Todo guibg=#FFBD2A guifg=#FFFFFF
 hi! Whitespace guifg=#677586
 hi! Visual gui=bold guibg=#163356
 hi! Search  guibg=#4d4b31 guifg=NONE
 "hi! Search  guibg=#3c3b26 guifg=NONE
 hi! link specialkey Whitespace
-hi! Type guifg=#FFA657 gui=NONE
+hi! Type guifg=#FA7970 gui=NONE
+hi! Class guifg=#FFA657 gui=NONE
 hi! PreProc guifg=#77bdfb
 hi! link Operator Repeat
 hi! link NonText Whitespace
@@ -700,7 +707,6 @@ hi! DiffAdd guifg=None guibg=#104731
 hi! DiffDelete guifg=None guibg=#4C111F
 hi! DiffText guifg=None guibg=#7A5614
 endif
-hi! UnderCursor guibg=#193b25 gui=none
 hi! Context guibg=#0D2341
 hi! FileName guifg=#C4CBD7
 highlight FloatBorder guifg=#525869 guibg=#1F2335
@@ -708,7 +714,12 @@ hi! TextSuccess guifg=#7ce38b
 hi! BoldSuccess guifg=#7ce38b gui=bold
 hi! link TextInfo GhBlue
 hi! BoldInfo guifg=#a2d2fb gui=bold
+call s:ghhl("FoldColumn", "base3", "base0")
 
+" under cursor
+hi! UnderCursorText guibg=#1A3B25 gui=none
+hi! UnderCursorRead guibg=#424852 gui=none
+hi! UnderCursorWrite guibg=#2A3037 gui=none
 
 " nvim cmp
 highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
@@ -731,3 +742,5 @@ highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4 gui=italic
 highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E gui=italic
 highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E gui=italic
 highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252 gui=italic
+
+autocmd Filetype vim,lua highlight! link Type Class

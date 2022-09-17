@@ -77,6 +77,7 @@ require('packer').startup({function(use)
       vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
       vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
       vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
+      vim.keymap.set('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { silent = true })
     end
   }
 
@@ -93,6 +94,50 @@ require('packer').startup({function(use)
   use {
     'kevinhwang91/nvim-bqf',
     opt = false,
+    config = function()
+      vim.cmd([[
+        hi BqfPreviewBorder guifg=#50a14f ctermfg=71
+        hi link BqfPreviewRange Search
+      ]])
+      require('bqf').setup({
+        auto_enable = true,
+        auto_resize_height = false,
+        preview = {
+          win_height = 999, -- full screen
+          win_vheight = 12,
+          delay_syntax = 80,
+          border_chars = {'┃', '┃', '━', '━', '┏', '┓', '┗', '┛', '█'},
+          should_preview_cb = function(bufnr, qwinid)
+            local ret = true
+            local bufname = vim.api.nvim_buf_get_name(bufnr)
+            local fsize = vim.fn.getfsize(bufname)
+            if fsize > 100 * 1024 then
+              -- skip file size greater than 100k
+              ret = false
+            elseif bufname:match('^fugitive://') then
+              -- skip fugitive buffer
+              ret = false
+            end
+            return ret
+          end
+        },
+        -- make `drop` and `tab drop` to become preferred
+        func_map = {
+          drop = 'o',
+          openc = 'O',
+          split = '<C-s>',
+          tabdrop = '<C-t>',
+          tabc = '',
+          ptogglemode = 'z,',
+        },
+        filter = {
+          fzf = {
+            action_for = {['ctrl-s'] = 'split', ['ctrl-t'] = 'tab drop'},
+            extra_opts = {'--bind', 'ctrl-o:toggle-all', '--prompt', '> '}
+          }
+        }
+      })
+    end
   } -- better quick fix
 
   use {
@@ -235,8 +280,17 @@ require('packer').startup({function(use)
           selectionRange = {
             enabled = true,
           },
+          inlayHints = {
+            parameterNames = {
+              enabled = "all"
+            }
+          },
+          implementationsCodeLens = true,
+          referencesCodeLens = true,
         }
       }
+
+      jdt_config.name = "jdtls"
 
       -- progress_report
       jdt_config.handlers = {
@@ -255,7 +309,7 @@ require('packer').startup({function(use)
       jdt_config.init_options = {
         bundles = {
           vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
-        }
+        },
       }
 
       jdt_config.on_attach = function(client, bufnr)
@@ -263,7 +317,7 @@ require('packer').startup({function(use)
         -- you make during a debug session immediately.
         -- Remove the option if you do not want that.
         require('jdtls').setup_dap({ hotcodereplace = 'auto' })
-        common_on_attach(client,bufnr)
+        common_on_attach(client, bufnr)
       end
       -- vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
       vim.api.nvim_create_autocmd("FileType", {
@@ -276,6 +330,36 @@ require('packer').startup({function(use)
   }
 
   use {
+    "simrat39/rust-tools.nvim",
+    after = 'nvim-lspconfig',
+    config = function()
+      local rt = require("rust-tools")
+
+      local extension_path = vim.fn.stdpath('data') .. '/mason/'
+      local codelldb_path = extension_path .. 'bin/codelldb'
+      local liblldb_path = extension_path .. 'packages/codelldb/extension/lldb/lib/liblldb.so'
+
+      rt.setup({
+        server = {
+          on_attach = function(client, bufnr)
+            common_on_attach(client, bufnr)
+          end,
+        },
+        dap = {
+          adapter = require('rust-tools.dap').get_codelldb_adapter(
+          codelldb_path, liblldb_path)
+        },
+        tools = {
+          inlay_hints = {
+            auto = false,
+          }
+        }
+      })
+    end
+  }
+
+
+  use {
     'neovim/nvim-lspconfig',
     config = function()
       -- vim.lsp.set_log_level('trace')
@@ -283,18 +367,34 @@ require('packer').startup({function(use)
 
       local lspconfig = require('lspconfig')
 
-      function common_on_attach(client,bufnr)
+      function common_on_attach(client, bufnr)
         local status_ok, aerial = pcall(require, 'aerial')
         if status_ok then
           aerial.on_attach(client, bufnr)
         end
-        local status_ok, illuminate = pcall(require, 'illuminate')
-        if status_ok then
-          illuminate.on_attach(client, bufnr)
-        end
 
         -- Enable completion triggered by <c-x><c-o>
         vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+        -- codelens
+        -- TODO: find a better way
+        local codelens_blacklist = {"clangd", "sumneko_lua", "pyright", "vimls"}
+        local enable_codelens = true
+        for _, v in pairs(codelens_blacklist) do
+          if client.name == v then
+            enable_codelens = false
+            break
+          end
+        end
+        if enable_codelens then
+          vim.api.nvim_create_autocmd({"InsertLeave", "TextChanged", "BufEnter"}, {
+            pattern = "*",
+            callback = function()
+              vim.lsp.codelens.refresh()
+            end
+          })
+          vim.defer_fn(function() vim.lsp.codelens.refresh() end, 100)
+        end
       end
 
       function showDocument()
@@ -313,17 +413,18 @@ require('packer').startup({function(use)
       -- Mappings.
       -- See `:help vim.lsp.*` for documentation on any of the below functions
       vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-      -- vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+      -- vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
       -- vim.keymap.set('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-      -- vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-      vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
+      vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+      -- vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
       vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
       vim.keymap.set('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
       vim.keymap.set('n', '<space>aa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
       vim.keymap.set('n', '<space>ar', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
       vim.keymap.set('n', '<space>al', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-      vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
+      -- vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
+      vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
       vim.keymap.set('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
       vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
       vim.keymap.set('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
@@ -364,6 +465,10 @@ require('packer').startup({function(use)
       local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
         local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+        capabilities.textDocument.foldingRange = {
+          dynamicRegistration = false,
+          lineFoldingOnly = true
+        }
         lsp_common_config = {
           -- on_attach = my_custom_on_attach,
           capabilities = capabilities,
@@ -402,12 +507,6 @@ require('packer').startup({function(use)
           -- set offset encoding
           capabilities.offsetEncoding = nil
         elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/vim-language-server", "--stdio"}
-        elseif lsp == 'hls' then
-          lsp_common_config.on_attach = function(client, bufnr)
-            common_on_attach(client,bufnr)
-            vim.cmd [[ autocmd InsertLeave,TextChanged <buffer> lua vim.lsp.codelens.refresh() ]]
-            vim.lsp.codelens.refresh()
-          end
         elseif lsp == "texlab" then
           lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/texlab" }
           lsp_common_config.on_attach = function(client, bufnr)
@@ -444,6 +543,7 @@ require('packer').startup({function(use)
 
           lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/lua-language-server"}
           if vim.fn.expand('%') == '.nvimrc.lua' then
+            -- TODO: not work for no-lazyload plugins
             lsp_common_config.autostart = false
           end
           lsp_common_config.settings = {
@@ -464,11 +564,14 @@ require('packer').startup({function(use)
               },
               -- Do not send telemetry data containing a randomized but unique identifier
               telemetry = {
-                enable = false,
+                enable = true,
               },
             },
           }
         end
+          if vim.fn.expand('%') == '.nvimrc.lua' then
+            lsp_common_config.autostart = false
+          end
 
         lspconfig[lsp].setup(lsp_common_config)
       end
@@ -508,9 +611,95 @@ require('packer').startup({function(use)
   }
 
   use {
+    'theHamsta/nvim-semantic-tokens',
+    config = function()
+      require("nvim-semantic-tokens").setup {
+        preset = "default",
+        highlighters = { require 'nvim-semantic-tokens.table-highlighter'}
+      }
+
+      vim.api.nvim_create_augroup("LspAttach_semantictokens", {})
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = "LspAttach_semantictokens",
+        callback = function(args)
+          local bufnr = args.buf
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+          local caps = client.server_capabilities
+          if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
+            local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
+            vim.api.nvim_create_autocmd({"TextChanged"}, {
+              group = augroup,
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.semantic_tokens_full()
+              end,
+            })
+            -- fire it first time on load as well
+            vim.lsp.buf.semantic_tokens_full()
+          end
+        end,
+      })
+
+      -- highlights
+      vim.cmd [[
+        hi link LspNamespace       Class
+        hi link LspType            Label
+        hi link LspClass           Class
+        hi link LspEnum            Enum
+        hi link LspInterface       Interface
+        hi link LspStruct          Struct
+        hi link LspTypeParameter   TypeParameter
+        hi link LspParameter       Parameter
+        hi link LspVariable        Variable
+        hi link LspProperty        Property
+        hi link LspEnumMember      EnumMember
+        hi link LspEvent           Event
+        hi link LspFunction        Function
+        hi link LspMethod          Function
+        hi link LspMacro           Macro
+        hi link LspKeyword         Keyword
+        hi link LspModifier        Modifier
+        hi link LspComment         Comment
+        hi link LspString          String
+        hi link LspNumber          Number
+        hi link LspRegexp          Regexp
+        hi link LspOperator        Operator
+      ]]
+    end
+  }
+
+  use {
+    'lvimuser/lsp-inlayhints.nvim',
+    branch = "anticonceal",
+    config = function()
+      require("lsp-inlayhints").setup({
+        debug_mode = true,
+      })
+      vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = "LspAttach_inlayhints",
+        callback = function(args)
+          if not (args.data and args.data.client_id) then
+            return
+          end
+
+          local bufnr = args.buf
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          require("lsp-inlayhints").on_attach(client, bufnr)
+        end,
+      })
+    end
+  }
+
+  use {
     'kosayoda/nvim-lightbulb',
     config = function()
-      vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'nvim-lightbulb'.update_lightbulb()]]
+      vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
+        callback = function()
+          require'nvim-lightbulb'.update_lightbulb()
+        end,
+      })
     end
   }
 
@@ -653,6 +842,23 @@ require('packer').startup({function(use)
     config = function()
       require("cmp_dictionary").setup({ dic = { ["markdown,tex,text"] = { "/usr/share/dict/words" } }, })
       require("cmp_dictionary").update()
+    end
+  }
+  use {
+    'rcarriga/cmp-dap',
+    config = function()
+      require("cmp").setup({
+        enabled = function()
+          return vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt"
+          or require("cmp_dap").is_dap_buffer()
+        end
+      })
+
+      require("cmp").setup.filetype({ "dap-repl", "dapui_watches" }, {
+        sources = {
+          { name = "dap" },
+        },
+      })
     end
   }
   use {
@@ -893,17 +1099,125 @@ require('packer').startup({function(use)
   }
 
   use {
+    'kevinhwang91/nvim-ufo',
+    requires = 'kevinhwang91/promise-async',
+    config = function()
+      vim.o.foldcolumn = '1'
+      vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+      vim.o.foldlevelstart = 99
+      vim.o.foldenable = true
+      vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+
+
+      local function handler(virt_text, lnum, end_lnum, width, truncate, ctx)
+        local result = {}
+
+        local counts = (" %d"):format(end_lnum - lnum)
+        local prefix = "⋯⋯  "
+        local suffix = "  ⋯⋯"
+        local padding = ""
+
+        local end_virt_text = ctx.get_fold_virt_text(end_lnum)
+        -- trim the end_virt_text
+        local leader_num = 0
+        for i = 1, #end_virt_text[1][1] do
+          local c = end_virt_text[1][1]:sub(i, i)
+          if c == " " then
+            leader_num = leader_num + 1
+          else
+            break
+          end
+        end
+        local first_text = end_virt_text[1][1]:sub(leader_num + 1, -1)
+        end_virt_text[1][1] = first_text
+
+        local end_virt_text_width = 0
+        for _, item in ipairs(end_virt_text) do
+          end_virt_text_width = end_virt_text_width + vim.fn.strdisplaywidth(item[1])
+        end
+
+        if end_virt_text_width > 5 then
+          end_virt_text = {}
+          end_virt_text_width =  0
+        end
+
+        local sufWidth = (2 * vim.fn.strdisplaywidth(suffix))
+        + vim.fn.strdisplaywidth(counts)
+        + end_virt_text_width
+
+        local target_width = width - sufWidth
+        local cur_width = 0
+
+        for _, chunk in ipairs(virt_text) do
+          local chunk_text = chunk[1]
+
+          local chunk_width = vim.fn.strdisplaywidth(chunk_text)
+          if target_width > cur_width + chunk_width then
+            table.insert(result, chunk)
+          else
+            chunk_text = truncate(chunk_text, target_width - cur_width)
+            local hl_group = chunk[2]
+            table.insert(result, { chunk_text, hl_group })
+            chunk_width = vim.fn.strdisplaywidth(chunk_text)
+
+            if cur_width + chunk_width < target_width then
+              padding = padding .. (" "):rep(target_width - cur_width - chunk_width)
+            end
+            break
+          end
+          cur_width = cur_width + chunk_width
+        end
+
+        table.insert(result, { "...", "UfoFoldedEllipsis" })
+        -- table.insert(result, { counts, "MoreMsg" })
+        -- table.insert(result, { suffix, "UfoFoldedEllipsis" })
+
+        for _, v in ipairs(end_virt_text) do
+          table.insert(result, v)
+        end
+
+        table.insert(result, { padding, "" })
+
+        return result
+      end
+
+      local function customizeSelector(bufnr)
+          local function handleFallbackException(err, providerName)
+              if type(err) == 'string' and err:match('UfoFallbackException') then
+                  return require('ufo').getFolds(providerName, bufnr)
+              else
+                  return require('promise').reject(err)
+              end
+          end
+
+          return require('ufo').getFolds('lsp', bufnr):catch(function(err)
+              return handleFallbackException(err, 'treesitter')
+          end):catch(function(err)
+              return handleFallbackException(err, 'indent')
+          end)
+      end
+
+      require('ufo').setup{
+        provider_selector = function(bufnr, filetype, buftype)
+          return customizeSelector
+        end,
+        enable_get_fold_virt_text = true,
+        fold_virt_text_handler = handler
+      }
+      -- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+      vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+      vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+    end
+  }
+
+  use {
     'nvim-treesitter/nvim-treesitter',
     run = ':TSUpdate',
     config = function()
       if vim.b.treesitter_disable ~= 1 then
-        -- folds by treesitter
-        vim.cmd[[ set foldmethod=expr ]]
-        vim.o.foldexpr="nvim_treesitter#foldexpr()"
-
         require 'nvim-treesitter.configs'.setup {
           -- One of "all", or a list of languages
-          ensure_installed = {"c", "cpp", "lua", "vim"},
+          ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust"},
 
           -- Install languages synchronously (only applied to `ensure_installed`)
           sync_install = false,
@@ -934,7 +1248,6 @@ require('packer').startup({function(use)
 
         -- disable comment hightlight (for javadoc)
         require"nvim-treesitter.highlight".set_custom_captures {
-          -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
           ["comment"] = "NONE",
         }
       end
@@ -1170,6 +1483,7 @@ require('packer').startup({function(use)
         silent_chdir = true,
         patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc", "pom.xml" },
         detection_methods = { "lsp", "pattern" },
+        ignore_lsp = {"clangd"},
         exclude_dirs = {'~'},
         -- your configuration comes here
         -- or leave it empty to use the default settings
@@ -1177,7 +1491,8 @@ require('packer').startup({function(use)
       }
 
       require('telescope').load_extension('projects')
-
+      -- manually call once
+      vim.cmd[[ProjectRoot]]
     end
   }
 
@@ -1566,17 +1881,47 @@ require('packer').startup({function(use)
   -- highlight cursor words via lsp
   use {
     'RRethy/vim-illuminate',
+    opt = true,
     config = function()
-      vim.g.Illuminate_delay = 300
-      vim.g.Illuminate_ftblacklist = {"NvimTree", "alpha", "dapui_scopes", "dapui_breakpoints", "help"}
+      require('illuminate').configure({
+        -- providers: provider used to get references in the buffer, ordered by priority
+        providers = {
+          'lsp',
+          -- 'treesitter', -- treesitter is too slow!
+          'regex',
+        },
+        -- delay: delay in milliseconds
+        delay = 100,
+        -- filetype_overrides: filetype specific overrides.
+        -- The keys are strings to represent the filetype while the values are tables that
+        -- supports the same keys passed to .configure except for filetypes_denylist and filetypes_allowlist
+        filetype_overrides = {},
+        -- filetypes_denylist: filetypes to not illuminate, this overrides filetypes_allowlist
+        filetypes_denylist = {
+          'dirvish',
+          'fugitive',
+        },
+        -- filetypes_allowlist: filetypes to illuminate, this is overriden by filetypes_denylist
+        filetypes_allowlist = {},
+        -- modes_denylist: modes to not illuminate, this overrides modes_allowlist
+        modes_denylist = {},
+        -- modes_allowlist: modes to illuminate, this is overriden by modes_denylist
+        modes_allowlist = {},
+        -- providers_regex_syntax_denylist: syntax to not illuminate, this overrides providers_regex_syntax_allowlist
+        -- Only applies to the 'regex' provider
+        -- Use :echom synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')
+        providers_regex_syntax_denylist = {},
+        -- providers_regex_syntax_allowlist: syntax to illuminate, this is overriden by providers_regex_syntax_denylist
+        -- Only applies to the 'regex' provider
+        -- Use :echom synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')
+        providers_regex_syntax_allowlist = {},
+        -- under_cursor: whether or not to illuminate under the cursor
+        under_cursor = true,
+      })
 
-      function highlightIlluminate()
-        vim.cmd [[ hi link LspReferenceText UnderCursor ]]
-        vim.cmd [[ hi link LspReferenceWrite UnderCursor ]]
-        vim.cmd [[ hi link LspReferenceRead UnderCursor ]]
-        vim.cmd [[ hi link illuminatedWord UnderCursor ]]
-      end
-      vim.defer_fn(highlightIlluminate, 0)
+      vim.api.nvim_set_hl(0, "IlluminatedWordText", {link = "UnderCursorText"})
+      vim.api.nvim_set_hl(0, "IlluminatedWordRead", {link = "UnderCursorRead"})
+      vim.api.nvim_set_hl(0, "IlluminatedWordWrite", {link = "UnderCursorWrite"})
     end
   }
 
@@ -1607,6 +1952,9 @@ require('packer').startup({function(use)
         renderer = {
           highlight_git = true,
           group_empty = true,
+        },
+        git = {
+          ignore = false,
         }
       }
     end
@@ -1623,6 +1971,7 @@ require('packer').startup({function(use)
 
   use {
     'nvim-telescope/telescope-fzf-native.nvim',
+    requires = { 'nvim-telescope/telescope.nvim' },
     run = 'make',
     config = function()
       require('telescope').setup {
@@ -1655,8 +2004,8 @@ require('packer').startup({function(use)
     config = function()
       require('auto-session').setup {
         log_level = 'error',
-        auto_session_suppress_dirs = {'~/'},
-        auto_session_create_enabled = false,
+        auto_session_suppress_dirs = {'~/', '~/Downloads', '~/Documents'},
+        auto_session_create_enabled = true,
         auto_session_enable_last_session = true,
         auto_restore_enabled = false,
         post_restore_cmds = {'silent !kill -s SIGWINCH $PPID'},
@@ -1969,6 +2318,12 @@ require('packer').startup({function(use)
       require("todo-comments").setup {
         -- your configuration comes here
       }
+      local hl = require('todo-comments.highlight')
+      local highlight_win = hl.highlight_win
+      hl.highlight_win = function(win, force)
+        -- hide errors
+        pcall(highlight_win, win, force)
+      end
     end
   }
 
@@ -2238,8 +2593,6 @@ require('packer').startup({function(use)
       vim.cmd('hi debugRed guifg=red')
       vim.fn.sign_define('DapBreakpoint', {text='🛑', texthl='debugRed', linehl='', numhl=''})
       dap.defaults.fallback.terminal_win_cmd = 'vertical rightbelow 50new'
-      vim.cmd [[ au FileType dap-repl lua require('dap.ext.autocompl').attach() ]]
-
       -- vim.keymap.set('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { silent = true })
       vim.keymap.set('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR>', { silent = true })
       vim.keymap.set('n', '<F5>', '<Cmd>lua require"dap".continue()<CR>', { silent = true })
@@ -2519,11 +2872,32 @@ end
 
 ----------------------------Lazy Load-------------------------------------------------
 function lazyLoadPlugins()
+  require('packer').loader(
+  -- begin vim plugins
+  'ultisnips',
+  'cmp-nvim-ultisnips',
+  'copilot.vim',
+  'vim-sandwich',
+  'vim-log-highlighting',
+  'vim-visual-multi',
+  'vim-bookmarks',
+  -- 'coc.nvim',
+  -- end vim plugins
+
+  -- begin misc
+  'nvim-hlslens',
+  'nvim-scrollview',
+  'Comment.nvim',
+  'vim-illuminate',
+  -- end misc
+
+  '<bang>' == '!')
 
   if vim.b.treesitter_disable ~= 1 then
     require('packer').loader(
     -- begin treesitter (slow performance)
     'nvim-ts-rainbow',   -- performance issue
+    'indent-blankline.nvim',
     'nvim-treesitter-context',
     'nvim-treesitter-textobjects',
     'nvim-ts-autotag',
@@ -2538,28 +2912,6 @@ function lazyLoadPlugins()
       vim.fn["rainbow_main#load"]()
     end)
   end
-
-  require('packer').loader(
-
-  -- begin vim plugins
-  'indent-blankline.nvim',
-  'ultisnips',
-  'cmp-nvim-ultisnips',
-  'copilot.vim',
-  'vim-sandwich',
-  'vim-log-highlighting',
-  'vim-visual-multi',
-  'vim-bookmarks',
-  'coc.nvim',
-  -- end vim plugins
-
-  -- begin misc
-  'nvim-hlslens',
-  'nvim-scrollview',
-  'Comment.nvim',
-  -- end misc
-
-  '<bang>' == '!')
 
   -- autocmd TODO: Need to be fixed
   vim.api.nvim_exec("doautocmd User PluginsLoaded", true)

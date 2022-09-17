@@ -118,8 +118,8 @@ let theme.hover                 = '#505050'
 let theme.hl                    = '#0066BF'
 let theme.hl_fg                 = '#ffffff'
 
-let theme.fg_selection          = 'none'
-let theme.bg_selection          = '#EDF4FC'
+let theme.fg_selection          = 'NONE'
+let theme.bg_selection          = '#DBE9F9'
 let theme.bg_selection_dark     = '#d7d4ef'
 let theme.bg_selection_light    = '#deebfe'
 let theme.bg_selection_very_light = '#e9f2ff'
@@ -160,15 +160,15 @@ call s:_('NormalPopup',      theme.fg,        theme.bg_subtle)
 call s:_('NormalPopover',    theme.fg,        theme.bg_popover)
 
 call s:_('Cursor',           '', theme.base,  'reverse')
-call s:_('SecondaryCursor',  '', theme.bg_hl, 'none')
+call s:_('SecondaryCursor',  '', theme.bg_hl, 'NONE')
 
 call s:_('CursorLine',       '',              theme.bg_verysubtle)
 call s:_('CursorColumn',     '',              theme.bg_verysubtle)
-call s:_('CursorLineNr',     theme.hl,        theme.bg_verysubtle, 'none')
-call s:_('LineNr',           theme.fg_widget, theme.bg_widget, 'none')
+call s:_('CursorLineNr',     theme.hl,        theme.bg_verysubtle, 'NONE')
+call s:_('LineNr',           theme.fg_widget, theme.bg_widget, 'NONE')
 
-call s:_('TermCursor',       '#044289',        'none',            'reverse')
-call s:_('TermCursorNC',     theme.fg_hl,     'none',            'reverse')
+call s:_('TermCursor',       '#044289',        'NONE',            'reverse')
+call s:_('TermCursorNC',     theme.fg_hl,     'NONE',            'reverse')
 call s:_('TermNormal',       theme.bg,        theme.base,    '')
 hi! link TermNormalNC TermNormal
 
@@ -177,12 +177,12 @@ call s:_('Visual',         '', theme.bg_selection, 'bold')
 call s:_('VisualBold',     '', theme.bg_selection, 'bold')
 call s:_('LastVisual',     '',                  theme.bg_selection_dark, '')
 call s:_('WildMenu',       theme.fg,            theme.bg_selection)
-call s:_('StatusLine',     theme.fg_light,      theme.bg_dark,          'none')
-call s:_('StatusLineNC',   theme.fg_lighter,    theme.bg_dark,          'none')
+call s:_('StatusLine',     theme.fg_light,      theme.bg_dark,          'NONE')
+call s:_('StatusLineNC',   theme.fg_lighter,    theme.bg_dark,          'NONE')
 call s:_('StatusLinePart', theme.fg_widget_alt, theme.bg_widget_alt,     'bold')
 call s:_('StatusLinePartNC', theme.fg_widget_alt_nc, theme.bg_widget_alt_nc,     'bold')
-call s:_('Separator',      '#4c4c4c',           'none',                  '')
-call s:_('VertSplit',      theme.fg_subtle,     theme.bg_widget,         'none')
+call s:_('Separator',      '#4c4c4c',           'NONE',                  '')
+call s:_('VertSplit',      theme.fg_subtle,     theme.bg_widget,         'NONE')
 
 call s:_('Pmenu',            theme.fg_overlay, theme.bg_overlay)
 call s:_('PmenuSel',         theme.hl_fg,      theme.hl)
@@ -197,8 +197,8 @@ end
 call s:_('Terminal',         s:white,  s:black0, '')
 
 
-call s:_('Folded',           'none',          theme.bg_verysubtle,  'none')
-call s:_('FoldColumn',       theme.fg_subtle, theme.bg_widget,      '')
+call s:_('Folded',           'NONE',          theme.bg_verysubtle,  'NONE')
+call s:_('FoldColumn',       s:gh_grey, theme.bg_widget,      '')
 call s:_('SignColumn',       '',              theme.bg_widget, '')
 call s:_('ColorColumn',      '',              theme.bg_widget, '')
 
@@ -208,10 +208,10 @@ call s:_('IndentGuidesOdd',  theme.fg_widget, '', '')
 
 " call s:_('TabLine',          s:white,       s:black1, 'bold')
 " call s:_('TabLineSel',       s:gh_link,     s:black1, 'bold')
-" call s:_('TabLineFill',      'none',        s:black1, 'bold')
+" call s:_('TabLineFill',      'NONE',        s:black1, 'bold')
 call s:_('TabLine',          s:white,       '', 'bold')
 call s:_('TabLineSel',       s:gh_link,     '', 'bold')
-call s:_('TabLineFill',      'none',        '', 'bold')
+call s:_('TabLineFill',      'NONE',        '', 'bold')
 
 let s:bg_current = theme.bg
 let s:bg_visible = theme.bg_subtle
@@ -225,34 +225,34 @@ call s:_('Buffer',            s:white,          s:bg_other, 'bold')
 call s:_('BufferCurrentMod',  s:yellow,         s:bg_current, 'bold')
 call s:_('BufferVisibleMod',  s:darkyellow,     s:bg_visible, 'bold')
 call s:_('BufferMod',         s:darkyellow,     s:bg_other, 'bold')
-call s:_('BufferSignCurrent', theme.fg_widget_dark, s:bg_current, 'none')
-call s:_('BufferSignVisible', theme.fg_widget_dark, s:bg_visible, 'none')
-call s:_('BufferSign',        theme.fg_widget_dark, s:bg_other, 'none')
+call s:_('BufferSignCurrent', theme.fg_widget_dark, s:bg_current, 'NONE')
+call s:_('BufferSignVisible', theme.fg_widget_dark, s:bg_visible, 'NONE')
+call s:_('BufferSign',        theme.fg_widget_dark, s:bg_other, 'NONE')
 call s:_('BufferPart',        s:gh_info_fg,     s:gh_info_bg0, 'bold')
 
 " }}}
 " Search, Highlight, Conceal, Messages                                               {{{
 
-call s:_('Search',          '', s:gh_search,      'none')
-call s:_('IncSearch',       '', s:gh_search_dark, 'none')
+call s:_('Search',          '', s:gh_search,      'NONE')
+call s:_('IncSearch',       '', s:gh_search_dark, 'NONE')
 call s:_('IncSearchCursor', '',     '',               'reverse')
 
-call s:_('Conceal',         theme.fg_conceal, 'none',    '')
-call s:_('SpecialKey',      '#333333',        'none',    '')
+call s:_('Conceal',         theme.fg_conceal, 'NONE',    '')
+call s:_('SpecialKey',      '#333333',        'NONE',    '')
 call s:_('NonText',         theme.fg_subtle,  '',        'bold')
-call s:_('MatchParen',      '',               '#BCE3FF', 'none')
+call s:_('MatchParen',      '',               '#BCE3FF', 'NONE')
 call s:_('SpecialOpt',      '#868680',        '#32363a', '')
 call s:_('Whitespace',      '#8f9aa9',        '',        '')
 
 
 
-call s:_('AutoHL',          '',     theme.bg,  'none')
-call s:_('Highlight',       'none', theme.bg_selection_light,       'none')
-call s:_('HighlightSubtle', 'none', theme.bg_selection_very_light, 'none')
+call s:_('AutoHL',          '',     theme.bg,  'NONE')
+call s:_('Highlight',       'NONE', theme.bg_selection_light,       'NONE')
+call s:_('HighlightSubtle', 'NONE', theme.bg_selection_very_light, 'NONE')
 
 call s:_('Key',             '#799d6a', '', '')
 call s:_('Question',        '#65C254', '', '',     'Green', '')
-call s:_('Todo',            '#3b84ea', 'none', 'bold')
+call s:_('Todo',            '#3b84ea', 'NONE', 'bold')
 
 call s:_('File',            theme.fg,  '',     'bold')
 call s:_('Directory',       '#3365CE', '',     'bold')
@@ -284,79 +284,79 @@ hi! link CommentLabel   CommentBold
 hi! link CommentSection CommentBold
 hi! link Noise Comment
 
-call s:_('Global',               s:gh_blue1, '',        'none')
-call s:_('PreProc',              s:gh_blue1, '',        'none')
+call s:_('Global',               s:gh_blue1, '',        'NONE')
+call s:_('PreProc',              s:gh_blue1, '',        'NONE')
 "call s:_('Macro',                s:gh_blue1, '',        'bold')
-call s:_('Macro',                s:gh_red, '',        'none')
+call s:_('Macro',                s:gh_red, '',        'NONE')
 call s:_('Define',               s:gh_blue1, '',        'bold')
 call s:_('PreCondit',            s:gh_blue1, '',        'bold')
 "call s:_('Include',              s:gh_blue1, '',        'bold')
-call s:_('Include',              s:gh_red, '',        'none')
+call s:_('Include',              s:gh_red, '',        'NONE')
 
 call s:_('Repeat',               s:gh_red, '',        '')
 call s:_('Keyword',              s:gh_red, '',        '')
-call s:_('Statement',            s:gh_red, '',        'none')
+call s:_('Statement',            s:gh_red, '',        'NONE')
 call s:_('Label',                s:gh_red, '',        '')
 
 call s:_('Operator',             s:gh_blue1, '',        '')
 "call s:_('Operator',             '#94afff', '',        '')
 
-call s:_('Constant',             s:gh_blue1, '',        'none')
-call s:_('Number',               s:gh_blue1, '',        'none')
-call s:_('Float',                s:gh_blue1, '',        'none')
-call s:_('Boolean',              s:gh_blue1, '',        'none')
-call s:_('Enum',                 s:gh_blue1, '',        'none')
+call s:_('Constant',             s:gh_blue1, '',        'NONE')
+call s:_('Number',               s:gh_blue1, '',        'NONE')
+call s:_('Float',                s:gh_blue1, '',        'NONE')
+call s:_('Boolean',              s:gh_blue1, '',        'NONE')
+call s:_('Enum',                 s:gh_blue1, '',        'NONE')
 
-call s:_('Delimiter',            '#668799', '',        'none')
-call s:_('DelimiterAlt',         '#799033', '',        'none')
+call s:_('Delimiter',            '#668799', '',        'NONE')
+call s:_('DelimiterAlt',         '#799033', '',        'NONE')
 call s:_('SpecialChar',          '#005CC5', '',        'bold')
 
-call s:_('String',               s:gh_blue0, '',        'none')
+call s:_('String',               s:gh_blue0, '',        'NONE')
 call s:_('StringDelimiter',      '#032f62', '',        'bold')
 
 call s:_('Character',            '#238fff', '',        'bold')
 
 
-call s:_('SpecialIdentifier',    '#9c5fff', '',        'none')
+call s:_('SpecialIdentifier',    '#9c5fff', '',        'NONE')
 
-"call s:_('Special',              '#a755df', '',        'none')
-call s:_('Special',              '#6F42C1', '',        'none')
+"call s:_('Special',              '#a755df', '',        'NONE')
+call s:_('Special',              '#6F42C1', '',        'NONE')
 call s:_('SpecialBold',          '#6F42C1', '',        'bold')
-call s:_('SpecialDelimiter',     '#a040af', '',        'none')
+call s:_('SpecialDelimiter',     '#a040af', '',        'NONE')
 
 
-call s:_('Identifier',           theme.fg,  '',        'none')
-call s:_('Variable',             '#ffe790', '',        'none')
-call s:_('Argument',             theme.fg,  '',        'none')
+call s:_('Identifier',           theme.fg,  '',        'NONE')
+call s:_('Variable',             theme.fg, '',        'NONE')
+call s:_('Argument',             theme.fg,  '',        'NONE')
 
-call s:_('Function',             s:gh_purple, '',        'none')
+call s:_('Function',             s:gh_purple, '',        'NONE')
 call s:_('Method',               s:gh_purple, '',        'bold')
 
-call s:_('Symbol',               s:gh_blue1, '',        'none')
-call s:_('Control',              s:gh_blue1, '',        'none')
-call s:_('PredefinedIdentifier', s:gh_blue1, '',        'none')
-call s:_('Predefined',           s:gh_blue1, '',        'none')
+call s:_('Symbol',               s:gh_blue1, '',        'NONE')
+call s:_('Control',              s:gh_blue1, '',        'NONE')
+call s:_('PredefinedIdentifier', s:gh_blue1, '',        'NONE')
+call s:_('Predefined',           s:gh_blue1, '',        'NONE')
 
-call s:_('StaticFunc',           '#ffb964', '',        'none')
-call s:_('Property',             s:gh_orange, '',        'none')
+call s:_('StaticFunc',           '#ffb964', '',        'NONE')
+call s:_('Property',             s:gh_orange, '',        'NONE')
 
 
-call s:_('Type',                 s:gh_red, '',        'none')
-call s:_('StorageClass',         s:gh_red, '',        'none')
-call s:_('Class',                s:gh_red, '',        'none')
-call s:_('Structure',            s:gh_red, '',        'none')
-call s:_('Typedef',              s:gh_red, '',        'none')
+call s:_('Type',                 s:gh_red, '',        'NONE')
+call s:_('StorageClass',         s:gh_red, '',        'NONE')
+call s:_('Class',                s:gh_purple, '',        'NONE')
+call s:_('Structure',            s:gh_red, '',        'NONE')
+call s:_('Typedef',              s:gh_red, '',        'NONE')
 
-call s:_('Regexp',               '#dd0093', 'none',        'none')
-call s:_('RegexpSpecial',        '#a40073', 'none',        'none')
-call s:_('RegexpDelimiter',      '#540063', 'none',        'bold')
-call s:_('RegexpKey',            '#5f0041', 'none',        'bold')
+call s:_('Regexp',               '#dd0093', 'NONE',        'NONE')
+call s:_('RegexpSpecial',        '#a40073', 'NONE',        'NONE')
+call s:_('RegexpDelimiter',      '#540063', 'NONE',        'bold')
+call s:_('RegexpKey',            '#5f0041', 'NONE',        'bold')
 
 " }}}
 " Diff                                                                       {{{
 
-call s:_('diffLine',    s:gh_grey, s:gh_info_bg1, 'none')
-call s:_('diffSubName', s:gh_grey, s:gh_info_bg1, 'none')
+call s:_('diffLine',    s:gh_grey, s:gh_info_bg1, 'NONE')
+call s:_('diffSubName', s:gh_grey, s:gh_info_bg1, 'NONE')
 
 hi! clear DiffAdd
 hi! clear DiffChange
@@ -486,14 +486,17 @@ hi! link objcMessageName Identifier
 
 " 1}}}
 
-hi! UnderCursor guibg=#E5F9E9 gui=none
+hi! UnderCursor guibg=#E5F9E9 gui=NONE
 hi! Context guibg=#D4EBFF
 hi! CocHintSign guifg=#317CD1 guibg=#F4FAFF
 hi! link CocHintVirtualText CocHintSign
+hi! link CocInlayHint CocHintSign
+hi! link InlayHint CocHintSign
 call s:_('FileName',           theme.fg_light,        '', 'bold')
 call s:_('TSConstMacro',           s:gh_red,        '', 'bold')
 hi! link CocSemMacro Define
-hi! link CocSemProperty Symbol
+hi! link CocSemProperty Property
+hi! link Property Symbol
 hi! FloatBorder guifg=#008BFF guibg=#D4EBFF
 
 " diagnostic
@@ -505,7 +508,10 @@ hi! link DiagnosticHint ModeMsg
 hi! link DiagnosticUnderlineError UnderlineError
 hi! link DiagnosticUnderlineWarn UnderlineWarning
 hi! link DiagnosticUnderlineInfo UnderlineInfo
-hi! link DiagnosticUnderlineHint UnderlineSpecial
+hi! link DiagnosticUnderlineHint Comment
+
+" nvim lsp
+hi! link LspInlayHint CocInlayHint
 
 " nvim cmp
 highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
@@ -528,3 +534,10 @@ highlight! CmpItemKindUnit guibg=NONE guifg=#444D56 gui=bold
 highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E gui=bold
 highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E gui=bold
 highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252 gui=bold
+
+" under cursor
+hi! UnderCursorText guibg=#CCF3D5 gui=none
+hi! UnderCursorRead guibg=#D5D5D5  gui=none
+hi! UnderCursorWrite guibg=#E5E5E5  gui=none
+
+autocmd Filetype vim,lua highlight! link Type Class

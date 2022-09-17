@@ -5,5 +5,9 @@
     "signature.enable": false,
     "notification.disabledProgressSources": ["*"],
     "semanticTokens.filetypes": ["*"],
-    "clangd.inlayHints.enable": true
+    "clangd.inlayHints.enable": true,
+    "Lua.telemetry.enable": true,
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.diagnostic.globals": ["vim"],
+    "rust-analyzer.updates.prompt": false
 }

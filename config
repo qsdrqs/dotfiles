@@ -38,7 +38,7 @@ exec_always --no-startup-id ~/init/*
 exec_always --no-startup-id fcitx5 #输入法
 exec_always --no-startup-id variety #desktop
 #exec_always --no-startup-id dunst #通知程序
-#exec_always --no-startup-id picom --experimental-backends #模糊渲染器
+exec_always --no-startup-id picom --experimental-backends #模糊渲染器
 #exec_always --no-startup-id picom #渲染器
 #exec_always --no-startup-id albert #alt+d call
 
@@ -268,7 +268,7 @@ bindsym $mod+m mode $sysd_des
 bar {
         mode dock
         position top
-        tray_output DP-1
+        tray_output DP-2
         status_command /home/qsdrqs/date.sh
 }
 

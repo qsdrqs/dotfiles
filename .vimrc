@@ -110,13 +110,6 @@ inoremap <expr><c-e> pumvisible() ? "\<c-e>" : "\<end>"
 "make Y same as D and C
 noremap Y y$
 
-"使得可以使用c-j,c-k轮询补全.
-"inoremap <C-j> <Down>
-"inoremap <C-k> <Up>
-inoremap <expr><C-j> pumvisible() ? "\<Down>" : "\<C-j>"
-inoremap <expr><C-k> pumvisible() ? "\<Up>" : "\<C-k>"
-inoremap <expr><tab> pumvisible() ? "\<CR>" : "\<tab>"
-
 "中文符号的补全
 inoremap “ “”<Left>
 inoremap ‘ ‘’<Left>
@@ -143,6 +136,9 @@ endif
 
 "lazygit
 nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
+
+"quickfix
+autocmd FileType qf nnoremap <silent>q :q<CR>
 
 "-------------------键位映射-----------------------"}}}
 
@@ -267,7 +263,6 @@ set guioptions-=m
 let g:neovide_cursor_animation_length=0
 let g:neovide_refresh_rate=60
 
-
 "---------------------Search---------------------------------"
 set hlsearch
 set incsearch
@@ -382,6 +377,7 @@ endif
 
 " open all folds by default
 set foldlevel=99
+set foldcolumn=1
 
 " 加载项目自定义配置(为了兼容使用.exrc)
 set exrc
@@ -478,10 +474,12 @@ else
       source ~/.nvimrc.lua
       nnoremap <leader><leader> <CMD>call TriggerPlugins(1)<CR>
 
-      "call TriggerPlugins(0) | exe "normal! g'\""
 
-      " call plugins if no args
-      if len(argv()) == 0 || isdirectory(argv()[0])
+      let load_plugins_on_start = v:false
+      if load_plugins_on_start
+        call TriggerPlugins(0) | exe "normal! g'\""
+      elseif (len(argv()) == 0 || isdirectory(argv()[0])) && !exists('g:loadplugins')
+        " call plugins if no args
         call TriggerPlugins(0)
       endif
 
