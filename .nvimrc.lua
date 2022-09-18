@@ -95,10 +95,10 @@ require('packer').startup({function(use)
     'kevinhwang91/nvim-bqf',
     opt = false,
     config = function()
-      vim.cmd([[
+      vim.cmd [[
         hi BqfPreviewBorder guifg=#50a14f ctermfg=71
         hi link BqfPreviewRange Search
-      ]])
+      ]]
       require('bqf').setup({
         auto_enable = true,
         auto_resize_height = false,
@@ -224,7 +224,7 @@ require('packer').startup({function(use)
       end
 
       -- java
-      local jdt_config = lsp_common_config
+      local jdt_config = get_lsp_common_config()
       jdt_config.cmd = {
 
         -- 💀
@@ -339,12 +339,10 @@ require('packer').startup({function(use)
       local codelldb_path = extension_path .. 'bin/codelldb'
       local liblldb_path = extension_path .. 'packages/codelldb/extension/lldb/lib/liblldb.so'
 
+      local lsp_config = get_lsp_common_config()
+      lsp_config.capabilities.offsetEncoding = nil
       rt.setup({
-        server = {
-          on_attach = function(client, bufnr)
-            common_on_attach(client, bufnr)
-          end,
-        },
+        server = lsp_config,
         dap = {
           adapter = require('rust-tools.dap').get_codelldb_adapter(
           codelldb_path, liblldb_path)
@@ -355,6 +353,21 @@ require('packer').startup({function(use)
           }
         }
       })
+    end
+  }
+
+  use {
+    'p00f/clangd_extensions.nvim',
+    after = 'nvim-lspconfig',
+    config = function()
+      local lsp_config = get_lsp_common_config()
+      lsp_config.capabilities.offsetEncoding = 'utf-8'
+      require("clangd_extensions").setup {
+        server = lsp_config,
+        extensions = {
+          autoSetHints = false
+        }
+      }
     end
   }
 
@@ -462,6 +475,34 @@ require('packer').startup({function(use)
         {"▏", "FloatBorder"},
       }
 
+      function get_lsp_common_config()
+        local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+        capabilities.textDocument.foldingRange = {
+          dynamicRegistration = false,
+          lineFoldingOnly = true
+        }
+        local config = {
+          on_attach = common_on_attach,
+          capabilities = capabilities,
+          flags = {
+            debounce_text_changes = 150,
+          },
+          handlers = {
+            ["textDocument/publishDiagnostics"] = vim.lsp.with(
+              vim.lsp.diagnostic.on_publish_diagnostics, {
+                virtual_text = true,
+                signs = true,
+                underline = true,
+                update_in_insert = false,
+              }
+            ),
+            ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = border }),
+            ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border }),
+          }
+        }
+        return config
+      end
+
       local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
       for _, lsp in ipairs(servers) do
         local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
@@ -469,33 +510,7 @@ require('packer').startup({function(use)
           dynamicRegistration = false,
           lineFoldingOnly = true
         }
-        lsp_common_config = {
-          -- on_attach = my_custom_on_attach,
-          capabilities = capabilities,
-          on_attach = function(client, bufnr)
-            common_on_attach(client,bufnr)
-          end,
-          flags = {
-            -- This will be the default in neovim 0.7+
-            debounce_text_changes = 150,
-          },
-          handlers = {
-            ["textDocument/codeLens"] = function(err, result, ctx, _)
-              if not result or not next(result) then
-                vim.lsp.codelens.on_codelens(err, result, ctx, _)
-              else
-                for _, item in ipairs(result) do
-                  if item.command then
-                    item.command.title = "     🔑 " .. item.command.title
-                  end
-                end
-                vim.lsp.codelens.on_codelens(err, result, ctx, _)
-              end
-            end,
-            ["textDocument/hover"] =  vim.lsp.with(vim.lsp.handlers.hover, {border = border}),
-            ["textDocument/signatureHelp"] =  vim.lsp.with(vim.lsp.handlers.signature_help, {border = border }),
-          }
-        }
+        local lsp_common_config = get_lsp_common_config()
 
         if lsp == 'pyright' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/pyright-langserver", "--stdio"}
         elseif lsp == 'pylsp' then lsp_common_config.cmd = {'pylsp'}
@@ -1122,18 +1137,36 @@ require('packer').startup({function(use)
         local leader_num = 0
         for i = 1, #end_virt_text[1][1] do
           local c = end_virt_text[1][1]:sub(i, i)
-          if c == " " then
+          if c == ' ' then
             leader_num = leader_num + 1
           else
             break
           end
         end
-        local first_text = end_virt_text[1][1]:sub(leader_num + 1, -1)
-        end_virt_text[1][1] = first_text
+        local first_end_text = end_virt_text[1][1]:sub(leader_num + 1, -1)
+        if first_end_text == "" then
+          table.remove(end_virt_text, 1)
+        else
+          end_virt_text[1][1] = first_end_text
+        end
+
+        local start_virt_text = ctx.get_fold_virt_text(lnum)
 
         local end_virt_text_width = 0
         for _, item in ipairs(end_virt_text) do
           end_virt_text_width = end_virt_text_width + vim.fn.strdisplaywidth(item[1])
+        end
+
+        -- add left parenthesis if missing
+        local maybe_left_parenthesis = nil
+        if string.find(end_virt_text[1][1], "}") and not string.find(start_virt_text[#start_virt_text][1], "{") then
+          maybe_left_parenthesis = {" {", end_virt_text[1][2]}
+        end
+        if string.find(end_virt_text[1][1], "]") and not string.find(start_virt_text[#start_virt_text][1], "[") then
+          maybe_left_parenthesis = {" [", end_virt_text[1][2]}
+        end
+        if string.find(end_virt_text[1][1], ")") and not string.find(start_virt_text[#start_virt_text][1], "(") then
+          maybe_left_parenthesis = {" (", end_virt_text[1][2]}
         end
 
         if end_virt_text_width > 5 then
@@ -1168,6 +1201,9 @@ require('packer').startup({function(use)
           cur_width = cur_width + chunk_width
         end
 
+        if maybe_left_parenthesis then
+          table.insert(result, maybe_left_parenthesis)
+        end
         table.insert(result, { "...", "UfoFoldedEllipsis" })
         -- table.insert(result, { counts, "MoreMsg" })
         -- table.insert(result, { suffix, "UfoFoldedEllipsis" })
