@@ -174,6 +174,7 @@ require('packer').startup({function(use)
     "williamboman/mason.nvim",
     config = function()
       require("mason").setup()
+      vim.fn.setenv("PATH", vim.fn.getenv("PATH") .. ":" .. vim.fn.stdpath("data") .. "/mason/bin")
     end
   }
 
@@ -390,24 +391,21 @@ require('packer').startup({function(use)
         vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
         -- codelens
-        -- TODO: find a better way
-        local codelens_blacklist = {"clangd", "sumneko_lua", "pyright", "vimls"}
-        local enable_codelens = true
-        for _, v in pairs(codelens_blacklist) do
-          if client.name == v then
-            enable_codelens = false
-            break
+        vim.api.nvim_create_autocmd({"InsertLeave", "TextChanged", "BufEnter"}, {
+          pattern = "*",
+          callback = function()
+            vim.lsp.codelens.refresh()
           end
+        })
+        -- refresh on start
+        vim.lsp.codelens.refresh()
+        -- rust_analyzer needs to be defered refresh
+        if client.name == "rust_analyzer" then
+          vim.defer_fn(function()
+            vim.lsp.codelens.refresh()
+          end, 100)
         end
-        if enable_codelens then
-          vim.api.nvim_create_autocmd({"InsertLeave", "TextChanged", "BufEnter"}, {
-            pattern = "*",
-            callback = function()
-              vim.lsp.codelens.refresh()
-            end
-          })
-          vim.defer_fn(function() vim.lsp.codelens.refresh() end, 100)
-        end
+
       end
 
       function showDocument()
@@ -503,7 +501,7 @@ require('packer').startup({function(use)
         return config
       end
 
-      local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls' }
+      local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls', 'tsserver' }
       for _, lsp in ipairs(servers) do
         local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
         capabilities.textDocument.foldingRange = {
@@ -512,18 +510,15 @@ require('packer').startup({function(use)
         }
         local lsp_common_config = get_lsp_common_config()
 
-        if lsp == 'pyright' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/pyright-langserver", "--stdio"}
-        elseif lsp == 'pylsp' then lsp_common_config.cmd = {'pylsp'}
-        elseif lsp == 'clangd' then
+        if lsp == 'clangd' then
           -- set offset encoding
           capabilities.offsetEncoding = 'utf-8'
         elseif lsp == "rust_analyzer" then
-          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/rust-analyzer"}
           -- set offset encoding
           capabilities.offsetEncoding = nil
-        elseif lsp == 'vimls' then lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/vim-language-server", "--stdio"}
+        elseif lsp == 'tsserver' then
+          -- lsp_common_config.root_dir = require('lspconfig.util').root_pattern("*")
         elseif lsp == "texlab" then
-          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/texlab" }
           lsp_common_config.on_attach = function(client, bufnr)
             common_on_attach(client,bufnr)
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>v', '<cmd>TexlabForward<cr>', { noremap=true, silent=true })
@@ -556,7 +551,6 @@ require('packer').startup({function(use)
           table.insert(runtime_path, "lua/?.lua")
           table.insert(runtime_path, "lua/?/init.lua")
 
-          lsp_common_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/lua-language-server"}
           if vim.fn.expand('%') == '.nvimrc.lua' then
             -- TODO: not work for no-lazyload plugins
             lsp_common_config.autostart = false
@@ -643,7 +637,7 @@ require('packer').startup({function(use)
           local caps = client.server_capabilities
           if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
             local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
-            vim.api.nvim_create_autocmd({"TextChanged"}, {
+            vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
               group = augroup,
               buffer = bufnr,
               callback = function()
@@ -652,6 +646,11 @@ require('packer').startup({function(use)
             })
             -- fire it first time on load as well
             vim.lsp.buf.semantic_tokens_full()
+            if client.name == "rust_analyzer" then
+              vim.defer_fn(function()
+                vim.lsp.buf.semantic_tokens_full()
+              end, 100)
+            end
           end
         end,
       })
@@ -662,7 +661,7 @@ require('packer').startup({function(use)
         hi link LspType            Label
         hi link LspClass           Class
         hi link LspEnum            Enum
-        hi link LspInterface       Interface
+        hi link LspInterface       Class
         hi link LspStruct          Struct
         hi link LspTypeParameter   TypeParameter
         hi link LspParameter       Parameter
@@ -766,8 +765,10 @@ require('packer').startup({function(use)
 
   use {
     "Pocco81/auto-save.nvim",
-    commit = '8df684bcb3c5fff8fa9a772952763fc3f6eb75ad',
+    -- commit = '8df684bcb3c5fff8fa9a772952763fc3f6eb75ad',
     opt = false,
+    config = function()
+    end
   }
 
   use {
@@ -787,14 +788,24 @@ require('packer').startup({function(use)
                 ignore_exitcode = true,
               }
             end
-          }
+          },
+          javascript = {
+            function()
+              return {
+                exe = "prettier",
+                args = {
+                  "--stdin-filepath",
+                  vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))
+                },
+                stdin = true,
+              }
+            end
+          },
         }
       })
-      vim.keymap.set("n", "<leader>af", "<cmd>lua formatBuf('n')<CR>", { silent = true })
-      vim.keymap.set("v", "<leader>af", "<cmd>lua formatBuf('v')<CR>", { silent = true })
 
       -- formatters
-      function formatBuf(vmode)
+      local function formatBuf()
         local modes = {"i", "s"}
         local mode = vim.fn.mode()
 
@@ -804,21 +815,17 @@ require('packer').startup({function(use)
           end
         end
 
-        local no_lsp_formatters = {'python'}
+        local no_lsp_formatters = {'python', 'javascript'}
         for _,v in pairs(no_lsp_formatters) do
           if vim.o.filetype == v then
             vim.cmd("Format")
             return
           end
         end
-        if vmode == 'v' then
-          vim.lsp.buf.range_formatting()
-        else
           vim.lsp.buf.format{ async = true }
-        end
       end
 
-      function formatTriggerHandler()
+      local function formatTriggerHandler()
         if vim.g.format_on_save == 1 then
           vim.defer_fn(formatBuf, 1000)
         end
@@ -834,11 +841,14 @@ require('packer').startup({function(use)
         end
       end
 
-
       -- defer 1000 ms for formatters
-      vim.cmd[[ au BufWritePost * silent lua formatTriggerHandler()]]
       -- vim.cmd[[ au BufWritePost <buffer> silent lua vim.defer_fn(formatBuf, 1000) ]]
+      vim.api.nvim_create_autocmd({"BufWritePost"}, {
+        pattern = "*",
+        callback = formatTriggerHandler,
+      })
       vim.cmd[[ command! AFTrigger lua formatTrigger() ]]
+      vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
     end
   }
 
@@ -2271,7 +2281,7 @@ require('packer').startup({function(use)
   }
 
   use {
-    "bellini666/trouble.nvim",
+    "folke/trouble.nvim",
     requires = "kyazdani42/nvim-web-devicons",
     config = function()
       require("trouble").setup {
@@ -2354,19 +2364,26 @@ require('packer').startup({function(use)
       require("todo-comments").setup {
         -- your configuration comes here
       }
-      local hl = require('todo-comments.highlight')
-      local highlight_win = hl.highlight_win
-      hl.highlight_win = function(win, force)
-        -- hide errors
-        pcall(highlight_win, win, force)
-      end
     end
   }
 
   use {
     "rcarriga/nvim-notify",
     config = function()
-      vim.notify = require("notify")
+      local banned_messages = {
+        "method textDocument/codeLens is not supported by any of the servers registered for the current buffer",
+        "[inlay_hints] LSP error:Invalid offset",
+        "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml"
+      }
+
+      vim.notify = function (msg, ...)
+        for _, banned in ipairs(banned_messages) do
+          if string.find(msg, banned, 1, true) then
+            return
+          end
+        end
+        require("notify")(msg, ...)
+      end
     end
   }
 
@@ -2647,7 +2664,7 @@ require('packer').startup({function(use)
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
-        command = vim.fn.stdpath('data') .. '/mason/bin/OpenDebugAD7',
+        command = 'OpenDebugAD7',
       }
 
 
@@ -2662,7 +2679,7 @@ require('packer').startup({function(use)
         port = "${port}",
         executable = {
           -- CHANGE THIS to your path!
-          command = vim.fn.stdpath('data') .. '/mason/bin/codelldb',
+          command = 'codelldb',
           args = {"--port", "${port}"},
 
           -- On windows you may have to uncomment this:
@@ -2677,12 +2694,10 @@ require('packer').startup({function(use)
           type = "lldb",
           request = "launch",
           -- stopOnEntry = true,
-          --[[
           program = function()
             return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
           end,
-          ]]
-          program = "./${fileBasenameNoExtension}",
+          -- program = "./${fileBasenameNoExtension}",
           cwd = '${workspaceFolder}',
           setupCommands = {
             {
@@ -2697,12 +2712,10 @@ require('packer').startup({function(use)
           type = "cppdbg",
           -- type = "lldb",
           request = "attach",
-          --[[
           program = function()
             return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
           end,
-          ]]
-          program = "./${fileBasenameNoExtension}",
+          -- program = "./${fileBasenameNoExtension}",
           MIMode = 'gdb',
           processId = function()
             return vim.fn.input('procsesID: ')
@@ -3032,21 +3045,22 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 
 -- vim.g.suda_smart_edit = 1
 
-require("autosave").setup({
-  enabled = true,
-  execution_message = "",
-  events = {"InsertLeave", "TextChanged"},
-  conditions = {
-    exists = true,
-    filename_is_not = {},
-    filetype_is_not = {},
-    modifiable = true,
+-- auto-save
+local autosave = require('auto-save')
+autosave.setup {
+  execution_message = {
+    message = function() -- message to print on save
+      return ""
+    end,
+    dim = 0.18, -- dim the color of `message`
   },
-  write_all_buffers = false,
-  on_off_commands = false,
-  clean_command_line_interval = 0,
-  debounce_delay = 135
-})
+  trigger_events = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
+}
+-- fix: #46
+local nvim_buf_set_var = vim.api.nvim_buf_set_var
+vim.api.nvim_buf_set_var = function(bufnr, ...)
+  return pcall(nvim_buf_set_var, bufnr, ...)
+end
 
 -- osc52 support on ssh
 if os.getenv("SSH_CONNECTION") ~= nil then

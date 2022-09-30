@@ -38,7 +38,7 @@ ZSH_DISABLE_COMPFIX=true
 export PATH=$PATH:$HOME/.local/bin:$HOME/.local/sbin
 # vman
 export PATH="$PATH:$HOME/.vim/plugged/vim-superman/bin"
-#haskell
+# haskell
 export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 [ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env" # ghcup-env
 
