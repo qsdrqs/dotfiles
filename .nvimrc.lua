@@ -1841,13 +1841,14 @@ require('packer').startup({function(use)
       vim.api.nvim_create_autocmd({"InsertEnter"}, {
         pattern = '*',
         callback = function()
-          vim.g.wait_init = 1
+          require('packer').loader('copilot.vim')
+          vim.g.copilot_initialized = 1
         end,
         once = true
       })
 
       local copilot = function()
-        if vim.g.wait_init == 1 then
+        if vim.g.copilot_initialized == 1 then
           if vim.api.nvim_eval("copilot#Enabled()") == 1 then
             return ' '
           else
@@ -2262,21 +2263,31 @@ require('packer').startup({function(use)
     'numToStr/Comment.nvim',
     opt = true,
     config = function()
-      local function map(mode, lhs, rhs)
-        vim.keymap.set(mode, lhs, rhs, { silent = true })
-      end
-      map('n', '<C-/>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
-      map('n', '<C-_>', '<CMD>lua require("Comment.api").toggle_current_linewise()<CR>')
-      map('n', '<C-M-/>', '<CMD>lua require("Comment.api").toggle_current_blockwise()<CR>')
-      map('n', '<C-M-_>', '<CMD>lua require("Comment.api").toggle_current_blockwise()<CR>')
-
-      -- Linewise toggle using C-/
-      map('x', '<C-/>', '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
-      map('x', '<C-_>', '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
-
-      -- Blockwise toggle using <leader>gb
-      map('x', '<c-m-/>', '<ESC><CMD>lua require("Comment.api").toggle_blockwise_op(vim.fn.visualmode())<CR>')
-      map('x', '<c-m-_>', '<ESC><CMD>lua require("Comment.api").toggle_blockwise_op(vim.fn.visualmode())<CR>')
+      require('Comment').setup {
+        ---Add a space b/w comment and the line
+        padding = true,
+        ---Whether the cursor should stay at its position
+        sticky = true,
+        ---Lines to be ignored while (un)comment
+        ignore = nil,
+        toggler = {
+          line = '<c-/>',
+          block = '<c-s-/>',
+        },
+        opleader = {
+          line = '<c-/>',
+          block = '<c-s-/>',
+        },
+        mappings = {
+          basic = true,
+          extra = true,
+          extended = false,
+        },
+        ---Function to call before (un)comment
+        pre_hook = nil,
+        ---Function to call after (un)comment
+        post_hook = nil,
+      }
     end
   }
 
@@ -2405,6 +2416,19 @@ require('packer').startup({function(use)
     -- auto adjust indent length and format (tab or space)
     "tpope/vim-sleuth",
     opt = false
+  }
+
+  use {
+    'jpalardy/vim-slime',
+    opt = true,
+    config = function()
+      vim.g.slime_target = "neovim"
+      vim.g.slime_no_mappings = 1
+      vim.cmd[[command! SlimeShowChannel echo &channel]]
+      vim.keymap.set('x', '<c-c><c-c>', "<Plug>SlimeRegionSend", { silent = true })
+      vim.keymap.set('n', '<c-c><c-c>', "<Plug>SlimeParagraphSend", { silent = true })
+      vim.keymap.set('n', '<c-c><c-v>', "<cmd>SlimeShowChannel<cr>", { silent = true })
+    end
   }
 
   use {
@@ -2925,16 +2949,16 @@ function lazyLoadPlugins()
   -- begin vim plugins
   'ultisnips',
   'cmp-nvim-ultisnips',
-  'copilot.vim',
   'vim-sandwich',
   'vim-log-highlighting',
   'vim-visual-multi',
   'vim-bookmarks',
+  'vim-slime',
   -- 'coc.nvim',
   -- end vim plugins
 
   -- begin misc
-  'nvim-hlslens',
+  -- 'nvim-hlslens',
   'nvim-scrollview',
   'Comment.nvim',
   'vim-illuminate',
@@ -2986,7 +3010,12 @@ autocmd BufNewFile * call LoadSkeletons()
 ]]
 
 -- register.nvim
-vim.g.registers_window_border = "single"
+local registers = require("registers")
+registers.setup({
+  window = {
+    border = "single"
+  }
+})
 
 -- vCoolor.vim won't disable mappings if it is loaded after the plugin
 vim.g.vcoolor_disable_mappings = 1

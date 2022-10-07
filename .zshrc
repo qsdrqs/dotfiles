@@ -35,7 +35,7 @@ export _Z_SRC=$HOME/dotfiles/z/z.sh
 ZSH_DISABLE_COMPFIX=true
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
-export PATH=$PATH:$HOME/.local/bin:$HOME/.local/sbin
+export PATH=$HOME/.local/bin:$HOME/.local/sbin:$PATH
 # vman
 export PATH="$PATH:$HOME/.vim/plugged/vim-superman/bin"
 # haskell
@@ -53,7 +53,6 @@ fi
 if [[ $TERM == "xterm-kitty" ]]; then
     #alias ssh="kitty +kitten ssh"
 fi
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -351,10 +350,10 @@ compinit
 compdef vman="man"
 
 # pyenv: not load by default due to performance issue
-if [[ -x `command -v pyenv` ]]; then
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-fi
+# if [[ -x `command -v pyenv` ]]; then
+#     eval "$(pyenv init -)"
+#     eval "$(pyenv virtualenv-init -)"
+# fi
 
 export WASMTIME_HOME="$HOME/.wasmtime"
 
