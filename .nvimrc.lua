@@ -362,6 +362,8 @@ require('packer').startup({function(use)
     after = 'nvim-lspconfig',
     config = function()
       local lsp_config = get_lsp_common_config()
+      lsp_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never"}
+      -- set offset encoding
       lsp_config.capabilities.offsetEncoding = 'utf-8'
       require("clangd_extensions").setup {
         server = lsp_config,
@@ -501,22 +503,17 @@ require('packer').startup({function(use)
         return config
       end
 
-      local servers = { 'clangd', 'pyright', 'texlab', 'sumneko_lua', 'rust_analyzer', 'vimls', 'hls', 'tsserver' }
+      -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
+      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver' }
       for _, lsp in ipairs(servers) do
         local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
         capabilities.textDocument.foldingRange = {
           dynamicRegistration = false,
           lineFoldingOnly = true
         }
-        local lsp_common_config = get_lsp_common_config()
 
-        if lsp == 'clangd' then
-          -- set offset encoding
-          capabilities.offsetEncoding = 'utf-8'
-        elseif lsp == "rust_analyzer" then
-          -- set offset encoding
-          capabilities.offsetEncoding = nil
-        elseif lsp == 'tsserver' then
+        local lsp_common_config = get_lsp_common_config()
+        if lsp == 'tsserver' then
           -- lsp_common_config.root_dir = require('lspconfig.util').root_pattern("*")
         elseif lsp == "texlab" then
           lsp_common_config.on_attach = function(client, bufnr)
