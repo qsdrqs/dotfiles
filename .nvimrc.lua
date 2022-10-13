@@ -1121,6 +1121,7 @@ require('packer').startup({function(use)
   }
 
   use {
+    -- smart fold
     'kevinhwang91/nvim-ufo',
     requires = 'kevinhwang91/promise-async',
     config = function()
@@ -1289,6 +1290,17 @@ require('packer').startup({function(use)
           },
         }
 
+        -- matlab
+        local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+        parser_config.matlab = {
+          install_info = {
+            url = "https://github.com/mstanciu552/tree-sitter-matlab.git",
+            files = { "src/parser.c" },
+            branch= 'main'
+          },
+          filetype = "matlab", -- if filetype does not agrees with parser name
+        }
+
         -- disable comment hightlight (for javadoc)
         require"nvim-treesitter.highlight".set_custom_captures {
           ["comment"] = "NONE",
@@ -1296,7 +1308,6 @@ require('packer').startup({function(use)
       end
 
     end
-
   }
 
   use {

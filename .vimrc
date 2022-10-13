@@ -419,6 +419,7 @@ augroup custom_highlight
   au Syntax * syn match Fixme  /\v<FIXME:/ containedin=.*Comment.*
   au Syntax * syn match Note  /\v<NOTE:/ containedin=.*Comment.*
   au Syntax * syn match searchme /\v<searchme:/ containedin=.*
+  au Syntax matlab syn match Operator /=/ containedin=.*
 augroup END
 hi! Todo guifg=#26302B guibg=#FFBD2A
 hi! Fixme guifg=#26302B guibg=#F06292
