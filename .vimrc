@@ -128,7 +128,7 @@ inoremap <C-h> <Left>
 let $NOTMUX = 1
 if has('nvim')
   "nnoremap \t :set splitbelow<CR>:15split term://zsh<cr>i
-  noremap <localleader>t :set splitbelow<CR>:exec float2nr(&lines * 0.20) . 'split'<cr>:term<cr>i
+  noremap <localleader>t :set splitright<CR>:exec float2nr(&columns * 0.40) . 'vsplit'<cr>:term<cr>i
 else
   "nnoremap \t :set splitbelow<CR>:terminal ++rows=15<CR>
   nnoremap \t :set splitbelow<CR>:terminal<CR>

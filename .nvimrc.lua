@@ -1255,6 +1255,40 @@ require('packer').startup({function(use)
   }
 
   use {
+    "akinsho/toggleterm.nvim",
+    config = function()
+      require("toggleterm").setup {
+        size = function(term)
+          if term.direction == "horizontal" then
+            return vim.o.lines * 0.2
+          elseif term.direction == "vertical" then
+            return vim.o.columns * 0.4
+          end
+        end,
+        open_mapping = [[<c-`>]],
+        winbar = {
+          enabled = true,
+        }
+      }
+      vim.keymap.set('n', '<localleader>t', "<cmd>exe v:count1 . 'ToggleTerm direction=vertical'<cr>")
+
+      -- lazy git
+      local Terminal  = require('toggleterm.terminal').Terminal
+      local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
+
+      local function lazygit_toggle()
+        lazygit:toggle()
+      end
+
+      vim.keymap.set("n", "<c-g>", lazygit_toggle, {noremap = true, silent = true})
+
+      -- repl
+      vim.keymap.set("n", "<c-c><c-c>", "<cmd>ToggleTermSendCurrentLine<cr>")
+      vim.keymap.set("v", "<c-c><c-c>", "<cmd>ToggleTermSendVisualLines<cr>")
+    end
+  }
+
+  use {
     'nvim-treesitter/nvim-treesitter',
     run = ':TSUpdate',
     config = function()
@@ -2427,19 +2461,6 @@ require('packer').startup({function(use)
   }
 
   use {
-    'jpalardy/vim-slime',
-    opt = true,
-    config = function()
-      vim.g.slime_target = "neovim"
-      vim.g.slime_no_mappings = 1
-      vim.cmd[[command! SlimeShowChannel echo &channel]]
-      vim.keymap.set('x', '<c-c><c-c>', "<Plug>SlimeRegionSend", { silent = true })
-      vim.keymap.set('n', '<c-c><c-c>', "<Plug>SlimeParagraphSend", { silent = true })
-      vim.keymap.set('n', '<c-c><c-v>', "<cmd>SlimeShowChannel<cr>", { silent = true })
-    end
-  }
-
-  use {
     'neoclide/coc.nvim',
     opt = true,
     run = 'yarn install --frozen-lockfile',
@@ -2961,7 +2982,6 @@ function lazyLoadPlugins()
   'vim-log-highlighting',
   'vim-visual-multi',
   'vim-bookmarks',
-  'vim-slime',
   -- 'coc.nvim',
   -- end vim plugins
 
