@@ -379,9 +379,6 @@ endif
 set foldlevel=99
 set foldcolumn=1
 
-" 加载项目自定义配置(为了兼容使用.exrc)
-set exrc
-
 " zsh shell
 set shell=zsh
 
@@ -454,6 +451,8 @@ function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim�
 
   " source again to load plugin configs
   if filereadable(expand(getcwd() . "/.exrc"))
+    " 加载项目自定义配置(为了兼容使用.exrc)
+    set exrc
     source .exrc
   endif
 endfunction

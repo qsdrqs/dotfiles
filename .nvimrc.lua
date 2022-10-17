@@ -307,11 +307,17 @@ require('packer').startup({function(use)
       -- See https://github.com/mfussenegger/nvim-jdtls#java-debug-installation
       --
       -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
-      jdt_config.init_options = {
-        bundles = {
-          vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
-        },
+      local bundles = {
+        vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-0.41.0.jar")
       }
+      vim.list_extend(bundles, vim.split(vim.fn.glob(
+          vim.fn.stdpath('data') .. "/mason/packages/java-test/extension/server/*.jar"), "\n"))
+      jdt_config.init_options = {
+        bundles = bundles,
+      }
+
+      vim.api.nvim_create_user_command("JdtDebugTestClass", "lua require('jdtls').test_class()", {})
+      vim.api.nvim_create_user_command("JdtDebugTestMethod", "lua require('jdtls').test_nearest_method()", {})
 
       jdt_config.on_attach = function(client, bufnr)
         -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
@@ -2699,19 +2705,19 @@ require('packer').startup({function(use)
       vim.cmd('hi debugRed guifg=red')
       vim.fn.sign_define('DapBreakpoint', {text='🛑', texthl='debugRed', linehl='', numhl=''})
       dap.defaults.fallback.terminal_win_cmd = 'vertical rightbelow 50new'
-      -- vim.keymap.set('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { silent = true })
-      vim.keymap.set('n', '<F2>', '<Cmd>lua require"dap".terminate({},{terminateDebuggee=true},term_dap())<CR>', { silent = true })
-      vim.keymap.set('n', '<F5>', '<Cmd>lua require"dap".continue()<CR>', { silent = true })
-      vim.keymap.set('n', '<leader><F5>', '<Cmd>lua require"dap".run_to_cursor()<CR>', { silent = true })
-      vim.keymap.set('n', '<F6>', '<Cmd>lua require"dap".pause()<CR>', { silent = true })
-      vim.keymap.set('n', '<F6>',  '<Cmd>lua require"dap".pause()<CR>' , { silent = true })
-      vim.keymap.set('n', '<F10>', '<Cmd>lua require"dap".step_over()<CR>' , { silent = true })
-      vim.keymap.set('n', '<F11>', '<Cmd>lua require"dap".step_into()<CR>' , { silent = true })
-      vim.keymap.set('n', '<F12>', '<Cmd>lua require"dap".step_out()<CR>' , { silent = true })
-      vim.keymap.set('n', '<F9>',  '<Cmd>lua require"dap".toggle_breakpoint()<CR>' , { silent = true })
-      vim.keymap.set('n', '<leader><F9>', '<Cmd>lua require"dap".clear_breakpoints()<CR>' , { silent = true })
-      vim.keymap.set('n', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { silent = true })
-      vim.keymap.set('v', '<F7>', '<Cmd>lua require("dapui").eval()<CR>' , { silent = true })
+      -- vim.keymap.set('n', '<F2>', 'dap.terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { silent = true })
+      vim.keymap.set('n', '<F2>', function() dap.terminate({},{terminateDebuggee=true}, term_dap()) end, { silent = true })
+      vim.keymap.set('n', '<F5>', dap.continue, { silent = true })
+      vim.keymap.set('n', '<leader><F5>', dap.run_to_cursor, { silent = true })
+      vim.keymap.set('n', '<F6>', dap.pause, { silent = true })
+      vim.keymap.set('n', '<F6>', dap.pause, { silent = true })
+      vim.keymap.set('n', '<F10>', dap.step_over, { silent = true })
+      vim.keymap.set('n', '<F11>', dap.step_into, { silent = true })
+      vim.keymap.set('n', '<F12>', dap.step_out, { silent = true })
+      vim.keymap.set('n', '<F9>', dap.toggle_breakpoint,  { silent = true })
+      vim.keymap.set('n', '<leader><F9>', dap.clear_breakpoints, { silent = true })
+      vim.keymap.set('n', '<F7>', require("dapui").eval, { silent = true })
+      vim.keymap.set('v', '<F7>', require("dapui").eval, { silent = true })
 
       -- C/C++
       dap.adapters.cppdbg = {
@@ -2726,7 +2732,6 @@ require('packer').startup({function(use)
       callback({ type = "server", host = config.host, port = config.port })
       end ]]
 
-      local dap = require('dap')
       dap.adapters.lldb = {
         type = 'server',
         port = "${port}",
@@ -2740,16 +2745,41 @@ require('packer').startup({function(use)
         }
       }
 
+      dap.configurations.cuda = {
+        {
+          name = "Launch file",
+          type = "cppdbg",
+          -- type = "lldb",
+          request = "launch",
+          miDebuggerServerAddress = "localhost:9091",
+          miDebuggerPath = "/opt/cuda/bin/cuda-gdb",
+          -- stopOnEntry = true,
+          program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+          end,
+          externalConsole = false,
+          -- program = "./${fileBasenameNoExtension}",
+          cwd = '${workspaceFolder}',
+          setupCommands = {
+            {
+              text = '-enable-pretty-printing',
+              description =  'enable pretty printing',
+              ignoreFailures = false 
+            },
+          },
+        },
+      }
       dap.configurations.cpp = {
         {
           name = "Launch file",
-          -- type = "cppdbg",
-          type = "lldb",
+          type = "cppdbg",
+          -- type = "lldb",
           request = "launch",
           -- stopOnEntry = true,
           program = function()
             return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
           end,
+          externalConsole = false,
           -- program = "./${fileBasenameNoExtension}",
           cwd = '${workspaceFolder}',
           setupCommands = {
@@ -2886,6 +2916,10 @@ require('packer').startup({function(use)
             position = "bottom",
           },
         },
+        controls = {
+          enabled = true,
+          -- element = "watches"
+        },
         floating = {
           max_height = nil, -- These can be integers or a float between 0 and 1.
           max_width = nil, -- Floats will be treated as percentage of your screen.
@@ -2896,6 +2930,21 @@ require('packer').startup({function(use)
         },
         windows = { indent = 1 },
       })
+
+      -- dapui control panel
+      -- local buf_name = "DAP Watches"
+      -- vim.api.nvim_create_autocmd("BufEnter", {
+      --   pattern = buf_name,
+      --   callback = function()
+      --     vim.defer_fn(function()
+      --       if vim.fn.expand("%") == buf_name then
+      --         local control_win = vim.fn.bufwinid(buf_name)
+      --         vim.notify("DAPUI control panel")
+      --         pcall(vim.api.nvim_win_set_option, control_win, "winbar", dapui.controls())
+      --       end
+      --     end, 100)
+      --   end,
+      -- })
 
       local dap = require("dap")
       dap.listeners.after.event_initialized["dapui_config"] = function()
@@ -3064,8 +3113,27 @@ function _G.qftf(info)
   else
     items = vim.fn.getloclist(info.winid, {id = info.id, items = 0}).items
   end
-  local limit = 31
-  local fname_fmt1, fname_fmt2 = '%-' .. limit .. 's', '…%.' .. (limit - 1) .. 's'
+  local limit = 99
+  -- get maximum length of file name
+  local max = 0
+  for i = info.start_idx, info.end_idx do
+    local e = items[i]
+    if e.valid == 1 then
+      if e.bufnr > 0 then
+        local fname = vim.fn.bufname(e.bufnr)
+        if max < #fname then
+          max = #fname
+        end
+      end
+    end
+  end
+  local length = 0
+  if max < limit then
+    length = max
+  else
+    length = limit
+  end
+  local fname_fmt1, fname_fmt2 = '%-' .. length .. 's', '…%.' .. (length - 1) .. 's'
   local valid_fmt = '%s │%5d:%-3d│%s %s'
   for i = info.start_idx, info.end_idx do
     local e = items[i]
@@ -3080,10 +3148,10 @@ function _G.qftf(info)
           fname = fname:gsub('^' .. os.getenv("HOME"), '~')
         end
         -- char in fname may occur more than 1 width, ignore this issue in order to keep performance
-        if #fname <= limit then
+        if #fname <= length then
           fname = fname_fmt1:format(fname)
         else
-          fname = fname_fmt2:format(fname:sub(1 - limit))
+          fname = fname_fmt2:format(fname:sub(1 - length))
         end
       end
       local lnum = e.lnum > 99999 and -1 or e.lnum
