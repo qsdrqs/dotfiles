@@ -496,7 +496,6 @@ require('packer').startup({function(use)
           handlers = {
             ["textDocument/publishDiagnostics"] = vim.lsp.with(
               vim.lsp.diagnostic.on_publish_diagnostics, {
-                virtual_text = true,
                 signs = true,
                 underline = true,
                 update_in_insert = false,
@@ -640,7 +639,7 @@ require('packer').startup({function(use)
           local caps = client.server_capabilities
           if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
             local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
-            vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
+            vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave", "TextChangedI"}, {
               group = augroup,
               buffer = bufnr,
               callback = function()
@@ -1172,15 +1171,17 @@ require('packer').startup({function(use)
         end
 
         -- add left parenthesis if missing
-        local maybe_left_parenthesis = nil
-        if string.find(end_virt_text[1][1], "}") and not string.find(start_virt_text[#start_virt_text][1], "{") then
-          maybe_left_parenthesis = {" {", end_virt_text[1][2]}
-        end
-        if string.find(end_virt_text[1][1], "]") and not string.find(start_virt_text[#start_virt_text][1], "[") then
-          maybe_left_parenthesis = {" [", end_virt_text[1][2]}
-        end
-        if string.find(end_virt_text[1][1], ")") and not string.find(start_virt_text[#start_virt_text][1], "(") then
-          maybe_left_parenthesis = {" (", end_virt_text[1][2]}
+        if end_virt_text[1] ~= nil and start_virt_text[#start_virt_text] ~= nil then
+          local maybe_left_parenthesis = nil
+          if string.find(end_virt_text[1][1], "}") and not string.find(start_virt_text[#start_virt_text][1], "{") then
+            maybe_left_parenthesis = {" {", end_virt_text[1][2]}
+          end
+          if string.find(end_virt_text[1][1], "]") and not string.find(start_virt_text[#start_virt_text][1], "[") then
+            maybe_left_parenthesis = {" [", end_virt_text[1][2]}
+          end
+          if string.find(end_virt_text[1][1], ")") and not string.find(start_virt_text[#start_virt_text][1], "(") then
+            maybe_left_parenthesis = {" (", end_virt_text[1][2]}
+          end
         end
 
         if end_virt_text_width > 5 then
