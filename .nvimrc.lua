@@ -390,11 +390,6 @@ require('packer').startup({function(use)
       local lspconfig = require('lspconfig')
 
       function common_on_attach(client, bufnr)
-        local status_ok, aerial = pcall(require, 'aerial')
-        if status_ok then
-          aerial.on_attach(client, bufnr)
-        end
-
         -- Enable completion triggered by <c-x><c-o>
         vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
@@ -482,7 +477,7 @@ require('packer').startup({function(use)
       }
 
       function get_lsp_common_config()
-        local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+        local capabilities = require('cmp_nvim_lsp').default_capabilities()
         capabilities.textDocument.foldingRange = {
           dynamicRegistration = false,
           lineFoldingOnly = true
@@ -511,7 +506,7 @@ require('packer').startup({function(use)
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
       local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver' }
       for _, lsp in ipairs(servers) do
-        local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+        local capabilities = require('cmp_nvim_lsp').default_capabilities()
         capabilities.textDocument.foldingRange = {
           dynamicRegistration = false,
           lineFoldingOnly = true
@@ -1325,6 +1320,10 @@ require('packer').startup({function(use)
             -- Using this option may slow down your editor, and you may see some duplicate highlights.
             -- Instead of true it can also be a list of languages
             additional_vim_regex_highlighting = true,
+            custom_captures = {
+              -- disable comment hightlight (for javadoc)
+              ["comment"] = "NONE",
+            }
           },
           indent = {
             enable = false
@@ -1342,10 +1341,6 @@ require('packer').startup({function(use)
           filetype = "matlab", -- if filetype does not agrees with parser name
         }
 
-        -- disable comment hightlight (for javadoc)
-        require"nvim-treesitter.highlight".set_custom_captures {
-          ["comment"] = "NONE",
-        }
       end
 
     end
@@ -1628,7 +1623,9 @@ require('packer').startup({function(use)
         icons = {
           Namespace = " ",
         },
-        max_width = 200,
+        layout = {
+          max_width = 200,
+        },
         disable_max_lines = -1,
       })
       -- winbar
