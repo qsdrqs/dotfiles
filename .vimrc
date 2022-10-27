@@ -84,6 +84,7 @@ else
   nnoremap <silent>c <C-W>c
   nnoremap <silent>o <C-W>o
 endif
+
 nnoremap <right> :vertical resize+1<CR>
 nnoremap <up> :res +1<CR>
 nnoremap <down> :res -1<CR>
