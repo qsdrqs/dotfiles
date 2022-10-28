@@ -218,7 +218,8 @@ if [ -e "/usr/bin/virtualenvwrapper.sh" ]; then
     export VIRTUALENVWRAPPER_PYTHON=/bin/python3
     export WORKON_HOME=~/.virtualenvs
     export PROJECT_HOME=~/PythonProject
-    source /usr/bin/virtualenvwrapper.sh
+    # NOTE: hide error messages
+    source /usr/bin/virtualenvwrapper.sh 2>/dev/null
 fi
 
 # Compilation flags
