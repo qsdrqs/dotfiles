@@ -45,10 +45,14 @@ export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+# use console to type gpg passphrase
+export GPG_TTY=$(tty)
+
 #Make alacritty compatible with SSH
 if [[ $TERM != "xterm-kitty" ]]; then
     export TERM="xterm-256color"
 fi
+
 
 if [[ $TERM == "xterm-kitty" ]]; then
     #alias ssh="kitty +kitten ssh"
