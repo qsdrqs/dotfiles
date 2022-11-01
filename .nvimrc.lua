@@ -90,7 +90,6 @@ require('packer').startup({function(use)
     end
   }
 
-
   use {
     'kevinhwang91/nvim-bqf',
     opt = false,

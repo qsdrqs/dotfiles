@@ -218,7 +218,7 @@ if [ -e "/usr/bin/virtualenvwrapper.sh" ]; then
     export VIRTUALENVWRAPPER_PYTHON=/bin/python3
     export WORKON_HOME=~/.virtualenvs
     export PROJECT_HOME=~/PythonProject
-    # NOTE: hide error messages
+    # NOTE: temporary disable error output
     source /usr/bin/virtualenvwrapper.sh 2>/dev/null
 fi
 
