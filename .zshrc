@@ -55,7 +55,12 @@ fi
 
 
 if [[ $TERM == "xterm-kitty" ]]; then
-    #alias ssh="kitty +kitten ssh"
+    # use xterm-256color in tmux
+    # if [[ $TMUX == "" ]]; then
+    #     alias ssh="kitty +kitten ssh"
+    # else
+    #     export TERM="xterm-256color"
+    # fi
 fi
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -163,6 +168,13 @@ function zsh_install(){
 zle -N zle-keymap-select
 echo -ne '\e[5 q'
 
+#To make zsh colorful by grc
+[[ -s "/etc/grc.zsh"  ]] && source /etc/grc.zsh
+# for gentoo
+[[ -s "/usr/share/grc/grc.zsh"  ]] && source /usr/share/grc/grc.zsh
+# for termux
+[[ -s "$HOME/grc/grc.zsh"  ]] && source $HOME/grc/grc.zsh
+
 # 加快加载速度
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
@@ -170,9 +182,6 @@ fi
 
 #init zsh
 source $ZSH/oh-my-zsh.sh
-
-#To make zsh colorful by grc
-[[ -s "/etc/grc.zsh"  ]] && source /etc/grc.zsh
 
 # 光标形状随模式改变
 function zle-keymap-select {

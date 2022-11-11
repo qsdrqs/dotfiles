@@ -328,6 +328,7 @@ endif
 
 "-------------------netrw-----------------------"}}}
 set diffopt=vertical
+set diffopt+=linematch:50
 
 set synmaxcol=0 " 取消最大行数限制
 

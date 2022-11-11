@@ -1272,6 +1272,7 @@ require('packer').startup({function(use)
         }
       }
       vim.keymap.set('n', '<localleader>t', "<cmd>exe v:count1 . 'ToggleTerm direction=vertical'<cr>")
+      vim.keymap.set('n', '<localleader>T', "<cmd>exe v:count1 . 'ToggleTerm'<cr>")
 
       -- lazy git
       local Terminal  = require('toggleterm.terminal').Terminal
@@ -2308,6 +2309,18 @@ require('packer').startup({function(use)
     'numToStr/Comment.nvim',
     opt = true,
     config = function()
+      local bindkey
+      if os.getenv("TMUX") ~= nil then
+        bindkey = {
+          line = '<c-_>',
+          block = '<c-s-_>',
+        }
+      else
+        bindkey = {
+          line = '<c-/>',
+          block = '<c-s-/>',
+        }
+      end
       require('Comment').setup {
         ---Add a space b/w comment and the line
         padding = true,
@@ -2315,14 +2328,8 @@ require('packer').startup({function(use)
         sticky = true,
         ---Lines to be ignored while (un)comment
         ignore = nil,
-        toggler = {
-          line = '<c-/>',
-          block = '<c-s-/>',
-        },
-        opleader = {
-          line = '<c-/>',
-          block = '<c-s-/>',
-        },
+        toggler = bindkey,
+        opleader = bindkey,
         mappings = {
           basic = true,
           extra = true,
@@ -2333,6 +2340,10 @@ require('packer').startup({function(use)
         ---Function to call after (un)comment
         post_hook = nil,
       }
+
+      local api = require('Comment.api')
+      vim.api.nvim_create_user_command("ToggleComment", api.toggle.linewise.current, {})
+      vim.api.nvim_create_user_command("ToggleBlockComment", api.toggle.blockwise.current, {})
     end
   }
 
