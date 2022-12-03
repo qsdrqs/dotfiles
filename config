@@ -31,7 +31,7 @@ exec_always --no-startup-id xss-lock -- /usr/lib/kscreenlocker_greet
 # and nm-applet is a desktop environment-independent system tray GUI xfor it.
 #exec_always ~/init/disable_wireless_aspm.sh #This makes wifi on SurfacePro5 works well.
 exec_always --no-startup-id ~/init/*
-#exec_always --no-startup-id nm-applet
+exec_always --no-startup-id nm-applet
 
 #防誤觸
 #exec_always --no-startup-id syndaemon -i 0.5 -R

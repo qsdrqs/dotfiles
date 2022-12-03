@@ -301,8 +301,8 @@ hi! link DiagnosticUnderlineWarn WarningMsg
 hi! link DiagnosticUnderlineInfo GhLightBlue
 hi! link DiagnosticUnderlineHint GhBase3
 
-hi! link DiagnosticError ErrorMsg
-hi! link DiagnosticWarn WarningMsg
+hi! DiagnosticError guifg=#fa7970 guibg=None guisp=#Fa7970
+hi! DiagnosticWarn guifg=#faa356 guibg=None guisp=#faa356
 hi! link DiagnosticInfo GhLightBlue
 hi! link DiagnosticHint GhBase3
 
@@ -728,19 +728,19 @@ highlight! CmpItemAbbrMatch guibg=NONE guifg=#569CD6 gui=bold
 highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#569CD6 gui=bold
 
 " light blue
-highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE gui=italic
-highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE gui=italic
-highlight! CmpItemKindEnum guibg=NONE guifg=#9CDCFE gui=italic
+highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE
+highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE
+highlight! CmpItemKindEnum guibg=NONE guifg=#9CDCFE
 " pink
-highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0 gui=italic
-highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0 gui=italic
+highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0
+highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0
 " front
-highlight! CmpItemKindText guibg=NONE guifg=#D4D4D4 gui=italic
-highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4 gui=italic
-highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4 gui=italic
+highlight! CmpItemKindText guibg=NONE guifg=#D4D4D4
+highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4
+highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4
 " yellow
-highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E gui=italic
-highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E gui=italic
-highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252 gui=italic
+highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E
+highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E
+highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252
 
 autocmd Filetype vim,lua highlight! link Type Class

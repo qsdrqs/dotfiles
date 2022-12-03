@@ -164,7 +164,10 @@ require('packer').startup({function(use)
       require'hlslens'.setup {
         calm_down = false,
         nearest_only = true,
-        nearest_float_when = 'auto'
+        nearest_float_when = 'auto',
+        build_position_cb = function(plist, _, _, _)
+            require("scrollbar.handlers.search").handler.show(plist.start_pos)
+        end,
       }
     end
   }
@@ -547,8 +550,7 @@ require('packer').startup({function(use)
           table.insert(runtime_path, "lua/?.lua")
           table.insert(runtime_path, "lua/?/init.lua")
 
-          if vim.fn.expand('%') == '.nvimrc.lua' then
-            -- TODO: not work for no-lazyload plugins
+          if string.find(vim.fn.expand('%'), '.nvimrc.lua') then
             lsp_common_config.autostart = false
           end
           lsp_common_config.settings = {
@@ -574,11 +576,7 @@ require('packer').startup({function(use)
             },
           }
         end
-          if vim.fn.expand('%') == '.nvimrc.lua' then
-            lsp_common_config.autostart = false
-          end
-
-        lspconfig[lsp].setup(lsp_common_config)
+          lspconfig[lsp].setup(lsp_common_config)
       end
 
 
@@ -612,6 +610,46 @@ require('packer').startup({function(use)
       -- code len
       vim.keymap.set('n', '<leader>cl', '<cmd>lua vim.lsp.codelens.run()<CR>', opts)
       vim.cmd [[hi! link LspCodeLens specialkey]]
+
+      -- format code
+      local function formatBuf()
+        local modes = {"i", "s"}
+        local mode = vim.fn.mode()
+
+        for _,v in pairs(modes) do
+          if mode == v then
+            return
+          end
+        end
+
+        vim.lsp.buf.format{ async = true }
+      end
+
+      local function formatTriggerHandler()
+        if vim.g.format_on_save == 1 then
+          vim.defer_fn(formatBuf, 1000)
+        end
+      end
+
+      function formatTrigger()
+        if not vim.g.format_on_save or vim.g.format_on_save == 0 then
+          vim.g.format_on_save = 1
+          print("Format On Save: ON")
+        elseif vim.g.format_on_save == 1 then
+          vim.g.format_on_save = 0
+          print("Format On Save: OFF")
+        end
+      end
+
+      -- defer 1000 ms for formatters
+      -- vim.cmd[[ au BufWritePost <buffer> silent lua vim.defer_fn(formatBuf, 1000) ]]
+      vim.api.nvim_create_autocmd({"BufWritePost"}, {
+        pattern = "*",
+        callback = formatTriggerHandler,
+      })
+      vim.cmd[[ command! AFTrigger lua formatTrigger() ]]
+      vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
+
     end
   }
 
@@ -684,7 +722,6 @@ require('packer').startup({function(use)
     branch = "anticonceal",
     config = function()
       require("lsp-inlayhints").setup({
-        debug_mode = true,
       })
       vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -768,83 +805,20 @@ require('packer').startup({function(use)
   }
 
   use {
-    'mhartington/formatter.nvim',
+    -- can be used as formatter
+    "jose-elias-alvarez/null-ls.nvim",
     config = function()
-      require("formatter").setup({
-        filetype = {
-          python = {
-            function()
-              return {
-                exe = "python3 -m autopep8",
-                args = {
-                  "--in-place --aggressive --aggressive",
-                  vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))
-                },
-                stdin = false,
-                ignore_exitcode = true,
-              }
-            end
-          },
-          javascript = {
-            function()
-              return {
-                exe = "prettier",
-                args = {
-                  "--stdin-filepath",
-                  vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))
-                },
-                stdin = true,
-              }
-            end
-          },
-        }
+      local null_ls = require("null-ls")
+
+      null_ls.setup({
+        sources = {
+          null_ls.builtins.diagnostics.eslint,
+          -- null_ls.builtins.completion.spell,
+          null_ls.builtins.formatting.autopep8,
+          null_ls.builtins.formatting.prettier,
+          null_ls.builtins.completion.tags
+        },
       })
-
-      -- formatters
-      local function formatBuf()
-        local modes = {"i", "s"}
-        local mode = vim.fn.mode()
-
-        for _,v in pairs(modes) do
-          if mode == v then
-            return
-          end
-        end
-
-        local no_lsp_formatters = {'python', 'javascript'}
-        for _,v in pairs(no_lsp_formatters) do
-          if vim.o.filetype == v then
-            vim.cmd("Format")
-            return
-          end
-        end
-          vim.lsp.buf.format{ async = true }
-      end
-
-      local function formatTriggerHandler()
-        if vim.g.format_on_save == 1 then
-          vim.defer_fn(formatBuf, 1000)
-        end
-      end
-
-      function formatTrigger()
-        if not vim.g.format_on_save or vim.g.format_on_save == 0 then
-          vim.g.format_on_save = 1
-          print("Format On Save: ON")
-        elseif vim.g.format_on_save == 1 then
-          vim.g.format_on_save = 0
-          print("Format On Save: OFF")
-        end
-      end
-
-      -- defer 1000 ms for formatters
-      -- vim.cmd[[ au BufWritePost <buffer> silent lua vim.defer_fn(formatBuf, 1000) ]]
-      vim.api.nvim_create_autocmd({"BufWritePost"}, {
-        pattern = "*",
-        callback = formatTriggerHandler,
-      })
-      vim.cmd[[ command! AFTrigger lua formatTrigger() ]]
-      vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
     end
   }
 
@@ -1117,6 +1091,14 @@ require('packer').startup({function(use)
       vim.cmd[[ command! CmpDisable lua require('cmp').setup{enabled=false} ]]
       vim.cmd[[ command! CmpEnable lua require('cmp').setup{enabled=true} ]]
     end
+  }
+
+  use {
+    -- permanent undo file
+    'kevinhwang91/nvim-fundo',
+    run = function()
+      require('fundo').install()
+    end,
   }
 
   use {
@@ -1715,9 +1697,59 @@ require('packer').startup({function(use)
 
       vim.cmd[[ hi link AerialWinHLFields Constant ]]
       vim.cmd[[ hi link AerialWinHLFile FileName ]]
-      vim.o.winbar = " %#AerialWinHLFile#%{%v:lua.filename_with_icon()%} %#AerialWinHLFields#%{%v:lua.winbar_aerial()%}"
+      -- vim.o.winbar = " %#AerialWinHLFile#%{%v:lua.filename_with_icon()%} %#AerialWinHLFields#%{%v:lua.winbar_aerial()%}"
 
     end
+  }
+
+  use {
+    "utilyre/barbecue.nvim",
+    requires = {
+      "neovim/nvim-lspconfig",
+      "smiteshp/nvim-navic",
+      "kyazdani42/nvim-web-devicons", -- optional
+    },
+    config = function()
+      vim.cmd [[
+      hi! link NavicSeparator NonText
+      ]]
+
+      require("barbecue").setup {
+        symbols = {
+          separator = ">",
+        },
+        kinds = {
+          File          = " ",
+          Module        = " ",
+          Namespace     = " ",
+          Package       = " ",
+          Class         = " ",
+          Method        = " ",
+          Property      = " ",
+          Field         = " ",
+          Constructor   = " ",
+          Enum          = "練",
+          Interface     = "練",
+          Function      = " ",
+          Variable      = " ",
+          Constant      = " ",
+          String        = " ",
+          Number        = " ",
+          Boolean       = "◩ ",
+          Array         = " ",
+          Object        = " ",
+          Key           = " ",
+          Null          = "ﳠ ",
+          EnumMember    = " ",
+          Struct        = " ",
+          Event         = " ",
+          Operator      = " ",
+          TypeParameter = " ",
+        }
+      }
+      -- init update
+      require("barbecue.ui").toggle(true)
+    end,
   }
 
 -- git signs
@@ -1798,6 +1830,16 @@ require('packer').startup({function(use)
     end
   }
 
+  use {
+    "akinsho/git-conflict.nvim",
+    config = function()
+      require('git-conflict').setup {
+        default_mappings = false
+      }
+      vim.keymap.set('n', "]c", "<cmd>GitConflictNextConflict<cr>")
+      vim.keymap.set('n', "[c", "<cmd>GitConflictPrevConflict<cr>")
+    end
+  }
 
   -- colorizer
   use {
@@ -1868,16 +1910,26 @@ require('packer').startup({function(use)
           if next(clients) == nil then
             return no_lsp
           end
+          local client_names = {}
           for _, client in ipairs(clients) do
             local filetypes = client.config.filetypes
             if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-              return client.name
+              table.insert(client_names, client.name)
             end
           end
-          if clients[1].name ~= nil then
-            return clients[1].name
-          else
+          if next(client_names) == nil then
             return no_lsp
+          else
+            -- remove duplicate items
+            local seen = {}
+            local unique = {}
+            for _, v in ipairs(client_names) do
+              if not seen[v] then
+                table.insert(unique, v)
+                seen[v] = true
+              end
+            end
+            return table.concat(unique, ', ')
           end
         end,
         icon = ' ',
@@ -2420,6 +2472,34 @@ require('packer').startup({function(use)
   }
 
   use {
+    'petertriho/nvim-scrollbar',
+    opt = true,
+    config = function()
+      require("scrollbar").setup {
+        handle = {
+          color = "CursorColumn",
+        },
+        marks = {
+          GitAdd = {
+            text = "│",
+          },
+          GitChange = {
+            text = "│"
+          },
+          Search = {
+            highlight = "IncSearch"
+          }
+        },
+        handlers = {
+          cursor = false,
+        }
+      }
+      require("scrollbar.handlers.gitsigns").setup()
+      require("scrollbar.handlers.search").setup()
+    end
+  }
+
+  use {
     'h-hg/fcitx.nvim',
     opt = false,
   }
@@ -2682,14 +2762,12 @@ require('packer').startup({function(use)
   }
 
  --管理gtags，集中存放tags
-  use {'ludovicchabant/vim-gutentags', opt = true, }
   use {
-    'skywind3000/gutentags_plus',
+    'ludovicchabant/vim-gutentags',
     opt = true,
     config = function()
-      -- enable gtags module
       -- vim.g.gutentags_modules = {'ctags', 'gtags_cscope'}
-      vim.g.gutentags_modules = {'gtags_cscope'}
+      vim.g.gutentags_modules = {'ctags'}
 
       -- config project root markers.
       vim.g.gutentags_project_root = {'.root', '.svn', '.git', '.hg', '.project', '.exrc', "pom.xml"}
@@ -3043,7 +3121,8 @@ function lazyLoadPlugins()
   -- end vim plugins
 
   -- begin misc
-  -- 'nvim-hlslens',
+  'nvim-hlslens',
+  'nvim-scrollbar',
   'nvim-scrollview',
   'Comment.nvim',
   'vim-illuminate',
@@ -3076,8 +3155,9 @@ function lazyLoadPlugins()
 end
 
 function loadTags()
-  require('packer').loader('vim-gutentags gutentags_plus', '<bang>' == '!')
+  require('packer').loader('vim-gutentags', '<bang>' == '!')
   vim.cmd("edit %")
+  vim.keymap.set('n', '<leader>gt', "<cmd>exec 'ltag ' . expand('<cword>') . '| lopen' <CR>", { silent = false })
 end
 vim.cmd("command! LoadTags lua loadTags()")
 
@@ -3210,6 +3290,12 @@ if os.getenv("SSH_CONNECTION") ~= nil then
   })
   -- vim.g.oscyank_term = 'default'
 end
+
+-- require('fundo').setup()
+
+---------------------------vscode neovim----------------------------------------------
+--TODO
+--------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------
 if vim.fn.expand('%:t') == '.nvimrc.lua' then

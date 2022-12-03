@@ -192,6 +192,7 @@ set completeopt=menu,menuone,noinsert
 
 set mouse=a
 set fileformat=unix
+set autoindent
 filetype on
 filetype plugin on
 filetype plugin indent on
@@ -328,7 +329,13 @@ endif
 
 "-------------------netrw-----------------------"}}}
 set diffopt=vertical
-set diffopt+=linematch:50
+if has('nvim')
+" get the version of neovim
+  let nvim_ver = luaeval("vim.version()")
+  if nvim_ver.minor > 8
+    set diffopt+=linematch:50
+  end
+end
 
 set synmaxcol=0 " 取消最大行数限制
 
@@ -433,6 +440,9 @@ endif
 function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim插件
   " recover_line means whether to recover the line number after loading plugins
   " because some plugins may change the line number.
+  if exists('g:loadplugins') && g:loadplugins == 1
+    return
+  endif
   let max_line = 20000 " file exceed 20000 lines will disable treesitter
   if line('$') > max_line
     let b:treesitter_disable = 1
@@ -447,7 +457,7 @@ function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim�
     lua lazyLoadPlugins()
     exec line_num
   else
-    lua lazyLoadPlugins()
+    lua vim.defer_fn(function() lazyLoadPlugins() end, 0)
   end
   let g:loadplugins = 1
 
