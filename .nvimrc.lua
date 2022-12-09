@@ -506,7 +506,7 @@ require('packer').startup({function(use)
       end
 
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
-      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver' }
+      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver', "cmake" }
       for _, lsp in ipairs(servers) do
         local capabilities = require('cmp_nvim_lsp').default_capabilities()
         capabilities.textDocument.foldingRange = {
@@ -650,70 +650,31 @@ require('packer').startup({function(use)
       vim.cmd[[ command! AFTrigger lua formatTrigger() ]]
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
 
-    end
-  }
-
-  use {
-    'theHamsta/nvim-semantic-tokens',
-    config = function()
-      require("nvim-semantic-tokens").setup {
-        preset = "default",
-        highlighters = { require 'nvim-semantic-tokens.table-highlighter'}
-      }
-
-      vim.api.nvim_create_augroup("LspAttach_semantictokens", {})
-      vim.api.nvim_create_autocmd("LspAttach", {
-        group = "LspAttach_semantictokens",
-        callback = function(args)
-          local bufnr = args.buf
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-
-          local caps = client.server_capabilities
-          if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
-            local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
-            vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave", "TextChangedI"}, {
-              group = augroup,
-              buffer = bufnr,
-              callback = function()
-                vim.lsp.buf.semantic_tokens_full()
-              end,
-            })
-            -- fire it first time on load as well
-            vim.lsp.buf.semantic_tokens_full()
-            if client.name == "rust_analyzer" then
-              vim.defer_fn(function()
-                vim.lsp.buf.semantic_tokens_full()
-              end, 100)
-            end
-          end
-        end,
-      })
-
-      -- highlights
       vim.cmd [[
-        hi link LspNamespace       Class
-        hi link LspType            Label
-        hi link LspClass           Class
-        hi link LspEnum            Enum
-        hi link LspInterface       Class
-        hi link LspStruct          Struct
-        hi link LspTypeParameter   TypeParameter
-        hi link LspParameter       Parameter
-        hi link LspVariable        Variable
-        hi link LspProperty        Property
-        hi link LspEnumMember      EnumMember
-        hi link LspEvent           Event
-        hi link LspFunction        Function
-        hi link LspMethod          Function
-        hi link LspMacro           Macro
-        hi link LspKeyword         Keyword
-        hi link LspModifier        Modifier
-        hi link LspComment         Comment
-        hi link LspString          String
-        hi link LspNumber          Number
-        hi link LspRegexp          Regexp
-        hi link LspOperator        Operator
+        hi link @namespace       Class
+        hi link @type            Label
+        hi link @class           Class
+        hi link @enum            Enum
+        hi link @interface       Class
+        hi link @struct          Struct
+        hi link @typeParameter   TypeParameter
+        hi link @parameter       Parameter
+        hi link @variable        Variable
+        hi link @property        Property
+        hi link @enumMember      EnumMember
+        hi link @event           Event
+        hi link @function        Function
+        hi link @method          Function
+        hi link @macro           Macro
+        hi link @keyword         Keyword
+        hi link @modifier        Modifier
+        hi link @comment         Comment
+        hi link @string          String
+        hi link @number          Number
+        hi link @regexp          Regexp
+        hi link @operator        Operator
       ]]
+
     end
   }
 
