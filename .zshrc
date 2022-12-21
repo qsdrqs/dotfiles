@@ -40,6 +40,8 @@ export PATH=$HOME/.local/bin:$HOME/.local/sbin:$PATH
 export PATH="$PATH:$HOME/.vim/plugged/vim-superman/bin"
 # haskell
 export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
+# rust
+export PATH="$HOME/.cargo/bin:$PATH"
 [ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env" # ghcup-env
 
 # Path to your oh-my-zsh installation.

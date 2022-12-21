@@ -106,6 +106,7 @@ noremap L 7l
 noremap <C-q> ^
 noremap <C-e> $
 inoremap <c-q> <home>
+" 其实可以直接设置 inoremap <c-e> <end>, 因为现在的补全框架已经不再使用pum
 inoremap <expr><c-e> pumvisible() ? "\<c-e>" : "\<end>"
 
 "make Y same as D and C
@@ -392,6 +393,7 @@ set foldcolumn=1
 set shell=zsh
 
 " show current syntax highlighting
+" neovim can use ":Inspect" instead
 function! Syn()
   for id in synstack(line("."), col("."))
     echo synIDattr(id, "name")
@@ -413,7 +415,16 @@ endif
 " limit textwidth in markdown and latex
 autocmd FileType markdown,tex set textwidth=80
 
-set exrc
+" set exrc
+if filereadable(expand(getcwd() . "/.exrc"))
+  " 加载项目自定义配置(为了兼容使用.exrc)
+  if has('nvim')
+    " 判断是否可以安全加载exrc文件
+      if luaeval('vim.secure.read(vim.fn.expand(vim.fn.getcwd() .. "/.exrc")) ~= nil')
+        source .exrc
+      endif
+  endif
+endif
 
 "-------------------杂项-----------------------"}}}
 "
@@ -463,11 +474,8 @@ function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim�
   end
   let g:loadplugins = 1
 
-  " source again to load plugin configs
-  if filereadable(expand(getcwd() . "/.exrc"))
-    " 加载项目自定义配置(为了兼容使用.exrc)
-    source .exrc
-  endif
+  " execute autocmd
+  doautocmd User PluginsLoaded
 endfunction
 
 "运行无插件vim

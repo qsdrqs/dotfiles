@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------------
 
 -- vim.cmd [[packadd packer.nvim]]
-local status_ok, impatient = pcall(require, "impatient")
+local _, impatient = pcall(require, "impatient")
 local fn = vim.fn
 local plugins_path = fn.stdpath('data')..'/plugins'
 local install_path = plugins_path .. '/pack/packer/start/packer.nvim'
@@ -650,29 +650,32 @@ require('packer').startup({function(use)
       vim.cmd[[ command! AFTrigger lua formatTrigger() ]]
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
 
+      -- semantic highlighting
       vim.cmd [[
-        hi link @namespace       Class
-        hi link @type            Label
         hi link @class           Class
+        hi link @namespace       Class
         hi link @enum            Enum
         hi link @interface       Class
-        hi link @struct          Struct
         hi link @typeParameter   TypeParameter
-        hi link @parameter       Parameter
-        hi link @variable        Variable
+        hi link @enumMember      Constant
+        hi link @event           Identifier
+        hi link @modifier        Keyword
+        hi link @regexp          SpecialChar
+        hi link @decorator       PreProc
+        hi link @struct          Class
         hi link @property        Property
-        hi link @enumMember      EnumMember
-        hi link @event           Event
-        hi link @function        Function
-        hi link @method          Function
-        hi link @macro           Macro
-        hi link @keyword         Keyword
-        hi link @modifier        Modifier
-        hi link @comment         Comment
-        hi link @string          String
-        hi link @number          Number
-        hi link @regexp          Regexp
-        hi link @operator        Operator
+
+        "hi link @type            Label
+        "hi link @parameter       Parameter
+        "hi link @variable        Variable
+        "hi link @function        Function
+        "hi link @method          Function
+        "hi link @macro           Macro
+        "hi link @keyword         Keyword
+        "hi link @comment         Comment
+        "hi link @string          String
+        "hi link @number          Number
+        "hi link @operator        Operator
       ]]
 
     end
@@ -972,7 +975,10 @@ require('packer').startup({function(use)
               end
             end,
             i = function(fallback)
-              local copilot_keys = vim.fn["copilot#Accept"]()
+              local ok, copilot_keys = pcall(vim.fn["copilot#Accept"])
+              if not ok then
+                copilot_keys = ""
+              end
               if cmp.visible() then
                 -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                 cmp.confirm()
@@ -1113,7 +1119,7 @@ require('packer').startup({function(use)
           if string.find(end_virt_text[1][1], "}") and not string.find(start_virt_text[#start_virt_text][1], "{") then
             maybe_left_parenthesis = {" {", end_virt_text[1][2]}
           end
-          if string.find(end_virt_text[1][1], "]") and not string.find(start_virt_text[#start_virt_text][1], "[") then
+          if string.find(end_virt_text[1][1], "]") and not string.find(start_virt_text[#start_virt_text][1], "%[") then
             maybe_left_parenthesis = {" [", end_virt_text[1][2]}
           end
           if string.find(end_virt_text[1][1], ")") and not string.find(start_virt_text[#start_virt_text][1], "(") then
@@ -1799,6 +1805,7 @@ require('packer').startup({function(use)
       }
       vim.keymap.set('n', "]c", "<cmd>GitConflictNextConflict<cr>")
       vim.keymap.set('n', "[c", "<cmd>GitConflictPrevConflict<cr>")
+
     end
   }
 
@@ -1900,7 +1907,9 @@ require('packer').startup({function(use)
       vim.api.nvim_create_autocmd({"InsertEnter"}, {
         pattern = '*',
         callback = function()
-          require('packer').loader('copilot.vim')
+          if vim.g.no_load_copilot ~= 1 then
+            require('packer').loader('copilot.vim')
+          end
           vim.g.copilot_initialized = 1
         end,
         once = true
@@ -2311,7 +2320,9 @@ require('packer').startup({function(use)
         dashboard.section.footer,
       }
 
-      alpha.setup(dashboard.config)
+      if vim.g.not_start_alpha ~= true then
+        alpha.setup(dashboard.config)
+      end
 
     end
   }
@@ -2455,7 +2466,7 @@ require('packer').startup({function(use)
           cursor = false,
         }
       }
-      require("scrollbar.handlers.gitsigns").setup()
+      -- require("scrollbar.handlers.gitsigns").setup()
       require("scrollbar.handlers.search").setup()
     end
   }
@@ -2798,7 +2809,6 @@ require('packer').startup({function(use)
           type = "cppdbg",
           -- type = "lldb",
           request = "launch",
-          miDebuggerServerAddress = "localhost:9091",
           miDebuggerPath = "/opt/cuda/bin/cuda-gdb",
           -- stopOnEntry = true,
           program = function()
@@ -2922,7 +2932,10 @@ require('packer').startup({function(use)
 
       -- Dap load launch.json from vscode when avaliable
       if vim.fn.filereadable("./.vscode/launch.json") and vim.g.load_launchjs ~= 1 then
-        require('dap.ext.vscode').load_launchjs(nil, { cppdbg = {'c', 'cpp', 'asm'} })
+        require('dap.ext.vscode').load_launchjs(nil, {
+          cppdbg = {'c', 'cpp', 'asm'},
+          lldb = {'rust'},
+        })
         vim.g.load_launchjs = 1
       end
     end
@@ -3230,11 +3243,6 @@ autosave.setup {
   },
   trigger_events = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
 }
--- fix: #46
-local nvim_buf_set_var = vim.api.nvim_buf_set_var
-vim.api.nvim_buf_set_var = function(bufnr, ...)
-  return pcall(nvim_buf_set_var, bufnr, ...)
-end
 
 -- osc52 support on ssh
 if os.getenv("SSH_CONNECTION") ~= nil then
@@ -3252,7 +3260,7 @@ if os.getenv("SSH_CONNECTION") ~= nil then
   -- vim.g.oscyank_term = 'default'
 end
 
--- require('fundo').setup()
+require('fundo').setup()
 
 ---------------------------vscode neovim----------------------------------------------
 --TODO
