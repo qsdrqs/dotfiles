@@ -432,8 +432,8 @@ require('packer').startup({function(use)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
       -- vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
       -- vim.keymap.set('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-      vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-      -- vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
+      -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+      vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
       vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
       vim.keymap.set('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
       vim.keymap.set('n', '<space>aa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
@@ -1394,7 +1394,7 @@ require('packer').startup({function(use)
       end
       require("indent_blankline").setup {
         -- char = '▏',
-        -- context_char = '▏',
+        -- context_char = '▎',
         use_treesitter = false,
         space_char_blankline = " ",
         show_first_indent_level = true,
@@ -1822,7 +1822,7 @@ require('packer').startup({function(use)
     config = function()
       require("bufferline").setup {
         options = {
-          separator_style = "slant",
+          -- separator_style = "slant",
           diagnostics = "nvim_lsp",
           max_name_length = 100,
           -- name_formatter = function(buf)  -- buf contains a "name", "path" and "bufnr"
@@ -1842,6 +1842,20 @@ require('packer').startup({function(use)
             end
             return s
           end
+        },
+        highlights = {
+          indicator_selected = {
+              fg = {
+                attribute = "fg",
+                highlight = "Keyword"
+              }
+          },
+          separator = {
+            fg = {
+              attribute = "fg",
+              highlight = "SpecialKey"
+            }
+          }
         }
       }
     end
