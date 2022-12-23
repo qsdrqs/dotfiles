@@ -1511,6 +1511,14 @@ require('packer').startup({function(use)
           color = '#E36209',
         }
       end
+      local get_marks_limits = require('hlargs.util').get_marks_limits
+      require('hlargs.util').get_marks_limits = function(bufnr, marks_ns, extmark)
+        local mark_data = vim.api.nvim_buf_get_extmark_by_id(bufnr, marks_ns, extmark, {details=true})
+        if #mark_data == 0 then
+          return 0, 0
+        end
+        return mark_data[1], mark_data[3].end_row
+      end
     end
   }
 
@@ -1858,6 +1866,16 @@ require('packer').startup({function(use)
           }
         }
       }
+    end
+  }
+
+  use {
+    'Vonr/align.nvim',
+    opt = true,
+    keys = {'x', 'al'},
+    config = function()
+      local NS = { noremap = true, silent = true }
+      vim.keymap.set('x', 'al', function() require'align'.align_to_string(true, true, true)  end, NS)
     end
   }
 
