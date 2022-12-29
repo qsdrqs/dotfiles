@@ -42,6 +42,9 @@ export PATH="$PATH:$HOME/.vim/plugged/vim-superman/bin"
 export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 # rust
 export PATH="$HOME/.cargo/bin:$PATH"
+# nvim mason
+export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
+
 [ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env" # ghcup-env
 
 # Path to your oh-my-zsh installation.

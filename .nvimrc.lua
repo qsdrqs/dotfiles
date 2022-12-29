@@ -75,7 +75,8 @@ require('packer').startup({function(use)
       vim.keymap.set('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { silent = true })
       vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
       vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rs', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rw', '<cmd>Telescope lsp_dynamic_workspace_symbols<cr>', { silent = true })
       vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
       vim.keymap.set('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { silent = true })
     end
@@ -506,7 +507,7 @@ require('packer').startup({function(use)
       end
 
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
-      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver', "cmake" }
+      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver', "cmake", "gopls" }
       for _, lsp in ipairs(servers) do
         local capabilities = require('cmp_nvim_lsp').default_capabilities()
         capabilities.textDocument.foldingRange = {
@@ -664,9 +665,10 @@ require('packer').startup({function(use)
         hi link @decorator       PreProc
         hi link @struct          Class
         hi link @property        Property
+        hi link @selfKeyword     Parameter
+        hi link @parameter       Parameter
 
         "hi link @type            Label
-        "hi link @parameter       Parameter
         "hi link @variable        Variable
         "hi link @function        Function
         "hi link @method          Function
@@ -1552,21 +1554,9 @@ require('packer').startup({function(use)
         telescope.load_extension('aerial')
       end
       require("aerial").setup({
-        backends = {
-          _ = {"lsp", "treesitter", "markdown"},
-        },
-        filter_kind = {
-          "Class",
-          "Constructor",
-          "Enum",
-          "Function",
-          "Interface",
-          "Module",
-          "Method",
-          "Struct",
-          "Namespace",
-          "Field",
-        },
+        backends = {"lsp", "treesitter", "markdown"},
+
+        filter_kind = false,
         guides = {
           -- When the child item has a sibling below it
           mid_item = "├─",
@@ -1578,7 +1568,32 @@ require('packer').startup({function(use)
           whitespace = "  ",
         },
         icons = {
-          Namespace = " ",
+          File          = "",
+          Module        = "",
+          Namespace     = "",
+          Package       = "",
+          Class         = "",
+          Method        = "",
+          Property      = "",
+          Field         = "",
+          Constructor   = "",
+          Enum          = " ",
+          Interface     = " ",
+          Function      = "",
+          Variable      = "",
+          Constant      = "",
+          String        = "",
+          Number        = "",
+          Boolean       = "◩",
+          Array         = "",
+          Object        = "",
+          Key           = "",
+          Null          = "ﳠ",
+          EnumMember    = "",
+          Struct        = "",
+          Event         = "",
+          Operator      = "",
+          TypeParameter = "",
         },
         layout = {
           max_width = 200,
@@ -1872,7 +1887,7 @@ require('packer').startup({function(use)
   use {
     'Vonr/align.nvim',
     opt = true,
-    keys = {'x', 'al'},
+    keys = {{'x', 'al'}},
     config = function()
       local NS = { noremap = true, silent = true }
       vim.keymap.set('x', 'al', function() require'align'.align_to_string(true, true, true)  end, NS)
@@ -2653,6 +2668,9 @@ require('packer').startup({function(use)
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
+      vim.g.copilot_filetypes = {
+        ["dap-repl"] = false
+      }
 
       function copilot_dismiss()
         local copilot_keys = vim.fn["copilot#Dismiss"]()
@@ -2877,6 +2895,11 @@ require('packer').startup({function(use)
               description =  'enable pretty printing',
               ignoreFailures = false 
             },
+            {
+                description =  "Set Disassembly Flavor to Intel",
+                text = "-gdb-set disassembly-flavor intel",
+                ignoreFailures = true
+            }
           },
         },
         {
@@ -2978,7 +3001,7 @@ require('packer').startup({function(use)
     config = function()
       local dapui = require("dapui")
       dapui.setup({
-        icons = { expanded = "▾", collapsed = "▸" },
+        icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
         mappings = {
           -- Use a table to apply multiple mappings
           expand = { "<CR>", "<2-LeftMouse>" },
@@ -3010,7 +3033,17 @@ require('packer').startup({function(use)
         },
         controls = {
           enabled = true,
-          -- element = "watches"
+          element = "watches",
+          icons = {
+            pause = "",
+            play = "",
+            step_into = "",
+            step_over = "",
+            step_out = "",
+            step_back = "",
+            run_last = "↻",
+            terminate = "□",
+          },
         },
         floating = {
           max_height = nil, -- These can be integers or a float between 0 and 1.
@@ -3155,9 +3188,6 @@ function lazyLoadPlugins()
       vim.fn["rainbow_main#load"]()
     end)
   end
-
-  -- autocmd TODO: Need to be fixed
-  vim.api.nvim_exec("doautocmd User PluginsLoaded", true)
 end
 
 function loadTags()

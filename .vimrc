@@ -240,12 +240,15 @@ function Delete8half()
 endfunction
 
 " use tpope/vim-sleuth to auto detect and adjust
+" 使用空格代替制表符
 set expandtab
+" 对于go文件，使用tab
+au BufEnter *.go setlocal noexpandtab
 set cindent "C 语言风格缩进"
 
 "使空格和缩进显示字符
 set list
-set listchars=tab:▸⋅,trail:▫,lead:⋅
+set listchars=tab:→\ ,trail:▫,lead:⋅
 
 "hi NonText ctermfg=16 guifg=#4a4a59
 "hi SpecialKey ctermfg=15 guifg=#4a4a59
