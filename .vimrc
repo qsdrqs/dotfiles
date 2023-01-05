@@ -144,7 +144,6 @@ autocmd FileType qf nnoremap <silent>q :q<CR>
 
 "-------------------键位映射-----------------------"}}}
 
-
 "-------------------colorscheme-----------------------"{{{
 "colorscheme monokai
 if $LIGHT == 1
@@ -418,16 +417,16 @@ endif
 " limit textwidth in markdown and latex
 autocmd FileType markdown,tex set textwidth=80
 
-" set exrc
-if filereadable(expand(getcwd() . "/.exrc"))
-  " 加载项目自定义配置(为了兼容使用.exrc)
-  if has('nvim')
-    " 判断是否可以安全加载exrc文件
-      if luaeval('vim.secure.read(vim.fn.expand(vim.fn.getcwd() .. "/.exrc")) ~= nil')
-        source .exrc
-      endif
-  endif
-endif
+set exrc
+" if filereadable(expand(getcwd() . "/.exrc"))
+"   " 加载项目自定义配置(为了兼容使用.exrc)
+"   if has('nvim')
+"     " 判断是否可以安全加载exrc文件
+"       if luaeval('vim.secure.read(vim.fn.expand(vim.fn.getcwd() .. "/.exrc")) ~= nil')
+"         source .exrc
+"       endif
+"   endif
+" endif
 
 "-------------------杂项-----------------------"}}}
 "
@@ -463,17 +462,13 @@ function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim�
   if line('$') > max_line
     let b:treesitter_disable = 1
   endif
-  if has('win32')
-    source $HOME/AppData/Local/nvim/packer_compiled.lua
-  else
-    source $HOME/.config/nvim/packer_compiled.lua
-  end
   if a:recover_line == 1
     let line_num = line(".")
     lua lazyLoadPlugins()
+    doautocmd BufRead
     exec line_num
   else
-    lua vim.defer_fn(function() lazyLoadPlugins() end, 0)
+    lua lazyLoadPlugins()
   end
   let g:loadplugins = 1
 
@@ -489,15 +484,8 @@ elseif exists('g:vscode')
 else
   if has('nvim')
     if file_readable(expand("~/.nvimrc.lua"))
-      if has('win32')
-        set pp+=$HOME/AppData/Local/nvim-data/plugins/
-      else
-        set pp+=$HOME/.local/share/nvim/plugins/
-      end
-
       source ~/.nvimrc.lua
       nnoremap <leader><leader> <CMD>call TriggerPlugins(1)<CR>
-
 
       let load_plugins_on_start = v:false
       if load_plugins_on_start

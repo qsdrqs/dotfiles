@@ -183,7 +183,7 @@ call s:ghhl("WarningMsg", "orange", "base1")
 
 hi! link Boolean Constant
 hi! link Character Constant
-hi! link Comment GhBase3
+"hi! link Comment GhBase3
 hi! link Conceal Ignore
 hi! link Conditional Statement
 hi! link Constant GhLightBlue
@@ -216,12 +216,12 @@ hi! link ModeMsg GhBase4
 hi! link MoreMsg GhBase4
 hi! link MsgArea GhBase4
 hi! link Noise Delimiter
-hi! link NonText GhBase3
+"hi! link NonText GhBase3
 hi! link NonText Ignore
 hi! link Number GhBlue
 hi! link Operator GhBlue
 hi! link PreCondit PreProc
-hi! link PreProc GhBase5
+"hi! link PreProc GhBase5
 hi! link Question GhBase4
 hi! link Quote StringDelimiter
 hi! link Repeat GhPurp
@@ -231,7 +231,7 @@ hi! link SignifySignChange Signify
 hi! link SignifySignDelete Signify
 hi! link SpecialChar Special
 "hi! link Special GhLightBlue
-hi! link SpecialKey GhBase3
+"hi! link SpecialKey GhBase3
 "hi! link SpecialKey Ignore
 hi! link Statement GhRed
 hi! link StatusLineTermNC StatusLineNC
@@ -726,6 +726,7 @@ highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
 " blue
 highlight! CmpItemAbbrMatch guibg=NONE guifg=#569CD6 gui=bold
 highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#569CD6 gui=bold
+highlight! CmpItemMenuDefault guifg=#ecf2f8
 
 " light blue
 highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE
@@ -744,3 +745,12 @@ highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E
 highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252
 
 autocmd Filetype vim,lua highlight! link Type Class
+
+highlight IndentBlanklineContextStart guisp=#79C0FF gui=underline
+
+highlight! Color1 guifg=#79C0FF
+highlight! Color2 guifg=#56D364
+highlight! Color3 guifg=#FFA657
+highlight! Color4 guifg=#FA7970
+highlight! Color5 guifg=#FF9BCE
+highlight! Color6 guifg=#D2A8FF

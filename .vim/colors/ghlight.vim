@@ -541,3 +541,10 @@ hi! UnderCursorRead guibg=#D5D5D5  gui=none
 hi! UnderCursorWrite guibg=#E5E5E5  gui=none
 
 autocmd Filetype vim,lua highlight! link Type Class
+
+highlight! Color1 guifg=#0969DA
+highlight! Color2 guifg=#1A7F37
+highlight! Color3 guifg=#9A6700
+highlight! Color4 guifg=#CF222E
+highlight! Color5 guifg=#BF3989
+highlight! Color6 guifg=#8250DF
