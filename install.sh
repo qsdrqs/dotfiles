@@ -2,42 +2,44 @@
 echo installing
 
 # move vim files
-ln -s ./dotfiles/.vimrc ../.vimrc
-ln -s ./dotfiles/.vimrc.plugs ../.vimrc.plugs
-ln -s ./dotfiles/.nvimrc.lua ../.nvimrc.lua
+ln -s $PWD/.vimrc $HOME/.vimrc
+ln -s $PWD/.vimrc.plugs $HOME/.vimrc.plugs
+ln -s $PWD/.nvimrc.lua $HOME/.nvimrc.lua
 
-if [[ ! -d ../.vim ]];then
-    mkdir -p ../.vim
+if [[ ! -d $HOME/.vim ]];then
+    mkdir -p $HOME/.vim
 fi
 
 # move nvim files
-if [[ ! -d ../.config/nvim ]];then
-    mkdir -p ../.config/nvim
+if [[ ! -d $HOME/.config/nvim ]];then
+    mkdir -p $HOME/.config/nvim
 fi
-for FILE in `ls ./.vim`
+for FILE in `ls $PWD/.vim`
 do
-    ln -s ../dotfiles/.vim/$FILE ../.vim/
-    ln -s ../../.vim/$FILE ../.config/nvim/
+    ln -s $PWD/.vim/$FILE $HOME/.vim/
+    ln -s $HOME/.vim/$FILE $HOME/.config/nvim/
 done
 ln -s $HOME/.vimrc $HOME/.config/nvim/init.vim
+ln -s $PWD/after $HOME/.config/nvim/after
+
 # coc config for nvim
 if [[ ! -d $HOME/.local/share/nvim ]];then
     mkdir -p $HOME/.local/share/nvim
 fi
-ln -s $HOME/dotfiles/coc-settings.json $HOME/.local/share/nvim/coc-settings.json
+ln -s $PWD/coc-settings.json $HOME/.local/share/nvim/coc-settings.json
 
 # move zsh files
-ln -s ./dotfiles/.zshrc ../.zshrc
+ln -s $PWD/.zshrc $HOME/.zshrc
 
 # move ranger files
-if [[ -d ../.config/ranger ]] && [[ ! -L ../.config/ranger ]];then
+if [[ -d $HOME/.config/ranger ]] && [[ ! -L $HOME/.config/ranger ]];then
     echo "having ranger dir, deleting..."
-    rm -rf ../.config/ranger
+    rm -rf $HOME/.config/ranger
 fi
-ln -s ../dotfiles/ranger ../.config/
+ln -s $PWD/ranger $HOME/.config/
 
 # move tmux files
-ln -s ./dotfiles/.tmux.conf ../.tmux.conf
-ln -s ./dotfiles/.tmux.conf.local ../.tmux.conf.local
+ln -s $PWD/.tmux.conf $HOME/.tmux.conf
+ln -s $PWD/.tmux.conf.local $HOME/.tmux.conf.local
 
 echo finish
