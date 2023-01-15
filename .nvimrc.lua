@@ -71,7 +71,7 @@ require('lazy').setup({
 
       end
 
-      vim.keymap.set('n', '<leader>as', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>f', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { silent = true })
       vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
       vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
       vim.keymap.set('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { silent = true })
@@ -316,7 +316,7 @@ require('lazy').setup({
       --
       -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
       local bundles = {
-        vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-0.41.0.jar")
+        vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar")
       }
       vim.list_extend(bundles, vim.split(vim.fn.glob(
           vim.fn.stdpath('data') .. "/mason/packages/java-test/extension/server/*.jar"), "\n"))
@@ -395,7 +395,7 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     config = function()
       -- vim.lsp.set_log_level('trace')
-      vim.lsp.set_log_level('ERROR')
+      vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
 
@@ -889,32 +889,32 @@ require('lazy').setup({
       local cmp = require('cmp')
 
       local kind_icons = {
-        Text = "",
-        Method = "",
-        Function = "",
-        Constructor = "",
-        Field = "",
-        Variable = "",
-        Class = "ﴯ",
-        Interface = "",
-        Module = "",
-        Property = "ﰠ",
-        Unit = "",
-        Value = "",
-        Enum = "",
-        Keyword = "",
-        Snippet = "",
-        Color = "",
-        File = "",
-        Reference = "",
-        Folder = "",
-        EnumMember = "",
-        Constant = "",
-        Struct = "",
-        Event = "",
-        Operator = "",
-        TypeParameter = "",
-        TabNine = ""
+        Text = ' ',
+        Method = ' ',
+        Function = ' ',
+        Constructor = ' ',
+        Field = ' ',
+        Variable = ' ',
+        Class = 'ﴯ ',
+        Interface = ' ',
+        Module = ' ',
+        Property = 'ﰠ ',
+        Unit = ' ',
+        Value = ' ',
+        Enum = ' ',
+        Keyword = ' ',
+        Snippet = ' ',
+        Color = ' ',
+        File = ' ',
+        Reference = ' ',
+        Folder = ' ',
+        EnumMember = ' ',
+        Constant = ' ',
+        Struct = ' ',
+        Event = ' ',
+        Operator = ' ',
+        TypeParameter = ' ',
+        TabNine = ' '
       }
 
       cmp.setup{
@@ -994,6 +994,7 @@ require('lazy').setup({
             end,
             i = function(fallback)
               local ok, copilot_keys = pcall(vim.fn["copilot#Accept"])
+              print(copilot_keys)
               if not ok then
                 copilot_keys = ""
               end
@@ -1096,6 +1097,7 @@ require('lazy').setup({
       vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
       vim.o.foldlevelstart = 99
       vim.o.foldenable = true
+      -- vim.o.statuscolumn='%=%{v:relnum?v:relnum:v:lnum}%s%#FoldColumn#%{foldlevel(v:lnum) > 0 ? (foldlevel(v:lnum) > foldlevel(v:lnum - 1) ? (foldclosed(v:lnum) == -1 ? "" : "") : " ") : " " }%*'
       vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
 
 
@@ -1133,15 +1135,15 @@ require('lazy').setup({
         end
 
         -- add left parenthesis if missing
+        local maybe_left_parenthesis = nil
         if end_virt_text[1] ~= nil and start_virt_text[#start_virt_text] ~= nil then
-          local maybe_left_parenthesis = nil
-          if string.find(end_virt_text[1][1], "}") and not string.find(start_virt_text[#start_virt_text][1], "{") then
+          if string.find(end_virt_text[1][1], "}") and not string.find(start_virt_text[#start_virt_text][1], "%{") then
             maybe_left_parenthesis = {" {", end_virt_text[1][2]}
           end
           if string.find(end_virt_text[1][1], "]") and not string.find(start_virt_text[#start_virt_text][1], "%[") then
             maybe_left_parenthesis = {" [", end_virt_text[1][2]}
           end
-          if string.find(end_virt_text[1][1], ")") and not string.find(start_virt_text[#start_virt_text][1], "(") then
+          if string.find(end_virt_text[1][1], ")") and not string.find(start_virt_text[#start_virt_text][1], "%(") then
             maybe_left_parenthesis = {" (", end_virt_text[1][2]}
           end
         end
@@ -1408,7 +1410,7 @@ require('lazy').setup({
     end
   },
   {
-    url = "https://gitlab.com/HiPhish/nvim-ts-rainbow2",
+    "mrjones2014/nvim-ts-rainbow",
     lazy = true,
     config = function()
         require("nvim-treesitter.configs").setup {
@@ -1417,17 +1419,16 @@ require('lazy').setup({
             disable = { }, -- list of languages you want to disable the plugin for
             extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
             max_file_lines = nil, -- Do not enable for files with more than n lines, int
-            hlgroups = {
-              'Color1',
-              'Color2',
-              'Color3',
-              'Color4',
-              'Color5',
-              'Color6',
-            }
-            -- termcolors = {} -- table of colour name strings
           }
+
         }
+        -- FIXME: 7 to 6
+        vim.api.nvim_set_hl(0, "rainbowcol1", { link = "Color1" })
+        vim.api.nvim_set_hl(0, "rainbowcol2", { link = "Color2" })
+        vim.api.nvim_set_hl(0, "rainbowcol3", { link = "Color3" })
+        vim.api.nvim_set_hl(0, "rainbowcol4", { link = "Color4" })
+        vim.api.nvim_set_hl(0, "rainbowcol5", { link = "Color5" })
+        vim.api.nvim_set_hl(0, "rainbowcol6", { link = "Color6" })
     end
   },
 
@@ -1586,6 +1587,9 @@ require('lazy').setup({
         },
         layout = {
           max_width = 200,
+        },
+        lsp = {
+          diagnostics_trigger_update = false,
         },
         disable_max_lines = -1,
       })
@@ -1887,8 +1891,6 @@ require('lazy').setup({
   {
     -- provide ui for lsp
     'stevearc/dressing.nvim',
-    config = function()
-    end
   },
 
   {
@@ -1947,8 +1949,8 @@ require('lazy').setup({
         callback = function()
           if vim.g.no_load_copilot ~= 1 then
             require('lazy').load{plugins = 'copilot.vim'}
+            vim.g.copilot_initialized = 1
           end
-          vim.g.copilot_initialized = 1
         end,
         once = true
       })
@@ -2535,7 +2537,7 @@ require('lazy').setup({
       local banned_messages = {
         "method textDocument/codeLens is not supported by any of the servers registered for the current buffer",
         "[inlay_hints] LSP error:Invalid offset",
-        "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml"
+        "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml",
       }
 
       vim.notify = function (msg, ...)
@@ -2570,14 +2572,14 @@ require('lazy').setup({
     lazy = false
   },
 
-  {
-    'neoclide/coc.nvim',
-    lazy = true,
-    build = 'yarn install --frozen-lockfile',
-    config = function()
-      vim.keymap.set('n', '<leader><leader>', '<cmd>CocCommand<cr>', { silent = true })
-    end
-  },
+  -- {
+  --   'neoclide/coc.nvim',
+  --   lazy = true,
+  --   build = 'yarn install --frozen-lockfile',
+  --   config = function()
+  --     vim.keymap.set('n', '<leader><leader>', '<cmd>CocCommand<cr>', { silent = true })
+  --   end
+  -- },
 
   {'junegunn/vim-easy-align', lazy = true, cmd = "EasyAlign"},
   {"dstein64/vim-startuptime", lazy = false},
@@ -2998,7 +3000,6 @@ require('lazy').setup({
     config = function()
       local dapui = require("dapui")
       dapui.setup({
-        icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
         mappings = {
           -- Use a table to apply multiple mappings
           expand = { "<CR>", "<2-LeftMouse>" },
@@ -3031,16 +3032,6 @@ require('lazy').setup({
         controls = {
           enabled = true,
           element = "watches",
-          icons = {
-            pause = "",
-            play = "",
-            step_into = "",
-            step_over = "",
-            step_out = "",
-            step_back = "",
-            run_last = "↻",
-            terminate = "□",
-          },
         },
         floating = {
           max_height = nil, -- These can be integers or a float between 0 and 1.
@@ -3225,7 +3216,7 @@ function lazyLoadPlugins()
     require('lazy').load{
       plugins = {
         -- begin treesitter (slow performance)
-        'nvim-ts-rainbow2',   -- performance issue
+        'nvim-ts-rainbow',   -- performance issue
         'indent-blankline.nvim',
         'nvim-treesitter-context',
         'nvim-treesitter-textobjects',
@@ -3367,7 +3358,8 @@ if os.getenv("SSH_CONNECTION") ~= nil then
         require("lazy").load{ plugins = {"nvim-osc52"} }
       end
       if vim.v.event.operator == 'y' and vim.v.event.regname == '' then
-        require('osc52').copy_register('"')
+        local osc52_copy_register = require('osc52').copy_register
+        pcall(osc52_copy_register, '"')
       end
     end
   })

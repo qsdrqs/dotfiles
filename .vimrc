@@ -85,10 +85,10 @@ else
   nnoremap <silent>o <C-W>o
 endif
 
-nnoremap <right> :vertical resize+1<CR>
-nnoremap <up> :res +1<CR>
-nnoremap <down> :res -1<CR>
-nnoremap <left> :vertical resize-1<CR>
+nnoremap <silent><right> :vertical resize+1<CR>
+nnoremap <silent><up> :res +1<CR>
+nnoremap <silent><down> :res -1<CR>
+nnoremap <silent><left> :vertical resize-1<CR>
 
 "保存
 "nnoremap <leader><leader> :w<CR>
@@ -337,6 +337,7 @@ if has('nvim')
   let nvim_ver = luaeval("vim.version()")
   if nvim_ver.minor > 8
     set diffopt+=linematch:50
+    " set statuscolumn=%=%s%l%C
   end
 end
 
