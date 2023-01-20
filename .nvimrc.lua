@@ -23,7 +23,11 @@ require('lazy').setup({
   {'nvim-lua/plenary.nvim' },
   {
     'nvim-telescope/telescope.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim' },
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope-fzf-native.nvim',
+      'tom-anders/telescope-vim-bookmarks.nvim',
+    },
     config = function()
       local action_set = require "telescope.actions.set"
 
@@ -68,19 +72,7 @@ require('lazy').setup({
             }
           }
         }
-
       end
-
-      vim.keymap.set('n', '<leader>f', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { silent = true })
-      vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
-      vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
-      vim.keymap.set('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { silent = true })
-      vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rs', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rw', '<cmd>Telescope lsp_dynamic_workspace_symbols<cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
-      vim.keymap.set('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { silent = true })
 
     end
   },
@@ -190,48 +182,6 @@ require('lazy').setup({
     'mfussenegger/nvim-jdtls',
     dependencies = 'nvim-lspconfig',
     config = function()
-      -- compatible with fidget
-      local function progress_report(_, result, ctx)
-        local lsp = vim.lsp
-        local info = {
-          client_id = ctx.client_id,
-        }
-
-        local kind = "report"
-        if result.complete then
-          kind = "end"
-        elseif result.workDone == 0 then
-          kind = "begin"
-        elseif result.workDone > 0 and result.workDone < result.totalWork then
-          kind = "report"
-        else
-          kind = "end"
-        end
-
-        local percentage = 0
-        if result.totalWork > 0 and result.workDone >= 0 then
-          percentage = result.workDone / result.totalWork * 100
-        end
-
-        local msg = {
-          token = result.id,
-          value = {
-            kind = kind,
-            percentage = percentage,
-            title = result.subTask,
-            message = result.subTask,
-          },
-        }
-        local client = vim.lsp.get_client_by_id(info.client_id)
-        if msg.token and client then
-          client.messages.progress[msg.token] = client.messages.progress[msg.token] or {}
-        end
-        -- print(vim.inspect(result.subTask))
-        if result.subTask and result.subTask ~= "" then
-          lsp.handlers["$/progress"](nil, msg, info)
-        end
-      end
-
       -- java
       local jdt_config = get_lsp_common_config()
       jdt_config.cmd = {
@@ -303,7 +253,6 @@ require('lazy').setup({
 
       -- progress_report
       jdt_config.handlers = {
-        ["language/progressReport"] = progress_report,
         -- disable default progress report
         ['language/status'] = function() end,
       }
@@ -378,7 +327,7 @@ require('lazy').setup({
     dependencies = 'nvim-lspconfig',
     config = function()
       local lsp_config = get_lsp_common_config()
-      lsp_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never"}
+      lsp_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never", "--background-index"}
       -- set offset encoding
       lsp_config.capabilities.offsetEncoding = 'utf-8'
       require("clangd_extensions").setup {
@@ -518,12 +467,6 @@ require('lazy').setup({
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
       local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver', "cmake", "gopls" }
       for _, lsp in ipairs(servers) do
-        local capabilities = require('cmp_nvim_lsp').default_capabilities()
-        capabilities.textDocument.foldingRange = {
-          dynamicRegistration = false,
-          lineFoldingOnly = true
-        }
-
         local lsp_common_config = get_lsp_common_config()
         if lsp == 'tsserver' then
           -- lsp_common_config.root_dir = require('lspconfig.util').root_pattern("*")
@@ -556,10 +499,6 @@ require('lazy').setup({
             }
           }
         elseif lsp == "sumneko_lua" then
-          local runtime_path = vim.split(package.path, ';')
-          table.insert(runtime_path, "lua/?.lua")
-          table.insert(runtime_path, "lua/?/init.lua")
-
           if string.find(vim.fn.expand('%'), '.nvimrc.lua') then
             lsp_common_config.autostart = false
           end
@@ -568,8 +507,6 @@ require('lazy').setup({
               runtime = {
                 -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
                 version = 'LuaJIT',
-                -- Setup your lua path
-                path = runtime_path,
               },
               diagnostics = {
                 -- Get the language server to recognize the `vim` global
@@ -585,8 +522,45 @@ require('lazy').setup({
               },
             },
           }
+        elseif lsp == "gopls" then
+          lsp_common_config.settings = {
+            gopls = {
+              semanticTokens = true,
+              hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                compositeLiteralTypes = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+              }
+            }
+          }
+          lsp_common_config.on_attach = function(client, bufnr)
+            common_on_attach(client,bufnr)
+            client.server_capabilities.semanticTokensProvider = {
+              full = {
+                delta = false
+              },
+              legend = {
+                -- from https://github.com/golang/tools/blob/master/gopls/internal/lsp/semantic.go#L981
+                tokenTypes = {
+                  "namespace", "type", "class", "enum", "interface",
+                  "struct", "typeParameter", "parameter", "variable", "property", "enumMember",
+                  "event", "function", "method", "macro", "keyword", "modifier", "comment",
+                  "string", "number", "regexp", "operator",
+                },
+                tokenModifiers = {
+                  "declaration", "definition", "readonly", "static",
+                  "deprecated", "abstract", "async", "modification", "documentation", "defaultLibrary",
+                },
+              },
+              range = true,
+            }
+          end
         end
-          lspconfig[lsp].setup(lsp_common_config)
+        lspconfig[lsp].setup(lsp_common_config)
       end
 
 
@@ -716,10 +690,12 @@ require('lazy').setup({
     -- for code actions
     'kosayoda/nvim-lightbulb',
     config = function()
+      local lightbulb = require('nvim-lightbulb')
+      lightbulb.setup {
+        ignore = {"null-ls"},
+      }
       vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
-        callback = function()
-          require'nvim-lightbulb'.update_lightbulb()
-        end,
+        callback = function() lightbulb.update_lightbulb() end
       })
     end
   },
@@ -727,7 +703,13 @@ require('lazy').setup({
   {
     'j-hui/fidget.nvim',
     config = function()
-      require"fidget".setup{}
+      require"fidget".setup{
+        sources = {
+          ["null-ls"] = {
+              ignore = true
+          }
+        }
+      }
     end
   },
 
@@ -790,7 +772,8 @@ require('lazy').setup({
           -- null_ls.builtins.completion.spell,
           null_ls.builtins.formatting.autopep8,
           null_ls.builtins.formatting.prettier,
-          null_ls.builtins.completion.tags
+          null_ls.builtins.completion.tags,
+          null_ls.builtins.code_actions.gitsigns,
         },
       })
     end
@@ -800,13 +783,12 @@ require('lazy').setup({
   {
     'quangnguyen30192/cmp-nvim-ultisnips',
     lazy = true,
-    dependencies = {"hrsh7th/nvim-cmp", "SirVer/ultisnips"}
+    dependencies = {"SirVer/ultisnips"}
   },
   {
     'hrsh7th/cmp-nvim-lsp',
+    depedencies = {"neovim/nvim-lspconfig"}
   },
-  -- { 'hrsh7th/cmp-vsnip',  },
-  { 'hrsh7th/vim-vsnip',  },
   { 'hrsh7th/cmp-nvim-lua',  },
   { 'hrsh7th/cmp-path', },
   { 'hrsh7th/cmp-buffer',  },
@@ -881,7 +863,6 @@ require('lazy').setup({
 
   {
     'hrsh7th/nvim-cmp',
-    dependencies = {'hrsh7th/vim-vsnip'},
     config = function()
       local t = function(str)
         return vim.api.nvim_replace_termcodes(str, true, true, true)
@@ -960,14 +941,14 @@ require('lazy').setup({
           -- REQUIRED - you must specify a snippet engine
           expand = function(args)
             -- Use vsnip to handles snips provided by lsp. Ultisnips has problems.
-            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+            -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
 
             -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
             -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
           end,
         },
-        mapping = cmp.mapping.preset.insert {
+        mapping = cmp.mapping.preset.insert({
           ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
           ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
           ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
@@ -1003,8 +984,6 @@ require('lazy').setup({
                 cmp.confirm()
               elseif copilot_keys ~= "" then
                 vim.api.nvim_feedkeys(copilot_keys, "i", true)
-              elseif vim.fn["vsnip#jumpable"](1) == 1 then
-                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-next)"), 'm', true)
               elseif vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
                 vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
               else
@@ -1013,9 +992,7 @@ require('lazy').setup({
               end
             end,
             s = function(fallback)
-              if vim.fn["vsnip#jumpable"](1) == 1 then
-                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-next)"), 'm', true)
-              elseif vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
+              if vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
                 vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
               else
                 fallback()
@@ -1033,8 +1010,6 @@ require('lazy').setup({
             i = function(fallback)
               if cmp.visible() then
                 cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
-              elseif vim.fn["vsnip#jumpable"](-1) == 1 then
-                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-prev)"), 'm', true)
               elseif vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
                 return vim.api.nvim_feedkeys( t("<Plug>(ultisnips_jump_backward)"), 'm', true)
               else
@@ -1042,16 +1017,14 @@ require('lazy').setup({
               end
             end,
             s = function(fallback)
-              if vim.fn["vsnip#jumpable"](-1) == 1 then
-                vim.api.nvim_feedkeys(t("<Plug>(vsnip-jump-prev)"), 'm', true)
-              elseif vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
+              if vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
                 return vim.api.nvim_feedkeys( t("<Plug>(ultisnips_jump_backward)"), 'm', true)
               else
                 fallback()
               end
             end
           }),
-        },
+        }),
         sources = cmp.config.sources({
           { name = 'ultisnips' }, -- For ultisnips users.
           { name = 'nvim_lsp_signature_help' },
@@ -1059,7 +1032,6 @@ require('lazy').setup({
           -- { name = 'omni' },
           { name = 'dictionary', keyword_length = 2 },
           { name = 'path' },
-          -- { name = 'vsnip' }, -- For vsnip users.
           { name = 'nvim_lua' },
           { name = 'buffer' },
           -- { name = 'luasnip' }, -- For luasnip users.
@@ -1347,6 +1319,7 @@ require('lazy').setup({
   {
     'nvim-treesitter/nvim-treesitter-textobjects',
     lazy = true,
+    event = "User PluginsLoaded",
     config = function()
       require'nvim-treesitter.configs'.setup {
         textobjects = {
@@ -1419,10 +1392,10 @@ require('lazy').setup({
             disable = { }, -- list of languages you want to disable the plugin for
             extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
             max_file_lines = nil, -- Do not enable for files with more than n lines, int
+            colors = {"#888888", "#888888", "#888888", "#888888", "#888888", "#888888"} -- only used to set the number to 6
           }
 
         }
-        -- FIXME: 7 to 6
         vim.api.nvim_set_hl(0, "rainbowcol1", { link = "Color1" })
         vim.api.nvim_set_hl(0, "rainbowcol2", { link = "Color2" })
         vim.api.nvim_set_hl(0, "rainbowcol3", { link = "Color3" })
@@ -1701,7 +1674,6 @@ require('lazy').setup({
         symbols = {
           separator = ">",
         },
-        theme = require("barbecue.theme.default"),
         kinds = {
           File          = " ",
           Module        = " ",
@@ -1729,7 +1701,9 @@ require('lazy').setup({
           Event         = " ",
           Operator      = " ",
           TypeParameter = " ",
-        }
+        },
+        exclude_filetypes = { "gitcommit", "toggleterm" },
+        include_buftypes = {"nowrite", ""},
       }
       -- init update
       require("barbecue.ui").toggle(true)
@@ -1760,16 +1734,15 @@ require('lazy').setup({
           follow_files = true
         },
         attach_to_untracked = true,
-        current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
+        current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
         current_line_blame_opts = {
           virt_text = true,
           virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
-          delay = 1000,
+          virt_text_priority = 0,
+          delay = 250,
           ignore_whitespace = false,
         },
-        current_line_blame_formatter_opts = {
-          relative_time = false
-        },
+        current_line_blame_formatter = '      <author>, <author_time:%R> - <summary>',
         sign_priority = 6,
         update_debounce = 100,
         status_formatter = nil, -- Use default
@@ -1788,18 +1761,30 @@ require('lazy').setup({
         on_attach = function(bufnr)
           local gs = package.loaded.gitsigns
 
-          local function map(mode, lhs, rhs, opts)
-            opts = vim.tbl_extend('force', {silent = true}, opts or {})
-            vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
+          local function map(mode, l, r, opts)
+            opts = opts or {}
+            opts.buffer = bufnr
+            vim.keymap.set(mode, l, r, opts)
           end
 
           -- Navigation
-          map('n', ']g', "&diff ? ']g' : '<cmd>Gitsigns next_hunk<CR>'", {expr=true})
-          map('n', '[g', "&diff ? '[g' : '<cmd>Gitsigns prev_hunk<CR>'", {expr=true})
+          map('n', ']g', function()
+            if vim.wo.diff then return ']c' end
+            vim.schedule(function() gs.next_hunk() end)
+            return '<Ignore>'
+          end, {expr=true})
+
+          map('n', '[g', function()
+            if vim.wo.diff then return '[c' end
+            vim.schedule(function() gs.prev_hunk() end)
+            return '<Ignore>'
+          end, {expr=true})
 
           -- Actions
-          map('n', '<leader>gr', ':Gitsigns reset_hunk<CR>')
-          map('v', '<leader>gr', ':Gitsigns reset_hunk<CR>')
+          map({'n', 'v'}, '<leader>ga', ':Gitsigns stage_hunk<CR>')
+          map('n', '<leader>gA', gs.stage_buffer)
+          map('n', '<leader>gu', gs.undo_stage_hunk)
+          map({'n', 'v'}, '<leader>gr', ':Gitsigns reset_hunk<CR>')
           map('n', '<leader>gR', '<cmd>Gitsigns reset_buffer<CR>')
           map('n', '<leader>gp', '<cmd>Gitsigns preview_hunk<CR>')
           map('n', '<leader>gm', '<cmd>lua require"gitsigns".blame_line{full=true}<CR>')
@@ -2152,6 +2137,9 @@ require('lazy').setup({
   {'MattesGroeger/vim-bookmarks', lazy = true},
   {
     'tom-anders/telescope-vim-bookmarks.nvim',
+    dependencies = {
+      'MattesGroeger/vim-bookmarks'
+    },
     config = function()
       require('telescope').load_extension('vim_bookmarks')
     end
@@ -2174,6 +2162,9 @@ require('lazy').setup({
 
   {
     'goolord/alpha-nvim',
+    cond = function()
+      return vim.g.not_start_alpha ~= true
+    end,
     config = function ()
       local alpha = require'alpha'
       local dashboard = require("alpha.themes.dashboard")
@@ -2363,9 +2354,7 @@ require('lazy').setup({
         dashboard.section.footer,
       }
 
-      if vim.g.not_start_alpha ~= true then
-        alpha.setup(dashboard.config)
-      end
+      alpha.setup(dashboard.config)
 
     end
   },
@@ -3136,11 +3125,6 @@ end
 function lazyLoadPlugins()
   require('lazy').load{
     plugins = {
-      -- begin telescope
-      'telescope-fzf-native.nvim',
-      'telescope-vim-bookmarks.nvim',
-      -- end telescope
-
       -- begin lsp
       'nvim-jdtls',
       'rust-tools.nvim',
@@ -3153,19 +3137,7 @@ function lazyLoadPlugins()
       'barbecue.nvim',
       -- end lsp
 
-      -- begin cmp
-      'cmp-nvim-lsp',
-      'vim-vsnip',
-      'cmp-nvim-lua',
-      'cmp-path',
-      'cmp-buffer',
-      'cmp-omni',
-      'cmp-nvim-lsp-signature-help',
-      'cmp-dictionary',
-      -- end cmp
-
       -- begin dap
-      'cmp-dap',
       'nvim-dap-ui',
       'nvim-dap-virtual-text',
       -- end dap
@@ -3176,12 +3148,9 @@ function lazyLoadPlugins()
       -- end git
 
       -- begin vim plugins
-      'ultisnips',
-      'cmp-nvim-ultisnips',
       'vim-sandwich',
       'vim-log-highlighting',
       'vim-visual-multi',
-      'vim-bookmarks',
       -- 'coc.nvim',
       -- end vim plugins
 
@@ -3209,8 +3178,32 @@ function lazyLoadPlugins()
       'vim-illuminate',
       -- end misc
 
+      -- begin cmp
+      'nvim-cmp',
+      -- end cmp
     }
   }
+
+  vim.api.nvim_create_autocmd("InsertEnter", {
+    callback = function()
+      require('lazy').load{
+        plugins = {
+          -- begin cmp
+          'cmp-nvim-lsp',
+          'cmp-nvim-lua',
+          'cmp-path',
+          'cmp-buffer',
+          'cmp-omni',
+          'cmp-nvim-lsp-signature-help',
+          'cmp-dictionary',
+          'cmp-dap',
+          'cmp-nvim-ultisnips',
+          -- end cmp
+        }
+      }
+    end,
+    once = true
+  })
 
   if vim.b.treesitter_disable ~= 1 then
     require('lazy').load{
@@ -3219,7 +3212,6 @@ function lazyLoadPlugins()
         'nvim-ts-rainbow',   -- performance issue
         'indent-blankline.nvim',
         'nvim-treesitter-context',
-        'nvim-treesitter-textobjects',
         'nvim-ts-autotag',
         'hlargs.nvim',
         -- end treesitter
@@ -3235,6 +3227,9 @@ function lazyLoadPlugins()
       vim.fn["rainbow_main#load"]()
     end)
   end
+
+  -- change <leader><leader> to telescope commands
+  vim.keymap.set('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { silent = true })
 end
 
 function loadTags()
@@ -3244,30 +3239,16 @@ function loadTags()
 end
 vim.cmd("command! LoadTags lua loadTags()")
 
-vim.api.nvim_create_autocmd("BufNewFile", {
-  callback = function()
-    vim.g["skeletons#autoRegister"] = 1
-    vim.g["skeletons#skeletonsDir"] = "~/.vim/skeletons"
-    require("lazy").load{ plugins = {"ultisnips", "vim-skeletons"} }
-    vim.call("skeletons#InsertSkeleton")
-  end
-})
-
--- register.nvim
-local registers = require("registers")
-registers.setup({
-  window = {
-    border = "single"
-  }
-})
-
--- vCoolor.vim won't disable mappings if it is loaded after the plugin
-vim.g.vcoolor_disable_mappings = 1
--- same as interesting words
-vim.g.interestingWordsDefaultMappings = 0
--- same as coc.nvim
-vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
-
+-- lazy load telescope
+vim.keymap.set('n', '<leader>f', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { silent = true })
+vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
+vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
+vim.keymap.set('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { silent = true })
+vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
+vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
+vim.keymap.set('n', '<leader>rs', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
+vim.keymap.set('n', '<leader>rw', '<cmd>Telescope lsp_dynamic_workspace_symbols<cr>', { silent = true })
+vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
 
 --------------------------------------------------------------------------------------
 ----------------------------Constant Plugins------------------------------------------
@@ -3367,6 +3348,31 @@ if os.getenv("SSH_CONNECTION") ~= nil then
 end
 
 require('fundo').setup()
+
+vim.api.nvim_create_autocmd("BufNewFile", {
+  callback = function()
+    vim.g["skeletons#autoRegister"] = 1
+    vim.g["skeletons#skeletonsDir"] = "~/.vim/skeletons"
+    require("lazy").load{ plugins = {"ultisnips", "vim-skeletons"} }
+    vim.call("skeletons#InsertSkeleton")
+  end
+})
+
+-- register.nvim
+local registers = require("registers")
+registers.setup({
+  window = {
+    border = "single"
+  }
+})
+
+-- vCoolor.vim won't disable mappings if it is loaded after the plugin
+vim.g.vcoolor_disable_mappings = 1
+-- same as interesting words
+vim.g.interestingWordsDefaultMappings = 0
+-- same as coc.nvim
+vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
+
 
 ---------------------------vscode neovim----------------------------------------------
 --TODO

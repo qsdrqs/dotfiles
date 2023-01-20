@@ -185,9 +185,7 @@ autocmd BufRead *.conf set filetype=config
 "-------------------file type-----------------------"}}}
 
 "hi Normal ctermbg=NONE
-if has("autocmd")
-    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif " 恢复退出时的光标位置，见:h mark
-endif
+au BufWinEnter * if line("'\"") > 1 && line("'\"") <= line("$")  | exe "normal! g'\"" | endif " 恢复退出时的光标位置，见:h mark
 set completeopt=menu,menuone,noinsert
 
 set mouse=a
@@ -418,16 +416,16 @@ endif
 " limit textwidth in markdown and latex
 autocmd FileType markdown,tex set textwidth=80
 
-set exrc
-" if filereadable(expand(getcwd() . "/.exrc"))
-"   " 加载项目自定义配置(为了兼容使用.exrc)
-"   if has('nvim')
-"     " 判断是否可以安全加载exrc文件
-"       if luaeval('vim.secure.read(vim.fn.expand(vim.fn.getcwd() .. "/.exrc")) ~= nil')
-"         source .exrc
-"       endif
-"   endif
-" endif
+" set exrc
+if filereadable(expand(getcwd() . "/.exrc"))
+  " 加载项目自定义配置(为了兼容使用.exrc)
+  if has('nvim')
+    " 判断是否可以安全加载exrc文件
+      if luaeval('vim.secure.read(vim.fn.expand(vim.fn.getcwd() .. "/.exrc")) ~= nil')
+        source .exrc
+      endif
+  endif
+endif
 
 "-------------------杂项-----------------------"}}}
 "
@@ -453,9 +451,7 @@ endif
 
 "-------------------加载插件-----------------------"{{{
 " nvim lua 插件加载
-function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim插件
-  " recover_line means whether to recover the line number after loading plugins
-  " because some plugins may change the line number.
+function! TriggerPlugins() "加载插件配置以及一些原生vim插件
   if exists('g:loadplugins') && g:loadplugins == 1
     return
   endif
@@ -463,18 +459,14 @@ function! TriggerPlugins(recover_line) "加载插件配置以及一些原生vim�
   if line('$') > max_line
     let b:treesitter_disable = 1
   endif
-  if a:recover_line == 1
-    let line_num = line(".")
-    lua lazyLoadPlugins()
-    doautocmd BufRead
-    exec line_num
-  else
-    lua lazyLoadPlugins()
-  end
-  let g:loadplugins = 1
+  lua lazyLoadPlugins()
 
+  let g:loadplugins = 1
   " execute autocmd
   doautocmd User PluginsLoaded
+
+  " start lsp
+  doautocmd BufRead
 endfunction
 
 "运行无插件vim
@@ -486,18 +478,18 @@ else
   if has('nvim')
     if file_readable(expand("~/.nvimrc.lua"))
       source ~/.nvimrc.lua
-      nnoremap <leader><leader> <CMD>call TriggerPlugins(1)<CR>
+      nnoremap <leader><leader> <CMD>call TriggerPlugins()<CR>
 
       let load_plugins_on_start = v:false
       if load_plugins_on_start
-        call TriggerPlugins(0) | exe "normal! g'\""
+        call TriggerPlugins()
       elseif (len(argv()) == 0 || isdirectory(argv()[0])) && !exists('g:loadplugins')
         " call plugins if no args
-        call TriggerPlugins(0)
+        call TriggerPlugins()
       endif
 
       " call plugins if in filetype
-      autocmd Filetype gitcommit call TriggerPlugins(0)
+      autocmd Filetype gitcommit call TriggerPlugins()
     endif
     " source ~/.vimrc.plugs
   else
@@ -507,4 +499,5 @@ else
     endif
   endif
 endif
-"-------------------加载插件-----------------------"}}}
+
+"-------------------加载插件-----------------
