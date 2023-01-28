@@ -452,7 +452,7 @@ endif
 "-------------------加载插件-----------------------"{{{
 " nvim lua 插件加载
 function! TriggerPlugins() "加载插件配置以及一些原生vim插件
-  if exists('g:loadplugins') && g:loadplugins == 1
+  if exists('g:plugins_loaded') && g:plugins_loaded == 1
     return
   endif
   let max_line = 20000 " file exceed 20000 lines will disable treesitter
@@ -461,12 +461,9 @@ function! TriggerPlugins() "加载插件配置以及一些原生vim插件
   endif
   lua lazyLoadPlugins()
 
-  let g:loadplugins = 1
+  let g:plugins_loaded = 1
   " execute autocmd
   doautocmd User PluginsLoaded
-
-  " start lsp
-  doautocmd BufRead
 endfunction
 
 "运行无插件vim
@@ -478,12 +475,12 @@ else
   if has('nvim')
     if file_readable(expand("~/.nvimrc.lua"))
       source ~/.nvimrc.lua
-      nnoremap <leader><leader> <CMD>call TriggerPlugins()<CR>
+      nnoremap <leader><leader> <CMD>call TriggerPlugins()<CR><CMD>doautocmd BufRead<CR>
 
       let load_plugins_on_start = v:false
       if load_plugins_on_start
         call TriggerPlugins()
-      elseif (len(argv()) == 0 || isdirectory(argv()[0])) && !exists('g:loadplugins')
+      elseif (len(argv()) == 0 || isdirectory(argv()[0])) && !exists('g:plugins_loaded')
         " call plugins if no args
         call TriggerPlugins()
       endif

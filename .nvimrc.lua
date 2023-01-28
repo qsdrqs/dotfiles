@@ -78,7 +78,7 @@ require('lazy').setup({
   },
 
   {
-    'nvim-telescope/telescope-rg.nvim',
+    'nvim-telescope/telescope-live-grep-args.nvim',
     lazy = true,
     keys = "<leader>gG",
     config = function()
@@ -465,7 +465,7 @@ require('lazy').setup({
       end
 
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
-      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver', "cmake", "gopls" }
+      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls" }
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
         if lsp == 'tsserver' then
@@ -1669,6 +1669,10 @@ require('lazy').setup({
       -- vim.api.nvim_set_hl(0, "BarbecueSeparator", { link = "NonText" })
       -- vim.api.nvim_set_hl(0, "BarbecueDirname", { link = "LineNr" })
       -- vim.api.nvim_set_hl(0, "BarbecueBasename", { link = "Pmenu" })
+
+      require('barbecue.utils').get_hl_by_name = function(name)
+        return vim.api.nvim_get_hl_by_name(name, true)
+      end
 
       require("barbecue").setup {
         symbols = {
@@ -3246,7 +3250,7 @@ vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = 
 vim.keymap.set('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { silent = true })
 vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
 vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
-vim.keymap.set('n', '<leader>rs', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
+vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
 vim.keymap.set('n', '<leader>rw', '<cmd>Telescope lsp_dynamic_workspace_symbols<cr>', { silent = true })
 vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
 

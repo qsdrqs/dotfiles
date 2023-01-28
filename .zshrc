@@ -54,8 +54,8 @@ export ZSH="$HOME/.oh-my-zsh"
 export GPG_TTY=$(tty)
 
 #Make alacritty compatible with SSH
-if [[ $TERM != "xterm-kitty" ]]; then
-    export TERM="xterm-256color"
+if [[ $TERM != "xterm-kitty" && $TMUX != "" ]]; then
+    export TERM="tmux-256color"
 fi
 
 

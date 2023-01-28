@@ -292,7 +292,7 @@ set -s set-clipboard on
 # this is the place to override or undo settings
 set -ga terminal-overrides ',*:Tc'
 # set -g default-terminal "screen-256color"
-set -g default-terminal "xterm-256color"
+set -g default-terminal "tmux-256color"
 set -g prefix C-g
 bind C-g send-prefix
 setw -g mode-keys vi

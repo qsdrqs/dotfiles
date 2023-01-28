@@ -184,7 +184,7 @@ call s:ghhl("WarningMsg", "orange", "base1")
 hi! link Boolean Constant
 hi! link Character Constant
 "hi! link Comment GhBase3
-hi! link Conceal Ignore
+hi! link Conceal GhBase3
 hi! link Conditional Statement
 hi! link Constant GhLightBlue
 hi! link Debug Special
