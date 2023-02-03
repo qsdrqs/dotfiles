@@ -39,18 +39,18 @@ require('lazy').setup({
         action_set.shift_selection(prompt_bufnr, -5)
       end
 
-      local status_ok, trouble = pcall(require, "trouble.providers.telescope")
+      local status_ok, trouble_telscope = pcall(require, "trouble.providers.telescope")
       if status_ok then
         require('telescope').setup {
           defaults = {
             mappings = {
               i = {
                 ["<C-j>"] = "move_selection_next",
-                ["<c-t>"] = trouble.open_with_trouble,
+                ["<c-t>"] = trouble_telscope.open_with_trouble,
                 ["<C-k>"] = "move_selection_previous",
               },
               n = {
-                ["<c-t>"] = trouble.open_with_trouble,
+                ["<c-t>"] = trouble_telscope.open_with_trouble,
                 ["K"] = move_selection_previous_5,
                 ["J"] = move_selection_next_5,
               },
@@ -371,7 +371,7 @@ require('lazy').setup({
 
       end
 
-      function showDocument()
+      local function showDocument()
         local clients = vim.lsp.get_active_clients()
         if next(clients) ~= nil then
           vim.lsp.buf.hover()
@@ -387,8 +387,8 @@ require('lazy').setup({
       -- Mappings.
       -- See `:help vim.lsp.*` for documentation on any of the below functions
       vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-      -- vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
+      -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+      vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
       -- vim.keymap.set('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
       -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
@@ -399,7 +399,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<space>al', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
       -- vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
       vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
-      vim.keymap.set('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+      -- vim.keymap.set('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
       vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
       vim.keymap.set('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
 
@@ -570,7 +570,7 @@ require('lazy').setup({
       vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
       vim.keymap.set('n', '<space>Q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
       vim.keymap.set('n', '<space>q', '<cmd>TroubleToggle workspace_diagnostics<CR>', opts)
-      vim.keymap.set('n', '<leader>d', '<cmd>lua showDocument()<CR>', opts)
+      vim.keymap.set('n', '<leader>d', showDocument, opts)
 
       -- vim.cmd [[au CursorHold <buffer> lua vim.diagnostic.open_float()]]
 
@@ -648,6 +648,7 @@ require('lazy').setup({
         hi link @property        Property
         hi link @selfKeyword     Parameter
         hi link @parameter       Parameter
+        au FileType go hi link   @readonly        Constant
 
         "hi link @type            Label
         "hi link @variable        Variable
@@ -682,6 +683,47 @@ require('lazy').setup({
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           require("lsp-inlayhints").on_attach(client, bufnr)
         end,
+      })
+    end
+  },
+
+  {
+    "luukvbaal/statuscol.nvim",
+    lazy = false,
+    config = function()
+      local builtin = require("statuscol.builtin")
+      require("statuscol").setup({
+        separator = " ",     -- separator between line number and buffer text ("│" or extra " " padding)
+        -- Builtin line number string options for ScLn() segment
+        thousands = false,     -- or line number thousands separator string ("." / ",")
+        relculright = false,   -- whether to right-align the cursor line number with 'relativenumber' set
+        -- Custom line number string options for ScLn() segment
+        lnumfunc = nil,        -- custom function called by ScLn(), should return a string
+        reeval = false,        -- whether or not the string returned by lnumfunc should be reevaluated
+        -- Custom fold column string options for ScFc() segment
+        foldfunc = "builtin",        -- nil for "%C" segment, "builtin" for builtin function, or custom function
+        -- called by ScFc(), should return a string
+        -- Builtin 'statuscolumn' options
+        setopt = true,         -- whether to set the 'statuscolumn', providing builtin click actions
+        order = "SNsF",        -- order of the fold, sign, line number and separator segments
+        ft_ignore = nil,       -- lua table with filetypes for which 'statuscolumn' will be unset
+        -- Click actions
+        Lnum                   = builtin.lnum_click,
+        FoldPlus               = builtin.foldplus_click,
+        FoldMinus              = builtin.foldminus_click,
+        FoldEmpty              = builtin.foldempty_click,
+        DapBreakpointRejected  = builtin.toggle_breakpoint,
+        DapBreakpoint          = builtin.toggle_breakpoint,
+        DapBreakpointCondition = builtin.toggle_breakpoint,
+        DiagnosticSignError    = builtin.diagnostic_click,
+        DiagnosticSignHint     = builtin.diagnostic_click,
+        DiagnosticSignInfo     = builtin.diagnostic_click,
+        DiagnosticSignWarn     = builtin.diagnostic_click,
+        GitSignsTopdelete      = builtin.gitsigns_click,
+        GitSignsUntracked      = builtin.gitsigns_click,
+        GitSignsAdd            = builtin.gitsigns_click,
+        GitSignsChangedelete   = builtin.gitsigns_click,
+        GitSignsDelete         = builtin.gitsigns_click,
       })
     end
   },
@@ -756,8 +798,15 @@ require('lazy').setup({
     "Pocco81/auto-save.nvim",
     -- commit = '8df684bcb3c5fff8fa9a772952763fc3f6eb75ad',
     lazy = false,
-    config = function()
-    end
+    opts = {
+      execution_message = {
+        message = function() -- message to print on save
+          return ""
+        end,
+        dim = 0.18, -- dim the color of `message`
+      },
+      trigger_events = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
+    }
   },
 
   {
@@ -1069,8 +1118,6 @@ require('lazy').setup({
       vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
       vim.o.foldlevelstart = 99
       vim.o.foldenable = true
-      -- vim.o.statuscolumn='%=%{v:relnum?v:relnum:v:lnum}%s%#FoldColumn#%{foldlevel(v:lnum) > 0 ? (foldlevel(v:lnum) > foldlevel(v:lnum - 1) ? (foldclosed(v:lnum) == -1 ? "" : "") : " ") : " " }%*'
-      vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
 
 
       local function handler(virt_text, lnum, end_lnum, width, truncate, ctx)
@@ -1235,56 +1282,58 @@ require('lazy').setup({
   {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     config = function()
-      if vim.b.treesitter_disable ~= 1 then
-        require 'nvim-treesitter.configs'.setup {
-          -- One of "all", or a list of languages
-          ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust"},
-
-          -- Install languages synchronously (only applied to `ensure_installed`)
-          sync_install = false,
-
-
-          -- List of parsers to ignore installing
-          -- ignore_install = { "javascript" },
-
-          highlight = {
-            -- `false` will disable the whole extension
-            enable = true,
-
-            -- list of language that will be disabled
-            disable = function(lang, bufnr) -- Disable in large C++ buffers
-              return vim.api.nvim_buf_line_count(bufnr) > 20000
-            end,
-
-            -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-            -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-            -- Using this option may slow down your editor, and you may see some duplicate highlights.
-            -- Instead of true it can also be a list of languages
-            additional_vim_regex_highlighting = true,
-            custom_captures = {
-              -- disable comment hightlight (for javadoc)
-              ["comment"] = "NONE",
-            }
-          },
-          indent = {
-            enable = false
-          },
-        }
-
-        -- matlab
-        local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-        parser_config.matlab = {
-          install_info = {
-            url = "https://github.com/mstanciu552/tree-sitter-matlab.git",
-            files = { "src/parser.c" },
-            branch= 'main'
-          },
-          filetype = "matlab", -- if filetype does not agrees with parser name
-        }
-
+      if vim.g.treesitter_disable == true then
+        return
       end
+      require 'nvim-treesitter.configs'.setup {
+        -- One of "all", or a list of languages
+        ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust"},
 
+        -- Install languages synchronously (only applied to `ensure_installed`)
+        sync_install = false,
+
+
+        -- List of parsers to ignore installing
+        -- ignore_install = { "javascript" },
+
+        highlight = {
+          -- `false` will disable the whole extension
+          enable = true,
+
+          -- list of language that will be disabled
+          disable = function(lang, bufnr) -- Disable in large C++ buffers
+            return vim.api.nvim_buf_line_count(bufnr) > 20000
+          end,
+
+          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+          -- Using this option may slow down your editor, and you may see some duplicate highlights.
+          -- Instead of true it can also be a list of languages
+          additional_vim_regex_highlighting = true,
+          custom_captures = {
+            -- disable comment hightlight (for javadoc)
+            ["comment"] = "NONE",
+          }
+        },
+        indent = {
+          enable = false
+        },
+      }
+
+      -- matlab
+      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      parser_config.matlab = {
+        install_info = {
+          url = "https://github.com/mstanciu552/tree-sitter-matlab.git",
+          files = { "src/parser.c" },
+          branch= 'main'
+        },
+        filetype = "matlab", -- if filetype does not agrees with parser name
+      }
     end
   },
 
@@ -1292,6 +1341,9 @@ require('lazy').setup({
     'nvim-treesitter/playground',
     lazy = true,
     cmd = {"TSPlaygroundToggle"},
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     config = function()
       require "nvim-treesitter.configs".setup{
         playground = {
@@ -1320,7 +1372,13 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter-textobjects',
     lazy = true,
     event = "User PluginsLoaded",
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     config = function()
+      if vim.g.treesitter_disable == true then
+        return
+      end
       require'nvim-treesitter.configs'.setup {
         textobjects = {
           select = {
@@ -1356,6 +1414,9 @@ require('lazy').setup({
   {
     "lukas-reineke/indent-blankline.nvim",
     lazy = true,
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     -- TODO: start highlight list
     config = function()
       local ok, treesitter = pcall(require, 'nvim-treesitter')
@@ -1385,6 +1446,9 @@ require('lazy').setup({
   {
     "mrjones2014/nvim-ts-rainbow",
     lazy = true,
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     config = function()
         require("nvim-treesitter.configs").setup {
           rainbow = {
@@ -1408,6 +1472,9 @@ require('lazy').setup({
   {
     'windwp/nvim-ts-autotag',
     lazy = true,
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     config = function()
       require'nvim-treesitter.configs'.setup {
         autotag = {
@@ -1420,6 +1487,9 @@ require('lazy').setup({
   {
     'nvim-treesitter/nvim-treesitter-context',
     lazy = true,
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     config = function()
       require'treesitter-context'.setup {
         enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
@@ -1464,6 +1534,9 @@ require('lazy').setup({
     'm-demare/hlargs.nvim',
     lazy = true,
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    cond = function()
+      return vim.g.treesitter_disable ~= true
+    end,
     config = function()
       if vim.g.colors_name == 'ghdark' then
         require('hlargs').setup {
@@ -1880,6 +1953,18 @@ require('lazy').setup({
   {
     -- provide ui for lsp
     'stevearc/dressing.nvim',
+  },
+
+  {
+    'smjonas/inc-rename.nvim',
+    opts = {
+      input_buffer_type = "dressing",
+    },
+    config = function()
+      vim.keymap.set("n", "<leader>rn", function()
+        return ":IncRename " .. vim.fn.expand("<cword>")
+      end, { expr = true })
+    end
   },
 
   {
@@ -2363,7 +2448,15 @@ require('lazy').setup({
     end
   },
 
-  {'tversteeg/registers.nvim', lazy = false},
+  {
+    'tversteeg/registers.nvim',
+    lazy = false,
+    opts = {
+      window = {
+        border = "single"
+      }
+    }
+  },
 
   {
     'numToStr/Comment.nvim',
@@ -2434,6 +2527,14 @@ require('lazy').setup({
           toggle_fold = {"zc", "zo"}, -- toggle fold of current file
         },
       }
+
+      local util = require("trouble.util")
+      local util_jump_to_item = util.jump_to_item
+      util.jump_to_item = function(win, precmd, item)
+        -- add mark to jump back
+        vim.cmd("normal! m'")
+        util_jump_to_item(win, precmd, item)
+      end
 
     end
   },
@@ -2575,7 +2676,6 @@ require('lazy').setup({
   -- },
 
   {'junegunn/vim-easy-align', lazy = true, cmd = "EasyAlign"},
-  {"dstein64/vim-startuptime", lazy = false},
   {
     'voldikss/vim-translator',
     lazy = true,
@@ -2977,6 +3077,41 @@ require('lazy').setup({
         },
       }
 
+      -- Go
+      dap.adapters.delve = {
+        type = 'server',
+        port = '${port}',
+        executable = {
+          command = 'dlv',
+          args = {'dap', '-l', '127.0.0.1:${port}'},
+        }
+      }
+
+      -- https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_dap.md
+      dap.configurations.go = {
+        {
+          type = "delve",
+          name = "Debug",
+          request = "launch",
+          program = "${file}"
+        },
+        {
+          type = "delve",
+          name = "Debug test", -- configuration for debugging test files
+          request = "launch",
+          mode = "test",
+          program = "${file}"
+        },
+        -- works with go.mod packages and sub packages 
+        {
+          type = "delve",
+          name = "Debug test (go.mod)",
+          request = "launch",
+          mode = "test",
+          program = "./${relativeFileDirname}"
+        }
+      }
+
       -- Dap load launch.json from vscode when avaliable
       if vim.fn.filereadable("./.vscode/launch.json") and vim.g.load_launchjs ~= 1 then
         require('dap.ext.vscode').load_launchjs(nil, {
@@ -3322,18 +3457,6 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 
 -- vim.g.suda_smart_edit = 1
 
--- auto-save
-local autosave = require('auto-save')
-autosave.setup {
-  execution_message = {
-    message = function() -- message to print on save
-      return ""
-    end,
-    dim = 0.18, -- dim the color of `message`
-  },
-  trigger_events = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
-}
-
 -- osc52 support on ssh
 if os.getenv("SSH_CONNECTION") ~= nil then
   vim.api.nvim_create_autocmd("TextYankPost", {
@@ -3360,14 +3483,6 @@ vim.api.nvim_create_autocmd("BufNewFile", {
     require("lazy").load{ plugins = {"ultisnips", "vim-skeletons"} }
     vim.call("skeletons#InsertSkeleton")
   end
-})
-
--- register.nvim
-local registers = require("registers")
-registers.setup({
-  window = {
-    border = "single"
-  }
 })
 
 -- vCoolor.vim won't disable mappings if it is loaded after the plugin

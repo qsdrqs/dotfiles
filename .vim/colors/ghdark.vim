@@ -9,7 +9,7 @@ let g:colors_name='ghdark'
 
 let g:github_colors = {
   \ "base0"        : ["#0d1117", 233],
-  \ "base1"        : ["#161b22", 235],
+  \ "base1"        : ["#171b22", 235],
   \ "base2"        : ["#21262d", 237],
   \ "base3"        : ["#89929b", 243],
   \ "base4"        : ["#ecf2f8", 252],
@@ -156,7 +156,7 @@ call s:ghhl("iCursor", "base0", "red")
 call s:ghhl("vCursor", "base0", "purp")
 call s:ghhl("CursorColumn", "none", "base1")
 call s:ghhl("CursorLine", "none", "base1")
-call s:ghhl("CursorLineNr", "lightblue", "base2")
+call s:ghhl("CursorLineNr", "lightblue", "base1")
 "call s:ghhl("DiffAdd", "green", "base0")
 "call s:ghhl("DiffChange", "orange", "base0")
 "call s:ghhl("DiffDelete", "red", "base0")

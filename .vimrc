@@ -149,7 +149,7 @@ autocmd FileType qf nnoremap <silent>q :q<CR>
 if $LIGHT == 1
   colorscheme ghlight
 else
-  colorscheme ghdark
+  colorscheme habamax
 endif
 set termguicolors
 let g:molokai_transparent=1
@@ -246,6 +246,7 @@ set cindent "C 语言风格缩进"
 "使空格和缩进显示字符
 set list
 set listchars=tab:→\ ,trail:▫,lead:⋅
+set fillchars=eob:\ ,fold:\ ,foldopen:,foldsep:\ ,foldclose:
 
 "hi NonText ctermfg=16 guifg=#4a4a59
 "hi SpecialKey ctermfg=15 guifg=#4a4a59
@@ -416,13 +417,13 @@ endif
 " limit textwidth in markdown and latex
 autocmd FileType markdown,tex set textwidth=80
 
-" set exrc
-if filereadable(expand(getcwd() . "/.exrc"))
-  " 加载项目自定义配置(为了兼容使用.exrc)
+" 加载项目自定义配置(为了兼容使用.exrc)
+set exrc
+if filereadable(expand(getcwd() . "/.prerc.vim"))
   if has('nvim')
-    " 判断是否可以安全加载exrc文件
-      if luaeval('vim.secure.read(vim.fn.expand(vim.fn.getcwd() .. "/.exrc")) ~= nil')
-        source .exrc
+    " 判断是否可以安全加载prerc文件
+      if luaeval('vim.secure.read(vim.fn.expand(vim.fn.getcwd() .. "/.prerc.vim")) ~= nil')
+        source .prerc.vim
       endif
   endif
 endif
@@ -446,6 +447,12 @@ hi! Fixme guifg=#26302B guibg=#F06292
 if has('nvim')
   hi! Note guifg=#2AFF2C guibg=none
   hi! searchme guifg=#F06292 guibg=none gui=bold
+endif
+
+" disable luaError and luaParenError
+if has('nvim')
+  au FileType vim hi link luaError Normal
+  au FileType vim hi link luaParenError Normal
 endif
 "-------------------Syntax highlight-----------------------"}}}
 
