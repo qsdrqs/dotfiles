@@ -239,7 +239,7 @@ call s:_('IncSearchCursor', '',     '',               'reverse')
 
 call s:_('Conceal',         theme.fg_conceal, 'NONE',    '')
 call s:_('SpecialKey',      '#333333',        'NONE',    '')
-call s:_('NonText',         theme.fg_subtle,  '',        'bold')
+call s:_('NonText',         theme.fg_subtle,  '',        'NONE')
 call s:_('MatchParen',      '',               '#BCE3FF', 'NONE')
 call s:_('SpecialOpt',      '#868680',        '#32363a', '')
 call s:_('Whitespace',      '#8f9aa9',        '',        '')

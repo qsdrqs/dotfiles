@@ -16,10 +16,10 @@ call_tmux(){
 if [[ $NOTMUX != 1 ]]; then
     if [[ -x `command -v tmux` ]] && [[ $TMUX == "" ]]; then
         if [[ -e "$HOME/wsl" ]]; then
-            export session_name="wsl"
+            session_name="wsl"
             call_tmux $session_name
         elif [[ "$SSH_CONNECTION" != ""  ]]; then
-            export session_name="ssh"
+            session_name="ssh"
             call_tmux $session_name
             #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then
             #export session_name="kde"
@@ -44,6 +44,9 @@ export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 # nvim mason
 export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
+# wasmtime
+export WASMTIME_HOME="$HOME/.wasmtime"
+export PATH="$WASMTIME_HOME/bin:$PATH"
 
 [ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env" # ghcup-env
 
@@ -56,16 +59,13 @@ export GPG_TTY=$(tty)
 #Make alacritty compatible with SSH
 if [[ $TERM != "xterm-kitty" && $TMUX != "" ]]; then
     export TERM="tmux-256color"
-fi
-
-
-if [[ $TERM == "xterm-kitty" ]]; then
-    # use xterm-256color in tmux
-    # if [[ $TMUX == "" ]]; then
-    #     alias ssh="kitty +kitten ssh"
-    # else
-    #     export TERM="xterm-256color"
-    # fi
+elif [[ $TERM == "xterm" ]]; then
+    export TERM="xterm-256color"
+elif [[ $TERM == "linux" ]]; then
+    export TERM="xterm-256color"
+elif [[ $TERM == "xterm-kitty" ]]; then
+    # alias ssh
+    alias ssh="kitty +kitten ssh"
 fi
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -229,7 +229,7 @@ else
     export VISUAL='vim'
 fi
 # 使用nvim作为默认pager
-export PAGER=nvimpager
+# export PAGER=nvimpager
 
 # python虚拟环境
 if [ -e "/usr/bin/virtualenvwrapper.sh" ]; then
@@ -278,7 +278,7 @@ alias prox="export http_proxy=http://$PROX:1081\
 && export ftp_proxy=http://$PROX:1081
 "
 alias tra="python3 ~/translator/translator.py"
-alias vim="$EDITOR"
+# alias vim="$EDITOR"
 alias vimm="/usr/bin/vim"
 alias vi="$EDITOR --cmd 'let g:vim_startup=1'"
 #Turn off the touch pad 
@@ -374,6 +374,13 @@ compdef vman="man"
 #     eval "$(pyenv virtualenv-init -)"
 # fi
 
-export WASMTIME_HOME="$HOME/.wasmtime"
-
-export PATH="$WASMTIME_HOME/bin:$PATH"
+# wrapper for vim to support restart
+vim() {
+    while true; do
+        $EDITOR "$@"
+        RET=$?
+        if [[ $RET != 100 ]]; then
+            return $RET
+        fi
+    done
+}

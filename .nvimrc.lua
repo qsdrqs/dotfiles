@@ -76,6 +76,7 @@ require('lazy').setup({
 
     end
   },
+  {'seandewar/sigsegvim', cmd = "Sigsegv"},
 
   {
     'nvim-telescope/telescope-live-grep-args.nvim',
@@ -344,7 +345,7 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     config = function()
       -- vim.lsp.set_log_level('trace')
-      vim.lsp.set_log_level('OFF')
+      -- vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
 
@@ -386,25 +387,25 @@ require('lazy').setup({
 
       -- Mappings.
       -- See `:help vim.lsp.*` for documentation on any of the below functions
-      vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+      vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
       -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
       vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
       -- vim.keymap.set('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
       -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
-      vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-      vim.keymap.set('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-      vim.keymap.set('n', '<space>aa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-      vim.keymap.set('n', '<space>ar', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+      vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+      vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+      vim.keymap.set('n', '<space>aa', vim.lsp.buf.add_workspace_folder, opts)
+      vim.keymap.set('n', '<space>ar', vim.lsp.buf.remove_workspace_folder, opts)
       vim.keymap.set('n', '<space>al', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
       -- vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
       vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
-      -- vim.keymap.set('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-      vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+      -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+      vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
       vim.keymap.set('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
 
       vim.diagnostic.config({
-        virtual_text = true,
+        virtual_text = false,
         virtual_lines = false
       })
       virtualLineEnabled = false
@@ -419,7 +420,7 @@ require('lazy').setup({
           virtualLineEnabled = true
         else
           vim.diagnostic.config({
-            virtual_text = true,
+            -- virtual_text = true,
             virtual_lines = false
           })
           virtualLineEnabled = false
@@ -465,7 +466,7 @@ require('lazy').setup({
       end
 
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
-      local servers = { 'pyright', 'texlab', 'sumneko_lua', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls" }
+      local servers = { 'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls" }
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
         if lsp == 'tsserver' then
@@ -498,7 +499,7 @@ require('lazy').setup({
               onOpenAndSave = true
             }
           }
-        elseif lsp == "sumneko_lua" then
+        elseif lsp == "lua_ls" then
           if string.find(vim.fn.expand('%'), '.nvimrc.lua') then
             lsp_common_config.autostart = false
           end
@@ -613,7 +614,7 @@ require('lazy').setup({
         end
       end
 
-      function formatTrigger()
+      local function formatTrigger()
         if not vim.g.format_on_save or vim.g.format_on_save == 0 then
           vim.g.format_on_save = 1
           print("Format On Save: ON")
@@ -629,7 +630,7 @@ require('lazy').setup({
         pattern = "*",
         callback = formatTriggerHandler,
       })
-      vim.cmd[[ command! AFTrigger lua formatTrigger() ]]
+      vim.api.nvim_create_user_command("AFTrigger", formatTrigger, {nargs = 0})
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
 
       -- semantic highlighting
@@ -706,7 +707,14 @@ require('lazy').setup({
         -- Builtin 'statuscolumn' options
         setopt = true,         -- whether to set the 'statuscolumn', providing builtin click actions
         order = "SNsF",        -- order of the fold, sign, line number and separator segments
-        ft_ignore = nil,       -- lua table with filetypes for which 'statuscolumn' will be unset
+        ft_ignore = {
+          "toggleterm",
+          "dapui_scopes",
+          "dapui_breakpoints",
+          "dapui_stacks",
+          "dapui_watches",
+          "dap-repl"
+        }, -- lua table with filetypes for which 'statuscolumn' will be unset
         -- Click actions
         Lnum                   = builtin.lnum_click,
         FoldPlus               = builtin.foldplus_click,
@@ -725,12 +733,16 @@ require('lazy').setup({
         GitSignsChangedelete   = builtin.gitsigns_click,
         GitSignsDelete         = builtin.gitsigns_click,
       })
+      -- disable in command line window
+      vim.api.nvim_create_autocmd("CmdwinEnter", {
+        callback = function() vim.o.statuscolumn="" end
+      })
     end
   },
 
   {
     -- for code actions
-    'kosayoda/nvim-lightbulb',
+    'qsdrqs/nvim-lightbulb',
     config = function()
       local lightbulb = require('nvim-lightbulb')
       lightbulb.setup {
@@ -871,7 +883,7 @@ require('lazy').setup({
   {
     'hrsh7th/cmp-cmdline',
     lazy = true,
-    keys = {"/", ":"},
+    keys = {"/", {":", mode = {'v', 'n'}}},
     config = function()
       local status_ok, cmp = pcall(require, "cmp")
       if not status_ok then
@@ -1024,16 +1036,16 @@ require('lazy').setup({
             end,
             i = function(fallback)
               local ok, copilot_keys = pcall(vim.fn["copilot#Accept"])
-              print(copilot_keys)
               if not ok then
                 copilot_keys = ""
               end
+              local ultisnips_ok, ultisnips_jump_forward = pcall(vim.fn["UltiSnips#CanJumpForwards"])
               if cmp.visible() then
                 -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                 cmp.confirm()
               elseif copilot_keys ~= "" then
                 vim.api.nvim_feedkeys(copilot_keys, "i", true)
-              elseif vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
+              elseif ultisnips_ok and ultisnips_jump_forward == 1 then
                 vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
               else
                 vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
@@ -1246,11 +1258,12 @@ require('lazy').setup({
 
   {
     "akinsho/toggleterm.nvim",
+    keys = {"<localleader>t", "<C-`>"},
     config = function()
       require("toggleterm").setup {
         size = function(term)
           if term.direction == "horizontal" then
-            return vim.o.lines * 0.2
+            return vim.o.lines * 0.25
           elseif term.direction == "vertical" then
             return vim.o.columns * 0.4
           end
@@ -1275,7 +1288,7 @@ require('lazy').setup({
 
       -- repl
       vim.keymap.set("n", "<c-c><c-c>", "<cmd>ToggleTermSendCurrentLine<cr>")
-      vim.keymap.set("v", "<c-c><c-c>", "<cmd>ToggleTermSendVisualLines<cr>")
+      vim.keymap.set("v", "<c-c><c-c>", "<cmd>'<,'>ToggleTermSendVisualLines<cr>")
     end
   },
 
@@ -1405,6 +1418,21 @@ require('lazy').setup({
             swap_previous = {
               ["<leader>sh"] = "@parameter.inner",
             },
+          },
+        },
+      }
+    end
+  },
+
+  {
+    "RRethy/nvim-treesitter-textsubjects",
+    lazy = true,
+    config = function()
+      require('nvim-treesitter.configs').setup {
+        textsubjects = {
+          enable = true,
+          keymaps = {
+            ['<CR>'] = 'textsubjects-smart',
           },
         },
       }
@@ -1951,16 +1979,52 @@ require('lazy').setup({
   },
 
   {
+    'monaqa/dial.nvim',
+    keys = {
+      {'g<C-a>', mode = 'v'},
+      {'g<C-x>', mode = 'v'},
+      {'<C-a>'},
+      {'<C-x>'}
+    },
+    config = function()
+      vim.keymap.set("n", "<C-a>", require("dial.map").inc_normal(), {noremap = true})
+      vim.keymap.set("n", "<C-x>", require("dial.map").dec_normal(), {noremap = true})
+      vim.keymap.set("v", "<C-a>", require("dial.map").inc_visual(), {noremap = true})
+      vim.keymap.set("v", "<C-x>", require("dial.map").dec_visual(), {noremap = true})
+      vim.keymap.set("v", "g<C-a>",require("dial.map").inc_gvisual(), {noremap = true})
+      vim.keymap.set("v", "g<C-x>",require("dial.map").dec_gvisual(), {noremap = true})
+
+      local augend = require("dial.augend")
+      require("dial.config").augends:register_group{
+        -- default augends used when no group name is specified
+        default = {
+          augend.integer.alias.decimal_int,   -- nonnegative decimal number (0, 1, 2, 3, ...)
+          augend.integer.alias.hex,       -- nonnegative hex number  (0x01, 0x1a1f, etc.)
+          augend.integer.alias.binary,
+          augend.integer.alias.octal,
+          augend.constant.alias.bool,
+          augend.constant.new {
+            elements = { "True", "False" },
+          },
+          augend.semver.alias.semver,
+          augend.date.alias["%Y/%m/%d"],  -- date (2022/02/19, etc.)
+        },
+      }
+    end
+  },
+
+  {
     -- provide ui for lsp
     'stevearc/dressing.nvim',
   },
 
   {
     'smjonas/inc-rename.nvim',
-    opts = {
-      input_buffer_type = "dressing",
-    },
+    keys = "<leader>rn",
     config = function()
+      require("inc_rename").setup({
+        -- input_buffer_type = "dressing",
+      })
       vim.keymap.set("n", "<leader>rn", function()
         return ":IncRename " .. vim.fn.expand("<cword>")
       end, { expr = true })
@@ -2056,7 +2120,7 @@ require('lazy').setup({
       local function auto_session_name()
         local status_ok, lib = pcall(require, 'auto-session-library')
         if status_ok then
-          return lib.current_session_name
+          return lib.current_session_name()
         else
           return ''
         end
@@ -2079,9 +2143,9 @@ require('lazy').setup({
           lualine_a = {{'filename', path = 0}},
           lualine_b = {'branch', 'diff', 'diagnostics'},
           lualine_c = {lsp_info, gtagsHandler},
-          lualine_x = {auto_session_name()},
+          lualine_x = {auto_session_name},
           lualine_y = { 'fileformat', 'filetype', copilot},
-          lualine_z = {'%l/%L,%c', 'encoding' }
+          lualine_z = {'%l/%L,%c', 'encoding'}
         },
         inactive_sections = {
           lualine_a = {},
@@ -2223,7 +2287,20 @@ require('lazy').setup({
     end
   },
 
-  {'MattesGroeger/vim-bookmarks', lazy = true},
+  {
+    'MattesGroeger/vim-bookmarks',
+    lazy = true,
+    config = function()
+      vim.g.bookmark_sign = ''
+      vim.keymap.set('n', '<leader>mm', '<cmd>BookmarkToggle<CR>', {silent = true})
+      vim.keymap.set('n', '<leader>mi', '<cmd>BookmarkAnnotate<CR>', {silent = true})
+      vim.keymap.set('n', '<leader>mn', '<cmd>BookmarkNext<CR>', {silent = true})
+      vim.keymap.set('n', '<leader>mp', '<cmd>BookmarkPrev<CR>', {silent = true})
+      vim.keymap.set('n', '<leader>ma', '<cmd>BookmarkShowAll<CR>', {silent = true})
+      vim.keymap.set('n', '<leader>mc', '<cmd>BookmarkClear<CR>', {silent = true})
+    end
+  },
+
   {
     'tom-anders/telescope-vim-bookmarks.nvim',
     dependencies = {
@@ -2240,11 +2317,16 @@ require('lazy').setup({
       require('auto-session').setup {
         log_level = 'error',
         auto_session_suppress_dirs = {'~/', '~/Downloads', '~/Documents'},
-        auto_session_create_enabled = true,
-        auto_session_enable_last_session = true,
-        auto_restore_enabled = false,
+        auto_session_create_enabled = false,
+        -- auto_session_enable_last_session = true,
+        auto_save_enabled = true,
+        auto_restore_enabled = true,
         post_restore_cmds = {'silent !kill -s SIGWINCH $PPID'},
-        pre_save_cmds = {"NvimTreeClose"},
+        pre_save_cmds = {
+          function()
+            pcall(vim.cmd, "NvimTreeClose")
+          end
+        },
       }
     end
   },
@@ -2618,11 +2700,16 @@ require('lazy').setup({
   {
     "folke/todo-comments.nvim",
     dependencies = {"nvim-lua/plenary.nvim"},
-    config = function()
-      require("todo-comments").setup {
-        -- your configuration comes here
+    opts = {
+      keywords = {
+        NOTE = {
+          -- color = "green"
+        },
+      },
+      colors = {
+        green = { "GitSignsAdd" }
       }
-    end
+    }
   },
 
   {
@@ -2639,6 +2726,10 @@ require('lazy').setup({
           if string.find(msg, banned, 1, true) then
             return
           end
+        end
+        if string.find(msg, "signatureHelp", 1, true) then
+          print(msg)
+          return
         end
         require("notify")(msg, ...)
       end
@@ -2676,13 +2767,31 @@ require('lazy').setup({
   -- },
 
   {'junegunn/vim-easy-align', lazy = true, cmd = "EasyAlign"},
+
   {
-    'voldikss/vim-translator',
-    lazy = true,
-    keys = "<leader>y",
+    "potamides/pantran.nvim",
+    keys = {{"<leader>y", mode = 'n'}, {"<leader>y", mode = 'x'}},
     config = function()
-      vim.keymap.set('n', '<leader>y', "<Plug>TranslateW", { silent = true })
-      vim.keymap.set('v', '<leader>y', "<Plug>TranslateWV", { silent = true })
+      local opts = {noremap = true, silent = true, expr = true}
+      local pantran = require("pantran")
+      vim.keymap.set("n", "<leader>y", pantran.motion_translate, opts)
+      vim.keymap.set("n", "<leader>yy", function() return pantran.motion_translate() .. "_" end, opts)
+      vim.keymap.set("x", "<leader>y", pantran.motion_translate, opts)
+
+      require("pantran").setup {
+        default_engine = "google",
+        engines = {
+          deepl = {
+            default_target = "ZH",
+            auth_key = "fb82d24e-df8e-e7f2-5db4-142818d50c12:fx",
+          },
+          google = {
+            fallback = {
+              default_target = "zh-CN",
+            }
+          },
+        },
+      }
     end
   },
   {
@@ -2905,7 +3014,6 @@ require('lazy').setup({
       vim.cmd('hi debugRed guifg=red')
       vim.fn.sign_define('DapBreakpoint', {text='🛑', texthl='debugRed', linehl='', numhl=''})
       dap.defaults.fallback.terminal_win_cmd = 'vertical rightbelow 50new'
-      -- vim.keymap.set('n', '<F2>', 'dap.terminate({},{terminateDebuggee=true},term_dap())<CR><Cmd>lua require"dap".close()<CR>', { silent = true })
       vim.keymap.set('n', '<F2>', function() dap.terminate({},{terminateDebuggee=true}, term_dap()) end, { silent = true })
       vim.keymap.set('n', '<F5>', dap.continue, { silent = true })
       vim.keymap.set('n', '<leader><F5>', dap.run_to_cursor, { silent = true })
@@ -3172,21 +3280,6 @@ require('lazy').setup({
         windows = { indent = 1 },
       })
 
-      -- dapui control panel
-      -- local buf_name = "DAP Watches"
-      -- vim.api.nvim_create_autocmd("BufEnter", {
-      --   pattern = buf_name,
-      --   callback = function()
-      --     vim.defer_fn(function()
-      --       if vim.fn.expand("%") == buf_name then
-      --         local control_win = vim.fn.bufwinid(buf_name)
-      --         vim.notify("DAPUI control panel")
-      --         pcall(vim.api.nvim_win_set_option, control_win, "winbar", dapui.controls())
-      --       end
-      --     end, 100)
-      --   end,
-      -- })
-
       local dap = require("dap")
       dap.listeners.after.event_initialized["dapui_config"] = function()
         dapui.open()
@@ -3351,6 +3444,7 @@ function lazyLoadPlugins()
         'nvim-ts-rainbow',   -- performance issue
         'indent-blankline.nvim',
         'nvim-treesitter-context',
+        'nvim-treesitter-textsubjects',
         'nvim-ts-autotag',
         'hlargs.nvim',
         -- end treesitter
@@ -3491,6 +3585,8 @@ vim.g.vcoolor_disable_mappings = 1
 vim.g.interestingWordsDefaultMappings = 0
 -- same as coc.nvim
 vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
+-- same as vim-bookmark
+vim.g.bookmark_no_default_key_mappings = 1
 
 
 ---------------------------vscode neovim----------------------------------------------

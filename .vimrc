@@ -130,7 +130,8 @@ inoremap <C-h> <Left>
 let $NOTMUX = 1
 if has('nvim')
   "nnoremap \t :set splitbelow<CR>:15split term://zsh<cr>i
-  noremap <localleader>t :set splitright<CR>:exec float2nr(&columns * 0.40) . 'vsplit'<cr>:term<cr>i
+  " use toggleterm instead
+  "noremap <localleader>t :set splitright<CR>:exec float2nr(&columns * 0.40) . 'vsplit'<cr>:term<cr>i
 else
   "nnoremap \t :set splitbelow<CR>:terminal ++rows=15<CR>
   nnoremap \t :set splitbelow<CR>:terminal<CR>
@@ -149,7 +150,7 @@ autocmd FileType qf nnoremap <silent>q :q<CR>
 if $LIGHT == 1
   colorscheme ghlight
 else
-  colorscheme habamax
+  colorscheme ghdark
 endif
 set termguicolors
 let g:molokai_transparent=1
@@ -427,6 +428,9 @@ if filereadable(expand(getcwd() . "/.prerc.vim"))
       endif
   endif
 endif
+
+" 重启vim，设置退出return 100为重启，需要shell相关函数支持
+nnoremap <leader>rs <cmd>cquit 100<cr>
 
 "-------------------杂项-----------------------"}}}
 "
