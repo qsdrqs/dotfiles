@@ -47,6 +47,9 @@ export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 # wasmtime
 export WASMTIME_HOME="$HOME/.wasmtime"
 export PATH="$WASMTIME_HOME/bin:$PATH"
+# go
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
 
 [ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env" # ghcup-env
 

@@ -481,7 +481,10 @@ endfunction
 if get(g:, 'vim_startup', 0) == 1
 
 elseif exists('g:vscode')
-
+    if file_readable(expand("~/.nvimrc.lua"))
+      source ~/.nvimrc.lua
+      lua VscodeNeovimHandler()
+    endif
 else
   if has('nvim')
     if file_readable(expand("~/.nvimrc.lua"))

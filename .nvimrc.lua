@@ -28,6 +28,15 @@ require('lazy').setup({
       'nvim-telescope/telescope-fzf-native.nvim',
       'tom-anders/telescope-vim-bookmarks.nvim',
     },
+    keys = {
+      "<leader>f",
+      "<leader>b",
+      "<leader>gs",
+      "<leader>gg",
+    },
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     config = function()
       local action_set = require "telescope.actions.set"
 
@@ -40,39 +49,46 @@ require('lazy').setup({
       end
 
       local status_ok, trouble_telscope = pcall(require, "trouble.providers.telescope")
+      local opts = {
+        defaults = {
+          mappings = {
+            i = {
+              ["<C-j>"] = "move_selection_next",
+              ["<C-k>"] = "move_selection_previous",
+            },
+            n = {
+              ["K"] = move_selection_previous_5,
+              ["J"] = move_selection_next_5,
+            },
+          }
+        }
+      }
       if status_ok then
-        require('telescope').setup {
-          defaults = {
-            mappings = {
-              i = {
-                ["<C-j>"] = "move_selection_next",
-                ["<c-t>"] = trouble_telscope.open_with_trouble,
-                ["<C-k>"] = "move_selection_previous",
-              },
-              n = {
-                ["<c-t>"] = trouble_telscope.open_with_trouble,
-                ["K"] = move_selection_previous_5,
-                ["J"] = move_selection_next_5,
-              },
-            }
-          }
-        }
-      else
-        require('telescope').setup {
-          defaults = {
-            mappings = {
-              i = {
-                ["<C-j>"] = "move_selection_next",
-                ["<C-k>"] = "move_selection_previous",
-              },
-              n = {
-                ["K"] = move_selection_previous_5,
-                ["J"] = move_selection_next_5,
-              },
-            }
-          }
-        }
+        opts.defaults.mappings.i["<C-t>"] = trouble_telscope.open_with_trouble
+        opts.defaults.mappings.n["<C-t>"] = trouble_telscope.open_with_trouble
       end
+      require('telescope').setup(opts)
+
+      local function telescope_grep_string_visual()
+        local saved_reg = vim.fn.getreg "v"
+        vim.cmd [[noautocmd sil norm "vy]]
+        local sele = vim.fn.getreg "v"
+        vim.fn.setreg("v", saved_reg)
+        require('telescope.builtin').grep_string({ search = sele })
+      end
+
+      -- lazy load telescope
+      local telescope_buildin = require('telescope.builtin')
+      vim.keymap.set('n', '<leader>f', function() telescope_buildin.find_files{no_ignore=true} end, { silent = true })
+      vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
+      vim.keymap.set('v', '<leader>gs', telescope_grep_string_visual, { silent = true })
+      vim.keymap.set('n', '<leader>gg', telescope_buildin.live_grep, { silent = true })
+      vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rw', '<cmd>Telescope lsp_dynamic_workspace_symbols<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
 
     end
   },
@@ -83,7 +99,7 @@ require('lazy').setup({
     lazy = true,
     keys = "<leader>gG",
     config = function()
-      vim.keymap.set('n', '<leader>gG', '<cmd>lua require("telescope").extensions.live_grep_raw.live_grep_raw()<cr>', { silent = true })
+      vim.keymap.set('n', '<leader>gG', require('telescope').extensions.live_grep_args.live_grep_args, { silent = true })
     end
   },
 
@@ -329,6 +345,7 @@ require('lazy').setup({
     config = function()
       local lsp_config = get_lsp_common_config()
       lsp_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never", "--background-index"}
+      lsp_config.filetypes = { "c", "cpp", "objc", "objcpp", "cuda"}
       -- set offset encoding
       lsp_config.capabilities.offsetEncoding = 'utf-8'
       require("clangd_extensions").setup {
@@ -345,7 +362,7 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     config = function()
       -- vim.lsp.set_log_level('trace')
-      -- vim.lsp.set_log_level('OFF')
+      vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
 
@@ -466,7 +483,7 @@ require('lazy').setup({
       end
 
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
-      local servers = { 'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls" }
+      local servers = { 'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls", "bufls" }
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
         if lsp == 'tsserver' then
@@ -501,7 +518,7 @@ require('lazy').setup({
           }
         elseif lsp == "lua_ls" then
           if string.find(vim.fn.expand('%'), '.nvimrc.lua') then
-            lsp_common_config.autostart = false
+            -- lsp_common_config.autostart = false
           end
           lsp_common_config.settings = {
             Lua = {
@@ -516,10 +533,17 @@ require('lazy').setup({
               workspace = {
                 -- Make the server aware of Neovim runtime files
                 library = vim.api.nvim_get_runtime_file("", true),
+                checkThirdParty = false,
               },
               -- Do not send telemetry data containing a randomized but unique identifier
               telemetry = {
                 enable = true,
+              },
+              codeLens = {
+                enable = true,
+              },
+              hint = {
+                enable = false,
               },
             },
           }
@@ -527,6 +551,7 @@ require('lazy').setup({
           lsp_common_config.settings = {
             gopls = {
               semanticTokens = true,
+              usePlaceholders = true,
               hints = {
                 assignVariableTypes = true,
                 compositeLiteralFields = true,
@@ -649,7 +674,6 @@ require('lazy').setup({
         hi link @property        Property
         hi link @selfKeyword     Parameter
         hi link @parameter       Parameter
-        au FileType go hi link   @readonly        Constant
 
         "hi link @type            Label
         "hi link @variable        Variable
@@ -661,6 +685,12 @@ require('lazy').setup({
         "hi link @string          String
         "hi link @number          Number
         "hi link @operator        Operator
+      ]]
+      -- language specific
+      vim.cmd [[
+        au FileType go hi link   @readonly        Constant
+        au FileType go hi link   @type            Class
+        au FileType go hi link   @defaultLibrary  Type
       ]]
 
     end
@@ -691,6 +721,9 @@ require('lazy').setup({
   {
     "luukvbaal/statuscol.nvim",
     lazy = false,
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     config = function()
       local builtin = require("statuscol.builtin")
       require("statuscol").setup({
@@ -884,6 +917,9 @@ require('lazy').setup({
     'hrsh7th/cmp-cmdline',
     lazy = true,
     keys = {"/", {":", mode = {'v', 'n'}}},
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     config = function()
       local status_ok, cmp = pcall(require, "cmp")
       if not status_ok then
@@ -1611,6 +1647,9 @@ require('lazy').setup({
     'stevearc/aerial.nvim',
     lazy = true,
     keys = "<leader>v",
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     config = function()
       vim.keymap.set('n', '<leader>v', '<cmd>AerialToggle!<CR>', { silent = true })
       local status_ok, telescope = pcall(require, "telescope")
@@ -2260,6 +2299,9 @@ require('lazy').setup({
     'famiu/bufdelete.nvim',
     lazy = true,
     keys = '<leader>x',
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     config = function()
       vim.keymap.set('n', '<leader>x', '<cmd>Bdelete!<CR>', {silent = true})
     end
@@ -3472,17 +3514,6 @@ function loadTags()
 end
 vim.cmd("command! LoadTags lua loadTags()")
 
--- lazy load telescope
-vim.keymap.set('n', '<leader>f', '<cmd>lua require"telescope.builtin".find_files{no_ignore=true}<cr>', { silent = true })
-vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
-vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
-vim.keymap.set('n', '<leader>gg', '<cmd>Telescope live_grep <cr>', { silent = true })
-vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
-vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
-vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
-vim.keymap.set('n', '<leader>rw', '<cmd>Telescope lsp_dynamic_workspace_symbols<cr>', { silent = true })
-vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
-
 --------------------------------------------------------------------------------------
 ----------------------------Constant Plugins------------------------------------------
 
@@ -3587,10 +3618,32 @@ vim.g.interestingWordsDefaultMappings = 0
 vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
 -- same as vim-bookmark
 vim.g.bookmark_no_default_key_mappings = 1
+-- same as visual-multi
+vim.g.VM_leader = '\\'
 
 
 ---------------------------vscode neovim----------------------------------------------
---TODO
---------------------------------------------------------------------------------------
+function VscodeNeovimHandler()
+  require('lazy').load{
+    plugins = {
+      "hop.nvim",
+      "vim-visual-multi",
+    }
+  }
+  vim.keymap.set('n', '<leader>af',function() vim.fn.VSCodeNotify("editor.action.formatDocument") end, { silent = true })
+  vim.keymap.set('v', '<leader>af',function() vim.fn.VSCodeNotifyVisual("editor.action.formatSelection", 0) end, { silent = true })
+  vim.keymap.set('n', '<leader>d',function() vim.fn.VSCodeNotify("editor.action.showHover") end, { silent = true })
+  vim.keymap.set('n', 'gi',function() vim.fn.VSCodeNotify("editor.action.goToImplementation") end, { silent = true })
+  vim.keymap.set('n', 'gr',function() vim.fn.VSCodeNotify("editor.action.goToReferences") end, { silent = true })
+  vim.keymap.set('n', '<leader>f',function() vim.fn.VSCodeNotify("workbench.action.quickOpen") end, { silent = true })
+  vim.keymap.set('n', '<leader>v',function() vim.fn.VSCodeNotify("workbench.action.toggleAuxiliaryBar") end, { silent = true })
+  vim.keymap.set('n', '<leader>n',function() vim.fn.VSCodeNotify("workbench.action.toggleSidebarVisibility") end, { silent = true })
+  vim.keymap.set('n', '<leader>rs',function() vim.fn.VSCodeNotify("workbench.action.reloadWindow") end, { silent = true })
+  vim.keymap.set('n', '<leader>gr',function() vim.fn.VSCodeNotify("git.revertChange") end, { silent = true })
 
+
+  -- just used for vscode selection
+  vim.keymap.set('v', '<leader>v',function() vim.fn.VSCodeNotifyVisual("editor.action.goToImplementation", 0) end, { silent = true })
+
+end
 --------------------------------------------------------------------------------------
