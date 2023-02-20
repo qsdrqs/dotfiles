@@ -592,8 +592,8 @@ require('lazy').setup({
 
       vim.keymap.set('n', '<space>e', changeDiagnostic, opts)
       -- vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-      vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
-      vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+      vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+      vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
       vim.keymap.set('n', '<space>Q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
       vim.keymap.set('n', '<space>q', '<cmd>TroubleToggle workspace_diagnostics<CR>', opts)
       vim.keymap.set('n', '<leader>d', showDocument, opts)
@@ -795,6 +795,13 @@ require('lazy').setup({
           ["null-ls"] = {
               ignore = true
           }
+        },
+        fmt = {
+          task = function(task_name, message, percentage)
+            if string.match(message, "Complete") then
+              return ""
+            end
+          end
         }
       }
     end
@@ -841,8 +848,10 @@ require('lazy').setup({
 
   {
     "Pocco81/auto-save.nvim",
-    -- commit = '8df684bcb3c5fff8fa9a772952763fc3f6eb75ad',
     lazy = false,
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     opts = {
       execution_message = {
         message = function() -- message to print on save
@@ -1151,6 +1160,10 @@ require('lazy').setup({
   {
     -- permanent undo file
     'kevinhwang91/nvim-fundo',
+    dependencies = {'kevinhwang91/promise-async'},
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     lazy = false,
     build = function()
       require('fundo').install()
@@ -1335,7 +1348,7 @@ require('lazy').setup({
       return vim.g.treesitter_disable ~= true
     end,
     config = function()
-      if vim.g.treesitter_disable == true then
+      if vim.g.treesitter_disable == true or vim.g.vscode then
         return
       end
       require 'nvim-treesitter.configs'.setup {
@@ -2122,7 +2135,6 @@ require('lazy').setup({
       }
 
       vim.api.nvim_create_autocmd({"InsertEnter"}, {
-        pattern = '*',
         callback = function()
           if vim.g.no_load_copilot ~= 1 then
             require('lazy').load{plugins = 'copilot.vim'}
@@ -2165,8 +2177,9 @@ require('lazy').setup({
         end
       end
 
-      local function void()
-        return ' '
+      local function shiftwidth()
+        local sw = vim.fn.shiftwidth()
+        return "sw:" .. sw
       end
 
       require('lualine').setup {
@@ -2184,7 +2197,7 @@ require('lazy').setup({
           lualine_c = {lsp_info, gtagsHandler},
           lualine_x = {auto_session_name},
           lualine_y = { 'fileformat', 'filetype', copilot},
-          lualine_z = {'%l/%L,%c', 'encoding'}
+          lualine_z = {shiftwidth, '%l/%L,%c', 'encoding'}
         },
         inactive_sections = {
           lualine_a = {},
@@ -2203,6 +2216,9 @@ require('lazy').setup({
   {
     'kevinhwang91/rnvimr',
     lazy = true,
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     keys = "<leader>ra",
     cmd = "RnvimrToggle",
     config = function()
@@ -2575,6 +2591,9 @@ require('lazy').setup({
   {
     'tversteeg/registers.nvim',
     lazy = false,
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     opts = {
       window = {
         border = "single"
@@ -2934,11 +2953,11 @@ require('lazy').setup({
 
   {
     "lambdalisue/suda.vim",
-    lazy = false,
+    cmd = {"SudaRead", "SudaWrite"}
   },
   {
     'mbbill/undotree',
-    lazy = false,
+    keys = "U",
     config = function()
       vim.keymap.set('n', 'U', '<cmd>UndotreeToggle<cr>', { silent = true })
     end
@@ -3458,6 +3477,24 @@ function lazyLoadPlugins()
     }
   }
 
+  -- replace netrw
+  local function open_nvim_tree(data)
+
+    -- buffer is a directory
+    local directory = vim.fn.isdirectory(data.file) == 1
+
+    if not directory then
+      return
+    end
+
+    -- change to the directory
+    vim.cmd.cd(data.file)
+
+    -- open the tree
+    require("nvim-tree.api").tree.open()
+  end
+  vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })
+
   vim.api.nvim_create_autocmd("InsertEnter", {
     callback = function()
       require('lazy').load{
@@ -3599,7 +3636,9 @@ if os.getenv("SSH_CONNECTION") ~= nil then
   -- vim.g.oscyank_term = 'default'
 end
 
-require('fundo').setup()
+if vim.g.vscode == nil then
+  require('fundo').setup()
+end
 
 vim.api.nvim_create_autocmd("BufNewFile", {
   callback = function()
@@ -3628,22 +3667,89 @@ function VscodeNeovimHandler()
     plugins = {
       "hop.nvim",
       "vim-visual-multi",
+      "nvim-treesitter-textobjects",
+      "vim-sandwich",
+      "gitsigns.nvim",
     }
   }
+
   vim.keymap.set('n', '<leader>af',function() vim.fn.VSCodeNotify("editor.action.formatDocument") end, { silent = true })
   vim.keymap.set('v', '<leader>af',function() vim.fn.VSCodeNotifyVisual("editor.action.formatSelection", 0) end, { silent = true })
-  vim.keymap.set('n', '<leader>d',function() vim.fn.VSCodeNotify("editor.action.showHover") end, { silent = true })
   vim.keymap.set('n', 'gi',function() vim.fn.VSCodeNotify("editor.action.goToImplementation") end, { silent = true })
   vim.keymap.set('n', 'gr',function() vim.fn.VSCodeNotify("editor.action.goToReferences") end, { silent = true })
-  vim.keymap.set('n', '<leader>f',function() vim.fn.VSCodeNotify("workbench.action.quickOpen") end, { silent = true })
   vim.keymap.set('n', '<leader>v',function() vim.fn.VSCodeNotify("workbench.action.toggleAuxiliaryBar") end, { silent = true })
   vim.keymap.set('n', '<leader>n',function() vim.fn.VSCodeNotify("workbench.action.toggleSidebarVisibility") end, { silent = true })
   vim.keymap.set('n', '<leader>rs',function() vim.fn.VSCodeNotify("workbench.action.reloadWindow") end, { silent = true })
-  vim.keymap.set('n', '<leader>gr',function() vim.fn.VSCodeNotify("git.revertChange") end, { silent = true })
+  vim.keymap.set('n', '<leader>q',function() vim.fn.VSCodeNotify("workbench.actions.view.toggleProblems") end, { silent = true })
+  vim.keymap.set('n', ']d',function() vim.fn.VSCodeNotify("editor.action.marker.next") end, { silent = true })
+  vim.keymap.set('n', '[d',function() vim.fn.VSCodeNotify("editor.action.marker.prev") end, { silent = true })
+  vim.keymap.set('n', '<leader>x',function() vim.fn.VSCodeNotify("workbench.action.closeActiveEditor") end, { silent = true })
+  vim.keymap.set('n', '<leader>at',function() vim.fn.VSCodeNotify("workbench.action.tasks.runTask") end, { silent = true })
+  vim.keymap.set('n', '<leader>ca',function() vim.fn.VSCodeNotify("editor.action.quickFix") end, { silent = true })
+  vim.keymap.set('n', '<leader>rn',function() vim.fn.VSCodeNotify("editor.action.rename") end, { silent = true })
+  vim.keymap.set('n', '<leader>gg',function() vim.fn.VSCodeNotify("workbench.action.findInFiles") end, { silent = true })
 
+  vim.keymap.set('n', '<leader>gs',function()
+    vim.cmd [[normal! yiw]]
+    vim.fn.VSCodeNotify("workbench.action.findInFiles")
+  end, { silent = true })
+  vim.keymap.set({'n', 'x'}, '<C-w>o',function()
+    vim.fn.VSCodeNotify('workbench.action.joinAllGroups')
+    vim.fn.VSCodeNotify("workbench.action.closeAuxiliaryBar")
+    vim.fn.VSCodeNotify("workbench.action.closeSidebar")
+    vim.fn.VSCodeNotify("workbench.action.closePanel")
+  end, { silent = true })
 
-  -- just used for vscode selection
+  -- git (use gitsigns.nvim instead)
+  -- vim.keymap.set('n', '<leader>gr',function() vim.fn.VSCodeNotify("git.revertSelectedRanges") end, { silent = true })
+  -- vim.keymap.set('n', ']g',function() vim.fn.VSCodeNotify("workbench.action.editor.nextChange") end, { silent = true })
+  -- vim.keymap.set('n', '[g',function() vim.fn.VSCodeNotify("workbench.action.editor.previousChange") end, { silent = true })
+  vim.api.nvim_create_autocmd("BufReadPost", {
+    callback = function(args)
+      local bufnr = args.buf
+      -- looks like "/home/qsdrqs/foo/bar"
+      local cwd = vim.fn.getcwd()
+
+      -- looks like "__vscode_neovim__-file:///home/qsdrqs/foo/bar/baz.txt"
+      local file_long_name = vim.fn.expand("%")
+      -- get relative path
+      local relative_name = string.sub(file_long_name, string.len("__vscode_neovim__-file://") + 1)
+      relative_name = string.sub(relative_name, string.len(cwd) + 2)
+
+      require'gitsigns'.attach(bufnr, {
+        file = relative_name,
+        toplevel = cwd,
+        gitdir = cwd .. "/.git",
+      })
+    end
+  })
+
+  -- just be used for vscode selection
   vim.keymap.set('v', '<leader>v',function() vim.fn.VSCodeNotifyVisual("editor.action.goToImplementation", 0) end, { silent = true })
+
+  -- same bindings
+  vim.keymap.set('n', '<leader>d',function() vim.fn.VSCodeNotify("editor.action.showHover") end, { silent = true })
+  vim.keymap.set('n', '<leader>e',function() vim.fn.VSCodeNotify("editor.action.showHover") end, { silent = true })
+
+  vim.keymap.set('n', '<leader>f',function() vim.fn.VSCodeNotify("workbench.action.quickOpen") end, { silent = true })
+  vim.keymap.set('n', '<leader>b',function() vim.fn.VSCodeNotify("workbench.action.quickOpen") end, { silent = true })
+
+  -- recover =
+  vim.keymap.del({'n', 'x'}, '=', { expr = true })
+  vim.keymap.del('n', '==', { expr = true })
+
+  -- clear background highlight
+  vim.cmd[[ hi Normal guibg=None ]]
+  vim.cmd[[ hi Visual guibg=None ]]
+
+  -- fold
+  vim.keymap.set('n', 'zc',function() vim.fn.VSCodeNotify("editor.fold") end, { silent = true })
+  vim.keymap.set('n', 'zC',function() vim.fn.VSCodeNotify("editor.foldRecursively") end, { silent = true })
+  vim.keymap.set('n', 'zo',function() vim.fn.VSCodeNotify("editor.unfold") end, { silent = true })
+  vim.keymap.set('n', 'zO',function() vim.fn.VSCodeNotify("editor.unfoldRecursively") end, { silent = true })
+  vim.keymap.set('n', 'za',function() vim.fn.VSCodeNotify("editor.toggleFold") end, { silent = true })
+  vim.keymap.set('n', 'zM',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
+  vim.keymap.set('n', 'zR',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
 
 end
 --------------------------------------------------------------------------------------

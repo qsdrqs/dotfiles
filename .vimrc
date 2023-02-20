@@ -328,7 +328,9 @@ endif
 "--------------persistent undo------------------"}}}
 
 "-------------------netrw-----------------------"{{{
-"let g:netrw_liststyle= 3
+let g:loaded_netrw = 1
+let g:loaded_netrwPlugin = 1
+" let g:netrw_liststyle= 3
 
 "-------------------netrw-----------------------"}}}
 set diffopt=vertical
@@ -412,7 +414,7 @@ if has('nvim')
   highlight WinBar guifg=#EEEEEE
   highlight WinBarNC guifg=#8B949E
   " set global statusline
-  set laststatus=3
+  "set laststatus=3
 endif
 
 " limit textwidth in markdown and latex

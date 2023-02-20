@@ -33,6 +33,7 @@ setopt nonomatch
 source $HOME/dotfiles/z/z.sh
 export _Z_SRC=$HOME/dotfiles/z/z.sh
 ZSH_DISABLE_COMPFIX=true
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH=$HOME/.local/bin:$HOME/.local/sbin:$PATH
