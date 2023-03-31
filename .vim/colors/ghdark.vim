@@ -690,7 +690,7 @@ hi! Search  guibg=#4d4b31 guifg=NONE
 hi! link specialkey Whitespace
 hi! Type guifg=#FA7970 gui=NONE
 hi! Class guifg=#FFA657 gui=NONE
-hi! PreProc guifg=#77bdfb
+hi! link PreProc GhBlue
 hi! link Operator Repeat
 hi! link NonText Whitespace
 hi IncSearch term=reverse cterm=reverse ctermfg=193 ctermbg=16 gui=reverse guifg=#C4BE89 guibg=#000000
@@ -746,7 +746,12 @@ highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252
 
 autocmd Filetype vim,lua highlight! link Type Class
 
-highlight IndentBlanklineContextStart guisp=#79C0FF gui=underline
+highlight IndentBlanklineContextStart1 guisp=#79C0FF gui=underline
+highlight IndentBlanklineContextStart2 guisp=#56D364 gui=underline
+highlight IndentBlanklineContextStart3 guisp=#FFA657 gui=underline
+highlight IndentBlanklineContextStart4 guisp=#FA7970 gui=underline
+highlight IndentBlanklineContextStart5 guisp=#FF9BCE gui=underline
+highlight IndentBlanklineContextStart6 guisp=#D2A8FF gui=underline
 
 highlight! Color1 guifg=#79C0FF
 highlight! Color2 guifg=#56D364

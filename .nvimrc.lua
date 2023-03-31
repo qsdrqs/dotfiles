@@ -361,7 +361,7 @@ require('lazy').setup({
   {
     'neovim/nvim-lspconfig',
     config = function()
-      -- vim.lsp.set_log_level('trace')
+      --vim.lsp.set_log_level('trace')
       vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
@@ -483,11 +483,23 @@ require('lazy').setup({
       end
 
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
-      local servers = { 'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls", "bufls" }
+      local servers = {
+        'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls", "bufls", "grammarly"
+      }
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
         if lsp == 'tsserver' then
           -- lsp_common_config.root_dir = require('lspconfig.util').root_pattern("*")
+        elseif lsp == "pyright" then
+          lsp_common_config.settings = {
+            python = {
+              analysis = {
+                diagnosticSeverityOverrides = {
+                  reportGeneralTypeIssues = "warning"
+                }
+              }
+            }
+          }
         elseif lsp == "texlab" then
           lsp_common_config.on_attach = function(client, bufnr)
             common_on_attach(client,bufnr)
@@ -517,7 +529,7 @@ require('lazy').setup({
             }
           }
         elseif lsp == "lua_ls" then
-          if string.find(vim.fn.expand('%'), '.nvimrc.lua') then
+          if string.find(vim.fn.expand('%'), '.nvimrc.lua', 1, true) then
             -- lsp_common_config.autostart = false
           end
           lsp_common_config.settings = {
@@ -585,6 +597,21 @@ require('lazy').setup({
               range = true,
             }
           end
+        elseif lsp == "grammarly" then
+          lsp_common_config.filetypes = { "markdown", "tex" }
+          lsp_common_config.cmd = {os.getenv("HOME") .. "/grammarly/packages/grammarly-languageserver/bin/server.js", "--stdio"}
+          lsp_common_config.init_options = {
+            clientId = "client_BaDkMgx4X19X9UxxYRCXZo"
+          }
+          lsp_common_config.settings = {
+            grammarly = {
+              config = {
+                suggestions = {
+                  MissingSpaces = false
+                }
+              }
+            }
+          }
         end
         lspconfig[lsp].setup(lsp_common_config)
       end
@@ -659,40 +686,34 @@ require('lazy').setup({
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
 
       -- semantic highlighting
-      vim.cmd [[
-        hi link @class           Class
-        hi link @namespace       Class
-        hi link @enum            Enum
-        hi link @interface       Class
-        hi link @typeParameter   TypeParameter
-        hi link @enumMember      Constant
-        hi link @event           Identifier
-        hi link @modifier        Keyword
-        hi link @regexp          SpecialChar
-        hi link @decorator       PreProc
-        hi link @struct          Class
-        hi link @property        Property
-        hi link @selfKeyword     Parameter
-        hi link @parameter       Parameter
+      local links = {
+        ['@lsp.type.class'] = 'Class',
+        ['@lsp.type.comment'] = 'Comment',
+        ['@lsp.type.namespace'] = 'Class',
+        ['@lsp.type.enum'] = 'Enum',
+        ['@lsp.type.interface'] = 'Class',
+        ['@lsp.type.typeParameter'] = 'TypeParameter',
+        ['@lsp.type.enumMember'] = 'Constant',
+        ['@lsp.type.regexp'] = 'SpecialChar',
+        ['@lsp.type.decorator'] = 'PreProc',
+        ['@lsp.type.struct'] = 'Class',
+        ['@lsp.type.property'] = 'Property',
+        ['@lsp.type.selfKeyword'] = 'Parameter',
+        ['@lsp.type.parameter'] = 'Parameter',
+        ['@lsp.typemod.variable.readonly'] = 'Constant',
+        ['@lsp.mod.static'] = 'Constant',
 
-        "hi link @type            Label
-        "hi link @variable        Variable
-        "hi link @function        Function
-        "hi link @method          Function
-        "hi link @macro           Macro
-        "hi link @keyword         Keyword
-        "hi link @comment         Comment
-        "hi link @string          String
-        "hi link @number          Number
-        "hi link @operator        Operator
-      ]]
-      -- language specific
-      vim.cmd [[
-        au FileType go hi link   @readonly        Constant
-        au FileType go hi link   @type            Class
-        au FileType go hi link   @defaultLibrary  Type
-      ]]
+        -- language specific
+        ['@lsp.type.type.go'] = 'Class',
+        ['@lsp.type.defaultLibrary.go'] = 'Type',
 
+        -- treesitter
+        ['@type'] = 'Class',
+        ['@type.builtin'] = 'Type',
+      }
+      for newgroup, oldgroup in pairs(links) do
+        vim.api.nvim_set_hl(0, newgroup, { link = oldgroup, default = true })
+      end
     end
   },
 
@@ -727,19 +748,28 @@ require('lazy').setup({
     config = function()
       local builtin = require("statuscol.builtin")
       require("statuscol").setup({
-        separator = " ",     -- separator between line number and buffer text ("│" or extra " " padding)
         -- Builtin line number string options for ScLn() segment
         thousands = false,     -- or line number thousands separator string ("." / ",")
         relculright = false,   -- whether to right-align the cursor line number with 'relativenumber' set
-        -- Custom line number string options for ScLn() segment
-        lnumfunc = nil,        -- custom function called by ScLn(), should return a string
-        reeval = false,        -- whether or not the string returned by lnumfunc should be reevaluated
-        -- Custom fold column string options for ScFc() segment
-        foldfunc = "builtin",        -- nil for "%C" segment, "builtin" for builtin function, or custom function
-        -- called by ScFc(), should return a string
         -- Builtin 'statuscolumn' options
         setopt = true,         -- whether to set the 'statuscolumn', providing builtin click actions
-        order = "SNsF",        -- order of the fold, sign, line number and separator segments
+        -- Default segments (fold -> sign -> line number + separator)
+        segments = {
+          {
+            sign = { name = { ".*" }, maxwidth = 1, colwidth = 2},
+            click = "v:lua.ScSa"
+          },
+          {
+            text = { builtin.lnumfunc},
+            condition = { true, builtin.not_empty },
+            click = "v:lua.ScLa",
+          },
+          {
+            sign = { name = {"GitSigns"},  maxwidth = 1, colwidth = 1, auto = false},
+            click = "v:lua.ScSa",
+          },
+          { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
+        },
         ft_ignore = {
           "toggleterm",
           "dapui_scopes",
@@ -749,22 +779,24 @@ require('lazy').setup({
           "dap-repl"
         }, -- lua table with filetypes for which 'statuscolumn' will be unset
         -- Click actions
-        Lnum                   = builtin.lnum_click,
-        FoldPlus               = builtin.foldplus_click,
-        FoldMinus              = builtin.foldminus_click,
-        FoldEmpty              = builtin.foldempty_click,
-        DapBreakpointRejected  = builtin.toggle_breakpoint,
-        DapBreakpoint          = builtin.toggle_breakpoint,
-        DapBreakpointCondition = builtin.toggle_breakpoint,
-        DiagnosticSignError    = builtin.diagnostic_click,
-        DiagnosticSignHint     = builtin.diagnostic_click,
-        DiagnosticSignInfo     = builtin.diagnostic_click,
-        DiagnosticSignWarn     = builtin.diagnostic_click,
-        GitSignsTopdelete      = builtin.gitsigns_click,
-        GitSignsUntracked      = builtin.gitsigns_click,
-        GitSignsAdd            = builtin.gitsigns_click,
-        GitSignsChangedelete   = builtin.gitsigns_click,
-        GitSignsDelete         = builtin.gitsigns_click,
+        clickhandlers = {
+          Lnum                   = builtin.lnum_click,
+          FoldClose              = builtin.foldclose_click,
+          FoldOpen               = builtin.foldopen_click,
+          FoldOther              = builtin.foldother_click,
+          DapBreakpointRejected  = builtin.toggle_breakpoint,
+          DapBreakpoint          = builtin.toggle_breakpoint,
+          DapBreakpointCondition = builtin.toggle_breakpoint,
+          DiagnosticSignError    = builtin.diagnostic_click,
+          DiagnosticSignHint     = builtin.diagnostic_click,
+          DiagnosticSignInfo     = builtin.diagnostic_click,
+          DiagnosticSignWarn     = builtin.diagnostic_click,
+          GitSignsTopdelete      = builtin.gitsigns_click,
+          GitSignsUntracked      = builtin.gitsigns_click,
+          GitSignsAdd            = builtin.gitsigns_click,
+          GitSignsChangedelete   = builtin.gitsigns_click,
+          GitSignsDelete         = builtin.gitsigns_click,
+        }
       })
       -- disable in command line window
       vim.api.nvim_create_autocmd("CmdwinEnter", {
@@ -796,13 +828,6 @@ require('lazy').setup({
               ignore = true
           }
         },
-        fmt = {
-          task = function(task_name, message, percentage)
-            if string.match(message, "Complete") then
-              return ""
-            end
-          end
-        }
       }
     end
   },
@@ -888,6 +913,7 @@ require('lazy').setup({
     lazy = true,
     dependencies = {"SirVer/ultisnips"}
   },
+  {'hrsh7th/vim-vsnip'},
   {
     'hrsh7th/cmp-nvim-lsp',
     depedencies = {"neovim/nvim-lspconfig"}
@@ -969,6 +995,7 @@ require('lazy').setup({
 
   {
     'hrsh7th/nvim-cmp',
+    dependencies = {"hrsh7th/vim-vsnip"},
     config = function()
       local t = function(str)
         return vim.api.nvim_replace_termcodes(str, true, true, true)
@@ -1047,11 +1074,11 @@ require('lazy').setup({
           -- REQUIRED - you must specify a snippet engine
           expand = function(args)
             -- Use vsnip to handles snips provided by lsp. Ultisnips has problems.
-            -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
 
             -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
             -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
           end,
         },
         mapping = cmp.mapping.preset.insert({
@@ -1217,13 +1244,13 @@ require('lazy').setup({
         -- add left parenthesis if missing
         local maybe_left_parenthesis = nil
         if end_virt_text[1] ~= nil and start_virt_text[#start_virt_text] ~= nil then
-          if string.find(end_virt_text[1][1], "}") and not string.find(start_virt_text[#start_virt_text][1], "%{") then
+          if string.find(end_virt_text[1][1], "}", 1, true) and not string.find(start_virt_text[#start_virt_text][1], "{", 1, true) then
             maybe_left_parenthesis = {" {", end_virt_text[1][2]}
           end
-          if string.find(end_virt_text[1][1], "]") and not string.find(start_virt_text[#start_virt_text][1], "%[") then
+          if string.find(end_virt_text[1][1], "]", 1, true) and not string.find(start_virt_text[#start_virt_text][1], "[", 1, true) then
             maybe_left_parenthesis = {" [", end_virt_text[1][2]}
           end
-          if string.find(end_virt_text[1][1], ")") and not string.find(start_virt_text[#start_virt_text][1], "%(") then
+          if string.find(end_virt_text[1][1], ")", 1, true) and not string.find(start_virt_text[#start_virt_text][1], "(", 1, true) then
             maybe_left_parenthesis = {" (", end_virt_text[1][2]}
           end
         end
@@ -1494,7 +1521,6 @@ require('lazy').setup({
     cond = function()
       return vim.g.treesitter_disable ~= true
     end,
-    -- TODO: start highlight list
     config = function()
       local ok, treesitter = pcall(require, 'nvim-treesitter')
       if vim.b.treesitter_disable ~= 1 then
@@ -1563,6 +1589,7 @@ require('lazy').setup({
 
   {
     'nvim-treesitter/nvim-treesitter-context',
+    commit = "4842abe5bd1a0dc8b67387cc187edbabc40925ba",
     lazy = true,
     cond = function()
       return vim.g.treesitter_disable ~= true
@@ -2283,22 +2310,74 @@ require('lazy').setup({
     },
     config = function()
       vim.keymap.set('n', '<leader>n', '<cmd>NvimTreeFindFileToggle<CR>', {silent = true})
+      local api = require('nvim-tree.api')
+
+      local on_attach = function(bufnr)
+
+        local opts = function(desc)
+          return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+        end
+
+        vim.keymap.set('n', '<C-]>', api.tree.change_root_to_node,          opts('CD'))
+        vim.keymap.set('n', '<C-e>', api.node.open.replace_tree_buffer,     opts('Open: In Place'))
+        vim.keymap.set('n', '<C-k>', api.node.show_info_popup,              opts('Info'))
+        vim.keymap.set('n', '<C-r>', api.fs.rename_sub,                     opts('Rename: Omit Filename'))
+        vim.keymap.set('n', '<C-t>', api.node.open.tab,                     opts('Open: New Tab'))
+        vim.keymap.set('n', '<C-v>', api.node.open.vertical,                opts('Open: Vertical Split'))
+        vim.keymap.set('n', '<C-x>', api.node.open.horizontal,              opts('Open: Horizontal Split'))
+        vim.keymap.set('n', '<BS>',  api.node.navigate.parent_close,        opts('Close Directory'))
+        vim.keymap.set('n', '<CR>',  api.node.open.edit,                    opts('Open'))
+        vim.keymap.set('n', '<Tab>', api.node.open.preview,                 opts('Open Preview'))
+        vim.keymap.set('n', '>',     api.node.navigate.sibling.next,        opts('Next Sibling'))
+        vim.keymap.set('n', '<',     api.node.navigate.sibling.prev,        opts('Previous Sibling'))
+        vim.keymap.set('n', '.',     api.node.run.cmd,                      opts('Run Command'))
+        vim.keymap.set('n', '-',     api.tree.change_root_to_parent,        opts('Up'))
+        vim.keymap.set('n', 'a',     api.fs.create,                         opts('Create'))
+        vim.keymap.set('n', 'bmv',   api.marks.bulk.move,                   opts('Move Bookmarked'))
+        vim.keymap.set('n', 'B',     api.tree.toggle_no_buffer_filter,      opts('Toggle No Buffer'))
+        vim.keymap.set('n', 'c',     api.fs.copy.node,                      opts('Copy'))
+        vim.keymap.set('n', 'C',     api.tree.toggle_git_clean_filter,      opts('Toggle Git Clean'))
+        vim.keymap.set('n', '[c',    api.node.navigate.git.prev,            opts('Prev Git'))
+        vim.keymap.set('n', ']c',    api.node.navigate.git.next,            opts('Next Git'))
+        vim.keymap.set('n', 'd',     api.fs.remove,                         opts('Delete'))
+        vim.keymap.set('n', 'D',     api.fs.trash,                          opts('Trash'))
+        vim.keymap.set('n', 'E',     api.tree.expand_all,                   opts('Expand All'))
+        vim.keymap.set('n', 'e',     api.fs.rename_basename,                opts('Rename: Basename'))
+        vim.keymap.set('n', ']e',    api.node.navigate.diagnostics.next,    opts('Next Diagnostic'))
+        vim.keymap.set('n', '[e',    api.node.navigate.diagnostics.prev,    opts('Prev Diagnostic'))
+        vim.keymap.set('n', 'F',     api.live_filter.clear,                 opts('Clean Filter'))
+        vim.keymap.set('n', 'f',     api.live_filter.start,                 opts('Filter'))
+        vim.keymap.set('n', 'g?',    api.tree.toggle_help,                  opts('Help'))
+        vim.keymap.set('n', 'gy',    api.fs.copy.absolute_path,             opts('Copy Absolute Path'))
+        vim.keymap.set('n', '<c-h>', api.tree.toggle_hidden_filter,         opts('Toggle Dotfiles'))
+        vim.keymap.set('n', 'I',     api.tree.toggle_gitignore_filter,      opts('Toggle Git Ignore'))
+        vim.keymap.set('n', 'm',     api.marks.toggle,                      opts('Toggle Bookmark'))
+        vim.keymap.set('n', 'o',     api.node.open.edit,                    opts('Open'))
+        vim.keymap.set('n', 'O',     api.node.open.no_window_picker,        opts('Open: No Window Picker'))
+        vim.keymap.set('n', 'p',     api.fs.paste,                          opts('Paste'))
+        vim.keymap.set('n', 'P',     api.node.navigate.parent,              opts('Parent Directory'))
+        vim.keymap.set('n', 'q',     api.tree.close,                        opts('Close'))
+        vim.keymap.set('n', 'r',     api.fs.rename,                         opts('Rename'))
+        vim.keymap.set('n', 'R',     api.tree.reload,                       opts('Refresh'))
+        vim.keymap.set('n', 's',     api.node.run.system,                   opts('Run System'))
+        vim.keymap.set('n', 'S',     api.tree.search_node,                  opts('Search'))
+        vim.keymap.set('n', 'U',     api.tree.toggle_custom_filter,         opts('Toggle Hidden'))
+        vim.keymap.set('n', 'W',     api.tree.collapse_all,                 opts('Collapse'))
+        vim.keymap.set('n', 'x',     api.fs.cut,                            opts('Cut'))
+        vim.keymap.set('n', 'y',     api.fs.copy.filename,                  opts('Copy Name'))
+        vim.keymap.set('n', 'Y',     api.fs.copy.relative_path,             opts('Copy Relative Path'))
+        vim.keymap.set('n', '<2-LeftMouse>',  api.node.open.edit,           opts('Open'))
+        vim.keymap.set('n', '<2-RightMouse>', api.tree.change_root_to_node, opts('CD'))
+        vim.keymap.set('n', '=', api.tree.change_root_to_node, opts('CD'))
+        vim.keymap.set('n', '<leader>', api.node.open.edit, opts('Open'))
+
+      end
+
       require'nvim-tree'.setup {
+        on_attach = on_attach,
         disable_netrw = true,
         diagnostics = {
           enable = true,
-        },
-        view = {
-          mappings = {
-            list = {
-              { key = "K", cb = '5k' },
-              { key = "J", cb = '5j' },
-              { key = "H", cb = '5h' },
-              { key = "<C-h>", action = 'toggle_dotfiles' },
-              { key = "=", action = 'cd' },
-              { key = "<leader>", action = 'edit' },
-            }
-          }
         },
         renderer = {
           highlight_git = true,
@@ -2380,6 +2459,7 @@ require('lazy').setup({
         auto_save_enabled = true,
         auto_restore_enabled = true,
         post_restore_cmds = {'silent !kill -s SIGWINCH $PPID'},
+        pre_restore = 'let g:not_start_alpha = true',
         pre_save_cmds = {
           function()
             pcall(vim.cmd, "NvimTreeClose")
@@ -2391,8 +2471,9 @@ require('lazy').setup({
 
   {
     'goolord/alpha-nvim',
+    dependencies = { 'rmagatti/auto-session' },
     cond = function()
-      return vim.g.not_start_alpha ~= true
+      return vim.g.not_start_alpha ~= true and #vim.fn.argv() == 0
     end,
     config = function ()
       local alpha = require'alpha'
@@ -2685,7 +2766,7 @@ require('lazy').setup({
   {
     'phaazon/hop.nvim',
     lazy = true,
-    keys = {"<leader>w", "<leader>l"},
+    -- keys = {"<leader>w", "<leader>l"},
     config = function()
       require'hop'.setup()
       vim.keymap.set('n', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
@@ -2696,6 +2777,60 @@ require('lazy').setup({
       vim.keymap.set('v', '<leader>l', "<cmd>lua require'hop'.hint_lines()<cr>", {})
     end
   },
+
+  {
+    'ggandor/leap.nvim',
+    keys = {"<leader>w", "<leader>l"},
+    config = function()
+      local function get_line_starts(winid)
+        local wininfo =  vim.fn.getwininfo(winid)[1]
+        local cur_line = vim.fn.line('.')
+
+        -- Get targets.
+        local targets = {}
+        local lnum = wininfo.topline
+        while lnum <= wininfo.botline do
+          local fold_end = vim.fn.foldclosedend(lnum)
+          -- Skip folded ranges.
+          if fold_end ~= -1 then
+            lnum = fold_end + 1
+          else
+            if lnum ~= cur_line then table.insert(targets, { pos = { lnum, 1 } }) end
+            lnum = lnum + 1
+          end
+        end
+        -- Sort them by vertical screen distance from cursor.
+        local cur_screen_row = vim.fn.screenpos(winid, cur_line, 1)['row']
+        local function screen_rows_from_cur(t)
+          local t_screen_row = vim.fn.screenpos(winid, t.pos[1], t.pos[2])['row']
+          return math.abs(cur_screen_row - t_screen_row)
+        end
+        table.sort(targets, function (t1, t2)
+          return screen_rows_from_cur(t1) < screen_rows_from_cur(t2)
+        end)
+
+        if #targets >= 1 then
+          return targets
+        end
+      end
+
+      -- Usage:
+      local function leap_to_line()
+        winid = vim.api.nvim_get_current_win()
+        require('leap').leap {
+          target_windows = { winid },
+          targets = get_line_starts(winid),
+        }
+      end
+      vim.keymap.set({'n', 'v'}, "<leader>l", leap_to_line)
+
+      vim.keymap.set({'n', 'v'}, "<leader>w", function ()
+        local current_window = vim.fn.win_getid()
+        require('leap').leap { target_windows = { current_window } }
+      end)
+    end
+  },
+
   {
     'folke/which-key.nvim',
     config = function()
@@ -2761,16 +2896,18 @@ require('lazy').setup({
   {
     "folke/todo-comments.nvim",
     dependencies = {"nvim-lua/plenary.nvim"},
-    opts = {
-      keywords = {
-        NOTE = {
-          -- color = "green"
+    config = function()
+      require("todo-comments").setup {
+        keywords = {
+          NOTE = {
+            -- color = "green"
+          },
         },
-      },
-      colors = {
-        green = { "GitSignsAdd" }
+        colors = {
+          green = { "GitSignsAdd" }
+        }
       }
-    }
+    end
   },
 
   {
@@ -2831,6 +2968,9 @@ require('lazy').setup({
 
   {
     "potamides/pantran.nvim",
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     keys = {{"<leader>y", mode = 'n'}, {"<leader>y", mode = 'x'}},
     config = function()
       local opts = {noremap = true, silent = true, expr = true}
@@ -2902,7 +3042,10 @@ require('lazy').setup({
   {
     'SirVer/ultisnips',
     lazy = true,
-    dependencies = {'honza/vim-snippets', rtp = '.'},
+    dependencies = {
+      {'honza/vim-snippets', rtp = '.'},
+      {'nvim-cmp'}
+    },
     config = function()
       vim.g.UltiSnipsExpandTrigger = '<Plug>(ultisnips_expand)'
       vim.g.UltiSnipsJumpForwardTrigger = '<Plug>(ultisnips_jump_forward)'
@@ -3247,7 +3390,7 @@ require('lazy').setup({
       }
 
       -- Go
-      dap.adapters.delve = {
+      dap.adapters.go = {
         type = 'server',
         port = '${port}',
         executable = {
@@ -3259,13 +3402,13 @@ require('lazy').setup({
       -- https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_dap.md
       dap.configurations.go = {
         {
-          type = "delve",
+          type = "go",
           name = "Debug",
           request = "launch",
           program = "${file}"
         },
         {
-          type = "delve",
+          type = "go",
           name = "Debug test", -- configuration for debugging test files
           request = "launch",
           mode = "test",
@@ -3273,7 +3416,7 @@ require('lazy').setup({
         },
         -- works with go.mod packages and sub packages 
         {
-          type = "delve",
+          type = "go",
           name = "Debug test (go.mod)",
           request = "launch",
           mode = "test",
@@ -3462,7 +3605,6 @@ function lazyLoadPlugins()
 
       -- begin misc
       'which-key.nvim',
-      'auto-session',
       'project.nvim',
       'nvim-ufo',
       'toggleterm.nvim',
@@ -3665,7 +3807,6 @@ vim.g.VM_leader = '\\'
 function VscodeNeovimHandler()
   require('lazy').load{
     plugins = {
-      "hop.nvim",
       "vim-visual-multi",
       "nvim-treesitter-textobjects",
       "vim-sandwich",
@@ -3688,11 +3829,19 @@ function VscodeNeovimHandler()
   vim.keymap.set('n', '<leader>ca',function() vim.fn.VSCodeNotify("editor.action.quickFix") end, { silent = true })
   vim.keymap.set('n', '<leader>rn',function() vim.fn.VSCodeNotify("editor.action.rename") end, { silent = true })
   vim.keymap.set('n', '<leader>gg',function() vim.fn.VSCodeNotify("workbench.action.findInFiles") end, { silent = true })
+  vim.keymap.set('n', '<leader><leader>',function() vim.fn.VSCodeCallVisual("workbench.action.showCommands", 0) end, { silent = true })
+
+  vim.keymap.set('x', '<leader>y',function() vim.fn.VSCodeCallVisual("extension.translateTextPreferred", 0) end, { silent = true })
+  vim.keymap.set('n', '<leader>y',function()
+    vim.cmd [[normal! viw]]
+    vim.fn.VSCodeCallVisual("extension.translateTextPreferred", 0)
+  end, { silent = true })
 
   vim.keymap.set('n', '<leader>gs',function()
     vim.cmd [[normal! yiw]]
     vim.fn.VSCodeNotify("workbench.action.findInFiles")
   end, { silent = true })
+
   vim.keymap.set({'n', 'x'}, '<C-w>o',function()
     vim.fn.VSCodeNotify('workbench.action.joinAllGroups')
     vim.fn.VSCodeNotify("workbench.action.closeAuxiliaryBar")
@@ -3701,31 +3850,50 @@ function VscodeNeovimHandler()
   end, { silent = true })
 
   -- git (use gitsigns.nvim instead)
-  -- vim.keymap.set('n', '<leader>gr',function() vim.fn.VSCodeNotify("git.revertSelectedRanges") end, { silent = true })
-  -- vim.keymap.set('n', ']g',function() vim.fn.VSCodeNotify("workbench.action.editor.nextChange") end, { silent = true })
-  -- vim.keymap.set('n', '[g',function() vim.fn.VSCodeNotify("workbench.action.editor.previousChange") end, { silent = true })
   vim.api.nvim_create_autocmd("BufReadPost", {
     callback = function(args)
       local bufnr = args.buf
       -- looks like "/home/qsdrqs/foo/bar"
       local cwd = vim.fn.getcwd()
 
-      -- looks like "__vscode_neovim__-file:///home/qsdrqs/foo/bar/baz.txt"
+      -- looks like "__vscode_neovim__-file:///home/qsdrqs/foo/bar/baz.txt" for local file
+      -- or "__vscode_neovim__-vscode-remote://wsl%2Barch/home/qsdrqs/foo/bar/baz.txt" for wsl file
       local file_long_name = vim.fn.expand("%")
       -- get relative path
       local relative_name = string.sub(file_long_name, string.len("__vscode_neovim__-file://") + 1)
-      relative_name = string.sub(relative_name, string.len(cwd) + 2)
+      local wsl_head = "__vscode_neovim__-vscode-remote://wsl"
 
-      require'gitsigns'.attach(bufnr, {
-        file = relative_name,
-        toplevel = cwd,
-        gitdir = cwd .. "/.git",
-      })
+      if string.find(relative_name, cwd, 1, true) ~= nil then
+        -- local file
+        relative_name = string.sub(relative_name, string.len(cwd) + 2)
+        require'gitsigns'.attach(bufnr, {
+          file = relative_name,
+          toplevel = cwd,
+          gitdir = cwd .. "/.git",
+        })
+      elseif string.find(file_long_name, wsl_head, 1, true) ~= nil then
+        -- wsl file
+        local absolute_path = string.sub(file_long_name, string.len(wsl_head) + string.len("%2Barch") + 1)
+        local absolute_path_dir = vim.fn.fnamemodify(absolute_path, ":h")
+        local cwd = vim.fn.system("git -C " .. absolute_path_dir .. " rev-parse --show-toplevel")
+        cwd = string.sub(cwd, 1, string.len(cwd) - 1)
+        local relative_path = string.sub(absolute_path, string.len(cwd) + 2)
+        require'gitsigns'.attach(bufnr, {
+          file = relative_path,
+          toplevel = cwd,
+          gitdir = cwd .. "/.git",
+        })
+      else
+        -- remote file, fallback to vscode keybindings
+        vim.keymap.set('n', '<leader>gr',function() vim.fn.VSCodeNotify("git.revertSelectedRanges") end, { silent = true })
+        vim.keymap.set('n', ']g',function() vim.fn.VSCodeNotify("workbench.action.editor.nextChange") end, { silent = true })
+        vim.keymap.set('n', '[g',function() vim.fn.VSCodeNotify("workbench.action.editor.previousChange") end, { silent = true })
+      end
     end
   })
 
   -- just be used for vscode selection
-  vim.keymap.set('v', '<leader>v',function() vim.fn.VSCodeNotifyVisual("editor.action.goToImplementation", 0) end, { silent = true })
+  vim.keymap.set('v', '<leader>v',function() vim.fn.VSCodeNotifyVisual("editor.action.goToImplementation", 1) end, { silent = true })
 
   -- same bindings
   vim.keymap.set('n', '<leader>d',function() vim.fn.VSCodeNotify("editor.action.showHover") end, { silent = true })
@@ -3751,5 +3919,14 @@ function VscodeNeovimHandler()
   vim.keymap.set('n', 'zM',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
   vim.keymap.set('n', 'zR',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
 
+  -- rewrap
+  vim.api.nvim_create_autocmd("InsertLeave", {
+    pattern = "*.tex",
+    callback = function()
+      vim.fn.VSCodeNotify("rewrap.rewrapComment")
+    end
+  })
+
 end
 --------------------------------------------------------------------------------------
+-- require'gitsigns'.attach(nil, {file = "src/rlbox.rs", toplevel = "/home/qsdrqs/rlbox-rust/", gitdir = "/home/qsdrqs/rlbox-rust/.git",})

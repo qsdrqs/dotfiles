@@ -414,11 +414,12 @@ if has('nvim')
   highlight WinBar guifg=#EEEEEE
   highlight WinBarNC guifg=#8B949E
   " set global statusline
-  "set laststatus=3
+  set laststatus=3
 endif
 
 " limit textwidth in markdown and latex
 autocmd FileType markdown,tex set textwidth=80
+set formatoptions+=m
 
 " 加载项目自定义配置(为了兼容使用.exrc)
 set exrc
@@ -483,10 +484,10 @@ endfunction
 if get(g:, 'vim_startup', 0) == 1
 
 elseif exists('g:vscode')
-    if file_readable(expand("~/.nvimrc.lua"))
-      source ~/.nvimrc.lua
-      lua VscodeNeovimHandler()
-    endif
+  if file_readable(expand("~/.nvimrc.lua"))
+    source ~/.nvimrc.lua
+    lua VscodeNeovimHandler()
+  endif
 else
   if has('nvim')
     if file_readable(expand("~/.nvimrc.lua"))
