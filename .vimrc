@@ -258,7 +258,7 @@ set wildmenu
 set wildmode=longest:full
 
 autocmd BufReadPost *.md setlocal spell spelllang=en_us,cjk
-autocmd BufReadPost *.tex setlocal spell spelllang=en_us,cjk
+"autocmd BufReadPost *.tex setlocal spell spelllang=en_us,cjk
 "忽略中文对英文进行拼写检查
 set magic
 set backspace=indent,eol,start          "Make backspace behave like every other editor

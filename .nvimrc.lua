@@ -508,6 +508,7 @@ require('lazy').setup({
           end
           lsp_common_config.settings = {
             texlab = {
+              -- rootDirectory = vim.fn.getcwd(),
               auxDirectory = "latex.out",
               build = {
                 onSave = true, -- Automatically build latex on save
@@ -684,36 +685,6 @@ require('lazy').setup({
       })
       vim.api.nvim_create_user_command("AFTrigger", formatTrigger, {nargs = 0})
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
-
-      -- semantic highlighting
-      local links = {
-        ['@lsp.type.class'] = 'Class',
-        ['@lsp.type.comment'] = 'Comment',
-        ['@lsp.type.namespace'] = 'Class',
-        ['@lsp.type.enum'] = 'Enum',
-        ['@lsp.type.interface'] = 'Class',
-        ['@lsp.type.typeParameter'] = 'TypeParameter',
-        ['@lsp.type.enumMember'] = 'Constant',
-        ['@lsp.type.regexp'] = 'SpecialChar',
-        ['@lsp.type.decorator'] = 'PreProc',
-        ['@lsp.type.struct'] = 'Class',
-        ['@lsp.type.property'] = 'Property',
-        ['@lsp.type.selfKeyword'] = 'Parameter',
-        ['@lsp.type.parameter'] = 'Parameter',
-        ['@lsp.typemod.variable.readonly'] = 'Constant',
-        ['@lsp.mod.static'] = 'Constant',
-
-        -- language specific
-        ['@lsp.type.type.go'] = 'Class',
-        ['@lsp.type.defaultLibrary.go'] = 'Type',
-
-        -- treesitter
-        ['@type'] = 'Class',
-        ['@type.builtin'] = 'Type',
-      }
-      for newgroup, oldgroup in pairs(links) do
-        vim.api.nvim_set_hl(0, newgroup, { link = oldgroup, default = true })
-      end
     end
   },
 
@@ -1589,7 +1560,7 @@ require('lazy').setup({
 
   {
     'nvim-treesitter/nvim-treesitter-context',
-    commit = "4842abe5bd1a0dc8b67387cc187edbabc40925ba",
+    -- commit = "4842abe5bd1a0dc8b67387cc187edbabc40925ba",
     lazy = true,
     cond = function()
       return vim.g.treesitter_disable ~= true
@@ -1599,39 +1570,33 @@ require('lazy').setup({
         enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
         throttle = true, -- Throttles plugin updates (may improve performance)
         max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-        patterns = { -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
-        -- For all filetypes
-        -- Note that setting an entry here replaces all other patterns for this entry.
-        -- By setting the 'default' entry below, you can control which nodes you want to
-        -- appear in the context window.
-        default = {
-          'class',
-          'function',
-          'method',
-          'namespace',
-          'struct',
-          -- 'for', -- These won't appear in the context
-          -- 'while',
-          -- 'if',
-          -- 'switch',
-          -- 'case',
+        patterns = {
+          -- For all filetypes
+          -- Note that setting an entry here replaces all other patterns for this entry.
+          -- By setting the 'default' entry below, you can control which nodes you want to
+          -- appear in the context window.
+          default = {
+            'class',
+            'function',
+            'method',
+            'namespace',
+            'struct',
+            -- 'for', -- These won't appear in the context
+            -- 'while',
+            -- 'if',
+            -- 'switch',
+            -- 'case',
+          },
+          -- Example for a specific filetype.
+          -- If a pattern is missing, *open a PR* so everyone can benefit.
+          --   rust = {
+          --       'impl_item',
+          --   },
         },
-        -- Example for a specific filetype.
-        -- If a pattern is missing, *open a PR* so everyone can benefit.
-        --   rust = {
-        --       'impl_item',
-        --   },
-      },
-      exact_patterns = {
-        -- Example for a specific filetype with Lua patterns
-        -- Treat patterns.rust as a Lua pattern (i.e "^impl_item$" will
-        -- exactly match "impl_item" only)
-        -- rust = true, 
-      },
-      mode = 'topline',
-    }
-    vim.cmd[[hi link TreesitterContext Context]]
-  end
+        mode = 'topline',
+      }
+      vim.cmd[[hi! link TreesitterContext Context]]
+    end
   },
 
   {
@@ -2044,6 +2009,9 @@ require('lazy').setup({
           }
         }
       }
+
+      vim.api.nvim_set_hl(0, "BufferLineIndicatorSelected", {link = "Keyword"})
+      vim.api.nvim_set_hl(0, "BufferLineSeparator", {link = "SpecialKey"})
     end
   },
 
@@ -2729,8 +2697,7 @@ require('lazy').setup({
     dependencies = {"kyazdani42/nvim-web-devicons"},
     config = function()
       require("trouble").setup {
-        action_keys = 
-        {
+        action_keys = {
           -- key mappings for actions in the trouble list
           -- map to {} to remove a mapping, for example:
           -- close = {},
@@ -2751,15 +2718,6 @@ require('lazy').setup({
           toggle_fold = {"zc", "zo"}, -- toggle fold of current file
         },
       }
-
-      local util = require("trouble.util")
-      local util_jump_to_item = util.jump_to_item
-      util.jump_to_item = function(win, precmd, item)
-        -- add mark to jump back
-        vim.cmd("normal! m'")
-        util_jump_to_item(win, precmd, item)
-      end
-
     end
   },
 
@@ -2889,8 +2847,17 @@ require('lazy').setup({
   },
 
   {
-    'h-hg/fcitx.nvim',
+    'keaising/im-select.nvim',
     lazy = false,
+    config = function()
+      if vim.fn.executable("im-select") ~= 0 then
+        return
+      end
+      if vim.fn.executable("fcitx5-remote") == 0 then
+        return
+      end
+      require('im_select').setup()
+    end
   },
 
   {
@@ -3557,6 +3524,42 @@ function term_dap()
 end
 --------------------------------------------------------------------------------------
 
+----------------------------Highlights------------------------------------------------
+local links = {
+  -- semantic highlighting
+  ['@lsp.type.class'] = 'Class',
+  ['@lsp.type.comment'] = 'Comment',
+  ['@lsp.type.namespace'] = 'Class',
+  ['@lsp.type.enum'] = 'Enum',
+  ['@lsp.type.interface'] = 'Class',
+  ['@lsp.type.typeParameter'] = 'TypeParameter',
+  ['@lsp.type.enumMember'] = 'Constant',
+  ['@lsp.type.regexp'] = 'SpecialChar',
+  ['@lsp.type.decorator'] = 'PreProc',
+  ['@lsp.type.struct'] = 'Class',
+  ['@lsp.type.property'] = 'Property',
+  ['@lsp.type.selfKeyword'] = 'Parameter',
+  ['@lsp.type.parameter'] = 'Parameter',
+  ['@lsp.typemod.variable.readonly'] = 'Constant',
+  ['@lsp.mod.static'] = 'Constant',
+
+  -- language specific
+  ['@lsp.type.type.go'] = 'Class',
+  ['@lsp.type.defaultLibrary.go'] = 'Type',
+
+  -- treesitter
+  ['@type'] = 'Class',
+  ['@type.builtin'] = 'Type',
+  ['@function.macro.latex'] = 'Keyword',
+  ['@namespace.latex'] = 'PreProc',
+  ['@text.reference.latex'] = 'Class',
+  ['@punctuation.special.latex'] = 'Keyword',
+}
+for newgroup, oldgroup in pairs(links) do
+  vim.api.nvim_set_hl(0, newgroup, { link = oldgroup, default = true })
+end
+
+--------------------------------------------------------------------------------------
 ----------------------------Lazy Load-------------------------------------------------
 function lazyLoadPlugins()
   require('lazy').load{
@@ -3930,3 +3933,4 @@ function VscodeNeovimHandler()
 end
 --------------------------------------------------------------------------------------
 -- require'gitsigns'.attach(nil, {file = "src/rlbox.rs", toplevel = "/home/qsdrqs/rlbox-rust/", gitdir = "/home/qsdrqs/rlbox-rust/.git",})
+--
