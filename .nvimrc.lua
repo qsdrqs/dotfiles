@@ -20,7 +20,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
   {'folke/lazy.nvim', lazy = false},
-  {'nvim-lua/plenary.nvim', lazy = false },
+  {'nvim-lua/plenary.nvim'},
   {
     'nvim-telescope/telescope.nvim',
     dependencies = {
@@ -3806,7 +3806,6 @@ else
   im_switch = "fcitx5-remote"
   default_im = "keyboard-us"
 end
-local Job = require'plenary.job'
 vim.api.nvim_create_autocmd({"InsertLeave", "CmdlineLeave"}, {
   callback = function()
     if im_switch == "fcitx5-remote" then
@@ -3816,7 +3815,7 @@ vim.api.nvim_create_autocmd({"InsertLeave", "CmdlineLeave"}, {
       end
     else
       -- async switch
-      switch_job = Job:new({
+      require'plenary.job':new({
         command = im_switch,
         on_stdout = vim.schedule_wrap(function(_, data)
           restored_im = all_trim(data)
