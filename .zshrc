@@ -33,9 +33,6 @@ if [[ $NOTMUX != 1 ]]; then
 fi
 
 setopt nonomatch
-source $HOME/dotfiles/z/z.sh
-export _Z_SRC=$HOME/dotfiles/z/z.sh
-ZSH_DISABLE_COMPFIX=true
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -374,6 +371,19 @@ GITSTATUS_LOG_LEVEL=DEBUG
 autoload -Uz compinit
 compinit
 compdef vman="man"
+
+# z.sh
+source $HOME/dotfiles/z/z.sh
+export _Z_SRC=$HOME/dotfiles/z/z.sh
+ZSH_DISABLE_COMPFIX=true
+
+_z_zsh_tab_completion() {
+    # tab completion
+    reply=(${(f)"$(_z --complete "$compl")"})
+    _describe 'values' reply
+}
+
+compdef _z_zsh_tab_completion _z
 
 # pyenv: not load by default due to performance issue
 # if [[ -x `command -v pyenv` ]]; then

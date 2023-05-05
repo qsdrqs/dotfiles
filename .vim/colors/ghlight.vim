@@ -298,7 +298,7 @@ call s:_('Keyword',              s:gh_red, '',        '')
 call s:_('Statement',            s:gh_red, '',        'NONE')
 call s:_('Label',                s:gh_red, '',        '')
 
-call s:_('Operator',             s:gh_blue1, '',        '')
+call s:_('Operator',             s:gh_red, '',        '')
 "call s:_('Operator',             '#94afff', '',        '')
 
 call s:_('Constant',             s:gh_blue1, '',        'NONE')

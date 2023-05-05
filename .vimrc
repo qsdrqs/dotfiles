@@ -421,6 +421,8 @@ endif
 autocmd FileType markdown,tex set textwidth=80
 set formatoptions+=m
 
+autocmd InsertLeave *.tex normal! mf gqip `f
+
 " 加载项目自定义配置(为了兼容使用.exrc)
 set exrc
 if filereadable(expand(getcwd() . "/.prerc.vim"))

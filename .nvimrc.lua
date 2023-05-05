@@ -20,7 +20,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
   {'folke/lazy.nvim', lazy = false},
-  {'nvim-lua/plenary.nvim' },
+  {'nvim-lua/plenary.nvim', lazy = false },
   {
     'nvim-telescope/telescope.nvim',
     dependencies = {
@@ -637,7 +637,7 @@ require('lazy').setup({
         return orig_util_open_floating_preview(contents, syntax, opts, ...)
       end
 
-      local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+      local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
       for type, icon in pairs(signs) do
         local hl = "DiagnosticSign" .. type
         vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
@@ -793,13 +793,17 @@ require('lazy').setup({
   {
     'j-hui/fidget.nvim',
     config = function()
-      require"fidget".setup{
+      local opts = {
         sources = {
           ["null-ls"] = {
               ignore = true
+          },
+          ["lua_ls"] = {
+            ignore = true
           }
         },
       }
+      require"fidget".setup(opts)
     end
   },
 
@@ -874,6 +878,10 @@ require('lazy').setup({
           null_ls.builtins.completion.tags,
           null_ls.builtins.code_actions.gitsigns,
         },
+        on_attach = function(client, bufnr)
+          -- disable formatting expression that introduced by null-ls
+          vim.api.nvim_buf_set_option(bufnr, "formatexpr", "")
+        end
       })
     end
   },
@@ -1988,7 +1996,7 @@ require('lazy').setup({
             local s = " "
             for e, n in pairs(diagnostics_dict) do
               local sym = e == "error" and " "
-              or (e == "warning" and "  " or " " )
+              or (e == "warning" and "  " or " " )
               s = s .. n .. sym
             end
             return s
@@ -2144,10 +2152,10 @@ require('lazy').setup({
           if vim.api.nvim_eval("copilot#Enabled()") == 1 then
             return ' '
           else
-            return ' '
+            return '󱃓 '
           end
         else
-          return ' '
+          return '󱃓 '
         end
       end
 
@@ -2188,7 +2196,10 @@ require('lazy').setup({
         },
         sections = {
           lualine_a = {{'filename', path = 0}},
-          lualine_b = {'branch', 'diff', 'diagnostics'},
+          lualine_b = {'branch', 'diff', {
+            'diagnostics',
+            symbols = {error = ' ', warn = ' ', info = ' ', hint = ' '},
+          }},
           lualine_c = {lsp_info, gtagsHandler},
           lualine_x = {auto_session_name},
           lualine_y = { 'fileformat', 'filetype', copilot},
@@ -2843,20 +2854,6 @@ require('lazy').setup({
       }
       -- require("scrollbar.handlers.gitsigns").setup()
       require("scrollbar.handlers.search").setup()
-    end
-  },
-
-  {
-    'keaising/im-select.nvim',
-    lazy = false,
-    config = function()
-      if vim.fn.executable("im-select") ~= 0 then
-        return
-      end
-      if vim.fn.executable("fcitx5-remote") == 0 then
-        return
-      end
-      require('im_select').setup()
     end
   },
 
@@ -3698,7 +3695,7 @@ vim.cmd("command! LoadTags lua loadTags()")
 
 --------------------------------------------------------------------------------------
 ----------------------------Constant Plugins------------------------------------------
-
+-- quick fix
 function _G.qftf(info)
   local items
   local ret = {}
@@ -3785,6 +3782,7 @@ if vim.g.vscode == nil then
   require('fundo').setup()
 end
 
+-- vim skeletons
 vim.api.nvim_create_autocmd("BufNewFile", {
   callback = function()
     vim.g["skeletons#autoRegister"] = 1
@@ -3793,6 +3791,57 @@ vim.api.nvim_create_autocmd("BufNewFile", {
     vim.call("skeletons#InsertSkeleton")
   end
 })
+
+-- begin im switch
+local im_switch
+local default_im
+local restored_im
+local function all_trim(s)
+  return s:match("^%s*(.-)%s*$")
+end
+if vim.fn.has('wsl') == 1 then
+  im_switch = "im-select.exe"
+  default_im = "1033"
+else
+  im_switch = "fcitx5-remote"
+  default_im = "keyboard-us"
+end
+local Job = require'plenary.job'
+vim.api.nvim_create_autocmd({"InsertLeave", "CmdlineLeave"}, {
+  callback = function()
+    if im_switch == "fcitx5-remote" then
+      restored_im = all_trim(vim.fn.system(im_switch .. " -n"))
+      if restored_im ~= default_im then
+        vim.fn.system(im_switch .. " -s " .. default_im)
+      end
+    else
+      -- async switch
+      switch_job = Job:new({
+        command = im_switch,
+        on_stdout = vim.schedule_wrap(function(_, data)
+          restored_im = all_trim(data)
+          if restored_im ~= default_im then
+            vim.fn.system(im_switch .. " " .. default_im)
+          end
+        end),
+      }):start()
+    end
+  end
+})
+vim.api.nvim_create_autocmd({"InsertEnter", "CmdlineEnter"}, {
+  callback = function()
+    if im_switch == "fcitx5-remote" then
+      if restored_im ~= nil and restored_im ~= default_im then
+        vim.fn.system(im_switch .. " -s " .. restored_im)
+      end
+    else
+      if restored_im ~= nil and restored_im ~= default_im then
+        vim.fn.system(im_switch .. " " .. restored_im)
+      end
+    end
+  end
+})
+-- end im switch
 
 -- vCoolor.vim won't disable mappings if it is loaded after the plugin
 vim.g.vcoolor_disable_mappings = 1
