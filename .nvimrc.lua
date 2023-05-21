@@ -299,11 +299,13 @@ require('lazy').setup({
         -- Remove the option if you do not want that.
         require('jdtls').setup_dap({ hotcodereplace = 'auto' })
         common_on_attach(client, bufnr)
+        require('jdtls.dap').setup_dap_main_class_configs()
       end
       -- vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "java",
         callback = function()
+          require('jdtls.setup').add_commands()
           require('jdtls').start_or_attach(jdt_config)
         end
       })
@@ -408,15 +410,14 @@ require('lazy').setup({
       -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
       vim.keymap.set('n', 'gd', '<cmd>Trouble lsp_definitions<CR>', opts)
       -- vim.keymap.set('n', '<leader>d', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-      -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gr', '<cmd>Trouble lsp_references<CR>', opts)
-      vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+
+      vim.keymap.set('n', 'gi', '<cmd>Trouble lsp_implementations<cr>', opts)
       vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
       vim.keymap.set('n', '<space>aa', vim.lsp.buf.add_workspace_folder, opts)
       vim.keymap.set('n', '<space>ar', vim.lsp.buf.remove_workspace_folder, opts)
       vim.keymap.set('n', '<space>al', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-      -- vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
-      vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+      vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
       -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
       vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
       vim.keymap.set('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
@@ -578,23 +579,10 @@ require('lazy').setup({
           }
           lsp_common_config.on_attach = function(client, bufnr)
             common_on_attach(client,bufnr)
+            local semantic = client.config.capabilities.textDocument.semanticTokens
             client.server_capabilities.semanticTokensProvider = {
-              full = {
-                delta = false
-              },
-              legend = {
-                -- from https://github.com/golang/tools/blob/master/gopls/internal/lsp/semantic.go#L981
-                tokenTypes = {
-                  "namespace", "type", "class", "enum", "interface",
-                  "struct", "typeParameter", "parameter", "variable", "property", "enumMember",
-                  "event", "function", "method", "macro", "keyword", "modifier", "comment",
-                  "string", "number", "regexp", "operator",
-                },
-                tokenModifiers = {
-                  "declaration", "definition", "readonly", "static",
-                  "deprecated", "abstract", "async", "modification", "documentation", "defaultLibrary",
-                },
-              },
+              full = true,
+              legend = {tokenModifiers = semantic.tokenModifiers, tokenTypes = semantic.tokenTypes},
               range = true,
             }
           end
@@ -661,13 +649,13 @@ require('lazy').setup({
         vim.lsp.buf.format{ async = true }
       end
 
-      local function formatTriggerHandler()
+      local function formatToggleHandler()
         if vim.g.format_on_save == 1 then
           vim.defer_fn(formatBuf, 1000)
         end
       end
 
-      local function formatTrigger()
+      local function formatToggle()
         if not vim.g.format_on_save or vim.g.format_on_save == 0 then
           vim.g.format_on_save = 1
           print("Format On Save: ON")
@@ -681,9 +669,9 @@ require('lazy').setup({
       -- vim.cmd[[ au BufWritePost <buffer> silent lua vim.defer_fn(formatBuf, 1000) ]]
       vim.api.nvim_create_autocmd({"BufWritePost"}, {
         pattern = "*",
-        callback = formatTriggerHandler,
+        callback = formatToggleHandler,
       })
-      vim.api.nvim_create_user_command("AFTrigger", formatTrigger, {nargs = 0})
+      vim.api.nvim_create_user_command("AFToggle", formatToggle, {nargs = 0})
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
     end
   },
@@ -692,8 +680,16 @@ require('lazy').setup({
     'lvimuser/lsp-inlayhints.nvim',
     branch = "anticonceal",
     config = function()
-      require("lsp-inlayhints").setup({
-      })
+      require("lsp-inlayhints").setup {
+        virt_text_formatter = function(label, hint, opts, client_name)
+          local vt = {}
+          vt[#vt + 1] = { " ", "None" }
+          vt[#vt + 1] = { label, opts.highlight }
+          vt[#vt + 1] = { " ", "None" }
+
+          return vt
+        end,
+      }
       vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
       vim.api.nvim_create_autocmd("LspAttach", {
         group = "LspAttach_inlayhints",
@@ -1641,8 +1637,9 @@ require('lazy').setup({
     config = function()
       require("project_nvim").setup {
         silent_chdir = true,
+        manual_mode = true,
         patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc", "pom.xml" },
-        detection_methods = { "lsp", "pattern" },
+        detection_methods = { "pattern", "lsp" },
         ignore_lsp = {"clangd"},
         exclude_dirs = {'~'},
         -- your configuration comes here
@@ -1651,8 +1648,6 @@ require('lazy').setup({
       }
 
       require('telescope').load_extension('projects')
-      -- manually call once
-      vim.cmd[[ProjectRoot]]
     end
   },
 
@@ -1966,6 +1961,9 @@ require('lazy').setup({
       vim.keymap.set('n', "[c", "<cmd>GitConflictPrevConflict<cr>")
 
     end
+  },
+  {
+    "sindrets/diffview.nvim",
   },
 
   -- colorizer
@@ -3154,11 +3152,25 @@ require('lazy').setup({
 
  --管理gtags，集中存放tags
   {
-    'ludovicchabant/vim-gutentags',
+    "dhananjaylatkar/cscope_maps.nvim",
+    lazy = true,
+    dependencies = {"folke/which-key.nvim"},
+    config = function()
+      require('cscope_maps').setup({
+        disable_maps = false, -- true disables my keymaps, only :Cscope will be loaded
+        cscope = {
+          db_file = "./cscope.out", -- location of cscope db file
+          use_telescope = false, -- true will show results in telescope picker
+        },
+      })
+    end
+  },
+  {
+    'dhananjaylatkar/vim-gutentags',
     lazy = true,
     config = function()
       -- vim.g.gutentags_modules = {'ctags', 'gtags_cscope'}
-      vim.g.gutentags_modules = {'ctags'}
+      vim.g.gutentags_modules = {'cscope_maps'}
 
       -- config project root markers.
       vim.g.gutentags_project_root = {'.root', '.svn', '.git', '.hg', '.project', '.exrc', "pom.xml"}
@@ -3327,29 +3339,6 @@ require('lazy').setup({
               return '/usr/bin/python'
             end
           end;
-        },
-      }
-
-      -- Java
-      dap.configurations.java = {
-        {
-          -- You need to extend the classPath to list your dependencies.
-          -- `nvim-jdtls` would automatically add the `classPaths` property if it is missing
-          -- classPaths = {},
-
-          javaExec = "java",
-          --[[
-          mainClass = function()
-            return vim.fn.input('Main class: ')
-          end,
-          ]]
-
-          -- If using the JDK9+ module system, this needs to be extended
-          -- `nvim-jdtls` would automatically populate this property
-          -- modulePaths = {},
-          name = "Launch Java Debug",
-          request = "launch",
-          type = "java"
         },
       }
 
@@ -3546,6 +3535,7 @@ local links = {
 
   -- treesitter
   ['@type'] = 'Class',
+  ['@type.qualifier'] = 'Keyword',
   ['@type.builtin'] = 'Type',
   ['@function.macro.latex'] = 'Keyword',
   ['@namespace.latex'] = 'PreProc',
@@ -3687,7 +3677,7 @@ function lazyLoadPlugins()
 end
 
 function loadTags()
-  require('lazy').load{ plugins = {'vim-gutentags'} }
+  require('lazy').load{ plugins = {'cscope_maps.nvim', 'vim-gutentags'} }
   vim.cmd("edit %")
   vim.keymap.set('n', '<leader>gt', "<cmd>exec 'ltag ' . expand('<cword>') . '| lopen' <CR>", { silent = false })
 end
@@ -3842,16 +3832,19 @@ vim.api.nvim_create_autocmd({"InsertEnter", "CmdlineEnter"}, {
 })
 -- end im switch
 
--- vCoolor.vim won't disable mappings if it is loaded after the plugin
+-------------------------plugin variables---------------------------------------------
+-- vCoolor.vim
 vim.g.vcoolor_disable_mappings = 1
--- same as interesting words
+-- interesting words
 vim.g.interestingWordsDefaultMappings = 0
--- same as coc.nvim
+vim.g.interestingWordsGUIColors = {'#8CCBEA', '#A4E57E', '#FFDB72', '#FF7272', '#FFB3FF', '#9999FF'}
+-- coc.nvim
 vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
--- same as vim-bookmark
+-- vim-bookmark
 vim.g.bookmark_no_default_key_mappings = 1
--- same as visual-multi
+-- visual-multi
 vim.g.VM_leader = '\\'
+--------------------------------------------------------------------------------------
 
 
 ---------------------------vscode neovim----------------------------------------------
@@ -3970,15 +3963,18 @@ function VscodeNeovimHandler()
   vim.keymap.set('n', 'zM',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
   vim.keymap.set('n', 'zR',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
 
+  vim.keymap.set('n', '<localleader>v',function() vim.fn.VSCodeNotify("latex-workshop.synctex") end, { silent = true })
+  vim.keymap.set('n', '<C-g>',function() vim.fn.VSCodeNotify("workbench.view.scm") end, { silent = true })
+
   -- rewrap
   vim.api.nvim_create_autocmd("InsertLeave", {
     pattern = "*.tex",
     callback = function()
-      vim.fn.VSCodeNotify("rewrap.rewrapComment")
+      if vim.g.wrap_on_insert_leave == 1 then
+        vim.fn.VSCodeNotify("rewrap.rewrapComment")
+      end
     end
   })
 
 end
 --------------------------------------------------------------------------------------
--- require'gitsigns'.attach(nil, {file = "src/rlbox.rs", toplevel = "/home/qsdrqs/rlbox-rust/", gitdir = "/home/qsdrqs/rlbox-rust/.git",})
---

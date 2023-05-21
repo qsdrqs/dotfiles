@@ -13,31 +13,31 @@ let maplocalleader = '\'
 " LEADER  ALT+N 切换 tab
 "----------------------------------------------------------------------
 if has('nvim') || has('gui_running')
-  nnoremap <silent><m-1> :tabn 1<cr>
-  nnoremap <silent><m-2> :tabn 2<cr>
-  nnoremap <silent><m-3> :tabn 3<cr>
-  nnoremap <silent><m-4> :tabn 4<cr>
-  nnoremap <silent><m-5> :tabn 5<cr>
-  nnoremap <silent><m-6> :tabn 6<cr>
-  nnoremap <silent><m-7> :tabn 7<cr>
-  nnoremap <silent><m-8> :tabn 8<cr>
-  nnoremap <silent><m-9> :tabn 9<cr>
-  nnoremap <silent><m-0> :tabn 10<cr>
+  nnoremap <silent><leader>1 :tabn 1<cr>
+  nnoremap <silent><leader>2 :tabn 2<cr>
+  nnoremap <silent><leader>3 :tabn 3<cr>
+  nnoremap <silent><leader>4 :tabn 4<cr>
+  nnoremap <silent><leader>5 :tabn 5<cr>
+  nnoremap <silent><leader>6 :tabn 6<cr>
+  nnoremap <silent><leader>7 :tabn 7<cr>
+  nnoremap <silent><leader>8 :tabn 8<cr>
+  nnoremap <silent><leader>9 :tabn 9<cr>
+  nnoremap <silent><leader>0 :tabn 10<cr>
   nnoremap <silent><leader><m-n> :tabnew<cr>
   nnoremap <silent><leader><m-c> :tabclose<cr>
   nnoremap <silent><leader><m-o> :tabonly<cr>
   nnoremap <silent><leader><m-s> :tab split<cr>
 else
-  nnoremap <silent>1 :tabn 1<cr>
-  nnoremap <silent>2 :tabn 2<cr>
-  nnoremap <silent>3 :tabn 3<cr>
-  nnoremap <silent>4 :tabn 4<cr>
-  nnoremap <silent>5 :tabn 5<cr>
-  nnoremap <silent>6 :tabn 6<cr>
-  nnoremap <silent>7 :tabn 7<cr>
-  nnoremap <silent>8 :tabn 8<cr>
-  nnoremap <silent>9 :tabn 9<cr>
-  nnoremap <silent>0 :tabn 10<cr>
+  nnoremap <silent><leader>1 :tabn 1<cr>
+  nnoremap <silent><leader>2 :tabn 2<cr>
+  nnoremap <silent><leader>3 :tabn 3<cr>
+  nnoremap <silent><leader>4 :tabn 4<cr>
+  nnoremap <silent><leader>5 :tabn 5<cr>
+  nnoremap <silent><leader>6 :tabn 6<cr>
+  nnoremap <silent><leader>7 :tabn 7<cr>
+  nnoremap <silent><leader>8 :tabn 8<cr>
+  nnoremap <silent><leader>9 :tabn 9<cr>
+  nnoremap <silent><leader>0 :tabn 10<cr>
   nnoremap <silent><leader>n :tabnew<cr>
   nnoremap <silent><leader>c :tabclose<cr>
   nnoremap <silent><leader>o :tabonly<cr>
@@ -421,7 +421,20 @@ endif
 autocmd FileType markdown,tex set textwidth=80
 set formatoptions+=m
 
-autocmd InsertLeave *.tex normal! mf gqip `f
+function! s:wrapPara()
+  if exists('g:vscode')
+    return
+  endif
+  if g:wrap_on_insert_leave == 1
+    normal! mf gqip `f
+  endif
+endfunction
+
+autocmd InsertLeave *.tex call s:wrapPara()
+if !exists('g:wrap_on_insert_leave')
+  let g:wrap_on_insert_leave = 1
+endif
+command! WrapToggle let g:wrap_on_insert_leave = !g:wrap_on_insert_leave
 
 " 加载项目自定义配置(为了兼容使用.exrc)
 set exrc
