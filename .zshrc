@@ -78,7 +78,9 @@ fi
 # ZSH_THEME="spaceship"
 # ZSH_THEME="powerlevel10k/powerlevel10k"
 source $HOME/theme.zsh
-source $HOME/extra.zsh
+if [ -e $HOME/extra.zsh ]; then
+    source $HOME/extra.zsh
+fi
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
