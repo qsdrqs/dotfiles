@@ -1637,7 +1637,7 @@ require('lazy').setup({
     config = function()
       require("project_nvim").setup {
         silent_chdir = true,
-        manual_mode = true,
+        manual_mode = false,
         patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc", "pom.xml" },
         detection_methods = { "pattern", "lsp" },
         ignore_lsp = {"clangd"},
@@ -2733,7 +2733,7 @@ require('lazy').setup({
   {
     'phaazon/hop.nvim',
     lazy = true,
-    -- keys = {"<leader>w", "<leader>l"},
+    keys = {"<leader>w", "<leader>l"},
     config = function()
       require'hop'.setup()
       vim.keymap.set('n', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
@@ -2747,7 +2747,7 @@ require('lazy').setup({
 
   {
     'ggandor/leap.nvim',
-    keys = {"<leader>w", "<leader>l"},
+    keys = {"s"},
     config = function()
       local function get_line_starts(winid)
         local wininfo =  vim.fn.getwininfo(winid)[1]
@@ -2782,16 +2782,7 @@ require('lazy').setup({
       end
 
       -- Usage:
-      local function leap_to_line()
-        winid = vim.api.nvim_get_current_win()
-        require('leap').leap {
-          target_windows = { winid },
-          targets = get_line_starts(winid),
-        }
-      end
-      vim.keymap.set({'n', 'v'}, "<leader>l", leap_to_line)
-
-      vim.keymap.set({'n', 'v'}, "<leader>w", function ()
+      vim.keymap.set({'n', 'v'}, "s", function ()
         local current_window = vim.fn.win_getid()
         require('leap').leap { target_windows = { current_window } }
       end)
@@ -3844,6 +3835,8 @@ vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
 vim.g.bookmark_no_default_key_mappings = 1
 -- visual-multi
 vim.g.VM_leader = '\\'
+-- sandwich
+vim.g.sandwich_no_default_key_mappings = 1
 --------------------------------------------------------------------------------------
 
 

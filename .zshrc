@@ -69,7 +69,7 @@ elif [[ $TERM == "linux" ]]; then
     export TERM="xterm-256color"
 elif [[ $TERM == "xterm-kitty" ]]; then
     # alias ssh
-    alias ssh="kitty +kitten ssh"
+    # alias ssh="kitty +kitten ssh"
 fi
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -78,6 +78,7 @@ fi
 # ZSH_THEME="spaceship"
 # ZSH_THEME="powerlevel10k/powerlevel10k"
 source $HOME/theme.zsh
+source $HOME/extra.zsh
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
@@ -283,7 +284,7 @@ alias prox="export http_proxy=http://$PROX:1081\
 "
 alias tra="python3 ~/translator/translator.py"
 # alias vim="$EDITOR"
-alias vimm="/usr/bin/vim"
+alias vimm="/usr/bin/env vim"
 alias vi="$EDITOR --cmd 'let g:vim_startup=1'"
 #Turn off the touch pad 
 #Sometimes system suspend will make touchpad unable to work, so it needs 3 times to make it work.
