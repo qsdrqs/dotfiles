@@ -159,23 +159,6 @@ fzf
 fzf-tab
 )
 
-function zsh_install(){
-    # oh-my-zsh
-    git clone https://github.com/ohmyzsh/ohmyzsh ~/.oh-my-zsh
-    # plugins
-    git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab &
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions &
-    git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git \
-        ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/fast-syntax-highlighting &
-
-    # themes
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k &
-    git clone https://github.com/denysdovhan/spaceship-prompt ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt &
-
-    echo "#ZSH_THEME=\"spaceship-prompt/spaceship\"\nZSH_THEME=\"powerlevel10k/powerlevel10k\"" > $HOME/theme.zsh
-
-}
-
 # 光标形状随模式改变
 zle -N zle-keymap-select
 echo -ne '\e[5 q'
