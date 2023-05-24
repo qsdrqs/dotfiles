@@ -13,7 +13,8 @@ function zsh_install(){
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k &
     git clone https://github.com/denysdovhan/spaceship-prompt ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt &
 
-    echo "#ZSH_THEME=\"spaceship-prompt/spaceship\"\nZSH_THEME=\"powerlevel10k/powerlevel10k\"" > $HOME/theme.zsh
+    echo "#ZSH_THEME=\"spaceship-prompt/spaceship\"" > $HOME/theme.zsh
+    echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" > $HOME/theme.zsh
 }
 
 function main() {
@@ -50,8 +51,8 @@ function main() {
     ln -s $PWD/.zshrc $HOME/.zshrc
 
     if [[ ! -d $HOME/.oh-my-zsh ]];then
-        zsh_install()
-    end
+        zsh_install
+    fi
 
     # move ranger files
     if [[ -d $HOME/.config/ranger ]] && [[ ! -L $HOME/.config/ranger ]];then
@@ -67,4 +68,4 @@ function main() {
     echo finish
 }
 
-main()
+main
