@@ -658,10 +658,10 @@ require('lazy').setup({
       local function formatToggle()
         if not vim.g.format_on_save or vim.g.format_on_save == 0 then
           vim.g.format_on_save = 1
-          print("Format On Save: ON")
+          vim.notify("Format On Save: ON")
         elseif vim.g.format_on_save == 1 then
           vim.g.format_on_save = 0
-          print("Format On Save: OFF")
+          vim.notify("Format On Save: OFF")
         end
       end
 
@@ -1049,11 +1049,11 @@ require('lazy').setup({
           -- REQUIRED - you must specify a snippet engine
           expand = function(args)
             -- Use vsnip to handles snips provided by lsp. Ultisnips has problems.
-            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+            -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
 
             -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
             -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
           end,
         },
         mapping = cmp.mapping.preset.insert({
@@ -1957,13 +1957,22 @@ require('lazy').setup({
       require('git-conflict').setup {
         default_mappings = false
       }
-      vim.keymap.set('n', "]c", "<cmd>GitConflictNextConflict<cr>")
-      vim.keymap.set('n', "[c", "<cmd>GitConflictPrevConflict<cr>")
+      vim.keymap.set('n', "]x", "<cmd>GitConflictNextConflict<cr>")
+      vim.keymap.set('n', "[x", "<cmd>GitConflictPrevConflict<cr>")
 
     end
   },
   {
     "sindrets/diffview.nvim",
+    lazy = true,
+    cmd = {"DiffviewOpen", "DiffviewFileHistory"},
+    opts = {
+      view = {
+        merge_tool = {
+          layout = "diff3_mixed"
+        }
+      }
+    }
   },
 
   -- colorizer

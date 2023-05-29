@@ -302,6 +302,17 @@ setw -g mode-keys vi
 # start with mouse mode enabled
 set -g mouse on
 
+# join pane
+bind ! join-pane -t :1
+bind @ join-pane -t :2
+bind '#' join-pane -t :3
+bind '$' join-pane -t :4
+bind % join-pane -t :5
+bind ^ join-pane -t :6
+bind & join-pane -t :7
+bind * join-pane -t :8
+bind ( join-pane -t :9
+
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
 #set -g status-keys vi

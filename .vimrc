@@ -215,6 +215,7 @@ let s:tablist = {
   \'vue': 2,
   \'vim': 2,
   \'lua': 2,
+  \'nix': 2,
 \}
 autocmd BufWinEnter * call Tab_len()
 function Tab_len()
@@ -242,7 +243,7 @@ endfunction
 set expandtab
 " 对于go文件，使用tab
 au BufEnter *.go setlocal noexpandtab
-set cindent "C 语言风格缩进"
+" set cindent "C 语言风格缩进"，会在一些文件类型下(比如nix)导致缩进错误
 
 "使空格和缩进显示字符
 set list
