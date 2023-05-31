@@ -33,6 +33,7 @@ require('lazy').setup({
       "<leader>b",
       "<leader>gs",
       "<leader>gg",
+      "<leader>t",
     },
     cond = function()
       return vim.g.vscode == nil
@@ -806,6 +807,7 @@ require('lazy').setup({
   {'kyazdani42/nvim-web-devicons'},
   {
     'windwp/nvim-autopairs',
+    event = "InsertEnter",
     config = function()
       require('nvim-autopairs').setup{}
       local npairs = require'nvim-autopairs'
@@ -928,7 +930,9 @@ require('lazy').setup({
     lazy = true,
     keys = {"/", {":", mode = {'v', 'n'}}},
     cond = function()
-      return vim.g.vscode == nil
+      return vim.g.vscode == nil and
+             vim.fn.getfsize(vim.fn.expand('%')) <= (1024 * 1024 * 100) and
+             vim.fn.line('$') <= 100000
     end,
     config = function()
       local status_ok, cmp = pcall(require, "cmp")
@@ -1309,7 +1313,7 @@ require('lazy').setup({
 
   {
     "akinsho/toggleterm.nvim",
-    keys = {"<localleader>t", "<C-`>"},
+    keys = {"<localleader>t", "<C-`>", "<localleader>T"},
     config = function()
       require("toggleterm").setup {
         size = function(term)
@@ -2041,6 +2045,7 @@ require('lazy').setup({
   },
 
   {
+    -- enhanced <c-a> and <c-x>
     'monaqa/dial.nvim',
     keys = {
       {'g<C-a>', mode = 'v'},
@@ -2413,6 +2418,14 @@ require('lazy').setup({
   {
     'MattesGroeger/vim-bookmarks',
     lazy = true,
+    keys = {
+      '<leader>mm',
+      '<leader>mi',
+      '<leader>mn',
+      '<leader>mp',
+      '<leader>ma',
+      '<leader>mc',
+    },
     config = function()
       vim.g.bookmark_sign = ''
       vim.keymap.set('n', '<leader>mm', '<cmd>BookmarkToggle<CR>', {silent = true})
@@ -2657,7 +2670,7 @@ require('lazy').setup({
 
   {
     'tversteeg/registers.nvim',
-    lazy = false,
+    keys = { '"' },
     cond = function()
       return vim.g.vscode == nil
     end,
@@ -2670,7 +2683,16 @@ require('lazy').setup({
 
   {
     'numToStr/Comment.nvim',
-    lazy = true,
+    keys = {
+      {"<c-_>", mode = 'v'},
+      {"<c-s-_>", mode = 'v'},
+      {"<c-_>", mode = 'n'},
+      {"<c-s-_>", mode = 'n'},
+      {"<c-/>", mode = 'v'},
+      {"<c-s-/>", mode = 'v'},
+      {"<c-/>", mode = 'n'},
+      {"<c-s-/>", mode = 'n'},
+    },
     config = function()
       local bindkey
       if os.getenv("TMUX") ~= nil then
@@ -2701,7 +2723,12 @@ require('lazy').setup({
         ---Function to call before (un)comment
         pre_hook = nil,
         ---Function to call after (un)comment
-        post_hook = nil,
+        post_hook = function(ctx)
+          -- execute if ctx.cmotion == 3,4,5
+          if ctx.cmotion > 2 then
+            vim.cmd[[ normal gvh ]]
+          end
+        end,
       }
 
       local api = require('Comment.api')
@@ -3150,7 +3177,6 @@ require('lazy').setup({
     end
   },
 
- --管理gtags，集中存放tags
   {
     "dhananjaylatkar/cscope_maps.nvim",
     lazy = true,
@@ -3166,6 +3192,7 @@ require('lazy').setup({
     end
   },
   {
+    --管理gtags，集中存放tags
     'dhananjaylatkar/vim-gutentags',
     lazy = true,
     config = function()
@@ -3598,8 +3625,6 @@ function lazyLoadPlugins()
       'project.nvim',
       'nvim-ufo',
       'toggleterm.nvim',
-      'nvim-autopairs',
-      'Comment.nvim',
       'vim-illuminate',
       -- end misc
 

@@ -486,7 +486,8 @@ function! TriggerPlugins() "加载插件配置以及一些原生vim插件
     return
   endif
   let max_line = 20000 " file exceed 20000 lines will disable treesitter
-  if line('$') > max_line
+  let max_size = 1024 * 1024 * 100
+  if line('$') > max_line || getfsize(expand('%')) > max_size
     let b:treesitter_disable = 1
   endif
   lua lazyLoadPlugins()
