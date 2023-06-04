@@ -143,6 +143,9 @@ nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
 "quickfix
 autocmd FileType qf nnoremap <silent>q :q<CR>
 
+" 防止visual下复制之后光标移动
+vnoremap y ygv<esc>
+
 "-------------------键位映射-----------------------"}}}
 
 "-------------------colorscheme-----------------------"{{{
@@ -340,7 +343,7 @@ if has('nvim')
   let nvim_ver = luaeval("vim.version()")
   if nvim_ver.minor > 8
     set diffopt+=linematch:50
-    " set statuscolumn=%=%s%l%C
+    let &stc='%=%s%{v:relnum?v:relnum:v:lnum}%C '
   end
 end
 

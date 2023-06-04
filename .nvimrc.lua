@@ -106,7 +106,6 @@ require('lazy').setup({
 
   {
     'kevinhwang91/nvim-bqf',
-    lazy = false,
     config = function()
       vim.cmd [[
         hi BqfPreviewBorder guifg=#50a14f ctermfg=71
@@ -390,6 +389,20 @@ require('lazy').setup({
           end, 500)
         end
 
+        -- inlay hints
+        if vim.version().minor >= 11 then
+          vim.api.nvim_create_autocmd({"BufEnter", "InsertLeave", "BufWritePost"}, {
+            pattern = "*",
+            callback = function()
+              vim.lsp.inlay_hint.refresh()
+            end,
+          })
+          vim.lsp.inlay_hint.refresh()
+        end
+
+        -- range select
+        vim.keymap.set('n', '<Enter>', require('lsp-selection-range').trigger, { buffer = bufnr })
+        vim.keymap.set('v', '<Enter>', require('lsp-selection-range').expand, { buffer = bufnr })
       end
 
       local function showDocument()
@@ -674,12 +687,18 @@ require('lazy').setup({
       })
       vim.api.nvim_create_user_command("AFToggle", formatToggle, {nargs = 0})
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
+
     end
   },
+
+  {'camilledejoye/nvim-lsp-selection-range'},
 
   {
     'lvimuser/lsp-inlayhints.nvim',
     branch = "anticonceal",
+    cond = function()
+      return vim.version().minor < 11
+    end,
     config = function()
       require("lsp-inlayhints").setup {
         virt_text_formatter = function(label, hint, opts, client_name)
@@ -709,7 +728,6 @@ require('lazy').setup({
 
   {
     "luukvbaal/statuscol.nvim",
-    lazy = false,
     cond = function()
       return vim.g.vscode == nil
     end,
@@ -775,7 +793,7 @@ require('lazy').setup({
 
   {
     -- for code actions
-    'qsdrqs/nvim-lightbulb',
+    'kosayoda/nvim-lightbulb',
     config = function()
       local lightbulb = require('nvim-lightbulb')
       lightbulb.setup {
@@ -846,7 +864,7 @@ require('lazy').setup({
 
   {
     "Pocco81/auto-save.nvim",
-    lazy = false,
+    event = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
     cond = function()
       return vim.g.vscode == nil
     end,
@@ -1167,10 +1185,10 @@ require('lazy').setup({
     -- permanent undo file
     'kevinhwang91/nvim-fundo',
     dependencies = {'kevinhwang91/promise-async'},
+    keys = {'u', "<C-r>"},
     cond = function()
       return vim.g.vscode == nil
     end,
-    lazy = false,
     build = function()
       require('fundo').install()
     end,
@@ -2726,7 +2744,7 @@ require('lazy').setup({
         post_hook = function(ctx)
           -- execute if ctx.cmotion == 3,4,5
           if ctx.cmotion > 2 then
-            vim.cmd[[ normal gvh ]]
+            vim.cmd[[ normal gv ]]
           end
         end,
       }
@@ -2904,6 +2922,7 @@ require('lazy').setup({
     config = function()
       local banned_messages = {
         "method textDocument/codeLens is not supported by any of the servers registered for the current buffer",
+        "method textDocument/inlayHint is not supported by any of the servers registered for the current buffer",
         "[inlay_hints] LSP error:Invalid offset",
         "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml",
       }
@@ -3014,8 +3033,8 @@ require('lazy').setup({
   },
   {
     'kana/vim-textobj-entire',
-    lazy = false,
-    dependencies = {"kana/vim-textobj-user", lazy = false},
+    keys = {"vie"},
+    dependencies = {"kana/vim-textobj-user"},
   },
   {
     'lfv89/vim-interestingwords',
@@ -3027,7 +3046,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>H', "<cmd>call UncolorAllWords()<cr>", { silent = true })
     end
   },
-  {'pgilad/vim-skeletons', lazy = true },
+  {'qsdrqs/vim-skeletons', lazy = true },
   {
     'SirVer/ultisnips',
     lazy = true,
@@ -3618,6 +3637,7 @@ function lazyLoadPlugins()
       'lualine.nvim',
       'alpha-nvim',
       'todo-comments.nvim',
+      'statuscol.nvim',
       -- end ui
 
       -- begin misc
@@ -3702,7 +3722,7 @@ function lazyLoadPlugins()
 end
 
 function loadTags()
-  require('lazy').load{ plugins = {'cscope_maps.nvim', 'vim-gutentags'} }
+  require('lazy').load { plugins = { 'cscope_maps.nvim', 'vim-gutentags' } }
   vim.cmd("edit %")
   vim.keymap.set('n', '<leader>gt', "<cmd>exec 'ltag ' . expand('<cword>') . '| lopen' <CR>", { silent = false })
 end
@@ -3712,6 +3732,7 @@ vim.cmd("command! LoadTags lua loadTags()")
 ----------------------------Constant Plugins------------------------------------------
 -- quick fix
 function _G.qftf(info)
+  require('lazy').load { plugins = { 'nvim-bqf' } }
   local items
   local ret = {}
   if info.quickfix == 1 then
