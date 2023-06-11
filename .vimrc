@@ -343,7 +343,9 @@ if has('nvim')
   let nvim_ver = luaeval("vim.version()")
   if nvim_ver.minor > 8
     set diffopt+=linematch:50
-    let &stc='%=%s%{v:relnum?v:relnum:v:lnum}%C '
+    if !exists('g:vscode')
+      let &stc='%=%s%{v:virtnum>0?"":(v:relnum?v:relnum:v:lnum)} %C'
+    endif
   end
 end
 

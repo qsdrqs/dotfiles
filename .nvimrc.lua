@@ -363,8 +363,8 @@ require('lazy').setup({
   {
     'neovim/nvim-lspconfig',
     config = function()
-      --vim.lsp.set_log_level('trace')
-      vim.lsp.set_log_level('OFF')
+      vim.lsp.set_log_level('ERROR')
+      -- vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
 
@@ -390,19 +390,16 @@ require('lazy').setup({
         end
 
         -- inlay hints
-        if vim.version().minor >= 11 then
-          vim.api.nvim_create_autocmd({"BufEnter", "InsertLeave", "BufWritePost"}, {
-            pattern = "*",
-            callback = function()
-              vim.lsp.inlay_hint.refresh()
-            end,
-          })
-          vim.lsp.inlay_hint.refresh()
-        end
+        -- if vim.version().minor >= 11 then
+        --   vim.api.nvim_create_autocmd({"BufEnter", "InsertLeave", "BufWritePost"}, {
+        --     pattern = "*",
+        --     callback = function()
+        --       vim.lsp.inlay_hint.refresh()
+        --     end,
+        --   })
+        --   vim.lsp.inlay_hint.refresh()
+        -- end
 
-        -- range select
-        vim.keymap.set('n', '<Enter>', require('lsp-selection-range').trigger, { buffer = bufnr })
-        vim.keymap.set('v', '<Enter>', require('lsp-selection-range').expand, { buffer = bufnr })
       end
 
       local function showDocument()
@@ -527,8 +524,9 @@ require('lazy').setup({
               auxDirectory = "latex.out",
               build = {
                 onSave = true, -- Automatically build latex on save
-                args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+                -- args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
                 -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+                args = { "-pdflua", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
               },
               forwardSearch = {
                 executable = "zathura",
@@ -691,14 +689,9 @@ require('lazy').setup({
     end
   },
 
-  {'camilledejoye/nvim-lsp-selection-range'},
-
   {
     'lvimuser/lsp-inlayhints.nvim',
     branch = "anticonceal",
-    cond = function()
-      return vim.version().minor < 11
-    end,
     config = function()
       require("lsp-inlayhints").setup {
         virt_text_formatter = function(label, hint, opts, client_name)
@@ -733,10 +726,12 @@ require('lazy').setup({
     end,
     config = function()
       local builtin = require("statuscol.builtin")
+      vim.o.numberwidth = vim.o.numberwidth + 2 -- fix numberwidth mismatch
       require("statuscol").setup({
         -- Builtin line number string options for ScLn() segment
         thousands = false,     -- or line number thousands separator string ("." / ",")
-        relculright = false,   -- whether to right-align the cursor line number with 'relativenumber' set
+        relculright = true,   -- whether to right-align the cursor line number with 'relativenumber' set
+        bt_ignore = {"nofile"},
         -- Builtin 'statuscolumn' options
         setopt = true,         -- whether to set the 'statuscolumn', providing builtin click actions
         -- Default segments (fold -> sign -> line number + separator)
@@ -746,7 +741,7 @@ require('lazy').setup({
             click = "v:lua.ScSa"
           },
           {
-            text = { builtin.lnumfunc},
+            text = { builtin.lnumfunc },
             condition = { true, builtin.not_empty },
             click = "v:lua.ScLa",
           },
@@ -783,10 +778,6 @@ require('lazy').setup({
           GitSignsChangedelete   = builtin.gitsigns_click,
           GitSignsDelete         = builtin.gitsigns_click,
         }
-      })
-      -- disable in command line window
-      vim.api.nvim_create_autocmd("CmdwinEnter", {
-        callback = function() vim.o.statuscolumn="" end
       })
     end
   },
@@ -1407,6 +1398,14 @@ require('lazy').setup({
         },
         indent = {
           enable = false
+        },
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            init_selection = "<Enter>", -- set to `false` to disable one of the mappings
+            scope_incremental = "<Enter>",
+            node_decremental = "<BS>",
+          },
         },
       }
 
@@ -2688,7 +2687,10 @@ require('lazy').setup({
 
   {
     'tversteeg/registers.nvim',
-    keys = { '"' },
+    keys = {
+      { '"',     mode = { 'v', 'n' } },
+      { '<C-r>', mode = { 'i' } }
+    },
     cond = function()
       return vim.g.vscode == nil
     end,
@@ -2957,6 +2959,19 @@ require('lazy').setup({
   },
 
   -- vim plugins
+  {
+    "andymass/vim-matchup",
+    config = function()
+      require'nvim-treesitter.configs'.setup {
+        matchup = {
+          enable = true,              -- mandatory, false will disable the whole extension
+          disable = { "c", "ruby" },  -- optional, list of language that will be disabled
+          -- [options]
+        }
+      }
+      vim.g.matchup_matchparen_offscreen = { method = "popup" }
+    end
+  },
   {
     -- auto adjust indent length and format (tab or space)
     "tpope/vim-sleuth",
@@ -3703,6 +3718,7 @@ function lazyLoadPlugins()
         'nvim-treesitter-textsubjects',
         'nvim-ts-autotag',
         'hlargs.nvim',
+        'vim-matchup',
         -- end treesitter
       }
     }
