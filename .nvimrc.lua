@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------------
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
@@ -17,6 +17,110 @@ if not vim.loop.fs_stat(lazypath) then
   })
 end
 vim.opt.rtp:prepend(lazypath)
+
+local kind_icons_list = {
+  Array               = '󰅪 ',
+  Boolean             = ' ',
+  BreakStatement      = '󰙧 ',
+  Call                = '󰃷 ',
+  CaseStatement       = '󱃙 ',
+  Class               = ' ',
+  Color               = '󰏘 ',
+  Constant            = '󰏿 ',
+  Constructor         = ' ',
+  ContinueStatement   = '→ ',
+  Copilot             = ' ',
+  Declaration         = '󰙠 ',
+  Delete              = '󰩺 ',
+  DoStatement         = '󰑖 ',
+  Enum                = ' ',
+  EnumMember          = ' ',
+  Event               = ' ',
+  Field               = ' ',
+  File                = '󰈔 ',
+  Folder              = '󰉋 ',
+  ForStatement        = '󰑖 ',
+  Function            = '󰊕 ',
+  Identifier          = '󰀫 ',
+  IfStatement         = '󰇉 ',
+  Interface           = ' ',
+  Keyword             = '󰌋 ',
+  List                = '󰅪 ',
+  Log                 = '󰦪 ',
+  Lsp                 = ' ',
+  Macro               = '󰁌 ',
+  MarkdownH1          = '󰉫 ',
+  MarkdownH2          = '󰉬 ',
+  MarkdownH3          = '󰉭 ',
+  MarkdownH4          = '󰉮 ',
+  MarkdownH5          = '󰉯 ',
+  MarkdownH6          = '󰉰 ',
+  Method              = '󰆧 ',
+  Module              = '󰏗 ',
+  Namespace           = '󰅩 ',
+  Null                = '󰢤 ',
+  Number              = '󰎠 ',
+  Object              = '󰅩 ',
+  Operator            = '󰆕 ',
+  Package             = '󰆦 ',
+  Property            = ' ',
+  Reference           = '󰦾 ',
+  Regex               = ' ',
+  Repeat              = '󰑖 ',
+  Scope               = '󰅩 ',
+  Snippet             = '󰩫 ',
+  Specifier           = '󰦪 ',
+  Statement           = '󰅩 ',
+  String              = '󰉾 ',
+  Struct              = ' ',
+  SwitchStatement     = '󰺟 ',
+  Text                = ' ',
+  Type                = ' ',
+  TypeParameter       = '󰆩 ',
+  Unit                = ' ',
+  Value               = '󰎠 ',
+  Variable            = '󰀫 ',
+  WhileStatement      = '󰑖 ',
+  Key                 = " ",
+}
+
+local kind_icons = {
+  Text           = ' ',
+  Method         = ' ',
+  Function       = ' ',
+  Constructor    = ' ',
+  Field          = ' ',
+  Variable       = ' ',
+  Class          = 'ﴯ ',
+  Interface      = ' ',
+  Module         = " ",
+  Property       = 'ﰠ ',
+  Unit           = ' ',
+  Value          = ' ',
+  Enum           = ' ',
+  Keyword        = ' ',
+  Snippet        = ' ',
+  Color          = ' ',
+  File           = ' ',
+  Reference      = ' ',
+  Folder         = ' ',
+  EnumMember     = ' ',
+  Constant       = ' ',
+  Struct         = ' ',
+  Event          = ' ',
+  Operator       = ' ',
+  TypeParameter  = " ",
+  TabNine        = ' ',
+  String         = " ",
+  Namespace      = " ",
+  Number         = " ",
+  Package        = " ",
+  Boolean        = "◩ ",
+  Array          = " ",
+  Object         = " ",
+  Key            = " ",
+  Null           = "ﳠ ",
+}
 
 require('lazy').setup({
   {'folke/lazy.nvim', lazy = false},
@@ -798,6 +902,7 @@ require('lazy').setup({
 
   {
     'j-hui/fidget.nvim',
+    branch = "legacy",
     config = function()
       local opts = {
         sources = {
@@ -808,6 +913,9 @@ require('lazy').setup({
             ignore = true
           }
         },
+        fmt = {
+          max_messages = 5,
+        }
       }
       require"fidget".setup(opts)
     end
@@ -972,11 +1080,18 @@ require('lazy').setup({
     config = function()
       require "lsp_signature".setup({
         bind = true, -- This is mandatory, otherwise border config won't get registered.
-        floating_window = false,
-        floating_window_above_cur_line = false,
+        floating_window = true,
+        floating_window_above_cur_line = true,
         handler_opts = {
           border = "rounded"
-        }
+        },
+        hint_enable = false,
+        transparency = 15,
+        floating_window_off_x = function()
+          local colnr = vim.api.nvim_win_get_cursor(0)[2] -- bu col number
+          return colnr
+        end,
+        max_width = 40,
       })
     end
   },
@@ -990,34 +1105,6 @@ require('lazy').setup({
       end
       local cmp = require('cmp')
 
-      local kind_icons = {
-        Text = ' ',
-        Method = ' ',
-        Function = ' ',
-        Constructor = ' ',
-        Field = ' ',
-        Variable = ' ',
-        Class = 'ﴯ ',
-        Interface = ' ',
-        Module = ' ',
-        Property = 'ﰠ ',
-        Unit = ' ',
-        Value = ' ',
-        Enum = ' ',
-        Keyword = ' ',
-        Snippet = ' ',
-        Color = ' ',
-        File = ' ',
-        Reference = ' ',
-        Folder = ' ',
-        EnumMember = ' ',
-        Constant = ' ',
-        Struct = ' ',
-        Event = ' ',
-        Operator = ' ',
-        TypeParameter = ' ',
-        TabNine = ' '
-      }
 
       cmp.setup{
         window = {
@@ -1030,7 +1117,7 @@ require('lazy').setup({
             if entry.source.name == 'cmp_tabnine' then
               vim_item.kind = "TabNine"
             end
-            vim_item.kind = string.format('%s', kind_icons[vim_item.kind]) -- This concatonates the icons with the name of the item kind
+            vim_item.kind = string.format('%s', kind_icons_list[vim_item.kind]) -- This concatonates the icons with the name of the item kind
             -- tabnine
             -- limit width to 50
             local abbr_len = string.len(vim_item.abbr)
@@ -1148,7 +1235,7 @@ require('lazy').setup({
         }),
         sources = cmp.config.sources({
           { name = 'ultisnips' }, -- For ultisnips users.
-          { name = 'nvim_lsp_signature_help' },
+          -- { name = 'nvim_lsp_signature_help' },
           { name = 'nvim_lsp' },
           -- { name = 'omni' },
           { name = 'dictionary', keyword_length = 2 },
@@ -1399,15 +1486,9 @@ require('lazy').setup({
         indent = {
           enable = false
         },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "<Enter>", -- set to `false` to disable one of the mappings
-            scope_incremental = "<Enter>",
-            node_decremental = "<BS>",
-          },
-        },
       }
+      -- incremental selection
+      vim.keymap.set("n", "<Enter>", require('nvim-treesitter.incremental_selection').init_selection, { buffer = true })
 
       -- matlab
       local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
@@ -1699,34 +1780,7 @@ require('lazy').setup({
           -- Raw indentation
           whitespace = "  ",
         },
-        icons = {
-          File          = "",
-          Module        = "",
-          Namespace     = "",
-          Package       = "",
-          Class         = "",
-          Method        = "",
-          Property      = "",
-          Field         = "",
-          Constructor   = "",
-          Enum          = " ",
-          Interface     = " ",
-          Function      = "",
-          Variable      = "",
-          Constant      = "",
-          String        = "",
-          Number        = "",
-          Boolean       = "◩",
-          Array         = "",
-          Object        = "",
-          Key           = "",
-          Null          = "ﳠ",
-          EnumMember    = "",
-          Struct        = "",
-          Event         = "",
-          Operator      = "",
-          TypeParameter = "",
-        },
+        icons = kind_icons_list,
         layout = {
           max_width = 200,
         },
@@ -1828,59 +1882,63 @@ require('lazy').setup({
   },
 
   {
-    "utilyre/barbecue.nvim",
-    dependencies = {
-      "neovim/nvim-lspconfig",
-      "smiteshp/nvim-navic",
-      "kyazdani42/nvim-web-devicons", -- optional
-    },
+    "Bekaboo/dropbar.nvim",
     config = function()
-      -- vim.api.nvim_set_hl(0, "BarbecueSeparator", { link = "NonText" })
-      -- vim.api.nvim_set_hl(0, "BarbecueDirname", { link = "LineNr" })
-      -- vim.api.nvim_set_hl(0, "BarbecueBasename", { link = "Pmenu" })
-
-      require('barbecue.utils').get_hl_by_name = function(name)
-        return vim.api.nvim_get_hl_by_name(name, true)
+      local no_bold = {}
+      for key, _ in pairs(kind_icons_list) do
+        table.insert(no_bold, "DropBarKind" .. key)
       end
+      for _, hl in ipairs(no_bold) do
+        vim.api.nvim_set_hl(0, hl, { bold = false })
+      end
+      vim.api.nvim_set_hl(0, "DropBarKindFile", { bold = true })
+      vim.api.nvim_set_hl(0, "DropBarKindFolder", { bold = true })
 
-      require("barbecue").setup {
-        symbols = {
-          separator = ">",
+      vim.api.nvim_set_hl(0, "DropBarIconUIPickPivot", { link = "Visual" })
+      vim.keymap.set("n", "<leader>V", require('dropbar.api').pick, { noremap = true, silent = true })
+
+      local api = require('dropbar.api')
+      require('dropbar').setup {
+        icons = {
+          ui = {
+            bar = {
+              separator = "  ",
+            }
+          }
         },
-        kinds = {
-          File          = " ",
-          Module        = " ",
-          Namespace     = " ",
-          Package       = " ",
-          Class         = " ",
-          Method        = " ",
-          Property      = " ",
-          Field         = " ",
-          Constructor   = " ",
-          Enum          = "練",
-          Interface     = "練",
-          Function      = " ",
-          Variable      = " ",
-          Constant      = " ",
-          String        = " ",
-          Number        = " ",
-          Boolean       = "◩ ",
-          Array         = " ",
-          Object        = " ",
-          Key           = " ",
-          Null          = "ﳠ ",
-          EnumMember    = " ",
-          Struct        = " ",
-          Event         = " ",
-          Operator      = " ",
-          TypeParameter = " ",
-        },
-        exclude_filetypes = { "gitcommit", "toggleterm" },
-        include_buftypes = {"nowrite", ""},
+        menu = {
+          keymaps = {
+            ['<Esc>'] = function()
+              local menu = api.get_current_dropbar_menu()
+              menu:close()
+            end,
+            ['h'] = function()
+              local menu = api.get_current_dropbar_menu()
+              if menu.prev_menu then
+                menu:close()
+              end
+            end,
+            ['l'] = function()
+              local menu = require('dropbar.api').get_current_dropbar_menu()
+              local cursor = vim.api.nvim_win_get_cursor(menu.win)
+              local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+              if component and component.children then
+                menu:click_on(component, nil, 1, 'l')
+              end
+            end
+          },
+          win_configs = {
+            border = "single",
+          }
+        }
       }
-      -- init update
-      require("barbecue.ui").toggle(true)
-    end,
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {"fugitiveblame"},
+        callback = function()
+          vim.o.winbar = "Git blame"
+        end
+      })
+    end
   },
 
 -- git signs
@@ -2443,6 +2501,9 @@ require('lazy').setup({
       '<leader>ma',
       '<leader>mc',
     },
+    init = function()
+      vim.g.bookmark_no_default_key_mappings = 1
+    end,
     config = function()
       vim.g.bookmark_sign = ''
       vim.keymap.set('n', '<leader>mm', '<cmd>BookmarkToggle<CR>', {silent = true})
@@ -2713,6 +2774,9 @@ require('lazy').setup({
       {"<c-/>", mode = 'n'},
       {"<c-s-/>", mode = 'n'},
     },
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     config = function()
       local bindkey
       if os.getenv("TMUX") ~= nil then
@@ -2746,7 +2810,11 @@ require('lazy').setup({
         post_hook = function(ctx)
           -- execute if ctx.cmotion == 3,4,5
           if ctx.cmotion > 2 then
-            vim.cmd[[ normal gv ]]
+            if vim.g.plugins_loaded then
+              vim.cmd[[ normal gv ]]
+            else
+              vim.cmd[[ normal gvh ]]
+            end
           end
         end,
       }
@@ -2871,6 +2939,10 @@ require('lazy').setup({
     config = function()
       vim.g.scrollview_current_only = 1
       vim.g.scrollview_excluded_filetypes = {"NvimTree", "alpha", "dapui_scopes"}
+      vim.g.scrollview_diagnostics_error_symbol = '-'
+      vim.g.scrollview_diagnostics_warn_symbol = '-'
+      vim.g.scrollview_diagnostics_info_symbol = '-'
+      vim.g.scrollview_diagnostics_hint_symbol = '-'
     end
   },
 
@@ -2966,10 +3038,11 @@ require('lazy').setup({
         matchup = {
           enable = true,              -- mandatory, false will disable the whole extension
           disable = { "c", "ruby" },  -- optional, list of language that will be disabled
+          disable_virtual_text = true,
           -- [options]
         }
       }
-      vim.g.matchup_matchparen_offscreen = { method = "popup" }
+      vim.g.matchup_matchparen_offscreen = { method = "" }
     end
   },
   {
@@ -2982,6 +3055,9 @@ require('lazy').setup({
   --   'neoclide/coc.nvim',
   --   lazy = true,
   --   build = 'yarn install --frozen-lockfile',
+  --   init = function()
+  --     vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
+  --   end,
   --   config = function()
   --     vim.keymap.set('n', '<leader><leader>', '<cmd>CocCommand<cr>', { silent = true })
   --   end
@@ -3033,8 +3109,12 @@ require('lazy').setup({
     'iamcco/markdown-preview.nvim',
     lazy = true,
     build = function() vim.fn["mkdp#util#install"]() end,
-    ft = {"markdown"},
+    cmd = "MarkdownPreview",
     config = function()
+      vim.api.nvim_create_user_command("MarkdownPreview", "echo 'Not a markdown file!'", {})
+      vim.api.nvim_exec_autocmds("BufEnter", {
+        group = "mkdp_init",
+      })
       vim.g.mkdp_open_to_the_world = 1
 
       vim.cmd[[
@@ -3055,6 +3135,10 @@ require('lazy').setup({
     'lfv89/vim-interestingwords',
     lazy = true,
     keys = "<leader>h",
+    init = function()
+      vim.g.interestingWordsDefaultMappings = 0
+      vim.g.interestingWordsGUIColors = {'#8CCBEA', '#A4E57E', '#FFDB72', '#FF7272', '#FFB3FF', '#9999FF'}
+    end,
     config = function()
       vim.keymap.set('n', '<leader>h', "<cmd>call InterestingWords('n')<cr>", { silent = true })
       vim.keymap.set('v', '<leader>h', "<cmd>call InterestingWords('v')<cr>", { silent = true })
@@ -3131,6 +3215,9 @@ require('lazy').setup({
   {
     'machakann/vim-sandwich',
     lazy = true,
+    init = function()
+      vim.g.sandwich_no_default_key_mappings = 1
+    end,
     config = function()
       vim.cmd[[
       runtime macros/sandwich/keymap/surround.vim
@@ -3182,6 +3269,9 @@ require('lazy').setup({
     'KabbAmine/vCoolor.vim',
     lazy = true,
     keys = "<leader>cp",
+    init = function()
+      vim.g.vcoolor_disable_mappings = 1
+    end,
     config = function()
       vim.g.vcoolor_disable_mappings = 1
       vim.keymap.set('n', '<leader>cp', '<cmd>VCoolor<cr>', { silent = true })
@@ -3206,6 +3296,9 @@ require('lazy').setup({
   {
     'mg979/vim-visual-multi',
     lazy = true,
+    init = function()
+      vim.g.VM_leader = '\\'
+    end,
     config = function()
       vim.g.VM_theme = 'neon'
     end
@@ -3621,7 +3714,7 @@ function lazyLoadPlugins()
       'fidget.nvim',
       'null-ls.nvim',
       'lsp_signature.nvim',
-      'barbecue.nvim',
+      'dropbar.nvim',
       -- end lsp
 
       -- begin dap
@@ -3647,7 +3740,7 @@ function lazyLoadPlugins()
       'bufferline.nvim',
       'nvim-notify',
       'nvim-hlslens',
-      'nvim-scrollbar',
+      -- 'nvim-scrollbar',
       'nvim-scrollview',
       'lualine.nvim',
       'alpha-nvim',
@@ -3894,29 +3987,13 @@ vim.api.nvim_create_autocmd({"InsertEnter", "CmdlineEnter"}, {
 })
 -- end im switch
 
--------------------------plugin variables---------------------------------------------
--- vCoolor.vim
-vim.g.vcoolor_disable_mappings = 1
--- interesting words
-vim.g.interestingWordsDefaultMappings = 0
-vim.g.interestingWordsGUIColors = {'#8CCBEA', '#A4E57E', '#FFDB72', '#FF7272', '#FFB3FF', '#9999FF'}
--- coc.nvim
-vim.g.coc_config_home=vim.fn.glob(vim.fn.stdpath('data'))
--- vim-bookmark
-vim.g.bookmark_no_default_key_mappings = 1
--- visual-multi
-vim.g.VM_leader = '\\'
--- sandwich
-vim.g.sandwich_no_default_key_mappings = 1
---------------------------------------------------------------------------------------
-
-
 ---------------------------vscode neovim----------------------------------------------
 function VscodeNeovimHandler()
   require('lazy').load{
     plugins = {
       "vim-visual-multi",
       "nvim-treesitter-textobjects",
+      "vim-matchup",
       "vim-sandwich",
       "gitsigns.nvim",
     }
@@ -4029,6 +4106,12 @@ function VscodeNeovimHandler()
 
   vim.keymap.set('n', '<localleader>v',function() vim.fn.VSCodeNotify("latex-workshop.synctex") end, { silent = true })
   vim.keymap.set('n', '<C-g>',function() vim.fn.VSCodeNotify("workbench.view.scm") end, { silent = true })
+
+  -- comment, use vscode builtin comment
+  vim.keymap.set('n', '<C-/>',function() vim.fn.VSCodeNotify("editor.action.commentLine") end, { silent = true })
+  vim.keymap.set('v', '<C-/>',function() vim.fn.VSCodeNotifyVisual("editor.action.commentLine", 0) end, { silent = true })
+  vim.keymap.set('n', '<C-s-/>',function() vim.fn.VSCodeNotify("editor.action.blockComment") end, { silent = true })
+  vim.keymap.set('v', '<C-s-/>',function() vim.fn.VSCodeNotifyVisual("editor.action.blockComment", 0) end, { silent = true })
 
   -- rewrap
   vim.api.nvim_create_autocmd("InsertLeave", {
