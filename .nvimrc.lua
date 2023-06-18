@@ -3656,11 +3656,8 @@ require('lazy').setup({
 
 -----------------------------dap------------------------------------------------------
 function term_dap()
-  local dapui = require("dapui")
-  dapui.close()
-  local virtual_text = require 'nvim-dap-virtual-text/virtual_text'
-  virtual_text._on_continue()
-  virtual_text.clear_last_frames()
+  require("dapui").close()
+  require 'nvim-dap-virtual-text/virtual_text'.clear_virtual_text()
 end
 --------------------------------------------------------------------------------------
 
