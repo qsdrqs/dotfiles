@@ -39,7 +39,7 @@ function main() {
         ln -s $HOME/.vim/$FILE $HOME/.config/nvim/
     done
     ln -s $HOME/.vimrc $HOME/.config/nvim/init.vim
-    ln -s $PWD/after $HOME/.config/nvim/after
+    ln -s $PWD/after $HOME/.config/nvim/
 
     # coc config for nvim
     if [[ ! -d $HOME/.local/share/nvim ]];then
@@ -55,7 +55,7 @@ function main() {
     fi
 
     # move ranger files
-    if [[ -d $HOME/.config/ranger ]] && [[ ! -L $HOME/.config/ranger ]];then
+    if [[ -d $HOME/.config/ranger ]] && [[ ! -L $HOME/.config/ranger ]] && [[ ! -L $HOME/.config/ranger/rc.conf ]];then
         echo "having ranger dir, deleting..."
         rm -rf $HOME/.config/ranger
     fi

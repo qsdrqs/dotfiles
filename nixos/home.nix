@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports = [
@@ -28,6 +28,7 @@
     dotDir = ".config/zsh";
     initExtraFirst = ''
       if [ -e $HOME/.zshrc ]; then
+        ZSH_CUSTOM="$HOME/zsh_custom"
         source $HOME/.zshrc
       fi
     '';
