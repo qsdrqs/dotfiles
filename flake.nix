@@ -14,6 +14,7 @@
       url = github:neovim/neovim;
       flake = false;
     };
+    vscode-server.url = "github:nix-community/nixos-vscode-server";
 
     # zsh
     omz = {
@@ -45,13 +46,15 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, vscode-server, ... }@inputs:
   let
     basicConfig = {
       system = "x86_64-linux";
       specialArgs = {inherit inputs;};
       modules = [
         ./nixos/configuration.nix
+
+        # home-manager module
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
@@ -62,6 +65,12 @@
           # arguments to home.nix
           home-manager.extraSpecialArgs = {inherit inputs;};
         }
+
+        # vscode-server
+        vscode-server.nixosModules.default
+        ({ config, pkgs, ... }: {
+          services.vscode-server.enable = true;
+        })
       ];
     };
   in
