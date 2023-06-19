@@ -3,6 +3,7 @@
 {
   imports = [
     ./dotfiles.nix
+    ./home-custom.nix
   ];
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -61,6 +62,7 @@
   home.file."authorized_keys" = {
     target = ".cache/authorized_keys";
     onChange = ''
+      mkdir -p ~/.ssh
       cp ~/.cache/authorized_keys ~/.ssh/
     '';
     text = ''

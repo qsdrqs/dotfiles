@@ -57,5 +57,15 @@ in
                   source = inputs.omz;
                   target = ".oh-my-zsh";
                 };
+
+                # can be override by lib.mkForce
+                "theme.zsh" = {
+                  text = ''
+                    ZSH_THEME="powerlevel10k/powerlevel10k"
+                    '';
+                };
               };
+
+  # can be override by 
+
 }
