@@ -35,6 +35,31 @@
     '';
     completionInit = ""; # define in my own zshrc
   };
+  programs.ssh.enable = true;
+  programs.ssh.matchBlocks = {
+    docean = {
+      host = "Docean";
+      hostname = "143.110.233.113";
+      user = "root";
+    };
+    aliyun = {
+      host = "Aliyun";
+      hostname = "8.140.148.238";
+      user = "root";
+    };
+    deskserver = {
+      host = "DESKSERVER";
+      hostname = "143.110.233.113";
+      user = "qsdrqs";
+      port = 3322;
+    };
+    rasparch = {
+      host = "RaspArch";
+      hostname = "143.110.233.113";
+      user = "qsdrqs";
+      port = 3323;
+    };
+};
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -62,8 +87,8 @@
   home.file."authorized_keys" = {
     target = ".cache/authorized_keys";
     onChange = ''
-      mkdir -p ~/.ssh
-      cp ~/.cache/authorized_keys ~/.ssh/
+      [[ -d ~/.ssh ]] || mkdir -p ~/.ssh
+      cp -f ~/.cache/authorized_keys ~/.ssh/
     '';
     text = ''
       ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDapy0TY1Rg25OQA6StQeiNz6FMync8IOtagynLbWXK1p/bSkDTPTK6HsPtIcZRjBQzhAwSIaDt3PHZMfYUpW+BcGKbvBucm6a1CjsWXzhCo85CmWIIysJh2aUw0dq4cJ12XKmaDzMUtTGjAGleQKueeCiSkkHp+K3j7R18/Ef30nkBXBztVHcbvr6AxoMxVP6MmfAWH39jAauXoNzrxx9cPNGouXytsPyXCTHYN9wY/Qndhi17DknIZJ6qP3DMNl1A3C6Mo7DCsXcfKy4pHPYYal5jM4q6cGWopXGEcTu64NjKr13YXmIgH5syTS8iQlMCIlmaBI/uN2ArNtd180D8feWELBnZze9nePCf4+f1SWLlAncrtYl31/AmMPEsDhpl/itC4E6/wzGcSWLdM3fjuguHtxxaPJkzM2NX31PcMU8lsVGRR/FbErm0ZGFurC2JcIXjwWcZaGCGqJEPWJJkwygAM3XTICJEkvJn+1AVg8DvZncbEupMV0X2muqhPCs=
