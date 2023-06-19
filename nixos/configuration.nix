@@ -59,6 +59,14 @@
     shell = pkgs.zsh;
   };
 
+  # gc
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 21d";
+  };
+  nix.settings.auto-optimise-store = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   nixpkgs.config.allowUnfree = true;
@@ -80,7 +88,6 @@
     gcc
     clang_16
     clang-tools_16
-    vscode
     python3Full
     perl
     virtualenv

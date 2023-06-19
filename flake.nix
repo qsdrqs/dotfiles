@@ -45,10 +45,9 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
-
-    # Utilized by `nix flake check`
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  let
+    basicConfig = {
       system = "x86_64-linux";
       specialArgs = {inherit inputs;};
       modules = [
@@ -65,6 +64,15 @@
         }
       ];
     };
-    foobar = inputs.foobar;
+  in
+  {
+
+    # Utilized by `nix flake check`
+    nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
+    nixosConfigurations.gui = nixpkgs.lib.nixosSystem (basicConfig // {
+      modules = basicConfig.modules ++ [
+        ./nixos/gui-configuration.nix
+      ];
+    });
   };
 }
