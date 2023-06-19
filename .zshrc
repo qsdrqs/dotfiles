@@ -304,7 +304,11 @@ glorep() {
     echo "successfully changed \033[32m$count\033[0m files of \"$1\" into \"$2\"."
 }
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh || [[ ! -f $ZDOTDIR/.p10k.zsh ]] || source $ZDOTDIR/.p10k.zsh
+if [[ -f ~/.p10k.zsh ]]; then
+    source ~/.p10k.zsh
+elif [[ -f $ZDOTDIR/.p10k.zsh ]]; then
+    source $ZDOTDIR/.p10k.zsh
+fi
 
 
 #vi-mode
