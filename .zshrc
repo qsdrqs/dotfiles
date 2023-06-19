@@ -262,6 +262,11 @@ alias sem-deselect="sudo emerge --deselect --ask"
 alias sem-depclean="sudo emerge --ask --depclean"
 alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bdeps=y @world"
 
+# NixOS
+snr-switch() {
+    sudo nixos-rebuild switch --flake path:$HOME/dotfiles#$1
+}
+
 export PROX=127.0.0.1
 alias prox="export http_proxy=http://$PROX:1081\
 && export https_proxy=http://$PROX:1081\

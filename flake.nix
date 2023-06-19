@@ -14,7 +14,7 @@
       url = github:neovim/neovim;
       flake = false;
     };
-    vscode-server.url = "github:nix-community/nixos-vscode-server";
+    vscode-server.url = github:nix-community/nixos-vscode-server;
 
     # zsh
     omz = {
@@ -41,6 +41,9 @@
       url = github:denysdovhan/spaceship-prompt;
       flake = false;
     };
+
+    # wsl
+    nixos-wsl.url = github:nix-community/NixOS-WSL;
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository
@@ -81,6 +84,11 @@
     nixosConfigurations.gui = nixpkgs.lib.nixosSystem (basicConfig // {
       modules = basicConfig.modules ++ [
         ./nixos/gui-configuration.nix
+      ];
+    });
+    nixosConfigurations.wsl = nixpkgs.lib.nixosSystem (basicConfig // {
+      modules = basicConfig.modules ++ [
+        ./nixos/wsl.nix
       ];
     });
   };
