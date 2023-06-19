@@ -19,7 +19,7 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
 
     # Utilized by `nix flake check`
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
@@ -27,6 +27,15 @@
       specialArgs = {inherit inputs;};
       modules = [
         ./nixos/configuration.nix
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.qsdrqs = import ./nixos/home.nix;
+
+          # Optionally, use home-manager.extraSpecialArgs to pass
+          # arguments to home.nix
+        }
       ];
     };
   };

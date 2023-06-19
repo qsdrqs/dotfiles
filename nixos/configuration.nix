@@ -83,7 +83,6 @@
     fzf
     fd
     ripgrep
-    home-manager
     gnumake
     gcc
     clang_16
