@@ -119,12 +119,15 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-  programs.zsh.enable = true;
-  programs.neovim.enable = true;
-  programs.neovim.defaultEditor = true;
-
-  programs.nix-ld.enable = true;
-
+  programs = {
+    zsh.enable = true;
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
+    nix-ld.enable = true;
+    gnupg.agent.enable = true;
+  };
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
