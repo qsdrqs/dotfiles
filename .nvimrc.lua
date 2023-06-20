@@ -494,15 +494,7 @@ require('lazy').setup({
         end
 
         -- inlay hints
-        -- if vim.version().minor >= 11 then
-        --   vim.api.nvim_create_autocmd({"BufEnter", "InsertLeave", "BufWritePost"}, {
-        --     pattern = "*",
-        --     callback = function()
-        --       vim.lsp.inlay_hint.refresh()
-        --     end,
-        --   })
-        --   vim.lsp.inlay_hint.refresh()
-        -- end
+        vim.lsp.buf.inlay_hint(bufnr, true)
 
       end
 
@@ -790,36 +782,6 @@ require('lazy').setup({
       vim.api.nvim_create_user_command("AFToggle", formatToggle, {nargs = 0})
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
 
-    end
-  },
-
-  {
-    'lvimuser/lsp-inlayhints.nvim',
-    branch = "anticonceal",
-    config = function()
-      require("lsp-inlayhints").setup {
-        virt_text_formatter = function(label, hint, opts, client_name)
-          local vt = {}
-          vt[#vt + 1] = { " ", "None" }
-          vt[#vt + 1] = { label, opts.highlight }
-          vt[#vt + 1] = { " ", "None" }
-
-          return vt
-        end,
-      }
-      vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
-      vim.api.nvim_create_autocmd("LspAttach", {
-        group = "LspAttach_inlayhints",
-        callback = function(args)
-          if not (args.data and args.data.client_id) then
-            return
-          end
-
-          local bufnr = args.buf
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          require("lsp-inlayhints").on_attach(client, bufnr)
-        end,
-      })
     end
   },
 
@@ -3706,7 +3668,6 @@ function lazyLoadPlugins()
       'nvim-jdtls',
       'rust-tools.nvim',
       'clangd_extensions.nvim',
-      'lsp-inlayhints.nvim',
       'nvim-lightbulb',
       'fidget.nvim',
       'null-ls.nvim',
