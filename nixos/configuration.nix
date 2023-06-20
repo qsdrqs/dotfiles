@@ -5,11 +5,6 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./custom.nix
-    ];
-
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # networking.hostName = "nixos"; # Define your hostname.
@@ -57,6 +52,9 @@
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
+    openssh.authorizedKeys.keyFiles = [
+      ./authorized_keys
+    ];
   };
 
   # gc
@@ -130,10 +128,14 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-  services.openssh.settings.PasswordAuthentication = false;
-  services.openssh.settings.KbdInteractiveAuthentication = false;
-  services.openssh.settings.X11Forwarding = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      X11Forwarding = true;
+    };
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

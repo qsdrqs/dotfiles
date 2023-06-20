@@ -78,17 +78,35 @@
     };
   in
   {
-
     # Utilized by `nix flake check`
     nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
     nixosConfigurations.gui = nixpkgs.lib.nixosSystem (basicConfig // {
       modules = basicConfig.modules ++ [
+        ./nixos/custom.nix
         ./nixos/gui-configuration.nix
       ];
     });
     nixosConfigurations.wsl = nixpkgs.lib.nixosSystem (basicConfig // {
       modules = basicConfig.modules ++ [
+        ./nixos/custom.nix
         ./nixos/wsl.nix
+      ];
+    });
+
+    # iso, build through #nixos-iso.config.system.build.isoImage
+    nixos-iso = nixpkgs.lib.nixosSystem (basicConfig // {
+      modules = basicConfig.modules ++ [
+        "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+
+        home-manager.nixosModules.home-manager
+        {
+          # impure
+          home-manager.users.qsdrqs = import ./nixos/isohome.nix;
+        }
+
+        ({ config, pkgs, ... }: {
+          services.getty.autologinUser = nixpkgs.lib.mkForce "qsdrqs";
+        })
       ];
     });
   };
