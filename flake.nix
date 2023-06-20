@@ -79,7 +79,11 @@
   in
   {
     # Utilized by `nix flake check`
-    nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
+    nixosConfigurations.basic = nixpkgs.lib.nixosSystem (basicConfig // {
+      modules = basicConfig.modules ++ [
+        ./nixos/custom.nix
+      ];
+    });
     nixosConfigurations.gui = nixpkgs.lib.nixosSystem (basicConfig // {
       modules = basicConfig.modules ++ [
         ./nixos/custom.nix
