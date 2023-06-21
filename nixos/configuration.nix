@@ -57,6 +57,9 @@
     ];
   };
 
+  # enable normal users to use reboot or shutdown
+  security.polkit.enable = true;
+
   # gc
   nix.gc = {
     automatic = true;
@@ -91,6 +94,7 @@
     perl
     virtualenv
     nodejs
+    unzip
   ];
   nixpkgs.overlays = [
     (self: super: {

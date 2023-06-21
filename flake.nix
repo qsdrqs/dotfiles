@@ -44,6 +44,9 @@
 
     # wsl
     nixos-wsl.url = github:nix-community/NixOS-WSL;
+
+    nix-index-database.url = "github:Mic92/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository
@@ -74,6 +77,7 @@
         ({ config, pkgs, ... }: {
           services.vscode-server.enable = true;
         })
+
       ];
     };
   in

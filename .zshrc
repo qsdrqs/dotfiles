@@ -264,7 +264,7 @@ alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bd
 
 # NixOS
 snr-switch() {
-    sudo nixos-rebuild switch --flake path:$HOME/dotfiles#$1
+    sudo nixos-rebuild switch --flake path:$HOME/dotfiles#$@
 }
 
 export PROX=127.0.0.1
@@ -364,9 +364,6 @@ unset LS_COLORS
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 GITSTATUS_LOG_LEVEL=DEBUG
-autoload -Uz compinit
-compinit
-compdef vman="man"
 
 # z.sh
 source $HOME/dotfiles/z/z.sh
