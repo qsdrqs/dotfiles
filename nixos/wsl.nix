@@ -3,6 +3,7 @@
 {
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
+    inputs.home-manager.nixosModules.home-manager
   ];
 
   wsl = {
@@ -19,4 +20,6 @@
     # docker-desktop.enable = true;
 
   };
+
+  home-manager.users.qsdrqs.home.file.wsl.text = "";
 }

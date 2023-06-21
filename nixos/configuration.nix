@@ -84,6 +84,7 @@
     ripgrep
     gnumake
     gcc
+    gdb
     clang_16
     clang-tools_16
     python3Full
