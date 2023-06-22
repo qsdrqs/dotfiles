@@ -665,7 +665,7 @@ require('lazy').setup({
                 enable = true,
               },
               hint = {
-                enable = false,
+                enable = true,
               },
             },
           }
@@ -3261,6 +3261,7 @@ require('lazy').setup({
     init = function()
       vim.g.VM_leader = '\\'
     end,
+    keys = "<C-n>",
     config = function()
       vim.g.VM_theme = 'neon'
     end
@@ -3944,6 +3945,13 @@ vim.api.nvim_create_autocmd({"InsertEnter", "CmdlineEnter"}, {
   end
 })
 -- end im switch
+
+-- workaround for https://github.com/neovim/neovim/issues/21856
+vim.api.nvim_create_autocmd({ "VimLeave" }, {
+  callback = function()
+    vim.cmd('sleep 10m')
+  end,
+})
 
 ---------------------------vscode neovim----------------------------------------------
 function VscodeNeovimHandler()

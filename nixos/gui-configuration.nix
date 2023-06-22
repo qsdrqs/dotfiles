@@ -1,4 +1,32 @@
 { config, pkgs, lib, inputs, ... }:
+let
+  ida64-fhs = pkgs.buildFHSUserEnv {
+      name = "ida64";
+      runScript = "${config.users.users.qsdrqs.home}/ida/ida64";
+      targetPkgs = pkgs: with pkgs; [
+        libglvnd
+        zlib
+        glib
+        libGL
+        fontconfig
+        freetype
+        xorg.libX11
+        xorg.xcbutilwm
+        xorg.xcbutilimage
+        xorg.xcbutilrenderutil
+        xorg.libSM
+        xorg.libICE
+        libxkbcommon
+        dbus
+        fuse glib gtk3 libnotify libxml2 libxslt
+        openssl.dev pkg-config strace udev vulkan-loader
+        xorg.libxcb xorg.libXcomposite xorg.libXcursor
+        xorg.libXdamage xorg.libXext xorg.libXfixes xorg.libXi xorg.libXrandr
+        xorg.libXrender xorg.libXScrnSaver xorg.libxshmfence xorg.libXtst
+        xorg.xcbutilkeysyms
+      ];
+    };
+in
 {
   environment.systemPackages = with pkgs; [
     vscode
@@ -9,6 +37,12 @@
     frp
     duf
     pavucontrol
+    telegram-desktop
+    libnotify
+    slack
+    baobab # disk usage
+    snapper-gui
+    ida64-fhs
   ];
 
   # provide org.freedesktop.secrets
@@ -53,6 +87,7 @@
       variety = super.variety.overrideAttrs (oldAttrs: {
         prePatch = oldAttrs.prePatch + ''
           substituteInPlace data/scripts/set_wallpaper --replace "\"i3\"" "\"none+i3\""
+          substituteInPlace data/scripts/set_wallpaper --replace "feh --bg-fill" "feh --bg-scale --no-xinerama"
         '';
       });
     })
@@ -75,4 +110,14 @@
   users.extraUsers.qsdrqs.extraGroups = [ "audio" ];
   hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";
   hardware.bluetooth.enable = true;
+
+  # snapshots
+  services.snapper.configs = {
+    home = {
+      SUBVOLUME = "/home";
+      ALLOW_USERS = [ "qsdrqs" ];
+      TIMELINE_CREATE = true;
+      TIMELINE_CLEANUP = true;
+    };
+  };
 }

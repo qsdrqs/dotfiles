@@ -95,6 +95,14 @@
     virtualenv
     nodejs
     unzip
+    appimage-run
+    (pkgs.buildFHSUserEnv {
+      name = "fhs";
+      runScript = "zsh";
+      targetPkgs = pkgs: with pkgs; [
+      ];
+    })
+    patchelf
   ];
   nixpkgs.overlays = [
     (self: super: {
