@@ -47,12 +47,15 @@
 
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    # nur
+    nur.url = github:nix-community/NUR;
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, vscode-server, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, vscode-server, nur, ... }@inputs:
   let
     basicConfig = {
       system = "x86_64-linux";
@@ -80,6 +83,7 @@
 
       ];
     };
+    pkgs = nixpkgs.legacyPackages.x86_64-linux;
   in
   {
     # Utilized by `nix flake check`
@@ -92,6 +96,7 @@
       modules = basicConfig.modules ++ [
         ./nixos/custom.nix
         ./nixos/gui-configuration.nix
+        nur.nixosModules.nur
       ];
     });
     nixosConfigurations.wsl = nixpkgs.lib.nixosSystem (basicConfig // {
@@ -129,5 +134,41 @@
         })
       ];
     });
+
+    # dev shells
+    devShells.x86_64-linux = {
+      rust = with pkgs; mkShell {
+        packages = [
+            cargo
+            rustc
+            rustfmt
+            clippy
+            rust-analyzer
+            llvmPackages_latest.llvm
+        ];
+        LIBCLANG_PATH="${llvmPackages_latest.libclang.lib}/lib";
+        BINDGEN_EXTRA_CLANG_ARGS = ''
+          -isystem ${llvmPackages_latest.libclang.lib}/lib/clang/16/include
+          -isystem ${libjpeg.dev}/include
+          -isystem ${glibc.dev}/include
+        '';
+      };
+      cpp = with pkgs; mkShell {
+        packages = [
+          cmake
+          gnumake
+          gcc
+          gdb
+          ninja
+          llvmPackages_latest.llvm
+          llvmPackages_latest.libclang
+        ];
+      };
+      python = with pkgs; mkShell {
+        packages = [
+          virtualenv
+        ];
+      };
+    };
   };
 }

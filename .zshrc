@@ -266,6 +266,13 @@ alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bd
 snr-switch() {
     sudo nixos-rebuild switch --flake path:$HOME/dotfiles#$@
 }
+nix-devel() {
+    local command="zsh"
+    for i in ${(on)@}; do
+        command="nix develop $HOME/dotfiles#$i --command $command"
+    done
+    eval $command
+}
 
 export PROX=127.0.0.1
 alias prox="export http_proxy=http://$PROX:1081\

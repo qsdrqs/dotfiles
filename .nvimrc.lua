@@ -428,8 +428,6 @@ require('lazy').setup({
 
       local lsp_config = get_lsp_common_config()
       lsp_config.capabilities.offsetEncoding = nil
-      -- use the stable version
-      lsp_config.cmd = {"/usr/bin/rust-analyzer"}
       rt.setup({
         server = lsp_config,
         dap = {
@@ -467,8 +465,8 @@ require('lazy').setup({
   {
     'neovim/nvim-lspconfig',
     config = function()
-      vim.lsp.set_log_level('ERROR')
-      -- vim.lsp.set_log_level('OFF')
+      -- vim.lsp.set_log_level('ERROR')
+      vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
 
@@ -2489,6 +2487,12 @@ require('lazy').setup({
 
   {
     'rmagatti/auto-session',
+    init = function()
+      if #vim.fn.argv() == 1 and vim.fn.isdirectory(vim.fn.argv()[1]) == 1 then
+        require('auto-session').RestoreSession()
+        vim.cmd("bdelete " .. vim.fn.getcwd())
+      end
+    end,
     config = function()
       require('auto-session').setup {
         log_level = 'error',

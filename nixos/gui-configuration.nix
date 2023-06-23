@@ -43,10 +43,24 @@ in
     baobab # disk usage
     snapper-gui
     ida64-fhs
+    mpv
+    google-chrome
+    zoom-us
+    config.nur.repos.xddxdd.qq
+    # wine wechat
+    (config.nur.repos.xddxdd.wine-wechat.override {
+      setupSrc = fetchurl {
+        url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
+        sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
+      };
+      version = "3.9.5";
+    })
+    config.nur.repos.linyinfeng.wemeet
   ];
 
   # provide org.freedesktop.secrets
   services.gnome.gnome-keyring.enable = true;
+  security.pam.services.sddm.enableGnomeKeyring = true;
 
   fonts.fonts = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" ]; })
@@ -74,6 +88,7 @@ in
         feh
         rofi
         picom
+        networkmanagerapplet
       ];
     };
     displayManager.sddm = {
@@ -103,9 +118,13 @@ in
     serviceConfig = {
       User = "root";
       ExecStart = ''${pkgs.frp}/bin/frpc -c /etc/frp/frpc.ini'';
+      Restart = "on-failure";
+      RestartSec = 5;
     };
   };
 
+  # Enable sound.
+  sound.enable = true;
   hardware.pulseaudio.enable = true;
   users.extraUsers.qsdrqs.extraGroups = [ "audio" ];
   hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";
@@ -114,10 +133,15 @@ in
   # snapshots
   services.snapper.configs = {
     home = {
-      SUBVOLUME = "/home";
-      ALLOW_USERS = [ "qsdrqs" ];
-      TIMELINE_CREATE = true;
-      TIMELINE_CLEANUP = true;
+      SUBVOLUME              = "/home";
+      ALLOW_USERS            = [ "qsdrqs" ];
+      TIMELINE_CREATE        = true;
+      TIMELINE_CLEANUP       = true;
+      TIMELINE_LIMIT_HOURLY  = 10;
+      TIMELINE_LIMIT_DAILY   = 10;
+      TIMELINE_LIMIT_WEEKLY  = 0;
+      TIMELINE_LIMIT_MONTHLY = 0;
+      TIMELINE_LIMIT_YEARLY  = 0;
     };
   };
 }

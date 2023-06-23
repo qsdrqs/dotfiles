@@ -10,7 +10,7 @@
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  # networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -21,11 +21,10 @@
 
   # Select internationalisation properties.
   # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkbOptions in tty.
-  # };
+  console = {
+    font = "Lat2-Terminus16";
+    useXkbConfig = true; # use xkbOptions in tty.
+  };
 
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
@@ -39,10 +38,6 @@
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
-
-  # Enable sound.
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -85,17 +80,11 @@
     fzf
     fd
     ripgrep
-    gnumake
-    gcc
-    gdb
-    clang_16
-    clang-tools_16
-    python3Full
     perl
-    virtualenv
     nodejs
     unzip
     appimage-run
+    killall
     (pkgs.buildFHSUserEnv {
       name = "fhs";
       runScript = "zsh";
@@ -103,7 +92,10 @@
       ];
     })
     patchelf
+    python3
+    lsof
   ];
+  environment.variables.LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
   nixpkgs.overlays = [
     (self: super: {
 
