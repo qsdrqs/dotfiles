@@ -84,7 +84,15 @@
 
         ];
       };
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      pkgs = (import nixpkgs {
+        system = basicConfig.system;
+        overlays = (import ./nixos/overlays.nix {
+            inherit inputs;
+            pkgs = nixpkgs.legacyPackages.${pkgs.system};
+            config = nixpkgs.config;
+            lib = nixpkgs.lib;
+          }).nixpkgs.overlays;
+      });
     in
     {
       # Utilized by `nix flake check`
