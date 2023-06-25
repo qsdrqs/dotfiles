@@ -1,31 +1,48 @@
 { config, pkgs, lib, inputs, ... }:
 let
   ida64-fhs = pkgs.buildFHSUserEnv {
-      name = "ida64";
-      runScript = "${config.users.users.qsdrqs.home}/ida/ida64";
-      targetPkgs = pkgs: with pkgs; [
-        libglvnd
-        zlib
-        glib
-        libGL
-        fontconfig
-        freetype
-        xorg.libX11
-        xorg.xcbutilwm
-        xorg.xcbutilimage
-        xorg.xcbutilrenderutil
-        xorg.libSM
-        xorg.libICE
-        libxkbcommon
-        dbus
-        fuse glib gtk3 libnotify libxml2 libxslt
-        openssl.dev pkg-config strace udev vulkan-loader
-        xorg.libxcb xorg.libXcomposite xorg.libXcursor
-        xorg.libXdamage xorg.libXext xorg.libXfixes xorg.libXi xorg.libXrandr
-        xorg.libXrender xorg.libXScrnSaver xorg.libxshmfence xorg.libXtst
-        xorg.xcbutilkeysyms
-      ];
-    };
+    name = "ida64";
+    runScript = "${config.users.users.qsdrqs.home}/ida/ida64";
+    targetPkgs = pkgs: with pkgs; [
+      libglvnd
+      zlib
+      libGL
+      fontconfig
+      freetype
+      libxkbcommon
+      dbus
+      fuse
+      glib
+      gtk3
+      libnotify
+      libxml2
+      libxslt
+      openssl.dev
+      pkg-config
+      strace
+      udev
+      vulkan-loader
+      xorg.libX11
+      xorg.xcbutilwm
+      xorg.xcbutilimage
+      xorg.xcbutilrenderutil
+      xorg.libSM
+      xorg.libICE
+      xorg.libxcb
+      xorg.libXcomposite
+      xorg.libXcursor
+      xorg.libXdamage
+      xorg.libXext
+      xorg.libXfixes
+      xorg.libXi
+      xorg.libXrandr
+      xorg.libXrender
+      xorg.libXScrnSaver
+      xorg.libxshmfence
+      xorg.libXtst
+      xorg.xcbutilkeysyms
+    ];
+  };
 in
 {
   environment.systemPackages = with pkgs; [
@@ -46,6 +63,10 @@ in
     mpv
     google-chrome
     zoom-us
+    libsForQt5.gwenview
+    zathura
+
+    # NUR
     config.nur.repos.xddxdd.qq
     # wine wechat
     (config.nur.repos.xddxdd.wine-wechat.override {
@@ -79,7 +100,7 @@ in
 
   services.xserver = {
     enable = true;
-    videoDrivers = ["nvidia"];
+    videoDrivers = [ "nvidia" ];
     windowManager.i3 = {
       enable = true;
       extraPackages = with pkgs; [
@@ -97,22 +118,11 @@ in
     };
   };
 
-  nixpkgs.overlays = [
-    (self: super: {
-      variety = super.variety.overrideAttrs (oldAttrs: {
-        prePatch = oldAttrs.prePatch + ''
-          substituteInPlace data/scripts/set_wallpaper --replace "\"i3\"" "\"none+i3\""
-          substituteInPlace data/scripts/set_wallpaper --replace "feh --bg-fill" "feh --bg-scale --no-xinerama"
-        '';
-      });
-    })
-  ];
-
   i18n.inputMethod.enabled = "fcitx5";
   i18n.inputMethod.fcitx5.addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
 
   systemd.services.frpc = {
-    wantedBy = [ "multi-user.target" ]; 
+    wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     description = "Start the frp client";
     serviceConfig = {
@@ -133,15 +143,15 @@ in
   # snapshots
   services.snapper.configs = {
     home = {
-      SUBVOLUME              = "/home";
-      ALLOW_USERS            = [ "qsdrqs" ];
-      TIMELINE_CREATE        = true;
-      TIMELINE_CLEANUP       = true;
-      TIMELINE_LIMIT_HOURLY  = 10;
-      TIMELINE_LIMIT_DAILY   = 10;
-      TIMELINE_LIMIT_WEEKLY  = 0;
+      SUBVOLUME = "/home";
+      ALLOW_USERS = [ "qsdrqs" ];
+      TIMELINE_CREATE = true;
+      TIMELINE_CLEANUP = true;
+      TIMELINE_LIMIT_HOURLY = 10;
+      TIMELINE_LIMIT_DAILY = 10;
+      TIMELINE_LIMIT_WEEKLY = 0;
       TIMELINE_LIMIT_MONTHLY = 0;
-      TIMELINE_LIMIT_YEARLY  = 0;
+      TIMELINE_LIMIT_YEARLY = 0;
     };
   };
 }

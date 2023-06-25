@@ -267,11 +267,18 @@ snr-switch() {
     sudo nixos-rebuild switch --flake path:$HOME/dotfiles#$@
 }
 nix-devel() {
-    local command="zsh"
-    for i in ${(on)@}; do
-        command="nix develop $HOME/dotfiles#$i --command $command"
+    local last_env=$NIX_DEV
+    local command=""
+    local envs=$last_env
+    for i in $@; do
+        command="$command nix develop $HOME/dotfiles#$i --command"
+        envs="$envs $i"
     done
+    export NIX_DEV=${envs:1}
+    command="$command zsh"
+    echo $command
     eval $command
+    export NIX_DEV=$last_env
 }
 
 export PROX=127.0.0.1

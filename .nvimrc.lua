@@ -590,7 +590,8 @@ require('lazy').setup({
 
       -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
       local servers = {
-        'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver', "cmake", "gopls", "bashls", "bufls", "grammarly"
+        'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver',
+        "cmake", "gopls", "bashls", "bufls", "grammarly", "nil_ls",
       }
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
@@ -704,6 +705,14 @@ require('lazy').setup({
                 suggestions = {
                   MissingSpaces = false
                 }
+              }
+            }
+          }
+        elseif lsp == "nil_ls" then
+          lsp_common_config.settings = {
+            ['nil'] = {
+              formatting = {
+                command = { "nixpkgs-fmt" }
               }
             }
           }
@@ -2489,6 +2498,7 @@ require('lazy').setup({
     'rmagatti/auto-session',
     init = function()
       if #vim.fn.argv() == 1 and vim.fn.isdirectory(vim.fn.argv()[1]) == 1 then
+        vim.cmd.cd(vim.fn.argv()[1])
         require('auto-session').RestoreSession()
         vim.cmd("bdelete " .. vim.fn.getcwd())
       end

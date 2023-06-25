@@ -10,7 +10,7 @@
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -66,7 +66,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   nixpkgs.config.allowUnfree = true;
-  environment.defaultPackages = [];
+  environment.defaultPackages = [ ];
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     lsd
@@ -94,23 +94,10 @@
     patchelf
     python3
     lsof
+    nil # nil language server
+    nixpkgs-fmt
   ];
   environment.variables.LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
-  nixpkgs.overlays = [
-    (self: super: {
-
-      neovim-unwrapped = super.neovim-unwrapped.overrideAttrs (oldAttrs: {
-        src = inputs.neovim;
-        patches = lib.lists.take 1 oldAttrs.patches;
-      });
-
-      ranger = super.ranger.overrideAttrs (oldAttrs: {
-        src = inputs.ranger;
-        propagatedBuildInputs = oldAttrs.propagatedBuildInputs ++ [pkgs.python3Packages.pylint];
-      });
-
-    })
-  ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
@@ -141,6 +128,11 @@
       X11Forwarding = true;
     };
   };
+
+  services.journald.extraConfig = ''
+    SystemMaxUse=500M
+    RuntimeMaxUse=500M
+  '';
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
