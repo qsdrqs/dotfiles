@@ -171,6 +171,12 @@
             virtualenv
           ];
         };
+        base_dev = with pkgs; mkShell {
+          packages = [
+            ranger
+            neovim
+          ];
+        };
       };
     };
 }

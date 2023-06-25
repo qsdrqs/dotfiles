@@ -328,6 +328,8 @@ if [[ -f ~/.p10k.zsh ]]; then
 elif [[ -f $ZDOTDIR/.p10k.zsh ]]; then
     source $ZDOTDIR/.p10k.zsh
 fi
+# set $NIX_DEV
+typeset -g POWERLEVEL9K_NIX_SHELL_CONTENT_EXPANSION=$NIX_DEV
 
 
 #vi-mode
