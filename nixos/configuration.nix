@@ -6,6 +6,7 @@
 
 {
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.tmp.useTmpfs = true;
 
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
@@ -133,6 +134,12 @@
     SystemMaxUse=500M
     RuntimeMaxUse=500M
   '';
+
+  services.syncthing = {
+    enable = true;
+    user = "qsdrqs";
+    configDir = "/home/qsdrqs/.config/syncthing";
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

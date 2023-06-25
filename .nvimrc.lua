@@ -713,6 +713,9 @@ require('lazy').setup({
             ['nil'] = {
               formatting = {
                 command = { "nixpkgs-fmt" }
+              },
+              nix = {
+                nixpkgsInputName = "nixos",
               }
             }
           }
@@ -3660,6 +3663,9 @@ local links = {
   -- language specific
   ['@lsp.type.type.go'] = 'Class',
   ['@lsp.type.defaultLibrary.go'] = 'Type',
+  ['@lsp.type.defaultLibrary.go'] = 'Type',
+  ['@lsp.type.path.nix'] = 'String',
+  ['@lsp.mod.definition.nix'] = 'Normal',
 
   -- treesitter
   ['@type'] = 'Class',

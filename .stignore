@@ -2,3 +2,13 @@ history
 bookmarks
 .vim/view
 .vim/sessions
+.git
+*.pyc
+*sync-conflict*
+.vim/plugged
+.netrwist
+tagged
+__pycache__
+custom.nix
+home-custom.nix
+nixos/custom
