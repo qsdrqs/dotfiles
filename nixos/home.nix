@@ -24,6 +24,11 @@
   # changes in each release.
   home.stateVersion = "23.05";
 
+  # enable direnv
+  programs.direnv.enable = true;
+  programs.direnv.nix-direnv.enable = true;
+  programs.direnv.enableZshIntegration = false; # self enable
+
   programs.zsh = {
     enable = true;
     dotDir = ".config/zsh";
@@ -34,6 +39,7 @@
       fi
     '';
     completionInit = ""; # define in my own zshrc
+    envExtra = ". $HOME/env_variables.sh";
   };
   programs.ssh.enable = true;
   programs.ssh.matchBlocks = {
@@ -59,7 +65,7 @@
       user = "qsdrqs";
       port = 3323;
     };
-};
+  };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -67,7 +73,7 @@
 
   programs.git = {
     enable = true;
-    userName  = "qsdrqs";
+    userName = "qsdrqs";
     userEmail = "qsdrqs@gmail.com";
     signing.key = "E2D709340CE26E78";
     signing.signByDefault = true;

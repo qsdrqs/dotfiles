@@ -161,6 +161,10 @@
             -isystem ${libjpeg.dev}/include
             -isystem ${glibc.dev}/include
           '';
+          RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
+          shellHook = ''
+            export NIX_DEV=rust
+          '';
         };
         cpp = with pkgs; mkShell {
           name = "cpp";
@@ -183,6 +187,7 @@
           packages = [
             ranger
             neovim
+            lazygit
           ];
         };
       };

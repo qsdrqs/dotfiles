@@ -274,12 +274,18 @@ nix-devel() {
         command="$command nix develop $HOME/dotfiles#$i --command"
         envs="$envs $i"
     done
-    export NIX_DEV=${envs:1}
+    export NIX_DEV=$envs
     command="$command zsh"
     echo $command
     eval $command
     export NIX_DEV=$last_env
 }
+
+# direnv for nix flakes
+export DIRENV_LOG_FORMAT=
+if [[ -x `command -v direnv` ]]; then
+    eval "$(direnv hook zsh)"
+fi
 
 export PROX=127.0.0.1
 alias prox="export http_proxy=http://$PROX:1081\

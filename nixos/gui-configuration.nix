@@ -65,6 +65,7 @@ in
     zoom-us
     libsForQt5.gwenview
     zathura
+    poppler_utils
 
     # NUR
     config.nur.repos.xddxdd.qq
