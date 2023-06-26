@@ -97,6 +97,8 @@
     lsof
     nil # nil language server
     nixpkgs-fmt
+    bat
+    file
   ];
   environment.variables.LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
 
@@ -121,25 +123,32 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-      X11Forwarding = true;
+  services = {
+    openssh = {
+      enable = true;
+      settings = {
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        X11Forwarding = true;
+      };
+    };
+    journald.extraConfig = ''
+      SystemMaxUse=500M
+      RuntimeMaxUse=500M
+    '';
+    syncthing = {
+      enable = true;
+      user = "qsdrqs";
+      configDir = "/home/qsdrqs/.config/syncthing";
+    };
+    v2ray = {
+      enable = true;
+      configFile = "/etc/v2ray/config.json";
     };
   };
 
-  services.journald.extraConfig = ''
-    SystemMaxUse=500M
-    RuntimeMaxUse=500M
-  '';
-
-  services.syncthing = {
-    enable = true;
-    user = "qsdrqs";
-    configDir = "/home/qsdrqs/.config/syncthing";
-  };
+  # avoid v2ray service to create config file
+  environment.etc."v2ray/config.json".enable = false;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

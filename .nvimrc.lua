@@ -2239,6 +2239,19 @@ require('lazy').setup({
         end
       end
 
+      local nix_dev = {
+        function()
+          -- get $NIX_DEV
+          local nix_dev = vim.env.NIX_DEV
+          if nix_dev == nil then
+            return ''
+          end
+          return nix_dev
+        end,
+        icon = ' ',
+        color = {gui = 'bold', fg = "#58A6FF"}
+      }
+
       local function shiftwidth()
         local sw = vim.fn.shiftwidth()
         return "sw:" .. sw
@@ -2260,7 +2273,7 @@ require('lazy').setup({
             symbols = {error = ' ', warn = ' ', info = ' ', hint = ' '},
           }},
           lualine_c = {lsp_info, gtagsHandler},
-          lualine_x = {auto_session_name},
+          lualine_x = {auto_session_name, nix_dev},
           lualine_y = { 'fileformat', 'filetype', copilot},
           lualine_z = {shiftwidth, '%l/%L,%c', 'encoding'}
         },

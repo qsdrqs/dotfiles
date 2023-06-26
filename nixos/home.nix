@@ -39,7 +39,6 @@
       fi
     '';
     completionInit = ""; # define in my own zshrc
-    envExtra = ". $HOME/env_variables.sh";
   };
   programs.ssh.enable = true;
   programs.ssh.matchBlocks = {

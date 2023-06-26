@@ -66,6 +66,9 @@ in
     libsForQt5.gwenview
     zathura
     poppler_utils
+    ark
+    gpick
+    kate
 
     # NUR
     config.nur.repos.xddxdd.qq

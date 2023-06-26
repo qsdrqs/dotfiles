@@ -87,11 +87,11 @@
       pkgs = (import nixpkgs {
         system = basicConfig.system;
         overlays = (import ./nixos/overlays.nix {
-            inherit inputs;
-            pkgs = nixpkgs.legacyPackages.${pkgs.system};
-            config = nixpkgs.config;
-            lib = nixpkgs.lib;
-          }).nixpkgs.overlays;
+          inherit inputs;
+          pkgs = nixpkgs.legacyPackages.${pkgs.system};
+          config = nixpkgs.config;
+          lib = nixpkgs.lib;
+        }).nixpkgs.overlays;
       });
     in
     {
@@ -146,26 +146,31 @@
 
       # dev shells
       devShells.x86_64-linux = {
-        rust = with pkgs; mkShell {
-          packages = [
-            cargo
-            rustc
-            rustfmt
-            clippy
-            rust-analyzer
-            llvmPackages_latest.llvm
-          ];
-          LIBCLANG_PATH = "${llvmPackages_latest.libclang.lib}/lib";
-          BINDGEN_EXTRA_CLANG_ARGS = ''
-            -isystem ${llvmPackages_latest.libclang.lib}/lib/clang/16/include
-            -isystem ${libjpeg.dev}/include
-            -isystem ${glibc.dev}/include
-          '';
-          RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
-          shellHook = ''
-            export NIX_DEV=rust
-          '';
-        };
+        rust = with pkgs;
+          let
+            clangShortVer = builtins.head (
+              nixpkgs.lib.splitString "." (
+                nixpkgs.lib.getVersion llvmPackages_latest.clang
+              )
+            );
+          in
+          mkShell {
+            packages = [
+              cargo
+              rustc
+              rustfmt
+              clippy
+              rust-analyzer
+              llvmPackages_latest.llvm
+            ];
+            LIBCLANG_PATH = "${llvmPackages_latest.libclang.lib}/lib";
+            BINDGEN_EXTRA_CLANG_ARGS = ''
+              -isystem ${llvmPackages_latest.libclang.lib}/lib/clang/${clangShortVer}/include
+              -isystem ${libjpeg_turbo.dev}/include
+              -isystem ${glibc.dev}/include
+            '';
+            RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
+          };
         cpp = with pkgs; mkShell {
           name = "cpp";
           nativeBuildInputs = [
@@ -191,5 +196,7 @@
           ];
         };
       };
+      # direct nix run
+      packages.x86_64-linux = pkgs;
     };
 }

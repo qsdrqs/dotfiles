@@ -22,15 +22,6 @@ let
   }) entries);
 in
 {
-  home.activation = {
-    dotfiles = ''
-      PATH=$PATH:${lib.makeBinPath [ pkgs.git ]}
-      # if [ ! -d "$HOME/dotfiles" ]; then
-      #   git clone https://github.com/qsdrqs/mydotfiles $HOME/dotfiles --recurse-submodules
-      # fi
-      # cd $HOME/dotfiles && ./install.sh
-    '';
-  };
   home.file = symbfile [
                 ".vimrc"
                 ".vimrc.plugs"

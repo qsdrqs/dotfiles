@@ -71,6 +71,10 @@ elif [[ $TERM == "xterm-kitty" ]]; then
     # alias ssh
     # alias ssh="kitty +kitten ssh"
 fi
+
+# disable ranger load default rc
+export RANGER_LOAD_DEFAULT_RC=false
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
