@@ -84,15 +84,17 @@
 
         ];
       };
-      pkgs = (import nixpkgs {
-        system = basicConfig.system;
+      pkgs' = (system: import nixpkgs {
+        system = system;
         overlays = (import ./nixos/overlays.nix {
           inherit inputs;
-          pkgs = nixpkgs.legacyPackages.${pkgs.system};
+          pkgs = nixpkgs.legacyPackages.${system};
           config = nixpkgs.config;
           lib = nixpkgs.lib;
         }).nixpkgs.overlays;
       });
+      x86_64-linux-pkgs = pkgs' "x86_64-linux";
+      aarch64-linux-pkgs = pkgs' "aarch64-linux";
     in
     {
       # Utilized by `nix flake check`
@@ -145,7 +147,7 @@
       });
 
       # dev shells
-      devShells.x86_64-linux = {
+      devShells' = (pkgs: {
         rust = with pkgs;
           let
             clangShortVer = builtins.head (
@@ -195,8 +197,16 @@
             lazygit
           ];
         };
+      });
+
+      devShells = {
+        x86_64-linux = self.devShells' x86_64-linux-pkgs;
+        aarch64-linux = self.devShells' aarch64-linux-pkgs;
       };
       # direct nix run
-      packages.x86_64-linux = pkgs;
+      packages = {
+        x86_64-linux = x86_64-linux-pkgs;
+        aarch64-linux = aarch64-linux-pkgs;
+      };
     };
 }
