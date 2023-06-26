@@ -715,7 +715,11 @@ require('lazy').setup({
                 command = { "nixpkgs-fmt" }
               },
               nix = {
-                nixpkgsInputName = "nixos",
+                flake = {
+                  autoArchive = true,
+                  autoEvalInputs = true,
+                  nixpkgsInputName = os.getenv("HOME") .. "/dotfiles",
+                }
               }
             }
           }
@@ -1596,7 +1600,7 @@ require('lazy').setup({
     end
   },
   {
-    "mrjones2014/nvim-ts-rainbow",
+    "HiPhish/nvim-ts-rainbow2",
     lazy = true,
     cond = function()
       return vim.g.treesitter_disable ~= true
@@ -1606,18 +1610,24 @@ require('lazy').setup({
           rainbow = {
             enable = true,
             disable = { }, -- list of languages you want to disable the plugin for
-            extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
-            max_file_lines = nil, -- Do not enable for files with more than n lines, int
-            colors = {"#888888", "#888888", "#888888", "#888888", "#888888", "#888888"} -- only used to set the number to 6
+            query = {
+              'rainbow-parens',
+              html = 'rainbow-tags',
+              latex = 'rainbow-blocks',
+            },
+            -- Highlight the entire buffer all at once
+            strategy = require('ts-rainbow').strategy.global,
+            hlgroups = {
+              "Color1",
+              "Color2",
+              "Color3",
+              "Color4",
+              "Color5",
+              "Color6",
+            }
           }
-
         }
-        vim.api.nvim_set_hl(0, "rainbowcol1", { link = "Color1" })
-        vim.api.nvim_set_hl(0, "rainbowcol2", { link = "Color2" })
-        vim.api.nvim_set_hl(0, "rainbowcol3", { link = "Color3" })
-        vim.api.nvim_set_hl(0, "rainbowcol4", { link = "Color4" })
-        vim.api.nvim_set_hl(0, "rainbowcol5", { link = "Color5" })
-        vim.api.nvim_set_hl(0, "rainbowcol6", { link = "Color6" })
+
     end
   },
 
@@ -3797,7 +3807,7 @@ function lazyLoadPlugins()
     require('lazy').load{
       plugins = {
         -- begin treesitter (slow performance)
-        'nvim-ts-rainbow',   -- performance issue
+        'nvim-ts-rainbow2',   -- performance issue
         'indent-blankline.nvim',
         'nvim-treesitter-context',
         'nvim-treesitter-textsubjects',

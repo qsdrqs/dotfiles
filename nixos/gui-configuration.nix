@@ -70,6 +70,10 @@ in
     gpick
     kate
 
+    android-file-transfer
+    android-udev-rules
+    android-tools
+
     # NUR
     config.nur.repos.xddxdd.qq
     # wine wechat

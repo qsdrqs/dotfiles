@@ -63,6 +63,7 @@
         modules = [
           ./nixos/configuration.nix
           ./nixos/overlays.nix
+          (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else null)
 
           # home-manager module
           home-manager.nixosModules.home-manager
@@ -98,21 +99,15 @@
     in
     {
       # Utilized by `nix flake check`
-      nixosConfigurations.basic = nixpkgs.lib.nixosSystem (basicConfig // {
-        modules = basicConfig.modules ++ [
-          ./nixos/custom.nix
-        ];
-      });
+      nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
       nixosConfigurations.gui = nixpkgs.lib.nixosSystem (basicConfig // {
         modules = basicConfig.modules ++ [
-          ./nixos/custom.nix
           ./nixos/gui-configuration.nix
           nur.nixosModules.nur
         ];
       });
       nixosConfigurations.wsl = nixpkgs.lib.nixosSystem (basicConfig // {
         modules = basicConfig.modules ++ [
-          ./nixos/custom.nix
           ./nixos/wsl.nix
         ];
       });
@@ -147,8 +142,8 @@
       });
 
       # dev shells
-      devShells' = (pkgs: {
-        rust = with pkgs;
+      devShells' = (pkgs: with pkgs; {
+        rust =
           let
             clangShortVer = builtins.head (
               nixpkgs.lib.splitString "." (
@@ -173,7 +168,7 @@
             '';
             RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
           };
-        cpp = with pkgs; mkShell {
+        cpp = mkShell {
           name = "cpp";
           nativeBuildInputs = [
             cmake
@@ -182,15 +177,16 @@
             ninja
             bear
             clang-tools_16
+            clang_16
             llvm_16
           ];
         };
-        python = with pkgs; mkShell {
+        python = mkShell {
           packages = [
             virtualenv
           ];
         };
-        base_dev = with pkgs; mkShell {
+        base_dev = mkShell {
           packages = [
             ranger
             neovim

@@ -99,6 +99,9 @@
     nixpkgs-fmt
     bat
     file
+    python3Packages.ipython
+    python3Packages.pip
+    rsync
   ];
   environment.variables.LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
 
