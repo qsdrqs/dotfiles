@@ -5,7 +5,7 @@
     (self: super: {
       neovim-unwrapped = super.neovim-unwrapped.overrideAttrs (oldAttrs: {
         src = inputs.neovim;
-        patches = lib.lists.take 1 oldAttrs.patches;
+        version = "0.10.0-dev";
       });
 
       ranger = super.ranger.overrideAttrs (oldAttrs: {
