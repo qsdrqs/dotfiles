@@ -69,6 +69,7 @@ in
     ark
     gpick
     kate
+    dolphin
 
     android-file-transfer
     android-udev-rules
@@ -87,9 +88,11 @@ in
     config.nur.repos.linyinfeng.wemeet
   ];
 
+  qt.platformTheme = "kde";
+
   # provide org.freedesktop.secrets
   services.gnome.gnome-keyring.enable = true;
-  security.pam.services.sddm.enableGnomeKeyring = true;
+  security.pam.services.login.enableGnomeKeyring = true;
 
   fonts.fonts = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" ]; })

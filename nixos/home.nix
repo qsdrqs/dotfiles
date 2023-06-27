@@ -41,6 +41,7 @@
     completionInit = ""; # define in my own zshrc
   };
   programs.ssh.enable = true;
+  programs.ssh.includes = [ "extra_config" ];
   programs.ssh.matchBlocks = {
     docean = {
       host = "Docean";
@@ -89,4 +90,11 @@
       };
     };
   };
+
+  # provide org.freedesktop.secrets
+  services.gnome-keyring = {
+    enable = true;
+    components = ["pkcs11" "secrets" "ssh"];
+  };
+
 }

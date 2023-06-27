@@ -191,6 +191,7 @@
             ranger
             neovim
             lazygit
+            neofetch
           ];
           LD_LIBRARY_PATH = lib.makeLibraryPath [ openssl ];
         };
