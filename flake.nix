@@ -192,6 +192,7 @@
             neovim
             lazygit
           ];
+          LD_LIBRARY_PATH = lib.makeLibraryPath [ openssl ];
         };
       });
 

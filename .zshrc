@@ -62,7 +62,7 @@ export GPG_TTY=$(tty)
 
 #Make alacritty compatible with SSH
 if [[ $TERM != "xterm-kitty" && $TMUX != "" ]]; then
-    export TERM="tmux-256color"
+    export TERM="xterm-256color"
 elif [[ $TERM == "xterm" ]]; then
     export TERM="xterm-256color"
 elif [[ $TERM == "linux" ]]; then
