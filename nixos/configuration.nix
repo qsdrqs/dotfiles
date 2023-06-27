@@ -76,6 +76,7 @@
     ranger
     tmux
     neofetch
+    gcc
     grc
     git
     fzf
@@ -145,7 +146,7 @@
       configDir = "/home/qsdrqs/.config/syncthing";
     };
     v2ray = {
-      enable = true;
+      enable = if builtins.pathExists "/etc/v2ray/config.json" then true else false;
       configFile = "/etc/v2ray/config.json";
     };
   };
