@@ -2,11 +2,23 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, options, ... }:
 
-{
+lib.mkMerge [
+
+# don't exist in nix-on-droid
+(lib.optionalAttrs (builtins.hasAttr "boot" options) {
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.tmp.useTmpfs = true;
+ })
+(lib.optionalAttrs (builtins.hasAttr "console" options) {
+  console = {
+    font = "Lat2-Terminus16";
+    useXkbConfig = true; # use xkbOptions in tty.
+  };
+ })
+
+{
 
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
@@ -22,10 +34,6 @@
 
   # Select internationalisation properties.
   # i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-    font = "Lat2-Terminus16";
-    useXkbConfig = true; # use xkbOptions in tty.
-  };
 
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
@@ -158,7 +166,7 @@
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  networking.firewall.enable = false;
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
@@ -173,4 +181,6 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "unstable"; # Did you read the comment?
 
-}
+}]
+
+

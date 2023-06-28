@@ -50,12 +50,18 @@
 
     # nur
     nur.url = "github:nix-community/NUR";
+
+    nix-on-droid = {
+      url = "github:t184256/nix-on-droid";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, vscode-server, nur, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, vscode-server, nur, nix-on-droid, ... }@inputs:
     let
       basicConfig = {
         system = "x86_64-linux";
@@ -111,6 +117,14 @@
           ./nixos/wsl.nix
         ];
       });
+
+      # nix-on-droid
+      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
+        modules = [
+          ./nixos/configuration.nix
+          ./nixos/overlays.nix
+        ];
+      };
 
       # iso, build through #nixos-iso.config.system.build.isoImage
       nixos-iso = nixpkgs.lib.nixosSystem (basicConfig // {
