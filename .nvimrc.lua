@@ -868,7 +868,9 @@ require('lazy').setup({
     config = function()
       local lightbulb = require('nvim-lightbulb')
       lightbulb.setup {
-        ignore = {"null-ls"},
+        ignore = {
+          clients = {"null-ls"}
+        },
       }
       vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
         callback = function() lightbulb.update_lightbulb() end
