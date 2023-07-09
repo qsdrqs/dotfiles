@@ -4,21 +4,9 @@
 
 { config, pkgs, lib, inputs, options, ... }:
 
-lib.mkMerge [
-
-# don't exist in nix-on-droid
-(lib.optionalAttrs (builtins.hasAttr "boot" options) {
+{
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.tmp.useTmpfs = true;
- })
-(lib.optionalAttrs (builtins.hasAttr "console" options) {
-  console = {
-    font = "Lat2-Terminus16";
-    useXkbConfig = true; # use xkbOptions in tty.
-  };
- })
-
-{
 
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
@@ -29,11 +17,15 @@ lib.mkMerge [
   time.timeZone = "America/Los_Angeles";
 
   # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  networking.proxy.default = "http://127.0.0.1:1081";
+  networking.proxy.noProxy = "127.0.0.1,localhost";
 
   # Select internationalisation properties.
   # i18n.defaultLocale = "en_US.UTF-8";
+  console = {
+    font = "Lat2-Terminus16";
+    useXkbConfig = true; # use xkbOptions in tty.
+  };
 
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
@@ -64,6 +56,14 @@ lib.mkMerge [
   # enable normal users to use reboot or shutdown
   security.polkit.enable = true;
 
+  security.wrappers.direnv = {
+    source = "${pkgs.direnv}/bin/direnv";
+    owner = "root";
+    group = "keys";
+    setgid = true;
+    setuid = true;
+  };
+
   # gc
   nix.gc = {
     automatic = true;
@@ -93,6 +93,7 @@ lib.mkMerge [
     perl
     nodejs
     unzip
+    zip
     appimage-run
     killall
     (pkgs.buildFHSUserEnv {
@@ -111,6 +112,8 @@ lib.mkMerge [
     python3Packages.ipython
     python3Packages.pip
     rsync
+    iptables
+    kmod
   ];
   environment.variables.LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
 
@@ -131,6 +134,16 @@ lib.mkMerge [
     };
     nix-ld.enable = true;
     gnupg.agent.enable = true;
+    proxychains = {
+      enable = true;
+      proxies.v2ray = {
+        type = "socks5";
+        host = "127.0.0.1";
+        port = 1080;
+        enable = true;
+      };
+      quietMode = true;
+    };
   };
   # List services that you want to enable:
 
@@ -154,7 +167,7 @@ lib.mkMerge [
       configDir = "/home/qsdrqs/.config/syncthing";
     };
     v2ray = {
-      enable = if builtins.pathExists "/etc/v2ray/config.json" then true else false;
+      enable = true;
       configFile = "/etc/v2ray/config.json";
     };
   };
@@ -181,6 +194,4 @@ lib.mkMerge [
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "unstable"; # Did you read the comment?
 
-}]
-
-
+}

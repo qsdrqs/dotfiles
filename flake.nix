@@ -67,9 +67,10 @@
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
+          # put the including of custom.nix at the top of the list
+          (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else null)
           ./nixos/configuration.nix
           ./nixos/overlays.nix
-          (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else null)
 
           # home-manager module
           home-manager.nixosModules.home-manager
@@ -121,14 +122,15 @@
       # nix-on-droid
       nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
         modules = [
-          ./nixos/configuration.nix
-          ./nixos/overlays.nix
+          ./nixos/nix-on-droid.nix
         ];
+        extraSpecialArgs = { inherit inputs; };
       };
 
       # iso, build through #nixos-iso.config.system.build.isoImage
       nixos-iso = nixpkgs.lib.nixosSystem (basicConfig // {
-        modules = basicConfig.modules ++ [
+        # drop the custom.nix
+        modules = (nixpkgs.lib.lists.drop 1 basicConfig.modules) ++ [
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
 
           home-manager.nixosModules.home-manager
@@ -151,6 +153,7 @@
               '';
             };
 
+            networking.networkmanager.enable = nixpkgs.lib.mkForce false;
           })
         ];
       });
@@ -197,7 +200,7 @@
         };
         python = mkShell {
           packages = [
-            virtualenv
+            python3Packages.virtualenv
           ];
         };
         base_dev = mkShell {

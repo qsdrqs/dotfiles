@@ -1,11 +1,10 @@
-({ config, pkgs, ... }: {
+({ config, pkgs, lib, ... }: {
   home.file = {
     dotfiles = {
       source = ../.;
     };
-    nvimconf = {
-      source = ~/.local/share/nvim;
-      target = ".local/share/nvim";
+    ".nvimrc.lua" = lib.mkForce {
+      text = "";
     };
     p10kzsh = {
       source = ./.p10k.zsh.minimal;
