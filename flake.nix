@@ -67,8 +67,7 @@
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
-          # put the including of custom.nix at the top of the list
-          (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else null)
+          (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else ./nixos/empty.nix)
           ./nixos/configuration.nix
           ./nixos/overlays.nix
 
@@ -130,7 +129,7 @@
       # iso, build through #nixos-iso.config.system.build.isoImage
       nixos-iso = nixpkgs.lib.nixosSystem (basicConfig // {
         # drop the custom.nix
-        modules = (nixpkgs.lib.lists.drop 1 basicConfig.modules) ++ [
+        modules = basicConfig.modules ++ [
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
 
           home-manager.nixosModules.home-manager
@@ -175,6 +174,7 @@
               rustfmt
               clippy
               rust-analyzer
+              cmake
               llvmPackages_latest.llvm
             ];
             LIBCLANG_PATH = "${llvmPackages_latest.libclang.lib}/lib";

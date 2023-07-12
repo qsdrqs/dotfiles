@@ -492,7 +492,7 @@ require('lazy').setup({
         end
 
         -- inlay hints
-        vim.lsp.buf.inlay_hint(bufnr, true)
+        vim.lsp.inlay_hint(bufnr, true)
 
       end
 
