@@ -114,6 +114,7 @@
     rsync
     iptables
     kmod
+    nmap
   ];
   environment.variables.LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
 

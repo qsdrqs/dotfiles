@@ -3,7 +3,6 @@
 {
   imports = [
     ./dotfiles.nix
-    (if builtins.pathExists ./home-custom.nix then ./home-custom.nix else ./empty.nix)
     inputs.nix-index-database.hmModules.nix-index
   ];
   # Home Manager needs a bit of information about you and the

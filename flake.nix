@@ -158,7 +158,7 @@
       });
 
       # dev shells
-      devShells' = (pkgs: with pkgs; {
+      devShells' = (arch: pkgs: with pkgs; {
         rust =
           let
             clangShortVer = builtins.head (
@@ -186,8 +186,7 @@
             RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
           };
         cpp = mkShell {
-          name = "cpp";
-          nativeBuildInputs = [
+          packages = [
             cmake
             gnumake
             gdb
@@ -196,6 +195,12 @@
             clang-tools_16
             clang_16
             llvm_16
+          ];
+        };
+        rust_cpp = mkShell {
+          inputsFrom = [
+            self.devShells.${arch}.rust
+            self.devShells.${arch}.cpp
           ];
         };
         python = mkShell {
@@ -215,8 +220,8 @@
       });
 
       devShells = {
-        x86_64-linux = self.devShells' x86_64-linux-pkgs;
-        aarch64-linux = self.devShells' aarch64-linux-pkgs;
+        x86_64-linux = self.devShells' "x86_64-linux" x86_64-linux-pkgs;
+        aarch64-linux = self.devShells' "aarch64-linux" aarch64-linux-pkgs;
       };
       # direct nix run
       packages = {
