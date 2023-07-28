@@ -198,6 +198,7 @@ require('lazy').setup({
     end
   },
   {'seandewar/sigsegvim', cmd = "Sigsegv"},
+  {"Eandrju/cellular-automaton.nvim", cmd = "CellularAutomaton"},
 
   {
     'nvim-telescope/telescope-live-grep-args.nvim',
@@ -3653,6 +3654,7 @@ require('lazy').setup({
       }
     end
   },
+
 }, {
   defaults = {
     lazy = true

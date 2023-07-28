@@ -116,7 +116,9 @@
     kmod
     nmap
   ];
-  environment.variables.LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
+  environment.variables = {
+    LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
+  };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

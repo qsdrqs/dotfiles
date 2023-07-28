@@ -97,4 +97,11 @@
     components = ["pkcs11" "secrets" "ssh"];
   };
 
+
+  home.sessionVariables = {
+    CREDENTIALS_FILE="${config.home.homeDirectory}/.git-credentials";
+    NIX_CONFIG = "access-tokens = github.com=$(${pkgs.coreutils-full}/bin/cat ${config.home.homeDirectory}/.git-credentials 2>/dev/null \\
+    | ${pkgs.gnugrep}/bin/grep github.com \\
+    | ${pkgs.gawk}/bin/awk -F'[:@]' '{print $3}')";
+  };
 }
