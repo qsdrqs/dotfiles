@@ -102,6 +102,7 @@
       targetPkgs = pkgs: with pkgs; [
       ];
     })
+    linuxKernel.packages.linux_latest_libre.cpupower
     patchelf
     python3
     lsof

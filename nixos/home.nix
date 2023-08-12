@@ -104,4 +104,18 @@
     | ${pkgs.gnugrep}/bin/grep github.com \\
     | ${pkgs.gawk}/bin/awk -F'[:@]' '{print $3}')";
   };
+
+  # Windows Fonts
+  home.activation = {
+    windowsFonts = ''
+      mkdir -p ~/.local/share/fonts
+      if [ ! -L ~/.local/share/fonts/Windows ]; then
+        if [ -d /mnt/c/Windows/Fonts ]; then
+          ln -s /mnt/c/Windows/Fonts/ ~/.local/share/fonts/Windows
+        elif [ -d /mnt/Windows/Fonts ]; then
+          ln -s /mnt/Windows/Fonts/ ~/.local/share/fonts/Windows
+        fi
+      fi
+    '';
+  };
 }

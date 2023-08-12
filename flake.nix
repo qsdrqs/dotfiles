@@ -177,13 +177,15 @@
               cmake
               llvmPackages_latest.llvm
             ];
-            LIBCLANG_PATH = "${llvmPackages_latest.libclang.lib}/lib";
-            BINDGEN_EXTRA_CLANG_ARGS = ''
-              -isystem ${llvmPackages_latest.libclang.lib}/lib/clang/${clangShortVer}/include
-              -isystem ${libjpeg_turbo.dev}/include
-              -isystem ${glibc.dev}/include
+            shellHook = ''
+              export LIBCLANG_PATH="${llvmPackages_latest.libclang.lib}/lib"
+              export BINDGEN_EXTRA_CLANG_ARGS="
+                -isystem ${llvmPackages_latest.libclang.lib}/lib/clang/${clangShortVer}/include
+                -isystem ${libjpeg_turbo.dev}/include
+                -isystem ${glibc.dev}/include
+              "
+              export RUST_SRC_PATH="${rust.packages.stable.rustPlatform.rustLibSrc}"
             '';
-            RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
           };
         cpp = mkShell {
           packages = [
@@ -206,6 +208,13 @@
         python = mkShell {
           packages = [
             python3Packages.virtualenv
+            nodePackages.pyright
+          ];
+        };
+        go = mkShell {
+          packages = [
+            go
+            gopls
           ];
         };
         base_dev = mkShell {
@@ -228,5 +237,6 @@
         x86_64-linux = x86_64-linux-pkgs;
         aarch64-linux = aarch64-linux-pkgs;
       };
+      rust = self.devShells.x86_64-linux.rust;
     };
 }

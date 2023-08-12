@@ -447,19 +447,6 @@ require('lazy').setup({
   {
     'p00f/clangd_extensions.nvim',
     dependencies = 'nvim-lspconfig',
-    config = function()
-      local lsp_config = get_lsp_common_config()
-      lsp_config.cmd = {"clangd", "--header-insertion-decorators=0", "-header-insertion=never", "--background-index"}
-      lsp_config.filetypes = { "c", "cpp", "objc", "objcpp", "cuda"}
-      -- set offset encoding
-      lsp_config.capabilities.offsetEncoding = 'utf-8'
-      require("clangd_extensions").setup {
-        server = lsp_config,
-        extensions = {
-          autoSetHints = false
-        }
-      }
-    end
   },
 
 
@@ -589,10 +576,11 @@ require('lazy').setup({
         return config
       end
 
-      -- 'clangd' and 'rust_analyzer' are handled by clangd_extensions and rust-tools.
+      -- 'rust_analyzer' are handled by rust-tools.
       local servers = {
         'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver',
         "cmake", "gopls", "bashls", "bufls", "grammarly", "nil_ls",
+        'clangd',
       }
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
@@ -608,6 +596,12 @@ require('lazy').setup({
               }
             }
           }
+        elseif lsp == "clangd" then
+          lsp_common_config.cmd = { "clangd", "--header-insertion-decorators=0", "-header-insertion=never",
+            "--background-index" }
+          lsp_common_config.filetypes = { "c", "cpp", "objc", "objcpp", "cuda" }
+          -- set offset encoding
+          lsp_common_config.capabilities.offsetEncoding = 'utf-8'
         elseif lsp == "texlab" then
           lsp_common_config.on_attach = function(client, bufnr)
             common_on_attach(client,bufnr)
@@ -3035,6 +3029,17 @@ require('lazy').setup({
     lazy = true,
   },
 
+  {
+    'glacambre/firenvim',
+    -- Lazy load firenvim
+    -- Explanation: https://github.com/folke/lazy.nvim/discussions/463#discussioncomment-4819297
+    cond = not not vim.g.started_by_firenvim,
+    build = function()
+      require("lazy").load({ plugins = "firenvim", wait = true })
+      vim.fn["firenvim#install"](0)
+    end
+  },
+
   -- vim plugins
   {
     "andymass/vim-matchup",
@@ -3165,7 +3170,7 @@ require('lazy').setup({
       vim.g.UltiSnipsListSnippets = '<c-x><c-s>'
       vim.g.UltiSnipsRemoveSelectModeMappings = 0
       vim.g.UltiSnipsEditSplit="vertical"
-      vim.g.UltiSnipsSnippetDirectories={ os.getenv("HOME") .. '/.vim/UltiSnips', "UltiSnips"}
+      vim.g.UltiSnipsSnippetDirectories={ "UltiSnips"}
       vim.g.UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit = os.getenv("HOME") .. '/.vim/UltiSnips'
       vim.keymap.set('n', '<leader>ss', '<cmd>UltiSnipsEdit<cr>', { silent = true })
       vim.api.nvim_create_autocmd("BufRead", {
@@ -3959,6 +3964,9 @@ else
 end
 vim.api.nvim_create_autocmd({"InsertLeave", "CmdlineLeave"}, {
   callback = function()
+    if vim.fn.executable(im_switch) == 0 then
+      return
+    end
     if im_switch == "fcitx5-remote" then
       restored_im = all_trim(vim.fn.system(im_switch .. " -n"))
       if restored_im ~= default_im then
