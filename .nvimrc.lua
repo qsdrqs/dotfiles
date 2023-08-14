@@ -1597,34 +1597,33 @@ require('lazy').setup({
     end
   },
   {
-    "HiPhish/nvim-ts-rainbow2",
+    "HiPhish/rainbow-delimiters.nvim",
     lazy = true,
     cond = function()
       return vim.g.treesitter_disable ~= true
     end,
     config = function()
-        require("nvim-treesitter.configs").setup {
-          rainbow = {
-            enable = true,
-            disable = { }, -- list of languages you want to disable the plugin for
-            query = {
-              'rainbow-parens',
-              html = 'rainbow-tags',
-              latex = 'rainbow-blocks',
-            },
-            -- Highlight the entire buffer all at once
-            strategy = require('ts-rainbow').strategy.global,
-            hlgroups = {
-              "Color1",
-              "Color2",
-              "Color3",
-              "Color4",
-              "Color5",
-              "Color6",
-            }
-          }
-        }
-
+      local rainbow_delimiters = require 'rainbow-delimiters'
+      require 'rainbow-delimiters.setup' {
+        strategy = {
+          [''] = rainbow_delimiters.strategy['global'],
+          cpp = rainbow_delimiters.strategy['global'],
+          vim = rainbow_delimiters.strategy['local'],
+        },
+        query = {
+          [''] = 'rainbow-delimiters',
+          lua = 'rainbow-blocks',
+        },
+        highlight = {
+          "Color1",
+          "Color2",
+          "Color3",
+          "Color4",
+          "Color5",
+          "Color6",
+        },
+        blacklist = {  },
+      }
     end
   },
 
@@ -3816,7 +3815,7 @@ function lazyLoadPlugins()
     require('lazy').load{
       plugins = {
         -- begin treesitter (slow performance)
-        'nvim-ts-rainbow2',   -- performance issue
+        'rainbow-delimiters.nvim',   -- performance issue
         'indent-blankline.nvim',
         'nvim-treesitter-context',
         'nvim-treesitter-textsubjects',
