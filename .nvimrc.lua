@@ -1607,7 +1607,6 @@ require('lazy').setup({
       require 'rainbow-delimiters.setup' {
         strategy = {
           [''] = rainbow_delimiters.strategy['global'],
-          cpp = rainbow_delimiters.strategy['global'],
           vim = rainbow_delimiters.strategy['local'],
         },
         query = {
@@ -3138,7 +3137,7 @@ require('lazy').setup({
   {
     'kana/vim-textobj-entire',
     keys = {"vie"},
-    dependencies = {"kana/vim-textobj-user"},
+    dependencies = {"vim-textobj-user"},
   },
   {
     'lfv89/vim-interestingwords',
@@ -4019,8 +4018,8 @@ function VscodeNeovimHandler()
     }
   }
 
-  vim.keymap.set('n', '<leader>af',function() vim.fn.VSCodeNotify("editor.action.formatDocument") end, { silent = true })
-  vim.keymap.set('v', '<leader>af',function() vim.fn.VSCodeNotifyVisual("editor.action.formatSelection", 0) end, { silent = true })
+  vam.keymap.set('n', '<leader>af',function() vam.fn.VSCodeNotify("editor.action.formatDocument") end, { silent = true })
+  vam.keymap.set('v', '<leader>af',function() vam.fn.VSCodeNotifyVisual("editor.action.formatSelection", 0) end, { silent = true })
   vim.keymap.set('n', 'gi',function() vim.fn.VSCodeNotify("editor.action.goToImplementation") end, { silent = true })
   vim.keymap.set('n', 'gr',function() vim.fn.VSCodeNotify("editor.action.goToReferences") end, { silent = true })
   vim.keymap.set('n', '<leader>v',function() vim.fn.VSCodeNotify("workbench.action.toggleAuxiliaryBar") end, { silent = true })
