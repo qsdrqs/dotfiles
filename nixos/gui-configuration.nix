@@ -70,6 +70,7 @@ in
     gpick
     kate
     dolphin
+    arandr
 
     android-file-transfer
     android-udev-rules

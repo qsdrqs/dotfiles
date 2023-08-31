@@ -14,7 +14,7 @@
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
   # Set your time zone.
-  time.timeZone = "America/Los_Angeles";
+  time.timeZone = "America/Chicago";
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://127.0.0.1:1081";
@@ -116,6 +116,7 @@
     iptables
     kmod
     nmap
+    lm_sensors
   ];
   environment.variables = {
     LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
