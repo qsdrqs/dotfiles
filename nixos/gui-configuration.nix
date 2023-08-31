@@ -96,7 +96,7 @@ in
   security.pam.services.login.enableGnomeKeyring = true;
 
   fonts.fonts = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" ]; })
+    (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })
   ];
 
   services.interception-tools = {
