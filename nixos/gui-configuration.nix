@@ -71,6 +71,7 @@ in
     kate
     dolphin
     arandr
+    scrcpy
 
     android-file-transfer
     android-udev-rules
@@ -90,6 +91,13 @@ in
   ];
 
   qt.platformTheme = "kde";
+  services.teamviewer.enable = true;
+
+  programs.wireshark = {
+    enable = true;
+    package =  pkgs.wireshark;
+  };
+  users.users.qsdrqs.extraGroups = [ "wireshark" ];
 
   # provide org.freedesktop.secrets
   services.gnome.gnome-keyring.enable = true;
