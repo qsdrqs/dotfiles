@@ -56,6 +56,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    hyprland.url = "github:hyprwm/Hyprland";
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository

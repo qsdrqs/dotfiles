@@ -108,6 +108,7 @@ in
 
   qt.platformTheme = "kde";
   services.teamviewer.enable = true;
+
   services.pipewire = {
     enable = true;
     audio.enable = true;
@@ -169,6 +170,7 @@ in
   programs.hyprland = {
     enable = true;
     enableNvidiaPatches = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
   };
   programs.waybar = {
     enable = true;
