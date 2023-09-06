@@ -46,7 +46,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.qsdrqs = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "input" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     openssh.authorizedKeys.keyFiles = [
       ./authorized_keys
@@ -76,6 +76,12 @@
   # $ nix search wget
   nixpkgs.config.allowUnfree = true;
   environment.defaultPackages = [ ];
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "nodejs-16.20.2"
+    "openssl-1.1.1v"
+  ];
+
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     lsd
@@ -91,7 +97,6 @@
     fd
     ripgrep
     perl
-    nodejs
     unzip
     zip
     appimage-run
@@ -117,6 +122,9 @@
     kmod
     nmap
     lm_sensors
+
+    nodejs_16
+    nodePackages.pnpm
   ];
   environment.variables = {
     LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";

@@ -449,12 +449,11 @@ require('lazy').setup({
     dependencies = 'nvim-lspconfig',
   },
 
-
   {
     'neovim/nvim-lspconfig',
     config = function()
-      -- vim.lsp.set_log_level('ERROR')
-      vim.lsp.set_log_level('OFF')
+      vim.lsp.set_log_level('ERROR')
+      -- vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
 

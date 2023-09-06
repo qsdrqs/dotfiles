@@ -45,6 +45,9 @@ let
   };
 in
 {
+  boot.kernelModules = [ "v4l2loopback" ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+
   environment.systemPackages = with pkgs; [
     vscode
     firefox-devedition
@@ -72,6 +75,13 @@ in
     dolphin
     arandr
     scrcpy
+    dunst
+    wineWowPackages.unstableFull
+    qemu_full
+    virt-manager
+    obs-studio
+    pulseaudio
+    wpsoffice
 
     android-file-transfer
     android-udev-rules
@@ -80,24 +90,30 @@ in
     # NUR
     config.nur.repos.xddxdd.qq
     # wine wechat
-    (config.nur.repos.xddxdd.wine-wechat.override {
-      setupSrc = fetchurl {
-        url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
-        sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
-      };
-      version = "3.9.5";
-    })
+    # (config.nur.repos.xddxdd.wine-wechat.override {
+    #   setupSrc = fetchurl {
+    #     url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
+    #     sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
+    #   };
+    #   version = "3.9.5";
+    # })
+    config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
   ];
 
-  qt.platformTheme = "kde";
+  qt = {
+    enable = true;
+    platformTheme = "kde";
+  };
   services.teamviewer.enable = true;
 
   programs.wireshark = {
     enable = true;
-    package =  pkgs.wireshark;
+    package = pkgs.wireshark;
   };
-  users.users.qsdrqs.extraGroups = [ "wireshark" ];
+  virtualisation.libvirtd.enable = true;
+  programs.dconf.enable = true;
+  users.users.qsdrqs.extraGroups = [ "wireshark" "libvirtd" ];
 
   # provide org.freedesktop.secrets
   services.gnome.gnome-keyring.enable = true;
@@ -127,7 +143,7 @@ in
         flameshot
         variety
         feh
-        rofi
+        rofi-wayland
         picom
         networkmanagerapplet
       ];
@@ -138,6 +154,18 @@ in
     };
   };
 
+  hardware = {
+    opengl = {
+      enable = true;
+      driSupport = true;
+      driSupport32Bit = true;
+    };
+    nvidia = {
+      modesetting.enable = true;
+      powerManagement.enable = true;
+      nvidiaSettings = true;
+    };
+  };
   i18n.inputMethod.enabled = "fcitx5";
   i18n.inputMethod.fcitx5.addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
 
