@@ -43,6 +43,10 @@ let
       xorg.xcbutilkeysyms
     ];
   };
+  hyprlandPackages = with pkgs; [
+    qt6.qtwayland
+    libsForQt5.qt5.qtwayland
+  ];
 in
 {
   boot.kernelModules = [ "v4l2loopback" ];
@@ -54,6 +58,7 @@ in
     kitty
     keepassxc
     xclip
+    wl-clipboard
     frp
     duf
     pavucontrol
@@ -99,10 +104,20 @@ in
     # })
     config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
-  ];
+  ] ++ hyprlandPackages;
 
   qt.platformTheme = "kde";
   services.teamviewer.enable = true;
+  services.pipewire = {
+    enable = true;
+    audio.enable = true;
+    pulse.enable = true;
+    alsa = {
+      enable = true;
+      support32Bit = true;
+    };
+    jack.enable = true;
+  };
 
   programs.wireshark = {
     enable = true;
@@ -151,6 +166,13 @@ in
     };
   };
 
+  programs.hyprland = {
+    enable = true;
+    enableNvidiaPatches = true;
+  };
+  programs.waybar = {
+    enable = true;
+  };
   hardware = {
     opengl = {
       enable = true;
@@ -163,6 +185,10 @@ in
       nvidiaSettings = true;
     };
   };
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  xdg.portal.enable = true;
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+
   i18n.inputMethod.enabled = "fcitx5";
   i18n.inputMethod.fcitx5.addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
 
@@ -180,9 +206,9 @@ in
 
   # Enable sound.
   sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  # hardware.pulseaudio.enable = true;
   users.extraUsers.qsdrqs.extraGroups = [ "audio" ];
-  hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";
+  # hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";
   hardware.bluetooth.enable = true;
 
   # snapshots
