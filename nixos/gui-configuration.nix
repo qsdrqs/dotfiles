@@ -101,10 +101,7 @@ in
     config.nur.repos.linyinfeng.wemeet
   ];
 
-  qt = {
-    enable = true;
-    platformTheme = "kde";
-  };
+  qt.platformTheme = "kde";
   services.teamviewer.enable = true;
 
   programs.wireshark = {
