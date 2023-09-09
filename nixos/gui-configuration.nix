@@ -46,11 +46,22 @@ let
   hyprlandPackages = with pkgs; [
     qt6.qtwayland
     libsForQt5.qt5.qtwayland
+    hyprpaper
+    hyprpicker
+    grim
+    slurp
+    jq
+    inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
   ];
 in
 {
   boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+
+  nix.settings = {
+    substituters = ["https://hyprland.cachix.org"];
+    trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+  };
 
   environment.systemPackages = with pkgs; [
     vscode
@@ -87,6 +98,7 @@ in
     obs-studio
     pulseaudio
     wpsoffice
+    steam-run
 
     android-file-transfer
     android-udev-rules
@@ -95,13 +107,13 @@ in
     # NUR
     config.nur.repos.xddxdd.qq
     # wine wechat
-    # (config.nur.repos.xddxdd.wine-wechat.override {
-    #   setupSrc = fetchurl {
-    #     url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
-    #     sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
-    #   };
-    #   version = "3.9.5";
-    # })
+    (config.nur.repos.xddxdd.wine-wechat.override {
+      setupSrc = fetchurl {
+        url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
+        sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
+      };
+      version = "3.9.5";
+    })
     config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
   ] ++ hyprlandPackages;
@@ -118,6 +130,21 @@ in
       support32Bit = true;
     };
     jack.enable = true;
+  };
+
+  services.mpd = {
+    enable = true;
+    user = "qsdrqs";
+    extraConfig = ''
+      audio_output {
+        type "pipewire"
+        name "My PipeWire Output"
+      }
+    '';
+  };
+  systemd.services.mpd.environment = {
+    # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/609
+    XDG_RUNTIME_DIR = "/run/user/1000"; # User-id 1000 must match above user. MPD will look inside this directory for the PipeWire socket.
   };
 
   programs.wireshark = {

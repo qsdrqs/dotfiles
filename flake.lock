@@ -130,6 +130,26 @@
         "type": "github"
       }
     },
+    "hyprland-contrib": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1693997747,
+        "narHash": "sha256-W23nMGmDnyBgxO8O/9jcZtiSpa0taMNcRAD1das/ttw=",
+        "owner": "hyprwm",
+        "repo": "contrib",
+        "rev": "5b67181fced4fb06d26afcf9614b35765c576168",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hyprwm",
+        "repo": "contrib",
+        "type": "github"
+      }
+    },
     "hyprland-protocols": {
       "inputs": {
         "nixpkgs": [
@@ -468,6 +488,7 @@
         "fzf-tab": "fzf-tab",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
+        "hyprland-contrib": "hyprland-contrib",
         "neovim": "neovim",
         "nix-index-database": "nix-index-database",
         "nix-on-droid": "nix-on-droid",
