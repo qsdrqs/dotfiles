@@ -59,8 +59,8 @@ in
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
 
   nix.settings = {
-    substituters = ["https://hyprland.cachix.org"];
-    trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+    substituters = [ "https://hyprland.cachix.org" ];
+    trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -71,6 +71,7 @@ in
     xclip
     wl-clipboard
     frp
+    rathole
     duf
     pavucontrol
     telegram-desktop
@@ -99,6 +100,7 @@ in
     pulseaudio
     wpsoffice
     steam-run
+    w3m
 
     android-file-transfer
     android-udev-rules
@@ -114,6 +116,7 @@ in
       };
       version = "3.9.5";
     })
+    config.nur.repos.xddxdd.qqmusic
     config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
   ] ++ hyprlandPackages;
@@ -221,13 +224,13 @@ in
   i18n.inputMethod.enabled = "fcitx5";
   i18n.inputMethod.fcitx5.addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
 
-  systemd.services.frpc = {
+  systemd.services.rathole = {
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
-    description = "Start the frp client";
+    description = "Start the rathole client";
     serviceConfig = {
       User = "root";
-      ExecStart = ''${pkgs.frp}/bin/frpc -c /etc/frp/frpc.ini'';
+      ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/client.toml'';
       Restart = "on-failure";
       RestartSec = 5;
     };

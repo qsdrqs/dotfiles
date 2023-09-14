@@ -115,6 +115,12 @@
         modules = basicConfig.modules ++ [
           ./nixos/gui-configuration.nix
           nur.nixosModules.nur
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.qsdrqs = import ./nixos/gui-home.nix;
+            home-manager.extraSpecialArgs = { inherit inputs; };
+          }
         ];
       });
       nixosConfigurations.wsl = nixpkgs.lib.nixosSystem (basicConfig // {
@@ -174,12 +180,13 @@
           in
           mkShell {
             packages = [
-              cargo
+              rustup
               rustc
               rustfmt
               clippy
               rust-analyzer
               cmake
+              cargo-wasi
               llvmPackages_latest.llvm
             ];
             shellHook = ''

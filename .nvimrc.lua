@@ -1459,9 +1459,6 @@ require('lazy').setup({
           enable = false
         },
       }
-      -- incremental selection
-      vim.keymap.set("n", "<Enter>", require('nvim-treesitter.incremental_selection').init_selection, { buffer = true })
-
       -- matlab
       local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
       parser_config.matlab = {
@@ -1473,6 +1470,18 @@ require('lazy').setup({
         filetype = "matlab", -- if filetype does not agrees with parser name
       }
     end
+  },
+
+  {
+      "sustech-data/wildfire.nvim",
+      dependencies = { "nvim-treesitter/nvim-treesitter" },
+      keys = { "<CR>" },
+      cond = function()
+        return vim.g.treesitter_disable ~= true
+      end,
+      config = function()
+          require("wildfire").setup()
+      end,
   },
 
   {
