@@ -220,6 +220,8 @@
         python = mkShell {
           packages = [
             python3Packages.virtualenv
+            python3Packages.numpy
+            python3Packages.matplotlib
             nodePackages.pyright
           ];
         };
@@ -237,6 +239,12 @@
             neofetch
           ];
           LD_LIBRARY_PATH = lib.makeLibraryPath [ openssl ];
+        };
+        node = mkShell {
+          packages = [
+            nodePackages.pnpm
+            nodePackages.yarn
+          ];
         };
       });
 

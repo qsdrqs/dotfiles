@@ -202,26 +202,26 @@ bindsym $mod+Control+0 workspace $ws20
 # bindsym $mod+9 workspace $ws19; workspace $ws9
 # bindsym $mod+0 workspace $ws20; workspace $ws10
 
-workspace $ws1 output $monL
-workspace $ws2 output $monL
-workspace $ws3 output $monL
-workspace $ws4 output $monL
-workspace $ws5 output $monL
-workspace $ws6 output $monL
-workspace $ws7 output $monL
-workspace $ws8 output $monL
-workspace $ws9 output $monL
-workspace $ws10 output $monL
-workspace $ws11 output $monR
-workspace $ws12 output $monR
-workspace $ws13 output $monR
-workspace $ws14 output $monR
-workspace $ws15 output $monR
-workspace $ws16 output $monR
-workspace $ws17 output $monR
-workspace $ws18 output $monR
-workspace $ws19 output $monR
-workspace $ws20 output $monR
+# workspace $ws1 output $monL
+# workspace $ws2 output $monL
+# workspace $ws3 output $monL
+# workspace $ws4 output $monL
+# workspace $ws5 output $monL
+# workspace $ws6 output $monL
+# workspace $ws7 output $monL
+# workspace $ws8 output $monL
+# workspace $ws9 output $monL
+# workspace $ws10 output $monL
+# workspace $ws11 output $monR
+# workspace $ws12 output $monR
+# workspace $ws13 output $monR
+# workspace $ws14 output $monR
+# workspace $ws15 output $monR
+# workspace $ws16 output $monR
+# workspace $ws17 output $monR
+# workspace $ws18 output $monR
+# workspace $ws19 output $monR
+# workspace $ws20 output $monR
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace number $ws1

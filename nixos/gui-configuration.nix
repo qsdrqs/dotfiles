@@ -195,6 +195,7 @@ in
       enable = true;
       autoNumlock = true;
     };
+    desktopManager.plasma5.enable = true;
   };
 
   programs.hyprland = {
@@ -215,6 +216,8 @@ in
       modesetting.enable = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
+      open = true;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
     };
   };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";

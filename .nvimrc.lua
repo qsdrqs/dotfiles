@@ -123,6 +123,7 @@ local kind_icons = {
 }
 
 require('lazy').setup({
+  {'dotfiles', lazy = false, dir = os.getenv("HOME") .. "/dotfiles/nvim"},
   {'folke/lazy.nvim', lazy = false},
   {'nvim-lua/plenary.nvim'},
   {
@@ -452,8 +453,8 @@ require('lazy').setup({
   {
     'neovim/nvim-lspconfig',
     config = function()
-      vim.lsp.set_log_level('ERROR')
-      -- vim.lsp.set_log_level('OFF')
+      -- vim.lsp.set_log_level('DEBUG')
+      vim.lsp.set_log_level('OFF')
 
       local lspconfig = require('lspconfig')
 
@@ -577,15 +578,24 @@ require('lazy').setup({
 
       -- 'rust_analyzer' are handled by rust-tools.
       local servers = {
-        'pyright', 'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver',
+        'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver',
         "cmake", "gopls", "bashls", "bufls", "grammarly", "nil_ls",
         'clangd',
       }
+
+      -- add my magic python lsp
+      local ok, pycfg = pcall(require, 'private.magic_py_lsp')
+      if not ok then
+        servers[#servers+1] = 'pyright'
+      else
+        require('lspconfig.configs')[pycfg.name] = pycfg.config
+        servers[#servers+1] = pycfg.name
+      end
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
         if lsp == 'tsserver' then
           -- lsp_common_config.root_dir = require('lspconfig.util').root_pattern("*")
-        elseif lsp == "pyright" then
+        elseif lsp == "pyright" or lsp == pycfg.name then
           lsp_common_config.settings = {
             python = {
               analysis = {
@@ -895,42 +905,15 @@ require('lazy').setup({
 
   {'kyazdani42/nvim-web-devicons'},
   {
-    'windwp/nvim-autopairs',
-    event = "InsertEnter",
-    config = function()
-      require('nvim-autopairs').setup{}
-      local npairs = require'nvim-autopairs'
-      local Rule   = require'nvim-autopairs.rule'
-
-      npairs.add_rules {
-        Rule(' ', ' ')
-        :with_pair(function (opts)
-          local pair = opts.line:sub(opts.col - 1, opts.col)
-          if vim.o.filetype == "markdown" then
-            return vim.tbl_contains({ '()', '{}' }, pair)
-          end
-          return vim.tbl_contains({ '()', '[]', '{}' }, pair)
-        end),
-        Rule('( ', ' )')
-        :with_pair(function() return false end)
-        :with_move(function(opts)
-          return opts.prev_char:match('.%)') ~= nil
-        end)
-        :use_key(')'),
-        Rule('{ ', ' }')
-        :with_pair(function() return false end)
-        :with_move(function(opts)
-          return opts.prev_char:match('.%}') ~= nil
-        end)
-        :use_key('}'),
-        Rule('[ ', ' ]')
-        :with_pair(function() return false end)
-        :with_move(function(opts)
-          return opts.prev_char:match('.%]') ~= nil
-        end)
-        :use_key(']')
-      }
-    end
+    'altermo/ultimate-autopair.nvim',
+    event={'InsertEnter','CmdlineEnter'},
+    branch='v0.6',
+    opts={
+      tabout = {
+        enable = true,
+        hopout = true,
+      },
+    },
   },
 
   {
@@ -1438,7 +1421,7 @@ require('lazy').setup({
 
         highlight = {
           -- `false` will disable the whole extension
-          enable = true,
+          enable = false,
 
           -- list of language that will be disabled
           disable = function(lang, bufnr) -- Disable in large C++ buffers
@@ -1559,23 +1542,9 @@ require('lazy').setup({
   },
 
   {
-    "RRethy/nvim-treesitter-textsubjects",
-    lazy = true,
-    config = function()
-      require('nvim-treesitter.configs').setup {
-        textsubjects = {
-          enable = true,
-          keymaps = {
-            ['<CR>'] = 'textsubjects-smart',
-          },
-        },
-      }
-    end
-  },
-
-  {
     "lukas-reineke/indent-blankline.nvim",
     lazy = true,
+    branch = "v3",
     cond = function()
       return vim.g.treesitter_disable ~= true
     end,
@@ -1585,23 +1554,28 @@ require('lazy').setup({
         vim.g.indent_blankline_show_current_context = true
         vim.g.indent_blankline_show_current_context_start = true
       end
-      require("indent_blankline").setup {
-        -- char = '▏',
-        -- context_char = '▎',
-        use_treesitter = false,
-        space_char_blankline = " ",
-        show_first_indent_level = true,
-        context_highlight_list = {
-          "Color1",
-          "Color2",
-          "Color3",
-          "Color4",
-          "Color5",
-          "Color6",
+      local highlight = {
+        "Color1",
+        "Color2",
+        "Color3",
+        "Color4",
+        "Color5",
+        "Color6",
+      }
+      local hooks = require "ibl.hooks"
+      vim.g.rainbow_delimiters = { highlight = highlight }
+      require("ibl").setup {
+        indent = {
+          -- char = '▏',
+          -- context_char = '▎',
+        },
+        scope = {
+          highlight = highlight,
+          show_end = true,
         },
 
-        filetype_exclude = {"alpha"},
       }
+      hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
     end
   },
   {
@@ -2071,7 +2045,7 @@ require('lazy').setup({
               s = s .. n .. sym
             end
             return s
-          end
+          end,
         },
         highlights = {
           indicator_selected = {
@@ -2091,6 +2065,11 @@ require('lazy').setup({
 
       vim.api.nvim_set_hl(0, "BufferLineIndicatorSelected", {link = "Keyword"})
       vim.api.nvim_set_hl(0, "BufferLineSeparator", {link = "SpecialKey"})
+
+      -- use alt + number to go to buffer
+      for i = 1, 9 do
+        vim.keymap.set("n", "<M-" .. i .. ">", "<cmd>BufferLineGoToBuffer " .. i .. "<CR>", { noremap = true, silent = true })
+      end
     end
   },
 
@@ -2860,7 +2839,7 @@ require('lazy').setup({
   },
 
   {
-    'phaazon/hop.nvim',
+    'smoka7/hop.nvim',
     lazy = true,
     keys = {"<leader>w", "<leader>l"},
     config = function()
@@ -2875,46 +2854,40 @@ require('lazy').setup({
   },
 
   {
-    'ggandor/leap.nvim',
-    keys = {"s"},
+    "folke/flash.nvim",
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "o", "x" }, function() require("flash").jump() end, desc = "Flash" },
+      { "<leader><CR>", mode = { "n", "o", "x" }, function() require("nvim-treesitter"); require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("nvim-treesitter"); require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+      { "f", "F", "t", "T"},
+    },
     config = function()
-      local function get_line_starts(winid)
-        local wininfo =  vim.fn.getwininfo(winid)[1]
-        local cur_line = vim.fn.line('.')
-
-        -- Get targets.
-        local targets = {}
-        local lnum = wininfo.topline
-        while lnum <= wininfo.botline do
-          local fold_end = vim.fn.foldclosedend(lnum)
-          -- Skip folded ranges.
-          if fold_end ~= -1 then
-            lnum = fold_end + 1
-          else
-            if lnum ~= cur_line then table.insert(targets, { pos = { lnum, 1 } }) end
-            lnum = lnum + 1
-          end
-        end
-        -- Sort them by vertical screen distance from cursor.
-        local cur_screen_row = vim.fn.screenpos(winid, cur_line, 1)['row']
-        local function screen_rows_from_cur(t)
-          local t_screen_row = vim.fn.screenpos(winid, t.pos[1], t.pos[2])['row']
-          return math.abs(cur_screen_row - t_screen_row)
-        end
-        table.sort(targets, function (t1, t2)
-          return screen_rows_from_cur(t1) < screen_rows_from_cur(t2)
-        end)
-
-        if #targets >= 1 then
-          return targets
-        end
+      local hls = {
+        -- FlashBackdrop = { fg = "#545c7e" },
+        FlashCurrent = { bg = "#ff966c", fg = "#1b1d2b" },
+        FlashLabel = { bg = "#ff007c", bold = true, fg = "#c8d3f5" },
+        FlashMatch = { bg = "#3e68d7", fg = "#c8d3f5" },
+      }
+      for hl_group, hl in pairs(hls) do
+        hl.default = true
+        vim.api.nvim_set_hl(0, hl_group, hl)
       end
-
-      -- Usage:
-      vim.keymap.set({'n', 'v'}, "s", function ()
-        local current_window = vim.fn.win_getid()
-        require('leap').leap { target_windows = { current_window } }
-      end)
+      require("flash").setup {
+        modes = {
+          search = {
+            enabled = false
+          }
+        },
+        label = {
+          rainbow = {
+            enabled = false
+          }
+        }
+      }
     end
   },
 
@@ -3704,6 +3677,7 @@ local links = {
   ['@lsp.type.defaultLibrary.go'] = 'Type',
   ['@lsp.type.path.nix'] = 'String',
   ['@lsp.mod.definition.nix'] = 'Normal',
+  ['@lsp.type.module.python'] = 'Class',
 
   -- treesitter
   ['@type'] = 'Class',
@@ -3825,7 +3799,6 @@ function lazyLoadPlugins()
         'rainbow-delimiters.nvim',   -- performance issue
         'indent-blankline.nvim',
         'nvim-treesitter-context',
-        'nvim-treesitter-textsubjects',
         'nvim-ts-autotag',
         'hlargs.nvim',
         'vim-matchup',

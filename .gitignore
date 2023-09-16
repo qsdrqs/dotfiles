@@ -3,6 +3,7 @@
 .vim/plugged
 .vim/sessions
 .vim/view
+private/
 .netrwist
 tagged
 bookmarks

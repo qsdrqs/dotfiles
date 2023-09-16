@@ -111,7 +111,7 @@
     patchelf
     python3
     lsof
-    nil # nil language server
+    nil # nix language server
     nixpkgs-fmt
     bat
     file
@@ -124,7 +124,6 @@
     lm_sensors
 
     nodejs_16
-    nodePackages.pnpm
   ];
   environment.variables = {
     LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
