@@ -1421,7 +1421,7 @@ require('lazy').setup({
 
         highlight = {
           -- `false` will disable the whole extension
-          enable = false,
+          enable = true,
 
           -- list of language that will be disabled
           disable = function(lang, bufnr) -- Disable in large C++ buffers
@@ -1475,7 +1475,7 @@ require('lazy').setup({
       return vim.g.treesitter_disable ~= true
     end,
     config = function()
-      require "nvim-treesitter.configs".setup{
+      require "nvim-treesitter.configs".setup {
         playground = {
           enable = true,
           disable = {},
@@ -3022,16 +3022,18 @@ require('lazy').setup({
   -- vim plugins
   {
     "andymass/vim-matchup",
+    init = function()
+      vim.g.matchup_matchparen_offscreen = { method = "" }
+      vim.g.matchup_matchparen_deferred = 1
+    end,
     config = function()
       require'nvim-treesitter.configs'.setup {
         matchup = {
           enable = true,              -- mandatory, false will disable the whole extension
-          disable = { "c", "ruby" },  -- optional, list of language that will be disabled
           disable_virtual_text = true,
           -- [options]
         }
       }
-      vim.g.matchup_matchparen_offscreen = { method = "" }
     end
   },
   {

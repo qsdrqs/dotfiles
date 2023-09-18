@@ -155,6 +155,7 @@ if $LIGHT == 1
 else
   colorscheme ghdark
 endif
+
 set termguicolors
 let g:molokai_transparent=1
 "-------------------colorscheme-----------------------"}}}

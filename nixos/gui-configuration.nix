@@ -2,7 +2,7 @@
 let
   ida64-fhs = pkgs.buildFHSUserEnv {
     name = "ida64";
-    runScript = "${config.users.users.qsdrqs.home}/ida/ida64";
+    runScript = "env QT_FONT_DPI=144 ${config.users.users.qsdrqs.home}/ida/ida64";
     targetPkgs = pkgs: with pkgs; [
       libglvnd
       zlib
@@ -43,6 +43,17 @@ let
       xorg.xcbutilkeysyms
     ];
   };
+  wpsoffice-hidpi = pkgs.symlinkJoin {
+    name = "wps-office";
+    paths = [ pkgs.wpsoffice ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      for bin in $(ls $out/bin); do
+        wrapProgram $out/bin/$bin \
+          --set QT_FONT_DPI 144
+      done
+    '';
+  };
   hyprlandPackages = with pkgs; [
     qt6.qtwayland
     libsForQt5.qt5.qtwayland
@@ -65,6 +76,7 @@ in
 
   environment.systemPackages = with pkgs; [
     vscode
+    vscodium
     firefox-devedition
     kitty
     keepassxc
@@ -98,9 +110,10 @@ in
     virt-manager
     obs-studio
     pulseaudio
-    wpsoffice
+    wpsoffice-hidpi
     steam-run
     w3m
+    inferno
 
     android-file-transfer
     android-udev-rules

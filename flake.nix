@@ -61,6 +61,15 @@
       url = "github:hyprwm/contrib";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    code-marketplace = {
+      url = "git+https://aur.archlinux.org/code-marketplace.git?ref=master";
+      flake = false;
+    };
+    code-features = {
+      url = "git+https://aur.archlinux.org/code-features.git?ref=master";
+      flake = false;
+    };
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository
