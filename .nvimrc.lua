@@ -460,7 +460,7 @@ require('lazy').setup({
 
       function common_on_attach(client, bufnr)
         -- Enable completion triggered by <c-x><c-o>
-        vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+        vim.bo[bufnr].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
         -- codelens
         vim.api.nvim_create_autocmd({"InsertLeave", "TextChanged", "BufEnter"}, {
@@ -1137,15 +1137,15 @@ require('lazy').setup({
               end
             end,
             i = function(fallback)
-              local ok, copilot_keys = pcall(vim.fn["copilot#Accept"])
+              local ok, copilot_keys = pcall(vim.fn["copilot#Accept"], "empty")
               if not ok then
-                copilot_keys = ""
+                copilot_keys = "empty"
               end
               local ultisnips_ok, ultisnips_jump_forward = pcall(vim.fn["UltiSnips#CanJumpForwards"])
               if cmp.visible() then
                 -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                 cmp.confirm()
-              elseif copilot_keys ~= "" then
+              elseif copilot_keys ~= "empty" then
                 vim.api.nvim_feedkeys(copilot_keys, "i", true)
               elseif ultisnips_ok and ultisnips_jump_forward == 1 then
                 vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
@@ -1455,17 +1455,19 @@ require('lazy').setup({
     end
   },
 
-  {
-      "sustech-data/wildfire.nvim",
-      dependencies = { "nvim-treesitter/nvim-treesitter" },
-      keys = { "<CR>" },
-      cond = function()
-        return vim.g.treesitter_disable ~= true
-      end,
-      config = function()
-          require("wildfire").setup()
-      end,
-  },
+  -- {
+  --     "sustech-data/wildfire.nvim",
+  --     dependencies = { "nvim-treesitter/nvim-treesitter" },
+  --     keys = { "<CR>" },
+  --     cond = function()
+  --       return vim.g.treesitter_disable ~= true
+  --     end,
+  --     config = function()
+  --         require("wildfire").setup({
+  --           filetype_exclude = { "qf", "vim" }
+  --         })
+  --     end,
+  -- },
 
   {
     'nvim-treesitter/playground',
@@ -2507,8 +2509,10 @@ require('lazy').setup({
     init = function()
       if #vim.fn.argv() == 1 and vim.fn.isdirectory(vim.fn.argv()[1]) == 1 then
         vim.cmd.cd(vim.fn.argv()[1])
-        require('auto-session').RestoreSession()
-        vim.cmd("bdelete " .. vim.fn.getcwd())
+        local res = require('auto-session').RestoreSession()
+        if res then
+          vim.cmd("bdelete " .. vim.fn.getcwd())
+        end
       end
     end,
     config = function()
@@ -3025,6 +3029,7 @@ require('lazy').setup({
     init = function()
       vim.g.matchup_matchparen_offscreen = { method = "" }
       vim.g.matchup_matchparen_deferred = 1
+      vim.g.matchup_matchparen_hi_surround_always = 1
     end,
     config = function()
       require'nvim-treesitter.configs'.setup {
@@ -3272,16 +3277,14 @@ require('lazy').setup({
   {
     'tpope/vim-fugitive',
     lazy = true,
-    cmd = {"G", "Gclog"}
+    cmd = {"G", "Gclog", "Gvdiffsplit"}
   },
 
   {
     'rbong/vim-flog',
     lazy = true,
     cmd = {"Flog"},
-    config = function()
-      require('lazy').load{plugins = 'vim-fugitive'}
-    end
+    dependencies = {'tpope/vim-fugitive'}
   },
 
   {
@@ -3303,20 +3306,34 @@ require('lazy').setup({
     config = function()
       require('cscope_maps').setup({
         disable_maps = false, -- true disables my keymaps, only :Cscope will be loaded
+        skip_input_prompt = true,
         cscope = {
-          db_file = "./cscope.out", -- location of cscope db file
-          use_telescope = false, -- true will show results in telescope picker
+          -- location of cscope db fils
+          db_file = './cscope.out',
+          -- cscope executable
+          exec = "cscope", -- "cscope" or "gtags-cscope"
+          -- choose your fav picker
+          picker = "quickfix", -- "telescope", "fzf-lua" or "quickfix"
+          -- "true" does not open picker for single result, just JUMP
+          skip_picker_for_single_result = true, -- "false" or "true"
+          -- these args are directly passed to "cscope -f <db_file> <args>"
+          db_build_cmd_args = { "-bqkv" },
+          -- statusline indicator, default is cscope executable
+          statusline_indicator = nil,
         },
       })
     end
   },
   {
     --管理gtags，集中存放tags
-    'dhananjaylatkar/vim-gutentags',
+    'skywind3000/vim-gutentags',
     lazy = true,
+    init = function()
+      vim.g.gutentags_define_advanced_commands = 1
+    end,
     config = function()
       -- vim.g.gutentags_modules = {'ctags', 'gtags_cscope'}
-      vim.g.gutentags_modules = {'cscope_maps'}
+      vim.g.gutentags_modules = {'ctags', 'gtags_cscope', 'cscope_maps'}
 
       -- config project root markers.
       vim.g.gutentags_project_root = {'.root', '.svn', '.git', '.hg', '.project', '.exrc', "pom.xml"}
@@ -3330,6 +3347,28 @@ require('lazy').setup({
       vim.g.gutentags_load = 1
 
     end
+  },
+
+  {
+    'skywind3000/gutentags_plus',
+    init = function()
+      vim.g.gutentags_plus_nomap = 1
+    end,
+    lazy = true,
+    config = function()
+      vim.cmd [[
+        noremap <silent> <leader>cgs :GscopeFind s <C-R><C-W><cr>
+        noremap <silent> <leader>cgg :GscopeFind g <C-R><C-W><cr>
+        noremap <silent> <leader>cgc :GscopeFind c <C-R><C-W><cr>
+        noremap <silent> <leader>cgt :GscopeFind t <C-R><C-W><cr>
+        noremap <silent> <leader>cge :GscopeFind e <C-R><C-W><cr>
+        noremap <silent> <leader>cgf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
+        noremap <silent> <leader>cgi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
+        noremap <silent> <leader>cgd :GscopeFind d <C-R><C-W><cr>
+        noremap <silent> <leader>cga :GscopeFind a <C-R><C-W><cr>
+        noremap <silent> <leader>cgz :GscopeFind z <C-R><C-W><cr>
+      ]]
+    end,
   },
 
   -- dap
@@ -3769,7 +3808,7 @@ function lazyLoadPlugins()
     vim.cmd.cd(data.file)
 
     -- open the tree
-    require("nvim-tree.api").tree.open()
+    vim.defer_fn(require("nvim-tree.api").tree.open, 0)
   end
   vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })
 
@@ -3823,7 +3862,7 @@ function lazyLoadPlugins()
 end
 
 function loadTags()
-  require('lazy').load { plugins = { 'cscope_maps.nvim', 'vim-gutentags' } }
+  require('lazy').load { plugins = { 'cscope_maps.nvim', 'vim-gutentags', 'gutentags_plus' } }
   vim.cmd("edit %")
   vim.keymap.set('n', '<leader>gt', "<cmd>exec 'ltag ' . expand('<cword>') . '| lopen' <CR>", { silent = false })
 end
@@ -3991,6 +4030,8 @@ vim.api.nvim_create_autocmd({ "VimLeave" }, {
 
 ---------------------------vscode neovim----------------------------------------------
 function VscodeNeovimHandler()
+  local vscode = require("vscode-neovim")
+
   require('lazy').load{
     plugins = {
       "vim-visual-multi",
@@ -4001,39 +4042,39 @@ function VscodeNeovimHandler()
     }
   }
 
-  vim.keymap.set('n', '<leader>af',function() vam.fn.VSCodeNotify("editor.action.formatDocument") end, { silent = true })
-  vim.keymap.set('v', '<leader>af',function() vam.fn.VSCodeNotifyVisual("editor.action.formatSelection", 0) end, { silent = true })
-  vim.keymap.set('n', 'gi',function() vim.fn.VSCodeNotify("editor.action.goToImplementation") end, { silent = true })
-  vim.keymap.set('n', 'gr',function() vim.fn.VSCodeNotify("editor.action.goToReferences") end, { silent = true })
-  vim.keymap.set('n', '<leader>v',function() vim.fn.VSCodeNotify("workbench.action.toggleAuxiliaryBar") end, { silent = true })
-  vim.keymap.set('n', '<leader>n',function() vim.fn.VSCodeNotify("workbench.action.toggleSidebarVisibility") end, { silent = true })
-  vim.keymap.set('n', '<leader>rs',function() vim.fn.VSCodeNotify("workbench.action.reloadWindow") end, { silent = true })
-  vim.keymap.set('n', '<leader>q',function() vim.fn.VSCodeNotify("workbench.actions.view.toggleProblems") end, { silent = true })
-  vim.keymap.set('n', ']d',function() vim.fn.VSCodeNotify("editor.action.marker.next") end, { silent = true })
-  vim.keymap.set('n', '[d',function() vim.fn.VSCodeNotify("editor.action.marker.prev") end, { silent = true })
-  vim.keymap.set('n', '<leader>x',function() vim.fn.VSCodeNotify("workbench.action.closeActiveEditor") end, { silent = true })
-  vim.keymap.set('n', '<leader>at',function() vim.fn.VSCodeNotify("workbench.action.tasks.runTask") end, { silent = true })
-  vim.keymap.set('n', '<leader>ca',function() vim.fn.VSCodeNotify("editor.action.quickFix") end, { silent = true })
-  vim.keymap.set('n', '<leader>rn',function() vim.fn.VSCodeNotify("editor.action.rename") end, { silent = true })
-  vim.keymap.set('n', '<leader>gg',function() vim.fn.VSCodeNotify("workbench.action.findInFiles") end, { silent = true })
-  vim.keymap.set('n', '<leader><leader>',function() vim.fn.VSCodeCallVisual("workbench.action.showCommands", 0) end, { silent = true })
+  vim.keymap.set('n', '<leader>af',function() vscode.notify("editor.action.formatDocument") end, { silent = true })
+  vim.keymap.set('v', '<leader>af',function() vscode.notify("editor.action.formatSelection") end, { silent = true })
+  vim.keymap.set('n', 'gi',function() vscode.notify("editor.action.goToImplementation") end, { silent = true })
+  vim.keymap.set('n', 'gr',function() vscode.notify("editor.action.goToReferences") end, { silent = true })
+  vim.keymap.set('n', '<leader>v',function() vscode.notify("workbench.action.toggleAuxiliaryBar") end, { silent = true })
+  vim.keymap.set('n', '<leader>n',function() vscode.notify("workbench.action.toggleSidebarVisibility") end, { silent = true })
+  vim.keymap.set('n', '<leader>rs',function() vscode.notify("workbench.action.reloadWindow") end, { silent = true })
+  vim.keymap.set('n', '<leader>q',function() vscode.notify("workbench.actions.view.toggleProblems") end, { silent = true })
+  vim.keymap.set('n', ']d',function() vscode.notify("editor.action.marker.next") end, { silent = true })
+  vim.keymap.set('n', '[d',function() vscode.notify("editor.action.marker.prev") end, { silent = true })
+  vim.keymap.set('n', '<leader>x',function() vscode.notify("workbench.action.closeActiveEditor") end, { silent = true })
+  vim.keymap.set('n', '<leader>at',function() vscode.notify("workbench.action.tasks.runTask") end, { silent = true })
+  vim.keymap.set('n', '<leader>ca',function() vscode.notify("editor.action.quickFix") end, { silent = true })
+  vim.keymap.set('n', '<leader>rn',function() vscode.notify("editor.action.rename") end, { silent = true })
+  vim.keymap.set('n', '<leader>gg',function() vscode.notify("workbench.action.findInFiles") end, { silent = true })
+  vim.keymap.set('n', '<leader><leader>',function() vscode.call("workbench.action.showCommands", 0) end, { silent = true })
 
-  vim.keymap.set('x', '<leader>y',function() vim.fn.VSCodeCallVisual("extension.translateTextPreferred", 0) end, { silent = true })
+  vim.keymap.set('x', '<leader>y',function() vscode.call("extension.translateTextPreferred", 0) end, { silent = true })
   vim.keymap.set('n', '<leader>y',function()
     vim.cmd [[normal! viw]]
-    vim.fn.VSCodeCallVisual("extension.translateTextPreferred", 0)
+    vscode.call("extension.translateTextPreferred", 0)
   end, { silent = true })
 
   vim.keymap.set('n', '<leader>gs',function()
     vim.cmd [[normal! yiw]]
-    vim.fn.VSCodeNotify("workbench.action.findInFiles")
+    vscode.notify("workbench.action.findInFiles")
   end, { silent = true })
 
   vim.keymap.set({'n', 'x'}, '<C-w>o',function()
-    vim.fn.VSCodeNotify('workbench.action.joinAllGroups')
-    vim.fn.VSCodeNotify("workbench.action.closeAuxiliaryBar")
-    vim.fn.VSCodeNotify("workbench.action.closeSidebar")
-    vim.fn.VSCodeNotify("workbench.action.closePanel")
+    vscode.notify('workbench.action.joinAllGroups')
+    vscode.notify("workbench.action.closeAuxiliaryBar")
+    vscode.notify("workbench.action.closeSidebar")
+    vscode.notify("workbench.action.closePanel")
   end, { silent = true })
 
   -- git (use gitsigns.nvim instead)
@@ -4072,22 +4113,22 @@ function VscodeNeovimHandler()
         })
       else
         -- remote file, fallback to vscode keybindings
-        vim.keymap.set('n', '<leader>gr',function() vim.fn.VSCodeNotify("git.revertSelectedRanges") end, { silent = true })
-        vim.keymap.set('n', ']g',function() vim.fn.VSCodeNotify("workbench.action.editor.nextChange") end, { silent = true })
-        vim.keymap.set('n', '[g',function() vim.fn.VSCodeNotify("workbench.action.editor.previousChange") end, { silent = true })
+        vim.keymap.set('n', '<leader>gr',function() vscode.notify("git.revertSelectedRanges") end, { silent = true })
+        vim.keymap.set('n', ']g',function() vscode.notify("workbench.action.editor.nextChange") end, { silent = true })
+        vim.keymap.set('n', '[g',function() vscode.notify("workbench.action.editor.previousChange") end, { silent = true })
       end
     end
   })
 
   -- just be used for vscode selection
-  vim.keymap.set('v', '<leader>v',function() vim.fn.VSCodeNotifyVisual("editor.action.goToImplementation", 1) end, { silent = true })
+  vim.keymap.set('v', '<leader>v',function() vscode.notify("editor.action.goToImplementation", 1) end, { silent = true })
 
   -- same bindings
-  vim.keymap.set('n', '<leader>d',function() vim.fn.VSCodeNotify("editor.action.showHover") end, { silent = true })
-  vim.keymap.set('n', '<leader>e',function() vim.fn.VSCodeNotify("editor.action.showHover") end, { silent = true })
+  vim.keymap.set('n', '<leader>d',function() vscode.notify("editor.action.showHover") end, { silent = true })
+  vim.keymap.set('n', '<leader>e',function() vscode.notify("editor.action.showHover") end, { silent = true })
 
-  vim.keymap.set('n', '<leader>f',function() vim.fn.VSCodeNotify("workbench.action.quickOpen") end, { silent = true })
-  vim.keymap.set('n', '<leader>b',function() vim.fn.VSCodeNotify("workbench.action.quickOpen") end, { silent = true })
+  vim.keymap.set('n', '<leader>f',function() vscode.notify("workbench.action.quickOpen") end, { silent = true })
+  vim.keymap.set('n', '<leader>b',function() vscode.notify("workbench.action.quickOpen") end, { silent = true })
 
   -- recover =
   vim.keymap.del({'n', 'x'}, '=', { expr = true })
@@ -4098,29 +4139,29 @@ function VscodeNeovimHandler()
   vim.cmd[[ hi Visual guibg=None ]]
 
   -- fold
-  vim.keymap.set('n', 'zc',function() vim.fn.VSCodeNotify("editor.fold") end, { silent = true })
-  vim.keymap.set('n', 'zC',function() vim.fn.VSCodeNotify("editor.foldRecursively") end, { silent = true })
-  vim.keymap.set('n', 'zo',function() vim.fn.VSCodeNotify("editor.unfold") end, { silent = true })
-  vim.keymap.set('n', 'zO',function() vim.fn.VSCodeNotify("editor.unfoldRecursively") end, { silent = true })
-  vim.keymap.set('n', 'za',function() vim.fn.VSCodeNotify("editor.toggleFold") end, { silent = true })
-  vim.keymap.set('n', 'zM',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
-  vim.keymap.set('n', 'zR',function() vim.fn.VSCodeNotify("editor.foldAll") end, { silent = true })
+  vim.keymap.set('n', 'zc',function() vscode.notify("editor.fold") end, { silent = true })
+  vim.keymap.set('n', 'zC',function() vscode.notify("editor.foldRecursively") end, { silent = true })
+  vim.keymap.set('n', 'zo',function() vscode.notify("editor.unfold") end, { silent = true })
+  vim.keymap.set('n', 'zO',function() vscode.notify("editor.unfoldRecursively") end, { silent = true })
+  vim.keymap.set('n', 'za',function() vscode.notify("editor.toggleFold") end, { silent = true })
+  vim.keymap.set('n', 'zM',function() vscode.notify("editor.foldAll") end, { silent = true })
+  vim.keymap.set('n', 'zR',function() vscode.notify("editor.foldAll") end, { silent = true })
 
-  vim.keymap.set('n', '<localleader>v',function() vim.fn.VSCodeNotify("latex-workshop.synctex") end, { silent = true })
-  vim.keymap.set('n', '<C-g>',function() vim.fn.VSCodeNotify("workbench.view.scm") end, { silent = true })
+  vim.keymap.set('n', '<localleader>v',function() vscode.notify("latex-workshop.synctex") end, { silent = true })
+  vim.keymap.set('n', '<C-g>',function() vscode.notify("workbench.view.scm") end, { silent = true })
 
   -- comment, use vscode builtin comment
-  vim.keymap.set('n', '<C-/>',function() vim.fn.VSCodeNotify("editor.action.commentLine") end, { silent = true })
-  vim.keymap.set('v', '<C-/>',function() vim.fn.VSCodeNotifyVisual("editor.action.commentLine", 0) end, { silent = true })
-  vim.keymap.set('n', '<C-s-/>',function() vim.fn.VSCodeNotify("editor.action.blockComment") end, { silent = true })
-  vim.keymap.set('v', '<C-s-/>',function() vim.fn.VSCodeNotifyVisual("editor.action.blockComment", 0) end, { silent = true })
+  vim.keymap.set('n', '<C-/>',function() vscode.notify("editor.action.commentLine") end, { silent = true })
+  vim.keymap.set('v', '<C-/>',function() vscode.notify("editor.action.commentLine", 0) end, { silent = true })
+  vim.keymap.set('n', '<C-s-/>',function() vscode.notify("editor.action.blockComment") end, { silent = true })
+  vim.keymap.set('v', '<C-s-/>',function() vscode.notify("editor.action.blockComment", 0) end, { silent = true })
 
   -- rewrap
   vim.api.nvim_create_autocmd("InsertLeave", {
     pattern = "*.tex",
     callback = function()
       if vim.g.wrap_on_insert_leave == 1 then
-        vim.fn.VSCodeNotify("rewrap.rewrapComment")
+        vscode.notify("rewrap.rewrapComment")
       end
     end
   })

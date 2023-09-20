@@ -122,6 +122,9 @@
     kmod
     nmap
     lm_sensors
+    cscope
+    global
+    ctags
 
     nodejs_16
   ];

@@ -75,7 +75,9 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    vscode
+    (vscode.override (prev: {
+      commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+    }))
     vscodium
     firefox-devedition
     kitty
@@ -93,7 +95,9 @@ in
     snapper-gui
     ida64-fhs
     mpv
-    google-chrome
+    (google-chrome.override (prev: {
+      commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+    }))
     zoom-us
     libsForQt5.gwenview
     zathura
