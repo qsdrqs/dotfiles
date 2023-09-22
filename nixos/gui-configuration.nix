@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, pkgs-master, inputs, ... }:
 let
   ida64-fhs = pkgs.buildFHSUserEnv {
     name = "ida64";
@@ -75,7 +75,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    (vscode.override (prev: {
+    (pkgs-master.vscode.override (prev: {
       commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
     }))
     vscodium

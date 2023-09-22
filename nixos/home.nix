@@ -35,6 +35,9 @@
     initExtraFirst = ''
       if [ -e $HOME/.zshrc ]; then
         ZSH_CUSTOM="$HOME/zsh_custom"
+        # source grc
+        source ${pkgs.grc}/etc/grc.zsh
+
         source $HOME/.zshrc
       fi
     '';

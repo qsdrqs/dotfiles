@@ -21,7 +21,8 @@ if [[ $NOTMUX != 1 ]]; then
         elif [[ "$SSH_CONNECTION" != ""  ]]; then
             session_name="ssh"
             if [[ -x `command -v notify-send` ]]; then
-                notify-send "ssh connected"
+                # FIXME: bug on wayland?
+                # notify-send "ssh connected"
             fi
             call_tmux $session_name
             #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then

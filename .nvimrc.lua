@@ -3029,7 +3029,11 @@ require('lazy').setup({
     init = function()
       vim.g.matchup_matchparen_offscreen = { method = "" }
       vim.g.matchup_matchparen_deferred = 1
-      vim.g.matchup_matchparen_hi_surround_always = 1
+      if vim.g.vscode == nil then
+        vim.g.matchup_matchparen_hi_surround_always = 1
+      else
+        vim.g.matchup_matchparen_enabled = 0
+      end
     end,
     config = function()
       require'nvim-treesitter.configs'.setup {

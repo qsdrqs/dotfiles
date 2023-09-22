@@ -5,6 +5,7 @@
   # https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-inputs
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     home-manager.url = "github:nix-community/home-manager";
     ranger = {
       url = "github:ranger/ranger";
@@ -77,9 +78,16 @@
 
   outputs = { self, nixpkgs, home-manager, vscode-server, nur, nix-on-droid, ... }@inputs:
     let
+      pkgs-master = import inputs.nixpkgs-master {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
       basicConfig = {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inherit inputs;
+          pkgs-master = pkgs-master;
+        };
         modules = [
           (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else ./nixos/empty.nix)
           ./nixos/configuration.nix
@@ -107,6 +115,7 @@
       };
       pkgs' = (system: import nixpkgs {
         system = system;
+        config.allowUnfree = true;
         overlays = (import ./nixos/overlays.nix {
           inherit inputs;
           pkgs = nixpkgs.legacyPackages.${system};
