@@ -10,7 +10,7 @@
 
       ranger = super.ranger.overrideAttrs (oldAttrs: {
         src = inputs.ranger;
-        propagatedBuildInputs = oldAttrs.propagatedBuildInputs ++ [pkgs.python3Packages.pylint];
+        propagatedBuildInputs = oldAttrs.propagatedBuildInputs ++ [ pkgs.python3Packages.pylint ];
       });
 
       variety = super.variety.overrideAttrs (oldAttrs: {
@@ -18,6 +18,22 @@
           substituteInPlace data/scripts/set_wallpaper --replace "\"i3\"" "\"none+i3\""
           substituteInPlace data/scripts/set_wallpaper --replace "feh --bg-fill" "feh --bg-scale --no-xinerama"
         '';
+      });
+
+      vscode = super.vscode.override (old: {
+        commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+      });
+
+      vscode-insiders = (super.vscode.override (prev: {
+        commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+        isInsiders = true;
+      })).overrideAttrs (prev: {
+        src = (builtins.fetchTarball {
+          url = "https://update.code.visualstudio.com/latest/linux-x64/insider";
+          sha256 = "1gkyagbrkihxbzcw8z0rg7plvgp7gg7yq6nlc0r7hwczsgz1dj1j";
+        });
+        version = "latest";
+        buildInputs = prev.buildInputs ++ [ pkgs.krb5 ];
       });
 
       vscodium = super.vscodium.overrideAttrs (oldAttrs: {

@@ -35,6 +35,13 @@ fi
 
 setopt nonomatch
 
+# history
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=500000
+export SAVEHIST=500000
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH=$HOME/.local/bin:$HOME/.local/sbin:$PATH

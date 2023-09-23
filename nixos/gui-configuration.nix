@@ -75,9 +75,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    (pkgs-master.vscode.override (prev: {
-      commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
-    }))
+    vscode
     vscodium
     firefox-devedition
     kitty

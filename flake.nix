@@ -240,6 +240,7 @@
             python3Packages.virtualenv
             python3Packages.numpy
             python3Packages.matplotlib
+            python3Packages.autopep8
             nodePackages.pyright
           ];
         };

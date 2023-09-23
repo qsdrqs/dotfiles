@@ -91,6 +91,7 @@
     tmux
     neofetch
     gcc
+    gnumake
     grc
     git
     fzf

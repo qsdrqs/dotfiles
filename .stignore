@@ -2,7 +2,6 @@ history
 bookmarks
 .vim/view
 .vim/sessions
-.git
 *.pyc
 *sync-conflict*
 .vim/plugged
