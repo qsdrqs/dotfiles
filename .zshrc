@@ -305,7 +305,7 @@ alias prox="export http_proxy=http://$PROX:1081\
 && export all_proxy=http://$PROX:1081\
 && export ftp_proxy=http://$PROX:1081
 "
-alias tra="python3 ~/translator/translator.py"
+alias tra="~/translate-shell/build/trans :zh+en"
 # alias vim="$EDITOR"
 alias vimm="/usr/bin/env vim"
 alias vi="$EDITOR --cmd 'let g:vim_startup=1'"

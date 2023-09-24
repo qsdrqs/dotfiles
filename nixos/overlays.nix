@@ -56,6 +56,16 @@
         '';
       });
 
+      deadd-notification-center = super.deadd-notification-center.overrideAttrs (oldAttrs: {
+        src = pkgs.fetchFromGitHub {
+          owner = "phuhl";
+          repo = "linux_notification_center";
+          rev = "master";
+          hash = "sha256-VU9NaQVS0n8hFRjWMvCMkaF5mZ4hpnluV31+/SAK7tU=";
+        };
+        version = "2.1.1";
+      });
+
     })
   ];
 }

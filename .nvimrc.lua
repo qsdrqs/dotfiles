@@ -2884,6 +2884,12 @@ require('lazy').setup({
         modes = {
           search = {
             enabled = false
+          },
+          char = {
+            jump_labels = true,
+            highlight = {
+              backdrop = false,
+            }
           }
         },
         label = {

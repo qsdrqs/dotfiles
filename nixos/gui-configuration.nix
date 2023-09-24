@@ -54,6 +54,16 @@ let
       done
     '';
   };
+  vscode-wrapper = pkgs.writeShellScriptBin "code-wrapper" ''
+    CODE_EXEC=${(pkgs-master.vscode.override (old: {
+      commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+    }))}/bin/code;
+    CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
+    sed -i 's/"window.titleBarStyle": "custom"/"window.titleBarStyle": "native"/g' $CONFIG;
+    exec -a "$0" "$CODE_EXEC" "$@" &
+    sleep 3
+    sed -i 's/"window.titleBarStyle": "native"/"window.titleBarStyle": "custom"/g' $CONFIG;
+  '';
   hyprlandPackages = with pkgs; [
     qt6.qtwayland
     libsForQt5.qt5.qtwayland
@@ -75,7 +85,10 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    vscode
+    (pkgs-master.vscode.override (old: {
+      commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+    }))
+    vscode-wrapper
     vscodium
     firefox-devedition
     kitty
@@ -106,7 +119,7 @@ in
     dolphin
     arandr
     scrcpy
-    dunst
+    deadd-notification-center
     wineWowPackages.unstableFull
     qemu_full
     virt-manager
@@ -160,9 +173,30 @@ in
       }
     '';
   };
-  systemd.services.mpd.environment = {
-    # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/609
-    XDG_RUNTIME_DIR = "/run/user/1000"; # User-id 1000 must match above user. MPD will look inside this directory for the PipeWire socket.
+
+  services.dbus.packages = with pkgs; [
+    libsForQt5.plasma-workspace
+  ];
+
+  systemd = {
+    services.mpd.environment = {
+      # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/609
+      XDG_RUNTIME_DIR = "/run/user/1000"; # User-id 1000 must match above user. MPD will look inside this directory for the PipeWire socket.
+    };
+    services.rathole = {
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      description = "Start the rathole client";
+      serviceConfig = {
+        User = "root";
+        ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/client.toml'';
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+    };
+    packages = with pkgs; [
+      deadd-notification-center
+    ];
   };
 
   programs.wireshark = {
@@ -241,18 +275,6 @@ in
 
   i18n.inputMethod.enabled = "fcitx5";
   i18n.inputMethod.fcitx5.addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
-
-  systemd.services.rathole = {
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-    description = "Start the rathole client";
-    serviceConfig = {
-      User = "root";
-      ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/client.toml'';
-      Restart = "on-failure";
-      RestartSec = 5;
-    };
-  };
 
   # Enable sound.
   sound.enable = true;
