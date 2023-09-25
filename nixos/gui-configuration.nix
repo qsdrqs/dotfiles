@@ -175,7 +175,6 @@ in
   };
 
   services.dbus.packages = with pkgs; [
-    libsForQt5.plasma-workspace
   ];
 
   systemd = {

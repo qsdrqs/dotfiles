@@ -904,16 +904,11 @@ require('lazy').setup({
   },
 
   {'kyazdani42/nvim-web-devicons'},
+
   {
-    'altermo/ultimate-autopair.nvim',
-    event={'InsertEnter','CmdlineEnter'},
-    branch='v0.6',
-    opts={
-      tabout = {
-        enable = true,
-        hopout = true,
-      },
-    },
+    'windwp/nvim-autopairs',
+    event = "InsertEnter",
+    opts = {}
   },
 
   {
@@ -3743,6 +3738,9 @@ for newgroup, oldgroup in pairs(links) do
   vim.api.nvim_set_hl(0, newgroup, { link = oldgroup, default = true })
 end
 
+function SetHightlight()
+end
+
 --------------------------------------------------------------------------------------
 ----------------------------Lazy Load-------------------------------------------------
 function lazyLoadPlugins()
@@ -4068,6 +4066,8 @@ function VscodeNeovimHandler()
   vim.keymap.set('n', '<leader>rn',function() vscode.notify("editor.action.rename") end, { silent = true })
   vim.keymap.set('n', '<leader>gg',function() vscode.notify("workbench.action.findInFiles") end, { silent = true })
   vim.keymap.set('n', '<leader><leader>',function() vscode.call("workbench.action.showCommands", 0) end, { silent = true })
+
+  vim.keymap.set('n', 'gh',function() vscode.call("clangd.switchheadersource", 0) end, { silent = true })
 
   vim.keymap.set('x', '<leader>y',function() vscode.call("extension.translateTextPreferred", 0) end, { silent = true })
   vim.keymap.set('n', '<leader>y',function()

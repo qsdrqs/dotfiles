@@ -204,7 +204,6 @@
               clippy
               rust-analyzer
               cmake
-              cargo-wasi
               llvmPackages_latest.llvm
             ];
             shellHook = ''
