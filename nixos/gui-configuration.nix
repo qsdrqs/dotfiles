@@ -55,7 +55,7 @@ let
     '';
   };
   vscode-wrapper = pkgs.writeShellScriptBin "code-wrapper" ''
-    CODE_EXEC=${(pkgs-master.vscode.override (old: {
+    CODE_EXEC=${(pkgs.vscode.override (old: {
       commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
     }))}/bin/code;
     CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
@@ -85,7 +85,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    (pkgs-master.vscode.override (old: {
+    (pkgs.vscode.override (old: {
       commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
     }))
     vscode-wrapper
@@ -193,9 +193,20 @@ in
         RestartSec = 5;
       };
     };
-    packages = with pkgs; [
-      deadd-notification-center
-    ];
+    user.services = {
+      deadd-notification-center = {
+        wantedBy = [ "graphical-session.target" ];
+        unitConfig = {
+          Description = "Deadd Notification Center";
+          PartOf = [ "graphical-session.target" ];
+        };
+        serviceConfig = {
+          Type = "dbus";
+          BusName = "org.freedesktop.Notifications";
+          ExecStart = "${pkgs.deadd-notification-center}/bin/deadd-notification-center";
+        };
+      };
+    };
   };
 
   programs.wireshark = {

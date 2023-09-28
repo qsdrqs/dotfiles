@@ -77,6 +77,9 @@
   nixpkgs.config.allowUnfree = true;
   environment.defaultPackages = [ ];
 
+  # repair nix store
+  # nixpkgs.config.sync-before-registering = true;
+
   nixpkgs.config.permittedInsecurePackages = [
     "nodejs-16.20.2"
     "openssl-1.1.1w"

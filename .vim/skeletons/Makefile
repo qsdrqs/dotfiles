@@ -19,9 +19,6 @@ INCLUDE := -I.
 CFLAGS  := -g -Wall -O2 $(DEFINES) $(INCLUDE)
 CXXFLAGS:= $(CFLAGS) -DHAVE_CONFIG_H
 
-
-#i think you should do anything here
-
 .PHONY : everything objs clean veryclean rebuild
 
 everything : $(TARGET)

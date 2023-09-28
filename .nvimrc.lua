@@ -408,13 +408,8 @@ require('lazy').setup({
         require('jdtls.dap').setup_dap_main_class_configs()
       end
       -- vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "java",
-        callback = function()
-          require('jdtls.setup').add_commands()
-          require('jdtls').start_or_attach(jdt_config)
-        end
-      })
+        require('jdtls.setup').add_commands()
+        require('jdtls').start_or_attach(jdt_config)
     end
   },
 
@@ -601,6 +596,16 @@ require('lazy').setup({
               analysis = {
                 diagnosticSeverityOverrides = {
                   reportGeneralTypeIssues = "warning"
+                },
+                extraPaths = {
+                  vim.fn.getcwd()
+                },
+                completeFunctionParens = true,
+                inlayHints = {
+                  variableTypes = true,
+                  functionReturnTypes = true,
+                  callArgumentNames = "all",
+                  pytestParameters = true,
                 }
               }
             }
@@ -976,7 +981,6 @@ require('lazy').setup({
   },
   {
     'rcarriga/cmp-dap',
-    depedencies = {"mfussenegger/nvim-dap"},
     config = function()
       require("cmp").setup({
         enabled = function()
@@ -2149,7 +2153,25 @@ require('lazy').setup({
           c = { fg = '#c6c6c6', bg = '#080808' },
         }
       end
+      local function get_venv()
+        local venv_name = os.getenv("VIRTUAL_ENV")
+        if venv_name ~= nil then
+          local venv_short_name = vim.fn.fnamemodify(venv_name, ":t")
+          if venv_short_name == "venv" then
+            venv_short_name = vim.fn.fnamemodify(venv_name, ":h:t")
+          end
+          return "(" .. venv_short_name .. ")"
+        else
+          return ""
+        end
+      end
       -- lsp info, from https://github.com/nvim-lualine/lualine.nvim/blob/master/examples/evil_lualine.lua
+      --
+      local lsp_click = function()
+        if vim.o.ft == "python" then
+          vim.cmd.VenvSelect()
+        end
+      end
       local lsp_info =  {
         -- Lsp server name .
         function()
@@ -2174,6 +2196,9 @@ require('lazy').setup({
             local unique = {}
             for _, v in ipairs(client_names) do
               if not seen[v] then
+                if v:match("py.*") then
+                  v = v .. get_venv()
+                end
                 table.insert(unique, v)
                 seen[v] = true
               end
@@ -2182,7 +2207,8 @@ require('lazy').setup({
           end
         end,
         icon = ' ',
-        color = {gui = 'bold'}
+        color = {gui = 'bold'},
+        on_click = lsp_click
       }
 
       vim.api.nvim_create_autocmd({"InsertEnter"}, {
@@ -2262,7 +2288,7 @@ require('lazy').setup({
             symbols = {error = ' ', warn = ' ', info = ' ', hint = ' '},
           }},
           lualine_c = {lsp_info, gtagsHandler},
-          lualine_x = {auto_session_name, nix_dev},
+          lualine_x = {auto_session_name,  nix_dev},
           lualine_y = { 'fileformat', 'filetype', copilot},
           lualine_z = {shiftwidth, '%l/%L,%c', 'encoding'}
         },
@@ -3024,6 +3050,19 @@ require('lazy').setup({
     end
   },
 
+  {
+    "linux-cultist/venv-selector.nvim",
+    dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
+    cmd = {"VenvSelect", "VenvSelectCached"},
+    config = function()
+      require("venv-selector").setup({
+        -- Your options go here
+        -- name = "venv",
+        -- auto_refresh = false
+      })
+    end
+  },
+
   -- vim plugins
   {
     "andymass/vim-matchup",
@@ -3379,6 +3418,16 @@ require('lazy').setup({
   -- dap
   {
     "mfussenegger/nvim-dap",
+    dependencies = {
+      "rcarriga/nvim-dap-ui",
+      "theHamsta/nvim-dap-virtual-text",
+      "mfussenegger/nvim-dap-python",
+      "rcarriga/cmp-dap"
+    },
+    keys = {
+      "<F5>",
+      "<F9>",
+    },
     config = function()
       local dap = require('dap')
       vim.cmd('hi debugRed guifg=red')
@@ -3499,38 +3548,8 @@ require('lazy').setup({
       dap.configurations.rust = dap.configurations.cpp
       dap.configurations.asm = dap.configurations.cpp
 
-      -- Python
-      dap.adapters.python = {
-        type = 'executable';
-        command = vim.fn.stdpath('data') .. '/mason/packages/debugpy/venv/bin/python',
-        args = { '-m', 'debugpy.adapter' };
-      }
-      dap.configurations.python = {
-        {
-          -- The first three options are required by nvim-dap
-          type = 'python'; -- the type here established the link to the adapter definition: `dap.adapters.python`
-          request = 'launch';
-          name = "Launch file";
-
-          -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
-
-          program = "${file}"; -- This configuration will launch the current file if used.
-          console = "integratedTerminal";
-          pythonPath = function()
-            -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
-            -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
-            -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
-            local cwd = vim.fn.getcwd()
-            if vim.fn.executable(cwd .. '/venv/bin/python') == 1 then
-              return cwd .. '/venv/bin/python'
-            elseif vim.fn.executable(cwd .. '/.venv/bin/python') == 1 then
-              return cwd .. '/.venv/bin/python'
-            else
-              return '/usr/bin/python'
-            end
-          end;
-        },
-      }
+      -- Java use nvim-jdtls
+      -- Python use nvim-dap-python
 
       -- Go
       dap.adapters.go = {
@@ -3578,8 +3597,13 @@ require('lazy').setup({
     end
   },
   {
+    'mfussenegger/nvim-dap-python',
+    config = function()
+      require('dap-python').setup()
+    end
+  },
+  {
     "rcarriga/nvim-dap-ui",
-    dependencies = {"mfussenegger/nvim-dap"},
     config = function()
       local dapui = require("dapui")
       dapui.setup({
@@ -3666,7 +3690,6 @@ require('lazy').setup({
   },
   {
     'theHamsta/nvim-dap-virtual-text',
-    dependencies = {"mfussenegger/nvim-dap"},
     config = function()
       require("nvim-dap-virtual-text").setup {
         enabled = true,                     -- enable this plugin (the default)
@@ -3738,16 +3761,22 @@ for newgroup, oldgroup in pairs(links) do
   vim.api.nvim_set_hl(0, newgroup, { link = oldgroup, default = true })
 end
 
-function SetHightlight()
-end
-
 --------------------------------------------------------------------------------------
 ----------------------------Lazy Load-------------------------------------------------
+function load_by_filetype(ft, plugins)
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = ft,
+    callback = function()
+      require('lazy').load{plugins = plugins}
+    end
+  })
+end
 function lazyLoadPlugins()
-  require('lazy').load{
+  load_by_filetype("java", {'nvim-jdtls'})
+
+  require('lazy').load {
     plugins = {
       -- begin lsp
-      'nvim-jdtls',
       'rust-tools.nvim',
       'clangd_extensions.nvim',
       'nvim-lightbulb',
@@ -3756,11 +3785,6 @@ function lazyLoadPlugins()
       'lsp_signature.nvim',
       'dropbar.nvim',
       -- end lsp
-
-      -- begin dap
-      'nvim-dap-ui',
-      'nvim-dap-virtual-text',
-      -- end dap
 
       -- begin git
       'gitsigns.nvim',
@@ -3832,7 +3856,6 @@ function lazyLoadPlugins()
           'cmp-omni',
           'cmp-nvim-lsp-signature-help',
           'cmp-dictionary',
-          'cmp-dap',
           'cmp-nvim-ultisnips',
           -- end cmp
         }
