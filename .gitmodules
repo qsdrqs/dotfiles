@@ -1,6 +1,9 @@
 [submodule "z"]
 	path = z
 	url = https://github.com/rupa/z.git
+[submodule "z.lua"]
+	path = z.lua
+	url = https://github.com/skywind3000/z.lua
 [submodule "fzf-marks"]
 	path = ranger/plugins/fzf-marks
 	url = https://github.com/laggardkernel/ranger-fzf-marks.git

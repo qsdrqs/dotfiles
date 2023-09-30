@@ -129,6 +129,7 @@
     cscope
     global
     ctags
+    lua
 
     nodejs_16
   ];

@@ -400,17 +400,21 @@ unset LS_COLORS
 GITSTATUS_LOG_LEVEL=DEBUG
 
 # z.sh
-source $HOME/dotfiles/z/z.sh
-export _Z_SRC=$HOME/dotfiles/z/z.sh
-ZSH_DISABLE_COMPFIX=true
+if [[ -x `command -v lua` ]]; then
+    eval "$(lua $HOME/dotfiles/z.lua/z.lua --init zsh)"
+else
+    source $HOME/dotfiles/z/z.sh
+    export _Z_SRC=$HOME/dotfiles/z/z.sh
+    ZSH_DISABLE_COMPFIX=true
 
-_z_zsh_tab_completion() {
-    # tab completion
-    reply=(${(f)"$(_z --complete "$compl")"})
-    _describe 'values' reply
-}
+    _z_zsh_tab_completion() {
+        # tab completion
+        reply=(${(f)"$(_z --complete "$compl")"})
+        _describe 'values' reply
+    }
 
-compdef _z_zsh_tab_completion _z
+    compdef _z_zsh_tab_completion _z
+fi
 
 # pyenv: not load by default due to performance issue
 # if [[ -x `command -v pyenv` ]]; then
