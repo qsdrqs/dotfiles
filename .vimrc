@@ -520,7 +520,7 @@ else
       let load_plugins_on_start = v:false
       if load_plugins_on_start
         call TriggerPlugins()
-      elseif (len(argv()) == 0 || isdirectory(argv()[0])) && !exists('g:plugins_loaded')
+      elseif (len(argv()) == 0 || isdirectory(argv()[0])) && !exists('g:plugins_loaded') && !exists('g:started_by_firenvim')
         " call plugins if no args
         call TriggerPlugins()
       endif

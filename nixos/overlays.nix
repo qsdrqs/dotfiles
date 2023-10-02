@@ -66,6 +66,18 @@
         version = "2.1.1";
       });
 
+      firefox-devedition= super.firefox-devedition.overrideAttrs (oldAttrs: {
+        buildCommand = (oldAttrs.buildCommand or "") + ''
+          mkdir -p $out/tmp/firefox-omni
+          cd $out/tmp/firefox-omni
+          ${pkgs.unzip}/bin/unzip $out/lib/firefox/browser/omni.ja
+          patch chrome/browser/content/browser/browser.xhtml < ${patches/browser.xhtml.patch}
+          ${pkgs.zip}/bin/zip -0DXqr $out/tmp/omni.ja *
+          cp -f $out/tmp/omni.ja $out/lib/firefox/browser/omni.ja
+          rm -rf $out/tmp
+        '';
+      });
+
     })
   ];
 }

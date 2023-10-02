@@ -724,6 +724,7 @@ require('lazy').setup({
                 command = { "nixpkgs-fmt" }
               },
               nix = {
+                maxMemoryMB = 2560,
                 flake = {
                   autoArchive = true,
                   autoEvalInputs = true,
@@ -1001,9 +1002,10 @@ require('lazy').setup({
     lazy = true,
     keys = {"/", {":", mode = {'v', 'n'}}},
     cond = function()
-      return vim.g.vscode == nil and
-             vim.fn.getfsize(vim.fn.expand('%')) <= (1024 * 1024 * 100) and
-             vim.fn.line('$') <= 100000
+      return vim.g.vscode == nil
+          and vim.fn.getfsize(vim.fn.expand('%')) <= (1024 * 1024 * 100)
+          and vim.fn.line('$') <= 100000
+          and vim.g.started_by_firenvim == nil
     end,
     config = function()
       local status_ok, cmp = pcall(require, "cmp")
@@ -2559,7 +2561,9 @@ require('lazy').setup({
     'goolord/alpha-nvim',
     dependencies = { 'rmagatti/auto-session' },
     cond = function()
-      return vim.g.not_start_alpha ~= true and #vim.fn.argv() == 0
+      return vim.g.not_start_alpha ~= true
+          and #vim.fn.argv() == 0
+          and vim.g.started_by_firenvim == nil
     end,
     config = function ()
       local alpha = require'alpha'
@@ -3043,10 +3047,25 @@ require('lazy').setup({
     'glacambre/firenvim',
     -- Lazy load firenvim
     -- Explanation: https://github.com/folke/lazy.nvim/discussions/463#discussioncomment-4819297
-    cond = not not vim.g.started_by_firenvim,
+    lazy = not vim.g.started_by_firenvim,
     build = function()
       require("lazy").load({ plugins = "firenvim", wait = true })
       vim.fn["firenvim#install"](0)
+    end,
+    config = function()
+      vim.o.laststatus = 0
+      vim.g.firenvim_config = {
+        globalSettings = { alt = "all" },
+        localSettings = {
+          [".*"] = {
+            cmdline  = "neovim",
+            content  = "text",
+            priority = 0,
+            selector = "textarea",
+            takeover = "never"
+          }
+        }
+      }
     end
   },
 

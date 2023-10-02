@@ -1,0 +1,14 @@
+284c284
+<          modifiers="accel" reserved="true"/>
+---
+>          modifiers="accel" reserved="false"/>
+286c286
+<          command="cmd_newNavigatorTabNoEvent" reserved="true"/>
+---
+>          command="cmd_newNavigatorTabNoEvent" reserved="false"/>
+305,306c305,306
+<     <key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel" reserved="true"/>
+<     <key id="key_closeWindow" data-l10n-id="close-shortcut" command="cmd_closeWindow" modifiers="accel,shift" reserved="true"/>
+---
+>     <key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel" reserved="false"/>
+>     <key id="key_closeWindow" data-l10n-id="close-shortcut" command="cmd_closeWindow" modifiers="accel,shift" reserved="false"/>
