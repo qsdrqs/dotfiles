@@ -125,7 +125,13 @@ local kind_icons = {
 require('lazy').setup({
   {'dotfiles', lazy = false, dir = os.getenv("HOME") .. "/dotfiles/nvim"},
   {'folke/lazy.nvim', lazy = false},
-  {'nvim-lua/plenary.nvim'},
+  {
+    'nvim-lua/plenary.nvim',
+    config = function()
+      vim.api.nvim_create_user_command("PlenaryProfile", function() require'plenary.profile'.start("profile.log", {flame = true}) end, {})
+      vim.api.nvim_create_user_command("PlenaryProfileStop", function() require'plenary.profile'.stop() end, {})
+    end
+  },
   {
     'nvim-telescope/telescope.nvim',
     dependencies = {
@@ -878,13 +884,21 @@ require('lazy').setup({
     config = function()
       local lightbulb = require('nvim-lightbulb')
       lightbulb.setup {
+        autocmd = {
+          enabled = true
+        },
+        sign = {
+          enabled = true,
+          -- Text to show in the sign column.
+          -- Must be between 1-2 characters.
+          text = "💡",
+          -- Highlight group to highlight the sign column text.
+          hl = "LightBulbSign",
+        },
         ignore = {
           clients = {"null-ls"}
         },
       }
-      vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
-        callback = function() lightbulb.update_lightbulb() end
-      })
     end
   },
 
@@ -2132,7 +2146,7 @@ require('lazy').setup({
     keys = "<leader>rn",
     config = function()
       require("inc_rename").setup({
-        -- input_buffer_type = "dressing",
+        input_buffer_type = "dressing",
       })
       vim.keymap.set("n", "<leader>rn", function()
         return ":IncRename " .. vim.fn.expand("<cword>")
@@ -3129,7 +3143,7 @@ require('lazy').setup({
     cond = function()
       return vim.g.vscode == nil
     end,
-    keys = {{"<leader>y", mode = 'n'}, {"<leader>y", mode = 'x'}},
+    keys = {{"<leader>y", mode = {'n', 'x'}}},
     config = function()
       local opts = {noremap = true, silent = true, expr = true}
       local pantran = require("pantran")
@@ -3240,7 +3254,8 @@ require('lazy').setup({
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
       vim.g.copilot_filetypes = {
-        ["dap-repl"] = false
+        ["dap-repl"] = false,
+        markdown = true
       }
 
       function copilot_dismiss()
@@ -3356,7 +3371,7 @@ require('lazy').setup({
     init = function()
       vim.g.VM_leader = '\\'
     end,
-    keys = "<C-n>",
+    keys = {{"<C-n>", mode = {'n', 'v', 'x'}}},
     config = function()
       vim.g.VM_theme = 'neon'
     end

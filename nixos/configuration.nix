@@ -130,6 +130,7 @@
     global
     ctags
     lua
+    home-manager
 
     nodejs_16
   ];

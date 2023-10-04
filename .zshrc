@@ -278,6 +278,9 @@ alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bd
 snr-switch() {
     sudo nixos-rebuild switch --flake path:$HOME/dotfiles#$@
 }
+hm-switch() {
+    home-manager switch --flake path:$HOME/dotfiles#$@
+}
 nix-devel() {
     local last_env=$NIX_DEV
     local command=""

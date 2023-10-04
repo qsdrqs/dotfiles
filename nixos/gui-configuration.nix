@@ -129,6 +129,7 @@ in
     steam-run
     w3m
     inferno
+    pandoc
 
     android-file-transfer
     android-udev-rules

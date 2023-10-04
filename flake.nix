@@ -113,6 +113,13 @@
 
         ];
       };
+      basicHomeConfig = {
+        pkgs = x86_64-linux-pkgs;
+        modules = [
+          ./nixos/home.nix
+        ];
+        extraSpecialArgs = { inherit inputs; };
+      };
       pkgs' = (system: import nixpkgs {
         system = system;
         config.allowUnfree = true;
@@ -186,6 +193,14 @@
         ];
       });
 
+      # home-manager
+      homeConfigurations.basic = home-manager.lib.homeManagerConfiguration basicHomeConfig;
+
+      homeConfigurations.gui = home-manager.lib.homeManagerConfiguration (basicHomeConfig // {
+        modules = basicHomeConfig.modules ++ [
+          ./nixos/gui-home.nix
+        ];
+      });
       # dev shells
       devShells' = (arch: pkgs: with pkgs; {
         rust =
