@@ -1,14 +1,34 @@
-284c284
-<          modifiers="accel" reserved="true"/>
----
->          modifiers="accel" reserved="false"/>
-286c286
-<          command="cmd_newNavigatorTabNoEvent" reserved="true"/>
----
->          command="cmd_newNavigatorTabNoEvent" reserved="false"/>
-305,306c305,306
-<     <key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel" reserved="true"/>
-<     <key id="key_closeWindow" data-l10n-id="close-shortcut" command="cmd_closeWindow" modifiers="accel,shift" reserved="true"/>
----
->     <key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel" reserved="false"/>
->     <key id="key_closeWindow" data-l10n-id="close-shortcut" command="cmd_closeWindow" modifiers="accel,shift" reserved="false"/>
+--- browser.xhtml	2023-10-05 13:14:23.144206463 -0500
++++ browser-unreserved.xhtml	2023-10-05 13:10:44.530077543 -0500
+@@ -281,9 +281,9 @@
+     <key id="key_newNavigator"
+          data-l10n-id="window-new-shortcut"
+          command="cmd_newNavigator"
+-         modifiers="accel" reserved="true"/>
++         modifiers="accel" reserved="false"/>
+     <key id="key_newNavigatorTab" data-l10n-id="tab-new-shortcut" modifiers="accel"
+-         command="cmd_newNavigatorTabNoEvent" reserved="true"/>
++         command="cmd_newNavigatorTabNoEvent" reserved="false"/>
+     <key id="focusURLBar" data-l10n-id="location-open-shortcut" command="Browser:OpenLocation"
+          modifiers="accel"/>
+     <key id="focusURLBar2" data-l10n-id="location-open-shortcut-alt" command="Browser:OpenLocation"
+@@ -302,8 +302,8 @@
+     <key id="openFileKb" data-l10n-id="file-open-shortcut" command="Browser:OpenFile"  modifiers="accel"/>
+     <key id="key_savePage" data-l10n-id="save-page-shortcut" command="Browser:SavePage" modifiers="accel"/>
+     <key id="printKb" data-l10n-id="print-shortcut" command="cmd_print"  modifiers="accel"/>
+-    <key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel" reserved="true"/>
+-    <key id="key_closeWindow" data-l10n-id="close-shortcut" command="cmd_closeWindow" modifiers="accel,shift" reserved="true"/>
++    <key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel" reserved="false"/>
++    <key id="key_closeWindow" data-l10n-id="close-shortcut" command="cmd_closeWindow" modifiers="accel,shift" reserved="false"/>
+     <key id="key_toggleMute" data-l10n-id="mute-toggle-shortcut" command="cmd_toggleMute" modifiers="control"/>
+     <key id="key_undo"
+          data-l10n-id="text-action-undo-shortcut"
+@@ -403,7 +403,7 @@
+     <key id="key_quitApplication" data-l10n-id="quit-app-shortcut"
+          modifiers="accel"
+          command="cmd_quitApplication"
+-         reserved="true"/>
++         reserved="false"/>
+ 
+     <key id="key_restoreLastClosedTabOrWindowOrSession" command="History:RestoreLastClosedTabOrWindowOrSession" data-l10n-id="tab-new-shortcut" modifiers="accel,shift"/>
+     <key id="key_undoCloseWindow" command="History:UndoCloseWindow" data-l10n-id="window-new-shortcut" modifiers="accel,shift"/>

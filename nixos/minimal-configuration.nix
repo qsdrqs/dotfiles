@@ -77,14 +77,6 @@
   nixpkgs.config.allowUnfree = true;
   environment.defaultPackages = [ ];
 
-  # repair nix store
-  # nixpkgs.config.sync-before-registering = true;
-
-  nixpkgs.config.permittedInsecurePackages = [
-    "nodejs-16.20.2"
-    "openssl-1.1.1w"
-  ];
-
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     lsd
@@ -93,17 +85,13 @@
     ranger
     tmux
     neofetch
-    gcc
-    gnumake
     grc
     git
     fzf
     fd
     ripgrep
-    perl
     unzip
     zip
-    appimage-run
     killall
     (pkgs.buildFHSUserEnv {
       name = "fhs";
@@ -115,28 +103,18 @@
     patchelf
     python3
     lsof
-    nil # nix language server
-    nixpkgs-fmt
     bat
     file
-    python3Packages.ipython
-    python3Packages.pip
     rsync
     iptables
     kmod
     nmap
     lm_sensors
-    cscope
-    global
-    ctags
     lua
     home-manager
-
-    nodejs_16
+    nix-tree
+    duf
   ];
-  environment.variables = {
-    LIBCLANG_PATH = "${pkgs.llvmPackages_latest.libclang.lib}/lib";
-  };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
@@ -155,16 +133,6 @@
     };
     nix-ld.enable = true;
     gnupg.agent.enable = true;
-    proxychains = {
-      enable = true;
-      proxies.v2ray = {
-        type = "socks5";
-        host = "127.0.0.1";
-        port = 1080;
-        enable = true;
-      };
-      quietMode = true;
-    };
   };
   # List services that you want to enable:
 
@@ -182,19 +150,7 @@
       SystemMaxUse=500M
       RuntimeMaxUse=500M
     '';
-    syncthing = {
-      enable = true;
-      user = "qsdrqs";
-      configDir = "/home/qsdrqs/.config/syncthing";
-    };
-    v2ray = {
-      enable = true;
-      configFile = "/etc/v2ray/config.json";
-    };
   };
-
-  # avoid v2ray service to create config file
-  environment.etc."v2ray/config.json".enable = false;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

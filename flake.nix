@@ -82,7 +82,7 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
-      basicConfig = {
+      minimalConfig = {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
@@ -90,7 +90,7 @@
         };
         modules = [
           (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else ./nixos/empty.nix)
-          ./nixos/configuration.nix
+          ./nixos/minimal-configuration.nix
           ./nixos/overlays.nix
 
           # home-manager module
@@ -105,67 +105,55 @@
             home-manager.extraSpecialArgs = { inherit inputs; };
           }
 
+        ];
+      };
+      serverConfig = minimalConfig // {
+        modules = minimalConfig.modules ++ [
+          ./nixos/server-configuration.nix
+
           # vscode-server
           vscode-server.nixosModules.default
           ({ config, pkgs, ... }: {
             services.vscode-server.enable = true;
           })
 
+          # NUR
+          nur.nixosModules.nur
         ];
       };
-      basicHomeConfig = {
+      guiConfig = minimalConfig // {
+        modules = minimalConfig.modules ++ [
+          ./nixos/gui-configuration.nix
+        ];
+      };
+
+      wslConfig = serverConfig // {
+        modules = serverConfig.modules ++ [
+          ./nixos/wsl-configuration.nix
+        ];
+      };
+
+      desktopConfig = serverConfig // guiConfig // {
+        modules = serverConfig.modules ++ guiConfig.modules ++ [
+          ./nixos/desktop-configuration.nix
+        ];
+      };
+
+      minimalHomeConfig = {
         pkgs = x86_64-linux-pkgs;
         modules = [
           ./nixos/home.nix
         ];
         extraSpecialArgs = { inherit inputs; };
       };
-      pkgs' = (system: import nixpkgs {
-        system = system;
-        config.allowUnfree = true;
-        overlays = (import ./nixos/overlays.nix {
-          inherit inputs;
-          pkgs = nixpkgs.legacyPackages.${system};
-          config = nixpkgs.config;
-          lib = nixpkgs.lib;
-        }).nixpkgs.overlays;
-      });
-      x86_64-linux-pkgs = pkgs' "x86_64-linux";
-      aarch64-linux-pkgs = pkgs' "aarch64-linux";
-    in
-    {
-      # Utilized by `nix flake check`
-      nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
-      nixosConfigurations.gui = nixpkgs.lib.nixosSystem (basicConfig // {
-        modules = basicConfig.modules ++ [
-          ./nixos/gui-configuration.nix
-          nur.nixosModules.nur
-
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.users.qsdrqs = import ./nixos/gui-home.nix;
-            home-manager.extraSpecialArgs = { inherit inputs; };
-          }
+      guiHomeConfig = minimalHomeConfig // {
+        modules = minimalHomeConfig.modules ++ [
+          ./nixos/gui-home.nix
         ];
-      });
-      nixosConfigurations.wsl = nixpkgs.lib.nixosSystem (basicConfig // {
-        modules = basicConfig.modules ++ [
-          ./nixos/wsl.nix
-        ];
-      });
-
-      # nix-on-droid
-      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
-        modules = [
-          ./nixos/nix-on-droid.nix
-        ];
-        extraSpecialArgs = { inherit inputs; };
       };
 
-      # iso, build through #nixos-iso.config.system.build.isoImage
-      nixos-iso = nixpkgs.lib.nixosSystem (basicConfig // {
-        # drop the custom.nix
-        modules = basicConfig.modules ++ [
+      isoConfig = minimalConfig // {
+        modules = minimalConfig.modules ++ [
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
 
           home-manager.nixosModules.home-manager
@@ -191,16 +179,50 @@
             networking.networkmanager.enable = nixpkgs.lib.mkForce false;
           })
         ];
+      };
+
+      isoGuiConfig = isoConfig // {
+        modules = isoConfig.modules ++ [
+          ./nixos/gui-configuration.nix
+        ];
+      };
+
+      pkgs' = (system: import nixpkgs {
+        system = system;
+        config.allowUnfree = true;
+        overlays = (import ./nixos/overlays.nix {
+          inherit inputs;
+          pkgs = nixpkgs.legacyPackages.${system};
+          config = nixpkgs.config;
+          lib = nixpkgs.lib;
+        }).nixpkgs.overlays;
       });
+      x86_64-linux-pkgs = pkgs' "x86_64-linux";
+      aarch64-linux-pkgs = pkgs' "aarch64-linux";
+    in
+    {
+      nixosConfigurations.minimal = nixpkgs.lib.nixosSystem minimalConfig;
+      nixosConfigurations.server = nixpkgs.lib.nixosSystem serverConfig;
+      nixosConfigurations.gui = nixpkgs.lib.nixosSystem guiConfig;
+      nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
+      nixosConfigurations.desktop = nixpkgs.lib.nixosSystem desktopConfig;
+
+      # nix-on-droid
+      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
+        modules = [
+          ./nixos/nix-on-droid.nix
+        ];
+        extraSpecialArgs = { inherit inputs; };
+      };
+
+      # iso, build through #nixos-iso.config.system.build.isoImage
+      nixos-iso = nixpkgs.lib.nixosSystem isoConfig;
+      nixos-iso-gui = nixpkgs.lib.nixosSystem isoGuiConfig;
 
       # home-manager
-      homeConfigurations.basic = home-manager.lib.homeManagerConfiguration basicHomeConfig;
+      homeConfigurations.basic = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
 
-      homeConfigurations.gui = home-manager.lib.homeManagerConfiguration (basicHomeConfig // {
-        modules = basicHomeConfig.modules ++ [
-          ./nixos/gui-home.nix
-        ];
-      });
+      homeConfigurations.gui = home-manager.lib.homeManagerConfiguration guiHomeConfig;
       # dev shells
       devShells' = (arch: pkgs: with pkgs; {
         rust =

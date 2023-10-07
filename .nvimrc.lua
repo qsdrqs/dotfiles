@@ -127,6 +127,10 @@ require('lazy').setup({
   {'folke/lazy.nvim', lazy = false},
   {
     'nvim-lua/plenary.nvim',
+    cmd = {
+      "PlenaryProfile",
+      "PlenaryProfileStop",
+    },
     config = function()
       vim.api.nvim_create_user_command("PlenaryProfile", function() require'plenary.profile'.start("profile.log", {flame = true}) end, {})
       vim.api.nvim_create_user_command("PlenaryProfileStop", function() require'plenary.profile'.stop() end, {})
@@ -709,7 +713,7 @@ require('lazy').setup({
             }
           end
         elseif lsp == "grammarly" then
-          lsp_common_config.filetypes = { "markdown", "tex" }
+          lsp_common_config.filetypes = { "markdown", "tex", "text" }
           lsp_common_config.cmd = {os.getenv("HOME") .. "/grammarly/packages/grammarly-languageserver/bin/server.js", "--stdio"}
           lsp_common_config.init_options = {
             clientId = "client_BaDkMgx4X19X9UxxYRCXZo"
@@ -833,7 +837,7 @@ require('lazy').setup({
         -- Default segments (fold -> sign -> line number + separator)
         segments = {
           {
-            sign = { name = { ".*" }, maxwidth = 1, colwidth = 2},
+            sign = { namespace = { ".*" }, maxwidth = 1, colwidth = 2},
             click = "v:lua.ScSa"
           },
           {
@@ -842,7 +846,7 @@ require('lazy').setup({
             click = "v:lua.ScLa",
           },
           {
-            sign = { name = {"GitSigns"},  maxwidth = 1, colwidth = 1, auto = false},
+            sign = { namespace = {"gitsigns"},  maxwidth = 1, colwidth = 1, auto = false},
             click = "v:lua.ScSa",
           },
           { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
@@ -857,22 +861,23 @@ require('lazy').setup({
         }, -- lua table with filetypes for which 'statuscolumn' will be unset
         -- Click actions
         clickhandlers = {
-          Lnum                   = builtin.lnum_click,
-          FoldClose              = builtin.foldclose_click,
-          FoldOpen               = builtin.foldopen_click,
-          FoldOther              = builtin.foldother_click,
-          DapBreakpointRejected  = builtin.toggle_breakpoint,
-          DapBreakpoint          = builtin.toggle_breakpoint,
-          DapBreakpointCondition = builtin.toggle_breakpoint,
-          DiagnosticSignError    = builtin.diagnostic_click,
-          DiagnosticSignHint     = builtin.diagnostic_click,
-          DiagnosticSignInfo     = builtin.diagnostic_click,
-          DiagnosticSignWarn     = builtin.diagnostic_click,
-          GitSignsTopdelete      = builtin.gitsigns_click,
-          GitSignsUntracked      = builtin.gitsigns_click,
-          GitSignsAdd            = builtin.gitsigns_click,
-          GitSignsChangedelete   = builtin.gitsigns_click,
-          GitSignsDelete         = builtin.gitsigns_click,
+          Lnum                    = builtin.lnum_click,
+          FoldClose               = builtin.foldclose_click,
+          FoldOpen                = builtin.foldopen_click,
+          FoldOther               = builtin.foldother_click,
+          DapBreakpointRejected   = builtin.toggle_breakpoint,
+          DapBreakpoint           = builtin.toggle_breakpoint,
+          DapBreakpointCondition  = builtin.toggle_breakpoint,
+          DiagnosticSignError     = builtin.diagnostic_click,
+          DiagnosticSignHint      = builtin.diagnostic_click,
+          DiagnosticSignInfo      = builtin.diagnostic_click,
+          DiagnosticSignWarn      = builtin.diagnostic_click,
+          GitSignsTopdelete       = builtin.gitsigns_click,
+          GitSignsUntracked       = builtin.gitsigns_click,
+          GitSignsAdd             = builtin.gitsigns_click,
+          GitSignsChangedelete    = builtin.gitsigns_click,
+          GitSignsDelete          = builtin.gitsigns_click,
+          gitsigns_extmark_signs_ = builtin.gitsigns_click,
         }
       })
     end
@@ -1561,7 +1566,6 @@ require('lazy').setup({
   {
     "lukas-reineke/indent-blankline.nvim",
     lazy = true,
-    branch = "v3",
     cond = function()
       return vim.g.treesitter_disable ~= true
     end,
@@ -3062,6 +3066,7 @@ require('lazy').setup({
     -- Lazy load firenvim
     -- Explanation: https://github.com/folke/lazy.nvim/discussions/463#discussioncomment-4819297
     lazy = not vim.g.started_by_firenvim,
+    dependencies = { 'github/copilot.vim', 'neovim/nvim-lspconfig' },
     build = function()
       require("lazy").load({ plugins = "firenvim", wait = true })
       vim.fn["firenvim#install"](0)
@@ -3745,6 +3750,9 @@ require('lazy').setup({
 }, {
   defaults = {
     lazy = true
+  },
+  install = {
+    missing = false
   }
 })
 
@@ -4004,6 +4012,34 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 
 -- osc52 support on ssh
 if os.getenv("SSH_CONNECTION") ~= nil then
+  -- disable the xclip under SSH due to high lantency
+  if os.getenv("TMUX") ~= nil then
+    vim.g.clipboard = {
+      name = "tmux clipboard",
+      copy = {
+        ["+"] = "tmux load-buffer -",
+        ["*"] = "tmux load-buffer -",
+      },
+      paste = {
+        ["+"] = "tmux save-buffer -",
+        ["*"] = "tmux save-buffer -",
+      },
+      cache_enabled = 1,
+    }
+  else
+    vim.g.clipboard = {
+      name = "dummy_clipboard",
+      copy = {
+        ["+"] = "",
+        ["*"] = "",
+      },
+      paste = {
+        ["+"] = "",
+        ["*"] = "",
+      },
+      cache_enabled = 0,
+    }
+  end
   vim.api.nvim_create_autocmd("TextYankPost", {
     callback = function()
       if have_load_osc52 == nil then

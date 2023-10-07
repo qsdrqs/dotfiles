@@ -437,7 +437,7 @@ function! s:wrapPara()
   endif
 endfunction
 
-autocmd InsertLeave *.tex call s:wrapPara()
+" autocmd InsertLeave *.tex call s:wrapPara()
 if !exists('g:wrap_on_insert_leave')
   let g:wrap_on_insert_leave = 1
 endif
