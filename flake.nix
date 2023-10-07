@@ -119,6 +119,9 @@
 
           # NUR
           nur.nixosModules.nur
+
+          # nix index database
+          inputs.nix-index-database.nixosModules.nix-index
         ];
       };
       guiConfig = minimalConfig // {

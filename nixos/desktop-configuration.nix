@@ -80,9 +80,7 @@ in
       commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
     }))
     zoom-us
-    gpick
     kate
-    arandr
     scrcpy
     wineWowPackages.unstableFull
     wpsoffice-hidpi
@@ -105,13 +103,13 @@ in
     # NUR
     config.nur.repos.xddxdd.qq
     # wine wechat
-    (config.nur.repos.xddxdd.wine-wechat.override {
-      setupSrc = fetchurl {
-        url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
-        sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
-      };
-      version = "3.9.5";
-    })
+    # (config.nur.repos.xddxdd.wine-wechat.override {
+    #   setupSrc = fetchurl {
+    #     url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
+    #     sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
+    #   };
+    #   version = "3.9.5";
+    # })
     config.nur.repos.xddxdd.qqmusic
     config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
@@ -162,12 +160,12 @@ in
     windowManager.i3 = {
       enable = true;
       extraPackages = with pkgs; [
+        gpick
+          arandr
         flameshot
         variety
         feh
-        rofi-wayland
         picom
-        networkmanagerapplet
       ];
     };
     desktopManager.plasma5.enable = true;

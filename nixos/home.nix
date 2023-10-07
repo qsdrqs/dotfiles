@@ -3,7 +3,6 @@
 {
   imports = [
     ./dotfiles.nix
-    inputs.nix-index-database.hmModules.nix-index
   ];
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -72,7 +71,6 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-  programs.nix-index.enable = true;
 
   programs.git = {
     enable = true;

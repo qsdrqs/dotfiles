@@ -18,9 +18,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    (pkgs.vscode.override (old: {
-      commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
-    }))
+    vscode
     firefox-devedition
     kitty
     xclip
@@ -36,6 +34,8 @@ in
     dolphin
     deadd-notification-center
     pulseaudio
+    rofi-wayland
+    networkmanagerapplet
   ] ++ hyprlandPackages;
 
   qt.platformTheme = "kde";

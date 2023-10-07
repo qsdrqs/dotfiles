@@ -22,7 +22,6 @@
     global
     ctags
     nodejs_16
-    clang
 
     # pdf2txt
     poppler_utils
