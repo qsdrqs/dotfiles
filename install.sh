@@ -3,18 +3,24 @@
 function zsh_install(){
     # oh-my-zsh
     git clone https://github.com/ohmyzsh/ohmyzsh $HOME/.oh-my-zsh
+    # zinit
+    git clone https://github.com/zdharma-continuum/zinit $HOME/.zinit
+    mkdir -p $HOME/zsh_custom/plugins
+    mkdir -p $HOME/zsh_custom/themes
+
     # plugins
-    git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/fzf-tab &
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions &
+    git clone https://github.com/Aloxaf/fzf-tab $HOME/zsh_custom/plugins/fzf-tab &
+    git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/zsh_custom/plugins/zsh-autosuggestions &
     git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git \
-        ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/fast-syntax-highlighting &
+        $HOME/zsh_custom/plugins/fast-syntax-highlighting &
 
     # themes
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k &
-    git clone https://github.com/denysdovhan/spaceship-prompt ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt &
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+        $HOME/zsh_custom/themes/powerlevel10k &
+    git clone https://github.com/denysdovhan/spaceship-prompt $HOME/zsh_custom/themes/spaceship-prompt &
 
-    echo "#ZSH_THEME=\"spaceship-prompt/spaceship\"" > $HOME/theme.zsh
-    echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" > $HOME/theme.zsh
+    echo "#ZSH_THEME=\"spaceship-prompt\"" > $HOME/theme.zsh
+    echo "ZSH_THEME=\"powerlevel10k\"" > $HOME/theme.zsh
 }
 
 function main() {
