@@ -5,56 +5,61 @@ let
     source = ../${filename};
     recursive = true;
   });
-  symbfileTarget = entries: builtins.listToAttrs (map (entry: {
-    name = entry.name + "_";
-    value = {
-      source = ../${entry.name};
-      target = entry.target;
-      recursive = true;
-    };
-  }) entries);
-  symbfileTargetInput = entries: builtins.listToAttrs (map (entry: {
-    name = entry.name;
-    value = {
-      source = inputs.${entry.name};
-      target = "zsh_custom/" + entry.target;
-    };
-  }) entries);
+  symbfileTarget = entries: builtins.listToAttrs (map
+    (entry: {
+      name = entry.name + "_";
+      value = {
+        source = ../${entry.name};
+        target = entry.target;
+        recursive = true;
+      };
+    })
+    entries);
+
+  genZshPlugins = plugins: lib.genAttrs plugins (plugin: {
+    source = inputs.zsh-config.inputs.${plugin};
+    target = "zsh_custom/plugins/${plugin}";
+  });
+
+  genZshThemes = themes: lib.genAttrs themes (theme: {
+    source = inputs.zsh-config.inputs.${theme};
+    target = "zsh_custom/themes/${theme}";
+  });
 in
 {
   home.file = symbfile [
-                ".vimrc"
-                ".vimrc.plugs"
-                ".nvimrc.lua"
-                ".tmux.conf"
-                ".tmux.conf.local"
-                ".zshrc"
-                ".vim"
-              ] //
-              symbfileTarget [
-                { name = "ranger"; target = ".config/ranger"; }
-                { name = ".vim"; target = ".config/nvim"; }
-                { name = "after"; target = ".config/nvim/after"; }
-                { name = ".vimrc"; target = ".config/nvim/init.vim"; }
-              ] //
-              symbfileTargetInput [
-                { name = "fzf-tab"; target = "plugins/fzf-tab"; }
-                { name = "zsh-autosuggestions"; target = "plugins/zsh-autosuggestions"; }
-                { name = "zsh-highlight"; target = "plugins/fast-syntax-highlighting"; }
-                { name = "p10k"; target = "themes/powerlevel10k"; }
-                { name = "spaceship"; target = "themes/spaceship-prompt"; }
-              ] // {
-                omz = {
-                  source = inputs.omz;
-                  target = ".oh-my-zsh";
-                };
+    ".vimrc"
+    ".vimrc.plugs"
+    ".nvimrc.lua"
+    ".tmux.conf"
+    ".tmux.conf.local"
+    ".zshrc"
+    ".vim"
+  ] //
+  symbfileTarget [
+    { name = "ranger"; target = ".config/ranger"; }
+    { name = ".vim"; target = ".config/nvim"; }
+    { name = "after"; target = ".config/nvim/after"; }
+    { name = ".vimrc"; target = ".config/nvim/init.vim"; }
+  ] //
+  genZshPlugins inputs.zsh-config.plugins //
+  genZshThemes inputs.zsh-config.themes //
+  {
+    omz = {
+      source = inputs.zsh-config.inputs.omz;
+      target = ".oh-my-zsh";
+    };
+    zinit = {
+      source = inputs.zsh-config.inputs.zinit;
+      target = ".zinit";
+    };
+    # can be override by lib.mkForce
+    "theme.zsh" = {
+      text = ''
+        ZSH_THEME="powerlevel10k"
+      '';
+    };
 
-                # can be override by lib.mkForce
-                "theme.zsh" = {
-                  text = ''
-                    ZSH_THEME="powerlevel10k/powerlevel10k"
-                    '';
-                };
-              };
+  };
 
 }

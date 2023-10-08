@@ -17,31 +17,7 @@
     };
     vscode-server.url = "github:nix-community/nixos-vscode-server";
 
-    # zsh
-    omz = {
-      url = "github:ohmyzsh/ohmyzsh";
-      flake = false;
-    };
-    fzf-tab = {
-      url = "github:Aloxaf/fzf-tab";
-      flake = false;
-    };
-    zsh-autosuggestions = {
-      url = "github:zsh-users/zsh-autosuggestions";
-      flake = false;
-    };
-    zsh-highlight = {
-      url = "github:zdharma-continuum/fast-syntax-highlighting";
-      flake = false;
-    };
-    p10k = {
-      url = "github:romkatv/powerlevel10k";
-      flake = false;
-    };
-    spaceship = {
-      url = "github:denysdovhan/spaceship-prompt";
-      flake = false;
-    };
+    zsh-config.url = "path:zsh";
 
     # wsl
     nixos-wsl.url = "github:nix-community/NixOS-WSL";

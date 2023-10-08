@@ -161,7 +161,7 @@ in
       enable = true;
       extraPackages = with pkgs; [
         gpick
-          arandr
+        arandr
         flameshot
         variety
         feh

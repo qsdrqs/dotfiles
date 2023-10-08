@@ -34,6 +34,22 @@
         "url": "https://aur.archlinux.org/code-marketplace.git"
       }
     },
+    "fast-syntax-highlighting": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1688591419,
+        "narHash": "sha256-RVX9ZSzjBW3LpFs2W86lKI6vtcvDWP6EPxzeTcRZua4=",
+        "owner": "zdharma-continuum",
+        "repo": "fast-syntax-highlighting",
+        "rev": "cf318e06a9b7c9f2219d78f41b46fa6e06011fd9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zdharma-continuum",
+        "repo": "fast-syntax-highlighting",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -501,7 +517,7 @@
         "type": "github"
       }
     },
-    "p10k": {
+    "powerlevel10k": {
       "flake": false,
       "locked": {
         "lastModified": 1694252474,
@@ -537,7 +553,6 @@
       "inputs": {
         "code-features": "code-features",
         "code-marketplace": "code-marketplace",
-        "fzf-tab": "fzf-tab",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
         "hyprland-contrib": "hyprland-contrib",
@@ -548,13 +563,9 @@
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-master": "nixpkgs-master",
         "nur": "nur",
-        "omz": "omz",
-        "p10k": "p10k",
         "ranger": "ranger",
-        "spaceship": "spaceship",
         "vscode-server": "vscode-server",
-        "zsh-autosuggestions": "zsh-autosuggestions",
-        "zsh-highlight": "zsh-highlight"
+        "zsh-config": "zsh-config"
       }
     },
     "spaceship": {
@@ -700,6 +711,22 @@
         "type": "github"
       }
     },
+    "zinit": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696117579,
+        "narHash": "sha256-of620r3S9w299bM+scfTeWn59qRyv0xRsD+Y10bon1U=",
+        "owner": "zdharma-continuum",
+        "repo": "zinit",
+        "rev": "e458e8288eb3c0ce45adeb1a8ec75f7990363974",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zdharma-continuum",
+        "repo": "zinit",
+        "type": "github"
+      }
+    },
     "zsh-autosuggestions": {
       "flake": false,
       "locked": {
@@ -716,19 +743,41 @@
         "type": "github"
       }
     },
-    "zsh-highlight": {
+    "zsh-config": {
+      "inputs": {
+        "fast-syntax-highlighting": "fast-syntax-highlighting",
+        "fzf-tab": "fzf-tab",
+        "omz": "omz",
+        "powerlevel10k": "powerlevel10k",
+        "spaceship": "spaceship",
+        "zinit": "zinit",
+        "zsh-autosuggestions": "zsh-autosuggestions",
+        "zsh-vi-mode": "zsh-vi-mode"
+      },
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-qP8iez4NAPkhpacF2/DRzm/9lOpmpX5d4ei3tBz/yNs=",
+        "path": "zsh",
+        "type": "path"
+      },
+      "original": {
+        "path": "zsh",
+        "type": "path"
+      }
+    },
+    "zsh-vi-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1688591419,
-        "narHash": "sha256-RVX9ZSzjBW3LpFs2W86lKI6vtcvDWP6EPxzeTcRZua4=",
-        "owner": "zdharma-continuum",
-        "repo": "fast-syntax-highlighting",
-        "rev": "cf318e06a9b7c9f2219d78f41b46fa6e06011fd9",
+        "lastModified": 1695880652,
+        "narHash": "sha256-peoyY+krpK/7dA3TW6PEpauDwZLe+riVWfwpFYnRn1Q=",
+        "owner": "jeffreytse",
+        "repo": "zsh-vi-mode",
+        "rev": "a3d717831c1864de8eabf20b946d66afc67e6695",
         "type": "github"
       },
       "original": {
-        "owner": "zdharma-continuum",
-        "repo": "fast-syntax-highlighting",
+        "owner": "jeffreytse",
+        "repo": "zsh-vi-mode",
         "type": "github"
       }
     }
