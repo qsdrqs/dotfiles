@@ -11,13 +11,10 @@
       url = "github:ranger/ranger";
       flake = false;
     };
-    neovim = {
-      url = "github:neovim/neovim";
-      flake = false;
-    };
     vscode-server.url = "github:nix-community/nixos-vscode-server";
 
     zsh-config.url = "path:zsh";
+    nvim-config.url = "path:nvim/flake";
 
     # wsl
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
@@ -58,6 +55,17 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
+      minimalHomeModules = [
+        ./nixos/home.nix
+      ];
+      serverHomeModules = minimalHomeModules ++ [
+        ./nixos/nvim-plugins.nix
+      ];
+      guiHomeModules = minimalHomeModules ++ [
+        ./nixos/gui-home.nix
+      ];
+      desktopHomeModules = serverHomeModules ++ guiHomeModules;
+
       minimalConfig = {
         system = "x86_64-linux";
         specialArgs = {
@@ -74,7 +82,9 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.qsdrqs = import ./nixos/home.nix;
+            home-manager.users.qsdrqs = {
+              imports = minimalHomeModules;
+            };
 
             # Optionally, use home-manager.extraSpecialArgs to pass
             # arguments to home.nix
@@ -98,11 +108,28 @@
 
           # nix index database
           inputs.nix-index-database.nixosModules.nix-index
+
+          # nvim plugins
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.qsdrqs = {
+              imports = serverHomeModules;
+            };
+            home-manager.extraSpecialArgs = { inherit inputs; };
+          }
         ];
       };
       guiConfig = minimalConfig // {
         modules = minimalConfig.modules ++ [
           ./nixos/gui-configuration.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.qsdrqs = {
+              imports = guiHomeModules;
+            };
+            home-manager.extraSpecialArgs = { inherit inputs; };
+          }
         ];
       };
 
@@ -120,15 +147,14 @@
 
       minimalHomeConfig = {
         pkgs = x86_64-linux-pkgs;
-        modules = [
-          ./nixos/home.nix
-        ];
+        modules = minimalHomeModules;
         extraSpecialArgs = { inherit inputs; };
       };
       guiHomeConfig = minimalHomeConfig // {
-        modules = minimalHomeConfig.modules ++ [
-          ./nixos/gui-home.nix
-        ];
+        modules = guiHomeModules;
+      };
+      desktopHomeConfig = guiHomeConfig // {
+        modules = desktopHomeModules;
       };
 
       isoConfig = minimalConfig // {
@@ -200,8 +226,9 @@
 
       # home-manager
       homeConfigurations.basic = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
-
       homeConfigurations.gui = home-manager.lib.homeManagerConfiguration guiHomeConfig;
+
+      homeConfigurations.desktop = home-manager.lib.homeManagerConfiguration desktopHomeConfig;
       # dev shells
       devShells' = (arch: pkgs: with pkgs; {
         rust =

@@ -1,0 +1,146 @@
+{
+  "nodes": {
+    "fast-syntax-highlighting": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1688591419,
+        "narHash": "sha256-RVX9ZSzjBW3LpFs2W86lKI6vtcvDWP6EPxzeTcRZua4=",
+        "owner": "zdharma-continuum",
+        "repo": "fast-syntax-highlighting",
+        "rev": "cf318e06a9b7c9f2219d78f41b46fa6e06011fd9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zdharma-continuum",
+        "repo": "fast-syntax-highlighting",
+        "type": "github"
+      }
+    },
+    "fzf-tab": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1686496455,
+        "narHash": "sha256-gvZp8P3quOtcy1Xtt1LAW1cfZ/zCtnAmnWqcwrKel6w=",
+        "owner": "Aloxaf",
+        "repo": "fzf-tab",
+        "rev": "c2b4aa5ad2532cca91f23908ac7f00efb7ff09c9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Aloxaf",
+        "repo": "fzf-tab",
+        "type": "github"
+      }
+    },
+    "omz": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696273122,
+        "narHash": "sha256-+euWolpyBImlucKpmipiPOumMZdwlApQ2lNEi6OauWU=",
+        "owner": "ohmyzsh",
+        "repo": "ohmyzsh",
+        "rev": "f36c6db0eac17b022eee87411e6996a5f5fc8457",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ohmyzsh",
+        "repo": "ohmyzsh",
+        "type": "github"
+      }
+    },
+    "powerlevel10k": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1694252474,
+        "narHash": "sha256-GHHoV9RfokusOKUjQ7yaxwENdM82l1qHiebs1AboMfY=",
+        "owner": "romkatv",
+        "repo": "powerlevel10k",
+        "rev": "873c4ff09c559a507d33e528df7e27a8a48705d7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "romkatv",
+        "repo": "powerlevel10k",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "fast-syntax-highlighting": "fast-syntax-highlighting",
+        "fzf-tab": "fzf-tab",
+        "omz": "omz",
+        "powerlevel10k": "powerlevel10k",
+        "spaceship": "spaceship",
+        "zinit": "zinit",
+        "zsh-autosuggestions": "zsh-autosuggestions",
+        "zsh-vi-mode": "zsh-vi-mode"
+      }
+    },
+    "spaceship": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696421196,
+        "narHash": "sha256-QCaZCSgg5BF8d2IIatkDBbVBL5CpzwoF94qfu2e4zTo=",
+        "owner": "denysdovhan",
+        "repo": "spaceship-prompt",
+        "rev": "de12062216f18f267716883954b7a6f657f54c56",
+        "type": "github"
+      },
+      "original": {
+        "owner": "denysdovhan",
+        "repo": "spaceship-prompt",
+        "type": "github"
+      }
+    },
+    "zinit": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696117579,
+        "narHash": "sha256-of620r3S9w299bM+scfTeWn59qRyv0xRsD+Y10bon1U=",
+        "owner": "zdharma-continuum",
+        "repo": "zinit",
+        "rev": "e458e8288eb3c0ce45adeb1a8ec75f7990363974",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zdharma-continuum",
+        "repo": "zinit",
+        "type": "github"
+      }
+    },
+    "zsh-autosuggestions": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1694098728,
+        "narHash": "sha256-B+Kz3B7d97CM/3ztpQyVkE6EfMipVF8Y4HJNfSRXHtU=",
+        "owner": "zsh-users",
+        "repo": "zsh-autosuggestions",
+        "rev": "c3d4e576c9c86eac62884bd47c01f6faed043fc5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zsh-users",
+        "repo": "zsh-autosuggestions",
+        "type": "github"
+      }
+    },
+    "zsh-vi-mode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1695880652,
+        "narHash": "sha256-peoyY+krpK/7dA3TW6PEpauDwZLe+riVWfwpFYnRn1Q=",
+        "owner": "jeffreytse",
+        "repo": "zsh-vi-mode",
+        "rev": "a3d717831c1864de8eabf20b946d66afc67e6695",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jeffreytse",
+        "repo": "zsh-vi-mode",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

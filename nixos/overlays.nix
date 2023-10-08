@@ -4,7 +4,7 @@
   nixpkgs.overlays = [
     (self: super: {
       neovim-unwrapped = super.neovim-unwrapped.overrideAttrs (oldAttrs: {
-        src = inputs.neovim;
+        src = inputs.nvim-config.neovim;
         version = "0.10.0-dev";
       });
 

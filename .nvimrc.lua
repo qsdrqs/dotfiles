@@ -122,7 +122,8 @@ local kind_icons = {
   Null           = "ﳠ ",
 }
 
-require('lazy').setup({
+local plugins = {
+  -- auto load rtp in dotfiles
   {'dotfiles', lazy = false, dir = os.getenv("HOME") .. "/dotfiles/nvim"},
   {'folke/lazy.nvim', lazy = false},
   {
@@ -1234,6 +1235,7 @@ require('lazy').setup({
     end
   },
 
+  {'kevinhwang91/promise-async'},
   {
     -- permanent undo file
     'kevinhwang91/nvim-fundo',
@@ -3224,6 +3226,7 @@ require('lazy').setup({
     end
   },
   {'qsdrqs/vim-skeletons', lazy = true },
+  {'honza/vim-snippets', lazy = true },
   {
     'SirVer/ultisnips',
     lazy = true,
@@ -3746,18 +3749,49 @@ require('lazy').setup({
       }
     end
   },
+}
 
-}, {
+local lazy_opts =  {
   defaults = {
     lazy = true
+  },
+  dev = {
+    path = vim.fn.stdpath("data") .. "/nix",
+    patterns = {"."},
   },
   install = {
     missing = false
   }
-})
+}
+
+require('lazy').setup(plugins, lazy_opts)
+
+
+-- `nvim --headless -c 'lua DumpPluginsList(); vim.cmd("q")'`
+function DumpPluginsList()
+  for _, plugin in ipairs(plugins) do
+    opt = {}
+    if plugin.branch ~= nil then
+      opt.branch = plugin.branch
+    end
+    if plugin.build ~= nil then
+      opt.build = true
+    end
+    if plugin.dependencies ~= nil then
+      opt.dependencies = plugin.dependencies
+    end
+    if plugin[1] ~= nil then
+      print(plugin[1], vim.json.encode(opt))
+    else
+      print(plugin.url, vim.json.encode(opt))
+    end
+    print("\n")
+  end
+  print('\n')
+end
 
 -----------------------------dap------------------------------------------------------
-function term_dap()
+local function term_dap()
   require("dapui").close()
   require 'nvim-dap-virtual-text/virtual_text'.clear_virtual_text()
 end

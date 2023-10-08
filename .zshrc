@@ -319,6 +319,7 @@ zle -N vi-backward-7-char
 unsetopt flow_control
 
 WORDCHARS=${WORDCHARS/\/}
+WORDCHARS=${WORDCHARS/./}
 
 #set -o vi
 bindkey -M viins '^L' vi-forward-char
