@@ -956,7 +956,7 @@ local plugins = {
 
   {
     -- can be used as formatter
-    "jose-elias-alvarez/null-ls.nvim",
+    "nvimtools/none-ls.nvim",
     config = function()
       local null_ls = require("null-ls")
 
@@ -2967,43 +2967,15 @@ local plugins = {
   },
 
   {
-    'dstein64/nvim-scrollview',
-    lazy = true,
+    "lewis6991/satellite.nvim",
     config = function()
-      vim.g.scrollview_current_only = 1
-      vim.g.scrollview_excluded_filetypes = {"NvimTree", "alpha", "dapui_scopes"}
-      vim.g.scrollview_diagnostics_error_symbol = '-'
-      vim.g.scrollview_diagnostics_warn_symbol = '-'
-      vim.g.scrollview_diagnostics_info_symbol = '-'
-      vim.g.scrollview_diagnostics_hint_symbol = '-'
-    end
-  },
-
-  {
-    'petertriho/nvim-scrollbar',
-    lazy = true,
-    config = function()
-      require("scrollbar").setup {
-        handle = {
-          color = "CursorColumn",
-        },
-        marks = {
-          GitAdd = {
-            text = "│",
-          },
-          GitChange = {
-            text = "│"
-          },
-          Search = {
-            highlight = "IncSearch"
-          }
-        },
+      require('satellite').setup {
         handlers = {
-          cursor = false,
+          cursor = {
+            enable = false
+          }
         }
       }
-      -- require("scrollbar.handlers.gitsigns").setup()
-      require("scrollbar.handlers.search").setup()
     end
   },
 
@@ -3857,7 +3829,7 @@ function lazyLoadPlugins()
       'clangd_extensions.nvim',
       'nvim-lightbulb',
       'fidget.nvim',
-      'null-ls.nvim',
+      'none-ls.nvim',
       'lsp_signature.nvim',
       'dropbar.nvim',
       -- end lsp
@@ -3880,8 +3852,7 @@ function lazyLoadPlugins()
       'bufferline.nvim',
       'nvim-notify',
       'nvim-hlslens',
-      -- 'nvim-scrollbar',
-      'nvim-scrollview',
+      'satellite.nvim',
       'lualine.nvim',
       'alpha-nvim',
       'todo-comments.nvim',

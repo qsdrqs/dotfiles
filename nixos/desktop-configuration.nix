@@ -151,9 +151,18 @@ in
     package = pkgs.wireshark;
   };
 
-  virtualisation.libvirtd.enable = true;
+  virtualisation = {
+    libvirtd.enable = true;
+    docker = {
+      enable = true;
+      rootless = {
+        enable = true;
+        setSocketVariable = true;
+      };
+    };
+  };
 
-  users.users.qsdrqs.extraGroups = [ "wireshark" "libvirtd" ];
+  users.users.qsdrqs.extraGroups = [ "wireshark" "libvirtd" "docker" ];
 
   services.xserver = {
     videoDrivers = [ "nvidia" ];

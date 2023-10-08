@@ -1191,19 +1191,19 @@
         "type": "gitlab"
       }
     },
-    "null-lsDOTnvim": {
+    "none-lsDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1691810493,
-        "narHash": "sha256-cWA0rzkOp/ekVKaFee7iea1lhnqKtWUIU+fW5M950wI=",
-        "owner": "jose-elias-alvarez",
-        "repo": "null-ls.nvim",
-        "rev": "0010ea927ab7c09ef0ce9bf28c2b573fc302f5a7",
+        "lastModified": 1696658105,
+        "narHash": "sha256-4+B2F4ZweWTqXlhSs0jiBaKSv52G4X7p37KHfYl6sPo=",
+        "owner": "nvimtools",
+        "repo": "none-ls.nvim",
+        "rev": "ae339f45590cc421a68de885fc5a3261cc247362",
         "type": "github"
       },
       "original": {
-        "owner": "jose-elias-alvarez",
-        "repo": "null-ls.nvim",
+        "owner": "nvimtools",
+        "repo": "none-ls.nvim",
         "type": "github"
       }
     },
@@ -1333,7 +1333,7 @@
         "markdown-previewDOTnvim": "markdown-previewDOTnvim",
         "masonDOTnvim": "masonDOTnvim",
         "neovim": "neovim",
-        "null-lsDOTnvim": "null-lsDOTnvim",
+        "none-lsDOTnvim": "none-lsDOTnvim",
         "nvim-autopairs": "nvim-autopairs",
         "nvim-bqf": "nvim-bqf",
         "nvim-cmp": "nvim-cmp",
@@ -1349,8 +1349,6 @@
         "nvim-lspconfig": "nvim-lspconfig",
         "nvim-notify": "nvim-notify",
         "nvim-osc52": "nvim-osc52",
-        "nvim-scrollbar": "nvim-scrollbar",
-        "nvim-scrollview": "nvim-scrollview",
         "nvim-treeDOTlua": "nvim-treeDOTlua",
         "nvim-treesitter": "nvim-treesitter",
         "nvim-treesitter-context": "nvim-treesitter-context",
@@ -1368,6 +1366,7 @@
         "registersDOTnvim": "registersDOTnvim",
         "rnvimr": "rnvimr",
         "rust-toolsDOTnvim": "rust-toolsDOTnvim",
+        "satelliteDOTnvim": "satelliteDOTnvim",
         "sigsegvim": "sigsegvim",
         "statuscolDOTnvim": "statuscolDOTnvim",
         "sudaDOTvim": "sudaDOTvim",
@@ -1403,7 +1402,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-DUkl3tHucRU39nTCRh3g0Eoz7j1upPJoP9qcATRLxL0=",
+        "narHash": "sha256-aMlmaENZiEqlEK6JxgCKLmcW1nikYFzzZjGvj42/94c=",
         "path": "nvim/flake",
         "type": "path"
       },
@@ -1585,38 +1584,6 @@
       "original": {
         "owner": "ojroques",
         "repo": "nvim-osc52",
-        "type": "github"
-      }
-    },
-    "nvim-scrollbar": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1684886154,
-        "narHash": "sha256-zLBexSxQCn9HPY04a9w/UCJP1F5ShI2X12I9xE9H0cM=",
-        "owner": "petertriho",
-        "repo": "nvim-scrollbar",
-        "rev": "35f99d559041c7c0eff3a41f9093581ceea534e8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "petertriho",
-        "repo": "nvim-scrollbar",
-        "type": "github"
-      }
-    },
-    "nvim-scrollview": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1696455525,
-        "narHash": "sha256-FINF2Aiw+QPAEaF1ZTM3n2gm40apITgoXvhHUlQN0Nw=",
-        "owner": "dstein64",
-        "repo": "nvim-scrollview",
-        "rev": "4a14332861f674b6f77cb5b0c84717935999a53e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "dstein64",
-        "repo": "nvim-scrollview",
         "type": "github"
       }
     },
@@ -1956,6 +1923,22 @@
       "original": {
         "owner": "simrat39",
         "repo": "rust-tools.nvim",
+        "type": "github"
+      }
+    },
+    "satelliteDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696603632,
+        "narHash": "sha256-k+S1yGHewdXKj/LkiDddkAiEGcGRSyY54HFcNCqhgr8=",
+        "owner": "lewis6991",
+        "repo": "satellite.nvim",
+        "rev": "7911fa8137c77258ba509ba875ea52c6d59737e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lewis6991",
+        "repo": "satellite.nvim",
         "type": "github"
       }
     },

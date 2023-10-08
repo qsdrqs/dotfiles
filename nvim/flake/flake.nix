@@ -91,8 +91,8 @@
       url = "github:Pocco81/auto-save.nvim";
       flake = false;
     };
-    null-lsDOTnvim = {
-      url = "github:jose-elias-alvarez/null-ls.nvim";
+    none-lsDOTnvim = {
+      url = "github:nvimtools/none-ls.nvim";
       flake = false;
     };
     ultisnips = {
@@ -303,12 +303,8 @@
       url = "github:folke/which-key.nvim";
       flake = false;
     };
-    nvim-scrollview = {
-      url = "github:dstein64/nvim-scrollview";
-      flake = false;
-    };
-    nvim-scrollbar = {
-      url = "github:petertriho/nvim-scrollbar";
+    satelliteDOTnvim = {
+      url = "github:lewis6991/satellite.nvim";
       flake = false;
     };
     todo-commentsDOTnvim = {
@@ -476,7 +472,7 @@
         { name = "nvim-web-devicons"; source = inputs.nvim-web-devicons; recursive = false; }
         { name = "nvim-autopairs"; source = inputs.nvim-autopairs; recursive = false; }
         { name = "auto-save.nvim"; source = inputs.auto-saveDOTnvim; recursive = false; }
-        { name = "null-ls.nvim"; source = inputs.null-lsDOTnvim; recursive = false; }
+        { name = "none-ls.nvim"; source = inputs.none-lsDOTnvim; recursive = false; }
         { name = "ultisnips"; source = inputs.ultisnips; recursive = false; }
         { name = "cmp-nvim-ultisnips"; source = inputs.cmp-nvim-ultisnips; recursive = false; }
         { name = "vim-vsnip"; source = inputs.vim-vsnip; recursive = false; }
@@ -529,8 +525,7 @@
         { name = "hop.nvim"; source = inputs.hopDOTnvim; recursive = false; }
         { name = "flash.nvim"; source = inputs.flashDOTnvim; recursive = false; }
         { name = "which-key.nvim"; source = inputs.which-keyDOTnvim; recursive = false; }
-        { name = "nvim-scrollview"; source = inputs.nvim-scrollview; recursive = false; }
-        { name = "nvim-scrollbar"; source = inputs.nvim-scrollbar; recursive = false; }
+        { name = "satellite.nvim"; source = inputs.satelliteDOTnvim; recursive = false; }
         { name = "todo-comments.nvim"; source = inputs.todo-commentsDOTnvim; recursive = false; }
         { name = "nvim-notify"; source = inputs.nvim-notify; recursive = false; }
         { name = "lsp_lines.nvim"; source = inputs.lsp_linesDOTnvim; recursive = false; }

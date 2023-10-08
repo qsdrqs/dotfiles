@@ -114,6 +114,7 @@
     home-manager
     nix-tree
     duf
+    lsb-release
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
