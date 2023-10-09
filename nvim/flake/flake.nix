@@ -488,7 +488,7 @@
         { name = "lsp_signature.nvim"; source = inputs.lsp_signatureDOTnvim; recursive = false; }
         { name = "nvim-cmp"; source = inputs.nvim-cmp; recursive = false; }
         { name = "promise-async"; source = inputs.promise-async; recursive = false; }
-        { name = "nvim-fundo"; source = inputs.nvim-fundo; recursive = true; }
+        { name = "nvim-fundo"; source = inputs.nvim-fundo; recursive = false; }
         { name = "nvim-ufo"; source = inputs.nvim-ufo; recursive = false; }
         { name = "toggleterm.nvim"; source = inputs.toggletermDOTnvim; recursive = false; }
         { name = "nvim-treesitter"; source = inputs.nvim-treesitter; recursive = true; }
@@ -531,7 +531,7 @@
         { name = "lsp_lines.nvim"; source = inputs.lsp_linesDOTnvim; recursive = false; }
         { name = "nvim-osc52"; source = inputs.nvim-osc52; recursive = false; }
         { name = "copilot.vim"; source = inputs.copilotDOTvim; recursive = false; }
-        { name = "firenvim"; source = inputs.firenvim; recursive = true; }
+        { name = "firenvim"; source = inputs.firenvim; recursive = false; }
         { name = "nvim-dap-python"; source = inputs.nvim-dap-python; recursive = false; }
         { name = "venv-selector.nvim"; source = inputs.venv-selectorDOTnvim; recursive = false; }
         { name = "vim-matchup"; source = inputs.vim-matchup; recursive = false; }

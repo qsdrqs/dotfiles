@@ -14,4 +14,13 @@ let
 in
 {
   home.file = genNvimPlugins inputs.nvim-config.plugins_list;
+
+  home.activation.updateNvimFlake = ''
+    cd ${config.home.homeDirectory}/dotfiles/nvim/flake
+    export PATH=${pkgs.neovim}/bin:${pkgs.git}/bin:$PATH
+    ${pkgs.python3}/bin/python3 dump_input.py
+    nix flake lock path:.
+    cd ${config.home.homeDirectory}/dotfiles
+    nix flake lock --update-input nvim-config path:.
+  '';
 }

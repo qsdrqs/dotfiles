@@ -214,6 +214,8 @@ alias zshrc="$EDITOR ~/dotfiles/.zshrc"
 alias vimrc="$EDITOR ~/dotfiles/.vimrc"
 alias vimplug="$EDITOR ~/dotfiles/.vimrc.plugs"
 alias nvimplug="$EDITOR ~/dotfiles/.nvimrc.lua"
+alias ll="ls -l"
+alias la="ls -la"
 
 # Arch
 alias sp="sudo pacman"

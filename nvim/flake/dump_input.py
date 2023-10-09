@@ -74,6 +74,9 @@ def main():
                 'build': need_build,
             }
 
+    # some plugins don't need to be recursive
+    plugins_dict['nvim-fundo']['build'] = False
+    plugins_dict['firenvim']['build'] = False
 
     with open('flake.nix', 'w') as f:
         plugin_lines = ';'.join(f'''

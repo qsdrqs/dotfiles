@@ -61,4 +61,11 @@ in
     };
   };
 
+  home.activation.updateZshFlake = ''
+    cd ${config.home.homeDirectory}/dotfiles/zsh
+    nix flake lock path:.
+    cd ${config.home.homeDirectory}/dotfiles
+    nix flake lock --update-input zsh-config path:.
+  '';
+
 }
