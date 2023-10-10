@@ -121,7 +121,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # init zinit
-ZINIT_HOME="${XDG_DATA_HOME:-${HOME}}/.zinit"
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}}/zinit"
 source "${ZINIT_HOME}/zinit.zsh"
 
 # load zinit plugins

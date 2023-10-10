@@ -153,6 +153,9 @@
       guiHomeConfig = minimalHomeConfig // {
         modules = guiHomeModules;
       };
+      serverHomeConfig = minimalHomeConfig // {
+        modules = serverHomeModules;
+      };
       desktopHomeConfig = guiHomeConfig // {
         modules = desktopHomeModules;
       };
@@ -226,6 +229,7 @@
 
       # home-manager
       homeConfigurations.basic = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
+      homeConfigurations.server = home-manager.lib.homeManagerConfiguration serverHomeConfig;
       homeConfigurations.gui = home-manager.lib.homeManagerConfiguration guiHomeConfig;
 
       homeConfigurations.desktop = home-manager.lib.homeManagerConfiguration desktopHomeConfig;

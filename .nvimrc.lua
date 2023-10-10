@@ -714,7 +714,7 @@ local plugins = {
             }
           end
         elseif lsp == "grammarly" then
-          lsp_common_config.filetypes = { "markdown", "tex", "text" }
+          lsp_common_config.filetypes = { "markdown", "tex" }
           lsp_common_config.cmd = {os.getenv("HOME") .. "/grammarly/packages/grammarly-languageserver/bin/server.js", "--stdio"}
           lsp_common_config.init_options = {
             clientId = "client_BaDkMgx4X19X9UxxYRCXZo"

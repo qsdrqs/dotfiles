@@ -51,7 +51,7 @@ in
     };
     zinit = {
       source = inputs.zsh-config.inputs.zinit;
-      target = ".zinit";
+      target = "zinit";
     };
     # can be override by lib.mkForce
     "theme.zsh" = {

@@ -40,6 +40,11 @@
         source $HOME/.zshrc
       fi
     '';
+    history = {
+      size = 500000;
+      save = 500000;
+      expireDuplicatesFirst = true;
+    };
     completionInit = ""; # define in my own zshrc
   };
   programs.ssh.enable = true;
