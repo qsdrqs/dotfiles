@@ -133,6 +133,8 @@ zinit light $HOME/zsh_custom/plugins/zsh-vi-mode
 # load plugins from oh-my-zsh
 zinit light $HOME/.oh-my-zsh/plugins/systemd
 zinit light $HOME/.oh-my-zsh/plugins/fd
+
+zinit ice wait lucid
 zinit light $HOME/.oh-my-zsh/plugins/fzf
 
 # load zinit themes
@@ -322,6 +324,7 @@ unsetopt flow_control
 
 WORDCHARS=${WORDCHARS/\/}
 WORDCHARS=${WORDCHARS/./}
+WORDCHARS=${WORDCHARS/#/}
 
 #set -o vi
 bindkey -M viins '^L' vi-forward-char
