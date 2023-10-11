@@ -3730,6 +3730,7 @@ local lazy_opts =  {
   dev = {
     path = vim.fn.stdpath("data") .. "/nix",
     patterns = {"."},
+    fallback = true,
   },
   install = {
     missing = false

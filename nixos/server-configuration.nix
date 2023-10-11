@@ -22,6 +22,7 @@
     global
     ctags
     nodejs_16
+    firejail
 
     # pdf2txt
     poppler_utils

@@ -268,7 +268,7 @@ autocmd BufReadPost *.md setlocal spell spelllang=en_us,cjk
 set magic
 set backspace=indent,eol,start          "Make backspace behave like every other editor
 
-set guifont=FiraCode\ Nerd\ Font
+set guifont=FiraCode\ Nerd\ Font:h20
 set guioptions-=m
 let g:neovide_cursor_animation_length=0
 let g:neovide_refresh_rate=60

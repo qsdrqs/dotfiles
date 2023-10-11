@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function zsh_install(){
+function zsh_install {
     # oh-my-zsh
     git clone https://github.com/ohmyzsh/ohmyzsh $HOME/.oh-my-zsh
     # zinit
@@ -23,7 +23,7 @@ function zsh_install(){
     echo "ZSH_THEME=\"powerlevel10k\"" > $HOME/theme.zsh
 }
 
-function main() {
+function main {
     echo installing
 
     # move vim files
