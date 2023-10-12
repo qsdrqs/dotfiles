@@ -1,10 +1,6 @@
 { config, pkgs, lib, inputs, ... }:
 
 let
-  commonBuildInputs = [
-    inputs.nixpkgs.legacyPackages.x86_64-linux.neovim
-    inputs.nixpkgs.legacyPackages.x86_64-linux.gnumake
-  ];
   commonInstallPhase = ''
     mkdir $out
     cp -r * $out
@@ -12,7 +8,7 @@ let
   build = {
     telescope-fzf-nativeDOTnvim = pkgs.stdenv.mkDerivation {
       name = "telescope-fzf-native.nvim";
-      buildInputs = commonBuildInputs;
+      buildInputs = with pkgs; [ gnumake ];
       src = inputs.nvim-config.inputs.telescope-fzf-nativeDOTnvim;
       installPhase = commonInstallPhase;
     };

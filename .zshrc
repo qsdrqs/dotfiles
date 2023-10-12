@@ -21,8 +21,7 @@ if [[ $NOTMUX != 1 ]]; then
         elif [[ "$SSH_CONNECTION" != ""  ]]; then
             session_name="ssh"
             if [[ -x `command -v notify-send` ]]; then
-                # FIXME: bug on wayland?
-                # notify-send "ssh connected"
+                notify-send "ssh connected"
             fi
             call_tmux $session_name
             #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then
@@ -125,17 +124,18 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}}/zinit"
 source "${ZINIT_HOME}/zinit.zsh"
 
 # load zinit plugins
-zinit light $HOME/zsh_custom/plugins/zsh-autosuggestions
-zinit light $HOME/zsh_custom/plugins/fast-syntax-highlighting
+# need compinit
 zinit light $HOME/zsh_custom/plugins/fzf-tab
+zicompinit
+zinit light $HOME/zsh_custom/plugins/fast-syntax-highlighting
 zinit light $HOME/zsh_custom/plugins/zsh-vi-mode
+zinit light $HOME/zsh_custom/plugins/zsh-autosuggestions
 
 # load plugins from oh-my-zsh
 zinit light $HOME/.oh-my-zsh/plugins/systemd
 zinit light $HOME/.oh-my-zsh/plugins/fd
 
-zinit ice wait lucid
-zinit light $HOME/.oh-my-zsh/plugins/fzf
+zinit wait lucid for $HOME/.oh-my-zsh/plugins/fzf
 
 # load zinit themes
 zinit light $HOME/zsh_custom/themes/$ZSH_THEME
@@ -324,7 +324,8 @@ unsetopt flow_control
 
 WORDCHARS=${WORDCHARS/\/}
 WORDCHARS=${WORDCHARS/./}
-WORDCHARS=${WORDCHARS/#/}
+WORDCHARS=${WORDCHARS/\#/}
+WORDCHARS=${WORDCHARS/-/}
 
 #set -o vi
 bindkey -M viins '^L' vi-forward-char

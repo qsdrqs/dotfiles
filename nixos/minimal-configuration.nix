@@ -49,7 +49,7 @@
     extraGroups = [ "wheel" "input" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     openssh.authorizedKeys.keyFiles = [
-      ./authorized_keys
+      ./private/authorized_keys
     ];
   };
 
@@ -127,7 +127,10 @@
   #   enableSSHSupport = true;
   # };
   programs = {
-    zsh.enable = true;
+    zsh = {
+      enable = true;
+      enableCompletion = false; # enabled in my own zshrc
+    };
     neovim = {
       enable = true;
       defaultEditor = true;

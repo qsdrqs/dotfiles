@@ -1592,6 +1592,7 @@ local plugins = {
           -- char = '▏',
           -- context_char = '▎',
         },
+        debounce = 300,
         scope = {
           highlight = highlight,
           show_end = true,
@@ -2091,7 +2092,7 @@ local plugins = {
 
       -- use alt + number to go to buffer
       for i = 1, 9 do
-        vim.keymap.set("n", "<M-" .. i .. ">", "<cmd>BufferLineGoToBuffer " .. i .. "<CR>", { noremap = true, silent = true })
+        vim.keymap.set("n", "<M-" .. i .. ">",  function() require("bufferline").go_to(i, true) end, { noremap = true, silent = true })
       end
     end
   },

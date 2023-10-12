@@ -84,6 +84,7 @@ in
     scrcpy
     wineWowPackages.unstableFull
     wpsoffice-hidpi
+    libreoffice
     vscode-wrapper
 
     virt-manager
@@ -144,6 +145,13 @@ in
         RestartSec = 5;
       };
     };
+  };
+
+  services.zerotierone = {
+    enable = true;
+    joinNetworks = lib.strings.splitString "\n" (
+      builtins.readFile ./private/zerotier-network-id
+    );
   };
 
   programs.wireshark = {

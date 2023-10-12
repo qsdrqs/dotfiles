@@ -323,6 +323,6 @@
         x86_64-linux = x86_64-linux-pkgs;
         aarch64-linux = aarch64-linux-pkgs;
       };
-      rust = self.devShells.x86_64-linux.rust;
+      legacyPackages = nixpkgs.legacyPackages;
     };
 }
