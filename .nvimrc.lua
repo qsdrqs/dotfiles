@@ -4018,7 +4018,7 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 -- vim.g.suda_smart_edit = 1
 
 -- osc52 support on ssh
-if os.getenv("SSH_CONNECTION") ~= nil then
+if os.getenv("SSH_CONNECTION") ~= nil or os.getenv("WSLPATH") ~= nil then
   -- disable the xclip under SSH due to high lantency
   if os.getenv("TMUX") ~= nil then
     vim.g.clipboard = {

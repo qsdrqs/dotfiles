@@ -64,6 +64,9 @@
       guiHomeModules = minimalHomeModules ++ [
         ./nixos/gui-home.nix
       ];
+      wslHomeModules = serverHomeModules ++ [
+        ./nixos/wsl-home.nix
+      ];
       desktopHomeModules = serverHomeModules ++ guiHomeModules;
 
       minimalConfig = {
@@ -136,6 +139,14 @@
       wslConfig = serverConfig // {
         modules = serverConfig.modules ++ [
           ./nixos/wsl-configuration.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.qsdrqs = {
+              imports = wslHomeModules;
+            };
+            home-manager.extraSpecialArgs = { inherit inputs; };
+          }
         ];
       };
 
@@ -158,6 +169,9 @@
       };
       desktopHomeConfig = guiHomeConfig // {
         modules = desktopHomeModules;
+      };
+      wslHomeConfig = serverHomeConfig // {
+        modules = wslHomeModules;
       };
 
       isoConfig = minimalConfig // {
@@ -231,92 +245,19 @@
       homeConfigurations.basic = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
       homeConfigurations.server = home-manager.lib.homeManagerConfiguration serverHomeConfig;
       homeConfigurations.gui = home-manager.lib.homeManagerConfiguration guiHomeConfig;
+      homeConfigurations.wsl = home-manager.lib.homeManagerConfiguration wslHomeConfig;
 
       homeConfigurations.desktop = home-manager.lib.homeManagerConfiguration desktopHomeConfig;
       # dev shells
-      devShells' = (arch: pkgs: with pkgs; {
-        rust =
-          let
-            clangShortVer = builtins.head (
-              nixpkgs.lib.splitString "." (
-                nixpkgs.lib.getVersion llvmPackages_latest.clang
-              )
-            );
-          in
-          mkShell {
-            packages = [
-              rustup
-              rustc
-              rustfmt
-              clippy
-              rust-analyzer
-              cmake
-              llvmPackages_latest.llvm
-            ];
-            shellHook = ''
-              export LIBCLANG_PATH="${llvmPackages_latest.libclang.lib}/lib"
-              export BINDGEN_EXTRA_CLANG_ARGS="
-                -isystem ${llvmPackages_latest.libclang.lib}/lib/clang/${clangShortVer}/include
-                -isystem ${libjpeg_turbo.dev}/include
-                -isystem ${glibc.dev}/include
-              "
-              export RUST_SRC_PATH="${rust.packages.stable.rustPlatform.rustLibSrc}"
-            '';
-          };
-        cpp = mkShell {
-          packages = [
-            cmake
-            gnumake
-            gdb
-            ninja
-            bear
-            clang-tools_16
-            clang_16
-            llvm_16
-          ];
-        };
-        rust_cpp = mkShell {
-          inputsFrom = [
-            self.devShells.${arch}.rust
-            self.devShells.${arch}.cpp
-          ];
-        };
-        python = mkShell {
-          packages = [
-            python3Packages.virtualenv
-            python3Packages.numpy
-            python3Packages.matplotlib
-            python3Packages.autopep8
-            python3Packages.debugpy
-            nodePackages.pyright
-          ];
-        };
-        go = mkShell {
-          packages = [
-            go
-            gopls
-          ];
-        };
-        base_dev = mkShell {
-          packages = [
-            ranger
-            neovim
-            lazygit
-            neofetch
-          ];
-          LD_LIBRARY_PATH = lib.makeLibraryPath [ openssl ];
-        };
-        node = mkShell {
-          packages = [
-            nodePackages.pnpm
-            nodePackages.yarn
-          ];
-        };
-      });
-
       devShells = {
-        x86_64-linux = self.devShells' "x86_64-linux" x86_64-linux-pkgs;
-        aarch64-linux = self.devShells' "aarch64-linux" aarch64-linux-pkgs;
+        x86_64-linux = (import ./nixos/dev-shell.nix {
+          pkgs = x86_64-linux-pkgs;
+          lib = nixpkgs.lib;
+        });
+        aarch64-linux = (import ./nixos/dev-shell.nix {
+          pkgs = aarch64-linux-pkgs;
+          lib = nixpkgs.lib;
+        });
       };
       # direct nix run
       packages = {

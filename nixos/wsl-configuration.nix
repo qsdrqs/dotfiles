@@ -26,8 +26,4 @@
     "$(${pkgs.coreutils-full}/bin/cat /etc/resolv.conf \\
     | ${pkgs.gnugrep}/bin/grep nameserver \\
     | ${pkgs.gawk}/bin/awk '{print $2; exit;}'):0.0";
-
-  home-manager.users.qsdrqs = {
-    home.file.wsl.text = "";
-  };
 }

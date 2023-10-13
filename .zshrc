@@ -15,7 +15,7 @@ call_tmux(){
 
 if [[ $NOTMUX != 1 ]]; then
     if [[ -x `command -v tmux` ]] && [[ $TMUX == "" ]]; then
-        if [[ -e "$HOME/wsl" ]]; then
+        if [[ $WSLPATH != "" ]]; then
             session_name="wsl"
             call_tmux $session_name
         elif [[ "$SSH_CONNECTION" != ""  ]]; then
@@ -240,7 +240,7 @@ nix-devel() {
     local command=""
     local envs=$last_env
     for i in $@; do
-        command="$command nix develop $HOME/dotfiles#$i --command"
+        command="$command nix develop path:$HOME/dotfiles#$i --command"
         envs="$envs $i"
     done
     export NIX_DEV=$envs
