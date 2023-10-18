@@ -76,7 +76,12 @@
           pkgs-master = pkgs-master;
         };
         modules = [
-          (if builtins.pathExists ./nixos/custom.nix then ./nixos/custom.nix else ./nixos/empty.nix)
+          (if builtins.pathExists ./nixos/custom.nix then
+            ./nixos/custom.nix
+          else
+            nixpkgs.lib.warn "No custom.nix found, maybe you forgot to copy the hardware-configuration.nix?"
+              ./nixos/empty.nix
+          )
           ./nixos/minimal-configuration.nix
           ./nixos/overlays.nix
 
