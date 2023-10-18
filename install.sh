@@ -74,4 +74,19 @@ function main {
     echo finish
 }
 
-main
+function nixpre {
+    nix flake lock --update-input nvim-config path:$HOME/dotfiles --experimental-features 'nix-command flakes'
+    nix flake lock --update-input zsh-config path:$HOME/dotfiles --experimental-features 'nix-command flakes'
+    echo "preinstall done"
+    echo "now run: nixos-rebuild switch --flake .#[config-name]"
+}
+
+arg=$1
+
+if [[ $arg == "main" ]];then
+    main
+elif [[ $arg == "nixpre" ]];then
+    nixpre
+else
+    echo "usage: ./install.sh [main|nixpre]"
+fi

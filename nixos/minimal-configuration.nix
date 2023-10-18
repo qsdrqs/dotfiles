@@ -49,7 +49,9 @@
     extraGroups = [ "wheel" "input" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     openssh.authorizedKeys.keyFiles = [
-      (if builtins.pathExists ./private/authorized_keys then ./private/authorized_keys else ./empty)
+      (if builtins.pathExists ./private/authorized_keys then ./private/authorized_keys else
+      lib.warn "No authorized_keys found, please create one in ./private/authorized_keys"
+        ./empty)
     ];
   };
 
