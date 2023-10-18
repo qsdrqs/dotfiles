@@ -838,7 +838,7 @@ local plugins = {
         -- Default segments (fold -> sign -> line number + separator)
         segments = {
           {
-            sign = { namespace = { ".*" }, maxwidth = 1, colwidth = 2},
+            sign = { name = { ".*" }, namespace = { ".*" }, maxwidth = 1, colwidth = 2},
             click = "v:lua.ScSa"
           },
           {
@@ -847,7 +847,7 @@ local plugins = {
             click = "v:lua.ScLa",
           },
           {
-            sign = { namespace = {"gitsigns"},  maxwidth = 1, colwidth = 1, auto = false},
+            sign = { namespace = {"gitsigns"},  maxwidth = 1, colwidth = 1, auto = false },
             click = "v:lua.ScSa",
           },
           { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
@@ -934,6 +934,9 @@ local plugins = {
   {
     'windwp/nvim-autopairs',
     event = "InsertEnter",
+    cond = function()
+      return vim.g.vscode == nil
+    end,
     opts = {}
   },
 
@@ -2236,12 +2239,19 @@ local plugins = {
 
       vim.api.nvim_create_autocmd({"InsertEnter"}, {
         callback = function()
+          if vim.g.copilot_initialized == 1 then
+            return
+          end
+          for k, v in pairs(vim.g.copilot_filetypes) do
+            if k == vim.bo.filetype and v == false then
+              return
+            end
+          end
           if vim.g.no_load_copilot ~= 1 then
             require('lazy').load{plugins = 'copilot.vim'}
             vim.g.copilot_initialized = 1
           end
         end,
-        once = true
       })
 
       local copilot = function()
@@ -3229,15 +3239,18 @@ local plugins = {
   {
     'github/copilot.vim',
     lazy = true,
+    init = function()
+      vim.g.copilot_filetypes = {
+        ["dap-repl"] = false,
+        dapui_watches = false,
+        markdown = true
+      }
+    end,
     config = function()
       vim.g.copilot_echo_num_completions = 1
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
-      vim.g.copilot_filetypes = {
-        ["dap-repl"] = false,
-        markdown = true
-      }
 
       function copilot_dismiss()
         local copilot_keys = vim.fn["copilot#Dismiss"]()
@@ -3444,6 +3457,11 @@ local plugins = {
       "<F9>",
     },
     config = function()
+      local function term_dap()
+        require("dapui").close()
+        require 'nvim-dap-virtual-text/virtual_text'.clear_virtual_text()
+      end
+
       local dap = require('dap')
       vim.cmd('hi debugRed guifg=red')
       vim.fn.sign_define('DapBreakpoint', {text='🛑', texthl='debugRed', linehl='', numhl=''})
@@ -3763,13 +3781,6 @@ function DumpPluginsList()
   end
   print('\n')
 end
-
------------------------------dap------------------------------------------------------
-local function term_dap()
-  require("dapui").close()
-  require 'nvim-dap-virtual-text/virtual_text'.clear_virtual_text()
-end
---------------------------------------------------------------------------------------
 
 ----------------------------Highlights------------------------------------------------
 local links = {
@@ -4275,6 +4286,9 @@ function VscodeNeovimHandler()
       end
     end
   })
+
+  -- highlight
+  vim.api.nvim_set_hl(0, "Search", { bg = "Yellow", fg = "Black" })
 
 end
 --------------------------------------------------------------------------------------

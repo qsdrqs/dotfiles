@@ -49,7 +49,7 @@
     extraGroups = [ "wheel" "input" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     openssh.authorizedKeys.keyFiles = [
-      ./private/authorized_keys
+      (if builtins.pathExists ./private/authorized_keys then ./private/authorized_keys else ./empty)
     ];
   };
 
@@ -115,6 +115,7 @@
     nix-tree
     duf
     lsb-release
+    valgrind
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
