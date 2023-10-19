@@ -61,6 +61,21 @@
     };
   };
 
+  systemd = {
+    services.rathole-server = {
+      enable = false;
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      description = "Start the rathole server";
+      serviceConfig = {
+        User = "root";
+        ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/server.toml'';
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+    };
+  };
+
   # avoid v2ray service to create config file
   environment.etc."v2ray/config.json".enable = false;
 

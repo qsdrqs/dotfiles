@@ -5,7 +5,13 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local use_nix = true
+local lazypath
+if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
+  lazypath = vim.fn.stdpath("data") .. "/nix/lazy.nvim"
+else
+  lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+end
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
@@ -1597,6 +1603,7 @@ local plugins = {
         },
         debounce = 300,
         scope = {
+          enabled = true,
           highlight = highlight,
           show_end = true,
         },
@@ -3741,14 +3748,15 @@ local plugins = {
     end
   },
 }
-
+local pattern
+if use_nix then pattern = "." else pattern = "*" end
 local lazy_opts =  {
   defaults = {
     lazy = true
   },
   dev = {
     path = vim.fn.stdpath("data") .. "/nix",
-    patterns = {"."},
+    patterns = {pattern},
     fallback = true,
   },
   install = {
@@ -3938,7 +3946,7 @@ function lazyLoadPlugins()
       }
     }
   else
-    require('lazy').load{
+    require('lazy').load {
       plugins = {
         'rainbow',
       }

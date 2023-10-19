@@ -457,6 +457,9 @@ endif
 " 重启vim，设置退出return 100为重启，需要shell相关函数支持
 nnoremap <leader>rs <cmd>cquit 100<cr>
 
+" 不要自动添加EOL
+set nofixeol
+
 "-------------------杂项-----------------------"}}}
 "
 "-------------------Syntax highlight-----------------------"{{{
