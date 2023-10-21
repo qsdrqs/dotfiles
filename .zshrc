@@ -231,10 +231,14 @@ alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bd
 
 # NixOS
 snr-switch() {
-    sudo nixos-rebuild switch --flake path:$HOME/dotfiles#$@
+    if [[ $1 == "droid" ]]; then
+        cd $HOME/dotfiles && nix-on-droid switch --flake path:.
+    else
+        cd $HOME/dotfiles && sudo nixos-rebuild switch --flake path:.#$@
+    fi
 }
 hm-switch() {
-    home-manager switch --flake path:$HOME/dotfiles#$@
+    cd $HOME/dotfiles && home-manager switch --flake path:.#$@
 }
 nix-devel() {
     local last_env=$NIX_DEV

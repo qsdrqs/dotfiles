@@ -6,21 +6,32 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ranger = {
       url = "github:ranger/ranger";
       flake = false;
     };
-    vscode-server.url = "github:nix-community/nixos-vscode-server";
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     zsh-config.url = "path:zsh";
     nvim-config.url = "path:nvim/flake";
 
     # wsl
-    nixos-wsl.url = "github:nix-community/NixOS-WSL";
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    nix-index-database.url = "github:Mic92/nix-index-database";
-    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+    nix-index-database = {
+      url = "github:Mic92/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # nur
     nur.url = "github:nix-community/NUR";
@@ -28,9 +39,13 @@
     nix-on-droid = {
       url = "github:t184256/nix-on-droid";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
 
-    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hyprland-contrib = {
       url = "github:hyprwm/contrib";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -58,16 +73,16 @@
       minimalHomeModules = [
         ./nixos/home.nix
       ];
-      serverHomeModules = minimalHomeModules ++ [
+      basicHomeModules = minimalHomeModules ++ [
         ./nixos/nvim-plugins.nix
       ];
       guiHomeModules = minimalHomeModules ++ [
         ./nixos/gui-home.nix
       ];
-      wslHomeModules = serverHomeModules ++ [
+      wslHomeModules = basicHomeModules ++ [
         ./nixos/wsl-home.nix
       ];
-      desktopHomeModules = serverHomeModules ++ guiHomeModules;
+      desktopHomeModules = basicHomeModules ++ guiHomeModules;
 
       minimalConfig = {
         system = "x86_64-linux";
@@ -101,9 +116,9 @@
 
         ];
       };
-      serverConfig = minimalConfig // {
+      basicConfig = minimalConfig // {
         modules = minimalConfig.modules ++ [
-          ./nixos/server-configuration.nix
+          ./nixos/basic-configuration.nix
 
           # vscode-server
           vscode-server.nixosModules.default
@@ -121,10 +136,15 @@
           home-manager.nixosModules.home-manager
           {
             home-manager.users.qsdrqs = {
-              imports = serverHomeModules;
+              imports = basicHomeModules;
             };
             home-manager.extraSpecialArgs = { inherit inputs; };
           }
+        ];
+      };
+      serverConfig = basicConfig // {
+        modules = basicConfig.modules ++ [
+          ./nixos/server-configuration.nix
         ];
       };
       guiConfig = minimalConfig // {
@@ -141,8 +161,8 @@
         ];
       };
 
-      wslConfig = serverConfig // {
-        modules = serverConfig.modules ++ [
+      wslConfig = basicConfig // {
+        modules = basicConfig.modules ++ [
           ./nixos/wsl-configuration.nix
 
           home-manager.nixosModules.home-manager
@@ -155,8 +175,8 @@
         ];
       };
 
-      desktopConfig = serverConfig // guiConfig // {
-        modules = serverConfig.modules ++ guiConfig.modules ++ [
+      desktopConfig = basicConfig // guiConfig // {
+        modules = basicConfig.modules ++ guiConfig.modules ++ [
           ./nixos/desktop-configuration.nix
         ];
       };
@@ -169,13 +189,13 @@
       guiHomeConfig = minimalHomeConfig // {
         modules = guiHomeModules;
       };
-      serverHomeConfig = minimalHomeConfig // {
-        modules = serverHomeModules;
+      basicHomeConfig = minimalHomeConfig // {
+        modules = basicHomeModules;
       };
       desktopHomeConfig = guiHomeConfig // {
         modules = desktopHomeModules;
       };
-      wslHomeConfig = serverHomeConfig // {
+      wslHomeConfig = basicHomeConfig // {
         modules = wslHomeModules;
       };
 
@@ -229,6 +249,7 @@
     in
     {
       nixosConfigurations.minimal = nixpkgs.lib.nixosSystem minimalConfig;
+      nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
       nixosConfigurations.server = nixpkgs.lib.nixosSystem serverConfig;
       nixosConfigurations.gui = nixpkgs.lib.nixosSystem guiConfig;
       nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
@@ -239,7 +260,7 @@
         modules = [
           ./nixos/nix-on-droid.nix
         ];
-        extraSpecialArgs = { inherit inputs; };
+        extraSpecialArgs = { inherit inputs; pkgs = aarch64-linux-pkgs; hm-module = basicHomeModules;};
       };
 
       # iso, build through #nixos-iso.config.system.build.isoImage
@@ -247,8 +268,8 @@
       nixos-iso-gui = nixpkgs.lib.nixosSystem isoGuiConfig;
 
       # home-manager
-      homeConfigurations.basic = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
-      homeConfigurations.server = home-manager.lib.homeManagerConfiguration serverHomeConfig;
+      homeConfigurations.minimal = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
+      homeConfigurations.basic = home-manager.lib.homeManagerConfiguration basicHomeConfig;
       homeConfigurations.gui = home-manager.lib.homeManagerConfiguration guiHomeConfig;
       homeConfigurations.wsl = home-manager.lib.homeManagerConfiguration wslHomeConfig;
 

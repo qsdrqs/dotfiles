@@ -67,16 +67,22 @@
   };
 
   # gc
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 21d";
+  nix = {
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 21d";
+    };
+    settings = {
+      auto-optimise-store = true;
+      experimental-features = [ "nix-command" "flakes" ];
+    };
   };
-  nix.settings.auto-optimise-store = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   nixpkgs.config.allowUnfree = true;
+  # remove packages installed by default (e.g. nano, etc.)
   environment.defaultPackages = [ ];
 
   environment.systemPackages = with pkgs; [
@@ -86,14 +92,18 @@
     curl
     ranger
     tmux
+    perl # for tmux to work
     neofetch
     grc
     git
     fzf
     fd
     ripgrep
+    gnutar
     unzip
     zip
+    gcc
+    gnumake
     killall
     (pkgs.buildFHSUserEnv {
       name = "fhs";
@@ -119,8 +129,6 @@
     lsb-release
     valgrind
   ];
-
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
