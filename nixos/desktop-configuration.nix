@@ -55,9 +55,7 @@ let
     '';
   };
   vscode-wrapper = pkgs.writeShellScriptBin "code-wrapper" ''
-    CODE_EXEC=${(pkgs.vscode.override (old: {
-      commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
-    }))}/bin/code;
+    CODE_EXEC=${pkgs.vscode}/bin/code;
     CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
     sed -i 's/"window.titleBarStyle": "custom"/"window.titleBarStyle": "native"/g' $CONFIG;
     exec -a "$0" "$CODE_EXEC" "$@" &

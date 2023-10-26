@@ -21,7 +21,7 @@ if [[ $NOTMUX != 1 ]]; then
         elif [[ "$SSH_CONNECTION" != ""  ]]; then
             session_name="ssh"
             if [[ -x `command -v notify-send` ]]; then
-                # notify-send "ssh connected"
+                timeout 5 notify-send "ssh connected"
             fi
             call_tmux $session_name
             #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then
@@ -133,6 +133,7 @@ zinit light $HOME/zsh_custom/plugins/zsh-vi-mode
 zinit light $HOME/zsh_custom/plugins/zsh-autosuggestions
 
 # load plugins from oh-my-zsh
+zinit snippet $HOME/.oh-my-zsh/lib/completion.zsh
 zinit light $HOME/.oh-my-zsh/plugins/systemd
 zinit light $HOME/.oh-my-zsh/plugins/fd
 

@@ -20,6 +20,8 @@ let
       xterm
       sudo
       gzip
+      findutils
+      grep
       (pkgs.writeScriptBin "sshd-start" ''
         #!${pkgs.runtimeShell}
 
