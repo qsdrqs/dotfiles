@@ -21,7 +21,7 @@
       });
 
       vscode = super.vscode.override (old: {
-        commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+        commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" "-g" ];
       });
 
       vscode-insiders = (super.vscode.override (prev: {
@@ -66,7 +66,7 @@
         version = "2.1.1";
       });
 
-      firefox-devedition= super.firefox-devedition.overrideAttrs (oldAttrs: {
+      firefox-devedition = super.firefox-devedition.overrideAttrs (oldAttrs: {
         buildCommand = (oldAttrs.buildCommand or "") + ''
           mkdir -p $out/tmp/firefox-omni
           cd $out/tmp/firefox-omni
@@ -75,6 +75,12 @@
           ${pkgs.zip}/bin/zip -0DXqr $out/tmp/omni.ja *
           cp -f $out/tmp/omni.ja $out/lib/firefox/browser/omni.ja
           rm -rf $out/tmp
+        '';
+      });
+
+      grc = super.grc.overrideAttrs (oldAttrs: {
+        postInstall = (oldAttrs.postInstall or "") + ''
+          sed -i 's/.{commands\[\$0\]}/\$0/g' $out/etc/grc.zsh
         '';
       });
 
