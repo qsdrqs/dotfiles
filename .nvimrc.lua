@@ -1535,9 +1535,8 @@ local plugins = {
   {
     'nvim-treesitter/nvim-treesitter-textobjects',
     lazy = true,
-    event = "User PluginsLoaded",
     cond = function()
-      return vim.g.treesitter_disable ~= true
+      return vim.b.treesitter_disable ~= true
     end,
     config = function()
       if vim.g.treesitter_disable == true then
@@ -2256,7 +2255,6 @@ local plugins = {
             end
           end
           if vim.g.no_load_copilot ~= 1 then
-            require('lazy').load{plugins = 'copilot.vim'}
             vim.g.copilot_initialized = 1
           end
         end,
@@ -3886,7 +3884,7 @@ function lazyLoadPlugins()
       'project.nvim',
       'nvim-ufo',
       'toggleterm.nvim',
-      'vim-illuminate',
+      'copilot.vim',
       -- end misc
 
       -- begin cmp
@@ -3943,6 +3941,8 @@ function lazyLoadPlugins()
         'nvim-ts-autotag',
         'hlargs.nvim',
         'vim-matchup',
+        'vim-illuminate',
+        'nvim-treesitter-textobjects'
         -- end treesitter
       }
     }

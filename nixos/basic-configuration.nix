@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, options, ... }:
+{ config, pkgs, pkgs-master, lib, inputs, options, ... }:
 
 {
   # repair nix store
@@ -56,6 +56,7 @@
     v2ray = {
       enable = true;
       configFile = "/etc/v2ray/config.json";
+      # package = pkgs-master.v2ray;
     };
   };
 

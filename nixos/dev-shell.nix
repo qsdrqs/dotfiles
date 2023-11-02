@@ -38,6 +38,7 @@ with pkgs; {
       clang-tools_16
       clang_16
       llvm_16
+      pkg-config
     ];
   };
   python = mkShell {
