@@ -1326,7 +1326,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-b3XVQ1+FcI1Uo3QyltB9aLTdbkCVkkJ0LjR2FjFzbvA=",
+        "narHash": "sha256-WUwlKfq7yd1G0nw+7oFoaizn9F/jnG0OajP0VJGKZQM=",
         "path": "nvim/flake",
         "type": "path"
       },

@@ -613,18 +613,8 @@ local plugins = {
             python = {
               analysis = {
                 diagnosticSeverityOverrides = {
-                  reportGeneralTypeIssues = "warning"
+                  -- reportGeneralTypeIssues = "warning"
                 },
-                extraPaths = {
-                  vim.fn.getcwd()
-                },
-                completeFunctionParens = true,
-                inlayHints = {
-                  variableTypes = true,
-                  functionReturnTypes = true,
-                  callArgumentNames = "all",
-                  pytestParameters = true,
-                }
               }
             }
           }

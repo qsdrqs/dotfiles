@@ -46,7 +46,8 @@ def main():
                         'build': False,
                     }
 
-        plugin_url: str = None
+        plugin_url: str = ""
+        plugin_name: str = ""
         if plugin.count('/') == 1:
             plugin_name = plugin.split('/')[1]
             plugin_name = plugin_name.replace('.', 'DOT')
@@ -68,7 +69,7 @@ def main():
         if 'branch' in json_opts:
             branch = json_opts['branch']
 
-        if plugin_url != None:
+        if plugin_url != "" and plugin_name != "":
             plugins_dict[plugin_name] = {
                 'url': plugin_url + f'?ref={branch}' if branch != None else plugin_url,
                 'build': need_build,
