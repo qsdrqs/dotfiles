@@ -68,6 +68,7 @@ in
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
 
   environment.systemPackages = with pkgs; [
+    vscode-insiders
     keepassxc
     telegram-desktop
     slack

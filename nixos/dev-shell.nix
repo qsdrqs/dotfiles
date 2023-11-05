@@ -48,6 +48,7 @@ with pkgs; {
       python3Packages.matplotlib
       python3Packages.autopep8
       python3Packages.debugpy
+      python3Packages.isort
       nodePackages.pyright
     ];
   };

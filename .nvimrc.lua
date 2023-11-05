@@ -964,14 +964,36 @@ local plugins = {
         sources = {
           null_ls.builtins.diagnostics.eslint,
           -- null_ls.builtins.completion.spell,
-          null_ls.builtins.formatting.autopep8,
           null_ls.builtins.formatting.prettier,
           null_ls.builtins.completion.tags,
           null_ls.builtins.code_actions.gitsigns,
+          -- python
+          null_ls.builtins.formatting.autopep8.with({
+            runtime_condition = function(params)
+              if params.options.isort == true then
+                return false
+              else
+                return true
+              end
+            end
+          }),
+          null_ls.builtins.formatting.isort.with({
+            runtime_condition = function(params)
+              if params.options.isort == true then
+                return true
+              else
+                return false
+              end
+            end
+          }),
         },
-        on_attach = function(client, bufnr)
-          -- disable formatting expression that introduced by null-ls
-          vim.api.nvim_buf_set_option(bufnr, "formatexpr", "")
+      })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {"python"},
+        callback = function(args)
+          vim.api.nvim_buf_create_user_command(args.buf, "PythonOrganizeImports", function()
+            vim.lsp.buf.format({formatting_options = {isort = true}})
+          end, {})
         end
       })
     end
@@ -1230,8 +1252,13 @@ local plugins = {
       }
 
       -- vim.keymap.set('i', '<C-x><C-o>', '<Cmd>lua require("cmp").complete()<CR>', { silent = true })
-      vim.cmd[[ command! CmpDisable lua require('cmp').setup{enabled=false} ]]
-      vim.cmd[[ command! CmpEnable lua require('cmp').setup{enabled=true} ]]
+
+      vim.api.nvim_create_user_command("CmpDisable", function()
+        cmp.setup{enabled=false}
+      end, {nargs = 0})
+      vim.api.nvim_create_user_command("CmpEnable", function()
+        cmp.setup{enabled=true}
+      end, {nargs = 0})
     end
   },
 

@@ -32,12 +32,12 @@
       });
 
       vscode-insiders = (super.vscode.override (prev: {
-        commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
+        commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" "-g" ];
         isInsiders = true;
       })).overrideAttrs (prev: {
         src = (builtins.fetchTarball {
           url = "https://update.code.visualstudio.com/latest/linux-x64/insider";
-          sha256 = "1gkyagbrkihxbzcw8z0rg7plvgp7gg7yq6nlc0r7hwczsgz1dj1j";
+          sha256 = "0pvmhwxprpdmxm2z4cb365sbxii0v6rn7jnyhybfiii7r309cg7v";
         });
         version = "latest";
         buildInputs = prev.buildInputs ++ [ pkgs.krb5 ];
