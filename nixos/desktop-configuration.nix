@@ -54,6 +54,16 @@ let
       done
     '';
   };
+  qq-hidpi = pkgs.symlinkJoin {
+    name = "qq";
+    paths = [ config.nur.repos.xddxdd.qq ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/qq \
+        --set GDK_DPI_SCALE 1.5
+      sed -i "s|Exec=.*|Exec=$out/bin/qq|" $out/share/applications/qq.desktop
+    '';
+  };
   vscode-wrapper = (exec: cmd: pkgs.writeShellScriptBin cmd ''
     CODE_EXEC=${exec};
     CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
@@ -101,7 +111,7 @@ in
     pandoc
 
     # NUR
-    config.nur.repos.xddxdd.qq
+    qq-hidpi
     # wine wechat
     # (config.nur.repos.xddxdd.wine-wechat.override {
     #   setupSrc = fetchurl {
