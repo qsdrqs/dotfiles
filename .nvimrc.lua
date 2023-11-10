@@ -94,28 +94,28 @@ local kind_icons_list = {
 local kind_icons = {
   Text           = ' ',
   Method         = ' ',
-  Function       = ' ',
+  Function       = '󰊕 ',
   Constructor    = ' ',
-  Field          = ' ',
+  Field          = '󰇽 ',
   Variable       = ' ',
   Class          = 'ﴯ ',
   Interface      = ' ',
   Module         = " ",
   Property       = 'ﰠ ',
   Unit           = ' ',
-  Value          = ' ',
+  Value          = '󰎠 ',
   Enum           = ' ',
-  Keyword        = ' ',
+  Keyword        = '󰌋 ',
   Snippet        = ' ',
-  Color          = ' ',
-  File           = ' ',
+  Color          = '󰏘 ',
+  File           = '󰈙 ',
   Reference      = ' ',
-  Folder         = ' ',
+  Folder         = '󰉋 ',
   EnumMember     = ' ',
-  Constant       = ' ',
+  Constant       = '󰏿 ',
   Struct         = ' ',
   Event          = ' ',
-  Operator       = ' ',
+  Operator       = '󰆕 ',
   TypeParameter  = " ",
   TabNine        = ' ',
   String         = " ",
@@ -2091,7 +2091,7 @@ local plugins = {
           diagnostics_indicator = function(count, level, diagnostics_dict, context)
             local s = " "
             for e, n in pairs(diagnostics_dict) do
-              local sym = e == "error" and " "
+              local sym = e == "error" and "󰅚 "
               or (e == "warning" and "  " or " " )
               s = s .. n .. sym
             end
@@ -2772,14 +2772,14 @@ local plugins = {
 
       dashboard.section.buttons.val = {
         dashboard.button("e", "  New file", "<cmd>ene <CR>"),
-        dashboard.button("l", "  Load session", "<cmd> RestoreSession <cr>"),
+        dashboard.button("l", "󰁯  Load session", "<cmd> RestoreSession <cr>"),
         dashboard.button("r", "  Open file manager", "<cmd>RnvimrToggle <cr>"),
-        dashboard.button("f", "  Find file", "<cmd>Telescope find_files<CR>"),
-        dashboard.button("h", "  Recently opened files", "<cmd> Telescope oldfiles <CR>"),
-        dashboard.button("g", "  Find word","<cmd>Telescope live_grep<CR>"),
-        dashboard.button("m", "  Jump to bookmarks", "<cmd>Telescope vim_bookmarks<cr>"),
+        dashboard.button("f", "󰍉  Find file", "<cmd>Telescope find_files<CR>"),
+        dashboard.button("h", "󱔗  Recently opened files", "<cmd> Telescope oldfiles <CR>"),
+        dashboard.button("g", "󰈬  Find word","<cmd>Telescope live_grep<CR>"),
+        dashboard.button("m", "󰃃  Jump to bookmarks", "<cmd>Telescope vim_bookmarks<cr>"),
         dashboard.button("u", "  Update plugins" , ":Lazy sync<CR>"),
-        dashboard.button("q", "  Quit" , ":qa<CR>"),
+        dashboard.button("q", "󰅚  Quit" , ":qa<CR>"),
       }
 
       for _, v in pairs(dashboard.section.buttons.val) do
@@ -4280,6 +4280,9 @@ function VscodeNeovimHandler()
   -- recover =
   vim.keymap.del({'n', 'x'}, '=', { expr = true })
   vim.keymap.del('n', '==', { expr = true })
+
+  -- recover gf
+  vim.keymap.del({'n', 'x'}, 'gf', { expr = true })
 
   -- clear background highlight
   vim.cmd[[ hi Normal guibg=None ]]

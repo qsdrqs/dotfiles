@@ -91,6 +91,14 @@
         '';
       });
 
+      wineWowPackages.unstableFull = super.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: {
+        patches =
+          (oldAttrs.patches or [ ])
+          ++ [
+            ./patches/wine.patch
+          ];
+
+      });
     })
   ];
 }

@@ -54,14 +54,14 @@ let
       done
     '';
   };
-  vscode-wrapper = pkgs.writeShellScriptBin "code-wrapper" ''
-    CODE_EXEC=${pkgs.vscode}/bin/code;
+  vscode-wrapper = (exec: cmd: pkgs.writeShellScriptBin cmd ''
+    CODE_EXEC=${exec};
     CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
     sed -i 's/"window.titleBarStyle": "custom"/"window.titleBarStyle": "native"/g' $CONFIG;
     exec -a "$0" "$CODE_EXEC" "$@" &
     sleep 3
     sed -i 's/"window.titleBarStyle": "native"/"window.titleBarStyle": "custom"/g' $CONFIG;
-  '';
+  '');
 in
 {
   boot.kernelModules = [ "v4l2loopback" ];
@@ -83,7 +83,8 @@ in
     wineWowPackages.unstableFull
     wpsoffice-hidpi
     libreoffice
-    vscode-wrapper
+    (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
+    (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
 
     virt-manager
     qemu_full

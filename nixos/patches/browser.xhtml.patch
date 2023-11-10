@@ -1,5 +1,5 @@
 --- browser.xhtml	2023-10-05 13:14:23.144206463 -0500
-+++ browser-unreserved.xhtml	2023-10-05 13:10:44.530077543 -0500
++++ browser.xhtml	2023-10-05 13:10:44.530077543 -0500
 @@ -281,9 +281,9 @@
      <key id="key_newNavigator"
           data-l10n-id="window-new-shortcut"
