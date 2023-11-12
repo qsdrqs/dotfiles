@@ -8,6 +8,7 @@ let
     grim
     slurp
     jq
+    swayidle
     inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
   ];
 in

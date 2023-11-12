@@ -5,7 +5,7 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-local use_nix = true
+local use_nix = false
 local lazypath
 if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
   lazypath = vim.fn.stdpath("data") .. "/nix/lazy.nvim"
@@ -128,6 +128,14 @@ local kind_icons = {
   Key            = " ",
   Null           = "ﳠ ",
 }
+
+-- git navigations by vscode-neovim
+local function vscode_next_hunk()
+  require("vscode-neovim").action("workbench.action.editor.nextChange")
+end
+local function vscode_prev_hunk()
+  require("vscode-neovim").action("workbench.action.editor.previousChange")
+end
 
 local plugins = {
   -- auto load rtp in dotfiles
@@ -732,7 +740,7 @@ local plugins = {
                 command = { "nixpkgs-fmt" }
               },
               nix = {
-                maxMemoryMB = 2560,
+                maxMemoryMB = 5120,
                 flake = {
                   autoArchive = true,
                   autoEvalInputs = true,
@@ -2011,13 +2019,25 @@ local plugins = {
           -- Navigation
           map('n', ']g', function()
             if vim.wo.diff then return ']c' end
-            vim.schedule(function() gs.next_hunk() end)
+            vim.schedule(function()
+              if vim.g.vscode then
+                vscode_next_hunk()
+              else
+                gs.next_hunk()
+              end
+            end)
             return '<Ignore>'
           end, {expr=true})
 
           map('n', '[g', function()
             if vim.wo.diff then return '[c' end
-            vim.schedule(function() gs.prev_hunk() end)
+            vim.schedule(function()
+              if vim.g.vscode then
+                vscode_prev_hunk()
+              else
+                gs.prev_hunk()
+              end
+            end)
             return '<Ignore>'
           end, {expr=true})
 
@@ -4173,6 +4193,9 @@ vim.api.nvim_create_autocmd({ "VimLeave" }, {
   end,
 })
 
+-- improve performance
+vim.keymap.set('n', '<leader>pf', "<cmd>IBLToggleScope<cr><cmd>TSToggle highlight<cr>", { silent = true })
+
 ---------------------------vscode neovim----------------------------------------------
 function VscodeNeovimHandler()
   local vscode = require("vscode-neovim")
@@ -4187,41 +4210,41 @@ function VscodeNeovimHandler()
     }
   }
 
-  vim.keymap.set('n', '<leader>af',function() vscode.notify("editor.action.formatDocument") end, { silent = true })
-  vim.keymap.set('v', '<leader>af',function() vscode.notify("editor.action.formatSelection") end, { silent = true })
-  vim.keymap.set('n', 'gi',function() vscode.notify("editor.action.goToImplementation") end, { silent = true })
-  vim.keymap.set('n', 'gr',function() vscode.notify("editor.action.goToReferences") end, { silent = true })
-  vim.keymap.set('n', '<leader>v',function() vscode.notify("workbench.action.toggleAuxiliaryBar") end, { silent = true })
-  vim.keymap.set('n', '<leader>n',function() vscode.notify("workbench.action.toggleSidebarVisibility") end, { silent = true })
-  vim.keymap.set('n', '<leader>rs',function() vscode.notify("workbench.action.reloadWindow") end, { silent = true })
-  vim.keymap.set('n', '<leader>q',function() vscode.notify("workbench.actions.view.toggleProblems") end, { silent = true })
-  vim.keymap.set('n', ']d',function() vscode.notify("editor.action.marker.next") end, { silent = true })
-  vim.keymap.set('n', '[d',function() vscode.notify("editor.action.marker.prev") end, { silent = true })
-  vim.keymap.set('n', '<leader>x',function() vscode.notify("workbench.action.closeActiveEditor") end, { silent = true })
-  vim.keymap.set('n', '<leader>at',function() vscode.notify("workbench.action.tasks.runTask") end, { silent = true })
-  vim.keymap.set('n', '<leader>ca',function() vscode.notify("editor.action.quickFix") end, { silent = true })
-  vim.keymap.set('n', '<leader>rn',function() vscode.notify("editor.action.rename") end, { silent = true })
-  vim.keymap.set('n', '<leader>gg',function() vscode.notify("workbench.action.findInFiles") end, { silent = true })
-  vim.keymap.set('n', '<leader><leader>',function() vscode.call("workbench.action.showCommands", 0) end, { silent = true })
+  vim.keymap.set('n', '<leader>af',function() vscode.action("editor.action.formatDocument") end, { silent = true })
+  vim.keymap.set('v', '<leader>af',function() vscode.action("editor.action.formatSelection") end, { silent = true })
+  vim.keymap.set('n', 'gi',function() vscode.action("editor.action.goToImplementation") end, { silent = true })
+  vim.keymap.set('n', 'gr',function() vscode.action("editor.action.goToReferences") end, { silent = true })
+  vim.keymap.set('n', '<leader>v',function() vscode.action("workbench.action.toggleAuxiliaryBar") end, { silent = true })
+  vim.keymap.set('n', '<leader>n',function() vscode.action("workbench.action.toggleSidebarVisibility") end, { silent = true })
+  vim.keymap.set('n', '<leader>rs',function() vscode.action("workbench.action.reloadWindow") end, { silent = true })
+  vim.keymap.set('n', '<leader>q',function() vscode.action("workbench.actions.view.toggleProblems") end, { silent = true })
+  vim.keymap.set('n', ']d',function() vscode.action("editor.action.marker.next") end, { silent = true })
+  vim.keymap.set('n', '[d',function() vscode.action("editor.action.marker.prev") end, { silent = true })
+  vim.keymap.set('n', '<leader>x',function() vscode.action("workbench.action.closeActiveEditor") end, { silent = true })
+  vim.keymap.set('n', '<leader>at',function() vscode.action("workbench.action.tasks.runTask") end, { silent = true })
+  vim.keymap.set('n', '<leader>ca',function() vscode.action("editor.action.quickFix") end, { silent = true })
+  vim.keymap.set('n', '<leader>rn',function() vscode.action("editor.action.rename") end, { silent = true })
+  vim.keymap.set('n', '<leader>gg',function() vscode.action("workbench.action.findInFiles") end, { silent = true })
+  vim.keymap.set('n', '<leader><leader>',function() vscode.call("workbench.action.showCommands") end, { silent = true })
 
-  vim.keymap.set('n', 'gh',function() vscode.call("clangd.switchheadersource", 0) end, { silent = true })
+  vim.keymap.set('n', 'gh',function() vscode.call("clangd.switchheadersource") end, { silent = true })
 
-  vim.keymap.set('x', '<leader>y',function() vscode.call("extension.translateTextPreferred", 0) end, { silent = true })
+  vim.keymap.set('x', '<leader>y',function() vscode.call("extension.translateTextPreferred") end, { silent = true })
   vim.keymap.set('n', '<leader>y',function()
     vim.cmd [[normal! viw]]
-    vscode.call("extension.translateTextPreferred", 0)
+    vscode.call("extension.translateTextPreferred")
   end, { silent = true })
 
   vim.keymap.set('n', '<leader>gs',function()
     vim.cmd [[normal! yiw]]
-    vscode.notify("workbench.action.findInFiles")
+    vscode.action("workbench.action.findInFiles")
   end, { silent = true })
 
   vim.keymap.set({'n', 'x'}, '<C-w>o',function()
-    vscode.notify('workbench.action.joinAllGroups')
-    vscode.notify("workbench.action.closeAuxiliaryBar")
-    vscode.notify("workbench.action.closeSidebar")
-    vscode.notify("workbench.action.closePanel")
+    vscode.action('workbench.action.joinAllGroups')
+    vscode.action("workbench.action.closeAuxiliaryBar")
+    vscode.action("workbench.action.closeSidebar")
+    vscode.action("workbench.action.closePanel")
   end, { silent = true })
 
   -- git (use gitsigns.nvim instead)
@@ -4260,22 +4283,22 @@ function VscodeNeovimHandler()
         })
       else
         -- remote file, fallback to vscode keybindings
-        vim.keymap.set('n', '<leader>gr',function() vscode.notify("git.revertSelectedRanges") end, { silent = true })
-        vim.keymap.set('n', ']g',function() vscode.notify("workbench.action.editor.nextChange") end, { silent = true })
-        vim.keymap.set('n', '[g',function() vscode.notify("workbench.action.editor.previousChange") end, { silent = true })
+        vim.keymap.set('n', '<leader>gr',function() vscode.action("git.revertSelectedRanges") end, { silent = true })
+        vim.keymap.set('n', ']g',function() vscode.action("workbench.action.editor.nextChange") end, { silent = true })
+        vim.keymap.set('n', '[g',function() vscode.action("workbench.action.editor.previousChange") end, { silent = true })
       end
     end
   })
 
   -- just be used for vscode selection
-  vim.keymap.set('v', '<leader>v',function() vscode.notify("editor.action.goToImplementation", 1) end, { silent = true })
+  vim.keymap.set('v', '<leader>v',function() vscode.action("editor.action.goToImplementation") end, { silent = true })
 
   -- same bindings
-  vim.keymap.set('n', '<leader>d',function() vscode.notify("editor.action.showHover") end, { silent = true })
-  vim.keymap.set('n', '<leader>e',function() vscode.notify("editor.action.showHover") end, { silent = true })
+  vim.keymap.set('n', '<leader>d',function() vscode.action("editor.action.showHover") end, { silent = true })
+  vim.keymap.set('n', '<leader>e',function() vscode.action("editor.action.showHover") end, { silent = true })
 
-  vim.keymap.set('n', '<leader>f',function() vscode.notify("workbench.action.quickOpen") end, { silent = true })
-  vim.keymap.set('n', '<leader>b',function() vscode.notify("workbench.action.quickOpen") end, { silent = true })
+  vim.keymap.set('n', '<leader>f',function() vscode.action("workbench.action.quickOpen") end, { silent = true })
+  vim.keymap.set('n', '<leader>b',function() vscode.action("workbench.action.quickOpen") end, { silent = true })
 
   -- recover =
   vim.keymap.del({'n', 'x'}, '=', { expr = true })
@@ -4289,35 +4312,31 @@ function VscodeNeovimHandler()
   vim.cmd[[ hi Visual guibg=None ]]
 
   -- fold
-  vim.keymap.set('n', 'zc',function() vscode.notify("editor.fold") end, { silent = true })
-  vim.keymap.set('n', 'zC',function() vscode.notify("editor.foldRecursively") end, { silent = true })
-  vim.keymap.set('n', 'zo',function() vscode.notify("editor.unfold") end, { silent = true })
-  vim.keymap.set('n', 'zO',function() vscode.notify("editor.unfoldRecursively") end, { silent = true })
-  vim.keymap.set('n', 'za',function() vscode.notify("editor.toggleFold") end, { silent = true })
-  vim.keymap.set('n', 'zM',function() vscode.notify("editor.foldAll") end, { silent = true })
-  vim.keymap.set('n', 'zR',function() vscode.notify("editor.foldAll") end, { silent = true })
+  vim.keymap.set('n', 'zc',function() vscode.action("editor.fold") end, { silent = true })
+  vim.keymap.set('n', 'zC',function() vscode.action("editor.foldRecursively") end, { silent = true })
+  vim.keymap.set('n', 'zo',function() vscode.action("editor.unfold") end, { silent = true })
+  vim.keymap.set('n', 'zO',function() vscode.action("editor.unfoldRecursively") end, { silent = true })
+  vim.keymap.set('n', 'za',function() vscode.action("editor.toggleFold") end, { silent = true })
+  vim.keymap.set('n', 'zM',function() vscode.action("editor.foldAll") end, { silent = true })
+  vim.keymap.set('n', 'zR',function() vscode.action("editor.foldAll") end, { silent = true })
 
-  vim.keymap.set('n', '<localleader>v',function() vscode.notify("latex-workshop.synctex") end, { silent = true })
-  vim.keymap.set('n', '<C-g>',function() vscode.notify("workbench.view.scm") end, { silent = true })
+  vim.keymap.set('n', '<localleader>v',function() vscode.action("latex-workshop.synctex") end, { silent = true })
+  vim.keymap.set('n', '<C-g>',function() vscode.action("workbench.view.scm") end, { silent = true })
 
   -- comment, use vscode builtin comment
-  vim.keymap.set('n', '<C-/>',function() vscode.notify("editor.action.commentLine") end, { silent = true })
-  vim.keymap.set('v', '<C-/>',function() vscode.notify("editor.action.commentLine", 0) end, { silent = true })
-  vim.keymap.set('n', '<C-s-/>',function() vscode.notify("editor.action.blockComment") end, { silent = true })
-  vim.keymap.set('v', '<C-s-/>',function() vscode.notify("editor.action.blockComment", 0) end, { silent = true })
+  vim.keymap.set({'n', 'v'}, '<C-/>',function() vscode.action("editor.action.commentLine") end, { silent = true })
+  vim.keymap.set({'n', 'v'}, '<C-s-/>',function() vscode.action("editor.action.blockComment") end, { silent = true })
+  vim.keymap.set('v', '<C-s-/>',function() vscode.action("editor.action.blockComment") end, { silent = true })
 
   -- rewrap
   vim.api.nvim_create_autocmd("InsertLeave", {
     pattern = "*.tex",
     callback = function()
       if vim.g.wrap_on_insert_leave == 1 then
-        vscode.notify("rewrap.rewrapComment")
+        vscode.action("rewrap.rewrapComment")
       end
     end
   })
-
-  -- highlight
-  vim.api.nvim_set_hl(0, "Search", { bg = "Yellow", fg = "Black" })
 
 end
 --------------------------------------------------------------------------------------

@@ -64,6 +64,17 @@ let
       sed -i "s|Exec=.*|Exec=$out/bin/qq|" $out/share/applications/qq.desktop
     '';
   };
+  qqmusic-hidpi = pkgs.symlinkJoin {
+    name = "qqmusic";
+    paths = [ config.nur.repos.xddxdd.qqmusic ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/qqmusic \
+        --set GDK_DPI_SCALE 1.5 \
+        --add-flags --no-sandbox
+      sed -i "s|Exec=.*|Exec=$out/bin/qqmusic %U|" $out/share/applications/qqmusic.desktop
+    '';
+  };
   vscode-wrapper = (exec: cmd: pkgs.writeShellScriptBin cmd ''
     CODE_EXEC=${exec};
     CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
@@ -120,7 +131,7 @@ in
     #   };
     #   version = "3.9.5";
     # })
-    config.nur.repos.xddxdd.qqmusic
+    qqmusic-hidpi
     config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
   ];
@@ -203,6 +214,7 @@ in
       powerManagement.enable = true;
       nvidiaSettings = true;
       open = true;
+      package = config.boot.kernelPackages.nvidiaPackages.production;
     };
   };
 
