@@ -5,7 +5,7 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-local use_nix = false
+local use_nix = true
 local lazypath
 if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
   lazypath = vim.fn.stdpath("data") .. "/nix/lazy.nvim"
@@ -3803,7 +3803,7 @@ local lazy_opts =  {
 require('lazy').setup(plugins, lazy_opts)
 
 
--- `nvim --headless -c 'lua DumpPluginsList(); vim.cmd("q")'`
+-- `nvim --headless --cmd "let g:plugins_loaded=1" -c 'lua DumpPluginsList(); vim.cmd("q")'`
 function DumpPluginsList()
   for _, plugin in ipairs(plugins) do
     opt = {}
@@ -4075,8 +4075,9 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 -- vim.g.suda_smart_edit = 1
 
 -- osc52 support on ssh
-if os.getenv("SSH_CONNECTION") ~= nil or os.getenv("WSLPATH") ~= nil then
+if (os.getenv("SSH_CONNECTION") ~= nil or os.getenv("WSLPATH") ~= nil) and vim.g.vscode == nil then
   -- disable the xclip under SSH due to high lantency
+  -- 
   if os.getenv("TMUX") ~= nil then
     vim.g.clipboard = {
       name = "tmux clipboard",
@@ -4214,6 +4215,7 @@ function VscodeNeovimHandler()
   vim.keymap.set('v', '<leader>af',function() vscode.action("editor.action.formatSelection") end, { silent = true })
   vim.keymap.set('n', 'gi',function() vscode.action("editor.action.goToImplementation") end, { silent = true })
   vim.keymap.set('n', 'gr',function() vscode.action("editor.action.goToReferences") end, { silent = true })
+  vim.keymap.set('n', 'gD',function() vscode.action("editor.action.goToDeclaration") end, { silent = true })
   vim.keymap.set('n', '<leader>v',function() vscode.action("workbench.action.toggleAuxiliaryBar") end, { silent = true })
   vim.keymap.set('n', '<leader>n',function() vscode.action("workbench.action.toggleSidebarVisibility") end, { silent = true })
   vim.keymap.set('n', '<leader>rs',function() vscode.action("workbench.action.reloadWindow") end, { silent = true })

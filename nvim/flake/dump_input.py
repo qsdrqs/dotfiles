@@ -15,7 +15,7 @@ import json
 
 
 def main():
-    cmd = 'nvim --headless -c \'lua DumpPluginsList(); vim.cmd("q")\''
+    cmd = 'nvim --headless --cmd "let g:plugins_loaded=1" -c \'lua DumpPluginsList(); vim.cmd("q")\''
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     plugins: list[str] = []

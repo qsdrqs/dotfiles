@@ -21,9 +21,16 @@
 
   };
 
+  environment.systemPackages = with pkgs; [
+    kitty
+  ];
+  fonts.packages = with pkgs; [
+    (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })
+  ];
+
   # use vcxsrv instead of wslg
-  environment.variables.DISPLAY =
-    "$(${pkgs.coreutils-full}/bin/cat /etc/resolv.conf \\
-    | ${pkgs.gnugrep}/bin/grep nameserver \\
-    | ${pkgs.gawk}/bin/awk '{print $2; exit;}'):0.0";
+  # environment.variables.DISPLAY =
+  #   "$(${pkgs.coreutils-full}/bin/cat /etc/resolv.conf \\
+  #   | ${pkgs.gnugrep}/bin/grep nameserver \\
+  #   | ${pkgs.gawk}/bin/awk '{print $2; exit;}'):0.0";
 }
