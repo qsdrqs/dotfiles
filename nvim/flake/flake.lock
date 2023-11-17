@@ -1343,6 +1343,7 @@
         "vim-sleuth": "vim-sleuth",
         "vim-snippets": "vim-snippets",
         "vim-textobj-entire": "vim-textobj-entire",
+        "vim-textobj-user": "vim-textobj-user",
         "vim-visual-multi": "vim-visual-multi",
         "vim-vsnip": "vim-vsnip",
         "which-keyDOTnvim": "which-keyDOTnvim"
@@ -1841,6 +1842,22 @@
       "original": {
         "owner": "kana",
         "repo": "vim-textobj-entire",
+        "type": "github"
+      }
+    },
+    "vim-textobj-user": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1582277364,
+        "narHash": "sha256-4+9SlywaEKpJL6MM2jcBjFoy2dpLqviil9idVNkeL/g=",
+        "owner": "kana",
+        "repo": "vim-textobj-user",
+        "rev": "41a675ddbeefd6a93664a4dc52f302fe3086a933",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kana",
+        "repo": "vim-textobj-user",
         "type": "github"
       }
     },

@@ -2944,7 +2944,10 @@ local plugins = {
   {
     'smoka7/hop.nvim',
     lazy = true,
-    keys = {"<leader>w", "<leader>l"},
+    keys = {
+      {"<leader>w", mode = { "n", "v" }},
+      {"<leader>l", mode = { "n", "v" }},
+    },
     config = function()
       require'hop'.setup()
       vim.keymap.set('n', '<leader>w', "<cmd>lua require'hop'.hint_words()<cr>", {})
@@ -3235,7 +3238,7 @@ local plugins = {
   {
     'kana/vim-textobj-entire',
     keys = {"vie"},
-    dependencies = {"vim-textobj-user"},
+    dependencies = {"kana/vim-textobj-user"},
   },
   {
     'lfv89/vim-interestingwords',

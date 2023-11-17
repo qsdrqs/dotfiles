@@ -363,6 +363,10 @@
       url = "github:iamcco/markdown-preview.nvim";
       flake = false;
     };
+    vim-textobj-user = {
+      url = "github:kana/vim-textobj-user";
+      flake = false;
+    };
     vim-textobj-entire = {
       url = "github:kana/vim-textobj-entire";
       flake = false;
@@ -540,6 +544,7 @@
         { name = "pantran.nvim"; dotname = "pantranDOTnvim";source = inputs.pantranDOTnvim; build = false; }
         { name = "rainbow"; dotname = "rainbow";source = inputs.rainbow; build = false; }
         { name = "markdown-preview.nvim"; dotname = "markdown-previewDOTnvim";source = inputs.markdown-previewDOTnvim; build = true; }
+        { name = "vim-textobj-user"; dotname = "vim-textobj-user";source = inputs.vim-textobj-user; build = false; }
         { name = "vim-textobj-entire"; dotname = "vim-textobj-entire";source = inputs.vim-textobj-entire; build = false; }
         { name = "vim-interestingwords"; dotname = "vim-interestingwords";source = inputs.vim-interestingwords; build = false; }
         { name = "vim-skeletons"; dotname = "vim-skeletons";source = inputs.vim-skeletons; build = false; }
