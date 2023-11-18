@@ -88,6 +88,20 @@ in
   boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
 
+  boot.loader = {
+    grub = {
+      device = "nodev";
+      efiSupport = true;
+      useOSProber = true;
+      gfxmodeEfi = "1024x768";
+      default = "saved";
+    };
+    efi = {
+      canTouchEfiVariables = true;
+      efiSysMountPoint = "/boot";
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     vscode-insiders
     keepassxc

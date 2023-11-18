@@ -69,9 +69,21 @@ def main():
         if 'branch' in json_opts:
             branch = json_opts['branch']
 
+        # check commit
+        commit = None
+        if 'commit' in json_opts:
+            commit = json_opts['commit']
+
         if plugin_url != "" and plugin_name != "":
+            if branch != None and commit != None:
+                raise Exception(f'plugin {plugin_name} has both branch and commit')
+            url = plugin_url
+            if commit != None:
+                url += f'?rev={commit}'
+            if branch != None:
+                url += f'?ref={branch}'
             plugins_dict[plugin_name] = {
-                'url': plugin_url + f'?ref={branch}' if branch != None else plugin_url,
+                'url': url,
                 'build': need_build,
             }
 

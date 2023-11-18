@@ -160,7 +160,7 @@
       flake = false;
     };
     nvim-ufo = {
-      url = "github:kevinhwang91/nvim-ufo";
+      url = "github:kevinhwang91/nvim-ufo?rev=ebbab711d909d5f675e38ad489765bd22bd2c6b3";
       flake = false;
     };
     toggletermDOTnvim = {

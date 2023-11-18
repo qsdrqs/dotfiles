@@ -1275,6 +1275,7 @@ local plugins = {
   {
     -- smart fold
     'kevinhwang91/nvim-ufo',
+    commit = "ebbab711d909d5f675e38ad489765bd22bd2c6b3",
     dependencies = {'kevinhwang91/promise-async'},
     config = function()
       vim.o.foldcolumn = '1'
@@ -3794,6 +3795,9 @@ function DumpPluginsList()
     end
     if plugin.dependencies ~= nil then
       opt.dependencies = plugin.dependencies
+    end
+    if plugin.commit ~= nil then
+      opt.commit = plugin.commit
     end
     if plugin[1] ~= nil then
       print(plugin[1], vim.json.encode(opt))
