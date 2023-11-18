@@ -166,9 +166,7 @@ local plugins = {
       "<leader>gg",
       "<leader>t",
     },
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     config = function()
       local action_set = require "telescope.actions.set"
 
@@ -501,7 +499,7 @@ local plugins = {
         end
 
         -- inlay hints
-        vim.lsp.inlay_hint(bufnr, true)
+        vim.lsp.inlay_hint.enable(bufnr, true)
 
       end
 
@@ -827,9 +825,7 @@ local plugins = {
 
   {
     "luukvbaal/statuscol.nvim",
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     config = function()
       local builtin = require("statuscol.builtin")
       vim.o.numberwidth = vim.o.numberwidth + 2 -- fix numberwidth mismatch
@@ -939,18 +935,14 @@ local plugins = {
   {
     'windwp/nvim-autopairs',
     event = "InsertEnter",
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     opts = {}
   },
 
   {
     "Pocco81/auto-save.nvim",
     event = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     opts = {
       execution_message = {
         message = function() -- message to print on save
@@ -1051,12 +1043,10 @@ local plugins = {
     'hrsh7th/cmp-cmdline',
     lazy = true,
     keys = {"/", {":", mode = {'v', 'n'}}},
-    cond = function()
-      return vim.g.vscode == nil
+    cond = vim.g.vscode == nil
           and vim.fn.getfsize(vim.fn.expand('%')) <= (1024 * 1024 * 100)
           and vim.fn.line('$') <= 100000
-          and vim.g.started_by_firenvim == nil
-    end,
+          and vim.g.started_by_firenvim == nil,
     config = function()
       local status_ok, cmp = pcall(require, "cmp")
       if not status_ok then
@@ -1276,9 +1266,7 @@ local plugins = {
     'kevinhwang91/nvim-fundo',
     dependencies = {'kevinhwang91/promise-async'},
     keys = {'u', "<C-r>"},
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     build = function()
       require('fundo').install()
     end,
@@ -1775,9 +1763,7 @@ local plugins = {
     'stevearc/aerial.nvim',
     lazy = true,
     keys = "<leader>v",
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     config = function()
       vim.keymap.set('n', '<leader>v', '<cmd>AerialToggle!<CR>', { silent = true })
       local status_ok, telescope = pcall(require, "telescope")
@@ -2385,9 +2371,7 @@ local plugins = {
   {
     'kevinhwang91/rnvimr',
     lazy = true,
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     keys = "<leader>ra",
     cmd = "RnvimrToggle",
     config = function()
@@ -2536,9 +2520,7 @@ local plugins = {
     'famiu/bufdelete.nvim',
     lazy = true,
     keys = '<leader>x',
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     config = function()
       vim.keymap.set('n', '<leader>x', '<cmd>Bdelete!<CR>', {silent = true})
     end
@@ -2839,9 +2821,7 @@ local plugins = {
       { '"',     mode = { 'v', 'n' } },
       { '<C-r>', mode = { 'i' } }
     },
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     opts = {
       window = {
         border = "single"
@@ -2861,9 +2841,7 @@ local plugins = {
       {"<c-/>", mode = 'n'},
       {"<c-s-/>", mode = 'n'},
     },
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     config = function()
       local bindkey
       if os.getenv("TMUX") ~= nil then
@@ -3176,9 +3154,7 @@ local plugins = {
 
   {
     "potamides/pantran.nvim",
-    cond = function()
-      return vim.g.vscode == nil
-    end,
+    cond = vim.g.vscode == nil,
     keys = {{"<leader>y", mode = {'n', 'x'}}},
     config = function()
       local opts = {noremap = true, silent = true, expr = true}
@@ -4211,6 +4187,7 @@ function VscodeNeovimHandler()
       "vim-matchup",
       "vim-sandwich",
       "gitsigns.nvim",
+      "vscode-multi-cursor.nvim",
     }
   }
 
