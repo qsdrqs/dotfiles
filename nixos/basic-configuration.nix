@@ -21,6 +21,7 @@
     nodejs_16
     firejail
     cloudflare-warp
+    openssl
 
     # pdf2txt
     poppler_utils

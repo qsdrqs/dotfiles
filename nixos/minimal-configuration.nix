@@ -102,6 +102,7 @@
     gnutar
     unzip
     zip
+    p7zip
     gcc
     gnumake
     killall
@@ -128,6 +129,7 @@
     duf
     lsb-release
     valgrind
+    sshfs
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

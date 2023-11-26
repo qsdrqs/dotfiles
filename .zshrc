@@ -66,16 +66,16 @@ export PATH="$GOPATH/bin:$PATH"
 export GPG_TTY=$(tty)
 
 #Make alacritty compatible with SSH
-if [[ $TERM != "xterm-kitty" && $TMUX != "" ]]; then
-    export TERM="xterm-256color"
-elif [[ $TERM == "xterm" ]]; then
-    export TERM="xterm-256color"
-elif [[ $TERM == "linux" ]]; then
-    export TERM="xterm-256color"
-elif [[ $TERM == "xterm-kitty" ]]; then
-    # alias ssh
-    # alias ssh="kitty +kitten ssh"
-fi
+# if [[ $TERM != "xterm-kitty" && $TMUX != "" ]]; then
+#     export TERM="xterm-256color"
+# elif [[ $TERM == "xterm" ]]; then
+#     export TERM="xterm-256color"
+# elif [[ $TERM == "linux" ]]; then
+#     export TERM="xterm-256color"
+# elif [[ $TERM == "xterm-kitty" ]]; then
+#     # alias ssh
+#     # alias ssh="kitty +kitten ssh"
+# fi
 
 # disable ranger load default rc
 export RANGER_LOAD_DEFAULT_RC=false

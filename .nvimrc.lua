@@ -604,7 +604,7 @@ local plugins = {
 
       -- add my magic python lsp
       local ok, pycfg = pcall(require, 'private.magic_py_lsp')
-      if not ok then
+      if not ok or pycfg.config == nil then
         servers[#servers+1] = 'pyright'
       else
         require('lspconfig.configs')[pycfg.name] = pycfg.config
@@ -1456,7 +1456,7 @@ local plugins = {
       end
       require 'nvim-treesitter.configs'.setup {
         -- One of "all", or a list of languages
-        ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust"},
+        ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust", "markdown"},
 
         -- Install languages synchronously (only applied to `ensure_installed`)
         sync_install = false,
@@ -3595,7 +3595,7 @@ local plugins = {
             {
               text = '-enable-pretty-printing',
               description =  'enable pretty printing',
-              ignoreFailures = false 
+              ignoreFailures = false
             },
           },
         }
@@ -4058,49 +4058,51 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 -- vim.g.suda_smart_edit = 1
 
 -- osc52 support on ssh
-if (os.getenv("SSH_CONNECTION") ~= nil or os.getenv("WSLPATH") ~= nil) and vim.g.vscode == nil then
+if os.getenv("SSH_CONNECTION") ~= nil then
   -- disable the xclip under SSH due to high lantency
-  -- 
-  if os.getenv("TMUX") ~= nil then
+  -- use osc52
+  local nvim_ver_minor = vim.version().minor
+  if nvim_ver_minor >= 10 then
     vim.g.clipboard = {
-      name = "tmux clipboard",
+      name = 'OSC 52',
       copy = {
-        ["+"] = "tmux load-buffer -",
-        ["*"] = "tmux load-buffer -",
+        ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+        ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
       },
       paste = {
-        ["+"] = "tmux save-buffer -",
-        ["*"] = "tmux save-buffer -",
+        ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+        ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
       },
-      cache_enabled = 1,
     }
   else
+    vim.api.nvim_create_autocmd("TextYankPost", {
+      callback = function()
+        if have_load_osc52 == nil then
+          have_load_osc52 = 1
+          require("lazy").load{ plugins = {"nvim-osc52"} }
+        end
+        if vim.v.event.operator == 'y' and vim.v.event.regname == '' then
+          local osc52_copy_register = require('osc52').copy_register
+          pcall(osc52_copy_register, '"')
+        end
+      end
+    })
+  end
+elseif vim.fn.has('wsl') == 1 then
+  -- wsl without ssh connection
+  if vim.fn.executable("win32yank.exe") == 1 then
     vim.g.clipboard = {
-      name = "dummy_clipboard",
+      name = 'win32yank',
       copy = {
-        ["+"] = "",
-        ["*"] = "",
+        ['+'] = {"win32yank.exe", "-i", "--crlf"},
+        ['*'] = {"win32yank.exe", "-i", "--crlf"},
       },
       paste = {
-        ["+"] = "",
-        ["*"] = "",
+        ['+'] = {"win32yank.exe", "-o", "--lf"},
+        ['*'] = {"win32yank.exe", "-o", "--lf"},
       },
-      cache_enabled = 0,
     }
   end
-  vim.api.nvim_create_autocmd("TextYankPost", {
-    callback = function()
-      if have_load_osc52 == nil then
-        have_load_osc52 = 1
-        require("lazy").load{ plugins = {"nvim-osc52"} }
-      end
-      if vim.v.event.operator == 'y' and vim.v.event.regname == '' then
-        local osc52_copy_register = require('osc52').copy_register
-        pcall(osc52_copy_register, '"')
-      end
-    end
-  })
-  -- vim.g.oscyank_term = 'default'
 end
 
 if vim.g.vscode == nil then
@@ -4212,6 +4214,8 @@ function VscodeNeovimHandler()
   vim.keymap.set('n', '<leader>rn',function() vscode.action("editor.action.rename") end, { silent = true })
   vim.keymap.set('n', '<leader>gg',function() vscode.action("workbench.action.findInFiles") end, { silent = true })
   vim.keymap.set('n', '<leader><leader>',function() vscode.call("workbench.action.showCommands") end, { silent = true })
+  vim.keymap.set('n', '<localleader>t',function() vscode.call("workbench.action.createTerminalEditorSide") end, { silent = true })
+  vim.keymap.set('n', '<localleader>T',function() vscode.call("workbench.action.createTerminalEditor") end, { silent = true })
 
   vim.keymap.set('n', 'gh',function() vscode.call("clangd.switchheadersource") end, { silent = true })
 
@@ -4231,6 +4235,10 @@ function VscodeNeovimHandler()
     vscode.action("workbench.action.closeAuxiliaryBar")
     vscode.action("workbench.action.closeSidebar")
     vscode.action("workbench.action.closePanel")
+  end, { silent = true })
+
+  vim.keymap.set('n', '<leader>ra',function()
+    vscode.action('multiCommand.openRanger')
   end, { silent = true })
 
   -- git (use gitsigns.nvim instead)

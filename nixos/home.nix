@@ -49,29 +49,9 @@
   };
   programs.ssh.enable = true;
   programs.ssh.includes = [ "extra_config" ];
-  programs.ssh.matchBlocks = {
-    docean = {
-      host = "Docean";
-      hostname = "143.110.233.113";
-      user = "root";
-    };
-    aliyun = {
-      host = "Aliyun";
-      hostname = "8.140.148.238";
-      user = "root";
-    };
-    deskserver = {
-      host = "DESKSERVER";
-      hostname = "143.110.233.113";
-      user = "qsdrqs";
-      port = 3322;
-    };
-    rasparch = {
-      host = "RaspArch";
-      hostname = "143.110.233.113";
-      user = "qsdrqs";
-      port = 3323;
-    };
+  home.file."extra_config" = {
+    source = ./private/ssh-config;
+    target = ".ssh/extra_config";
   };
 
   # Let Home Manager install and manage itself.

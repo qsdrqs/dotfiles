@@ -3,7 +3,14 @@ let
   homeDir = config.users.users.qsdrqs.home;
 in
 {
-  services.syncthing.guiAddress = "0.0.0.0:8384";
+  imports = [
+    (if builtins.pathExists ./private/server-private.nix then
+        ./private/server-private.nix
+     else
+       lib.warn "No private files found"
+     ./empty.nix
+    )
+  ];
 
   systemd = {
     services.rathole-server = {
@@ -17,24 +24,88 @@ in
         RestartSec = 5;
       };
     };
-    user.services = {
-      keepass-backup = {
-        description = "backup keepass database";
-        serviceConfig = {
-          KillSignal = "SIGINT";
-          ExecStart = "${pkgs.bash}/bin/sh ${homeDir}/keepass_backup.sh ${homeDir}";
+
+    # certbot renew
+    services.certbot-renew = {
+      enable = false;
+      description = "Certbot Renewal";
+      serviceConfig = {
+        ExecStart="${pkgs.certbot}/bin/certbot renew";
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+    };
+    timers.certbot-renew = {
+      enable = false;
+      description="Daily renewal of Let's Encrypt's certificates by certbot";
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+      };
+      wantedBy = [ "timers.target" ];
+    };
+
+    user = {
+      services = {
+        keepass-backup = {
+          description = "backup keepass database";
+          serviceConfig = {
+            KillSignal = "SIGINT";
+            ExecStart = "${pkgs.bash}/bin/sh ${homeDir}/keepass_backup.sh ${homeDir}";
+          };
+        };
+      };
+      timers = {
+        keepass-backup = {
+          description = "Hourly backup keepass database";
+          timerConfig = {
+            OnCalendar = "hourly";
+            Persistent = true;
+          };
+          wantedBy = [ "default.target" ];
         };
       };
     };
   };
-  systemd.user.timers = {
-    keepass-backup = {
-      description = "Hourly backup keepass database";
-      timerConfig = {
-        OnCalendar = "hourly";
-        Persistent = true;
-      };
-      wantedBy = [ "default.target" ];
+
+  services.nginx = {
+    enable = false;
+    httpConfig = "include /etc/nginx/nginx.conf;";
+  };
+
+  services.matrix-synapse = {
+    enable = false;
+    configFile = "/etc/synapse/homeserver.yaml";
+    dataDir = "/var/lib/synapse";
+    settings = {
+      media_store_path = "/var/lib/synapse/media_store";
+      signing_key_path = "/etc/synapse/qsdrqs.site.signing.key";
     };
   };
+
+  systemd.services.matrix-synapse = {
+    enable = config.services.matrix-synapse.enable;
+    serviceConfig = {
+      ExecStart = lib.mkForce ''
+        ${pkgs.matrix-synapse}/bin/synapse_homeserver \
+        --config-path /etc/synapse/homeserver.yaml
+      '';
+    };
+  };
+
+  services.coturn = {
+    enable = false;
+  };
+
+  systemd.services.coturn = let
+    runConfig = "/run/coturn/turnserver.cfg";
+  in
+  {
+    enable = config.services.coturn.enable;
+    preStart = lib.mkForce ''
+      cat /etc/turnserver/turnserver.conf > ${runConfig}
+      chmod 640 ${runConfig}
+    '';
+  };
+
 }
