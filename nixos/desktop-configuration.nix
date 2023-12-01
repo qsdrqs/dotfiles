@@ -168,17 +168,6 @@ in
       # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/609
       XDG_RUNTIME_DIR = "/run/user/1000"; # User-id 1000 must match above user. MPD will look inside this directory for the PipeWire socket.
     };
-    services.rathole-client = {
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
-      description = "Start the rathole client";
-      serviceConfig = {
-        User = "root";
-        ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/client.toml'';
-        Restart = "on-failure";
-        RestartSec = 5;
-      };
-    };
   };
 
   services.zerotierone = {

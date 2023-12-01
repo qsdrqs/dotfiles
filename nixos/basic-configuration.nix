@@ -74,6 +74,18 @@
         DynamicUser = "no";
       };
     };
+    services.rathole-client = {
+      enable = false;
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      description = "Start the rathole client";
+      serviceConfig = {
+        User = "root";
+        ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/client.toml'';
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+    };
   };
 
   # avoid v2ray service to create config file

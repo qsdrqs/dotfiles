@@ -28,6 +28,10 @@
     (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })
   ];
 
+  # Set syncthing GUI address to 0.0.0.0
+  # So that it's accessible from Windows
+  services.syncthing.guiAddress = "0.0.0.0:8384";
+
   # use vcxsrv instead of wslg
   # environment.variables.DISPLAY =
   #   "$(${pkgs.coreutils-full}/bin/cat /etc/resolv.conf \\
