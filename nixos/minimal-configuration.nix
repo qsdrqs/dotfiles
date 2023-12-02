@@ -91,6 +91,7 @@
     wget
     curl
     ranger
+    yazi
     tmux
     perl # for tmux to work
     neofetch

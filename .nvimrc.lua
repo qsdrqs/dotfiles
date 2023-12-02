@@ -1410,7 +1410,7 @@ local plugins = {
 
   {
     "akinsho/toggleterm.nvim",
-    keys = {"<localleader>t", "<C-`>", "<localleader>T"},
+    keys = {"<localleader>t", "<C-`>", "<localleader>T", "<leader>ra"},
     config = function()
       require("toggleterm").setup {
         size = function(term)
@@ -1436,7 +1436,34 @@ local plugins = {
         lazygit:toggle()
       end
 
+      local yazi = Terminal:new({
+        cmd = "export NVIM_YAZI=1 && yazi",
+        hidden = true,
+        direction = "float",
+        float_opts = {
+          width = vim.fn.float2nr(0.7 * vim.o.columns),
+          height = vim.fn.float2nr(0.7 * vim.o.lines),
+        },
+        on_exit = function(t, job, exit_code, name)
+          local lf_temp_path = "/tmp/yaziopen"
+          local file = io.open(lf_temp_path, "r")
+          if file == nil then
+            return
+          end
+          local name = file:read("*a")
+          file:close()
+          os.remove(lf_temp_path)
+          vim.defer_fn(function()
+            vim.cmd("edit " .. name)
+          end, 0)
+        end
+      })
+      local function yazi_toggle()
+        yazi:toggle()
+      end
+
       vim.keymap.set("n", "<c-g>", lazygit_toggle, {noremap = true, silent = true})
+      vim.keymap.set("n", "<leader>ra", yazi_toggle, {noremap = true, silent = true})
 
       -- repl
       vim.keymap.set("n", "<c-c><c-c>", "<cmd>ToggleTermSendCurrentLine<cr>")
@@ -2373,10 +2400,10 @@ local plugins = {
     'kevinhwang91/rnvimr',
     lazy = true,
     cond = vim.g.vscode == nil,
-    keys = "<leader>ra",
+    -- keys = "<leader>ra",
     cmd = "RnvimrToggle",
     config = function()
-      vim.keymap.set('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', {silent = true})
+      -- vim.keymap.set('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', {silent = true})
       vim.g.rnvimr_enable_picker = 1
     end
   },
@@ -4238,7 +4265,12 @@ function VscodeNeovimHandler()
   end, { silent = true })
 
   vim.keymap.set('n', '<leader>ra',function()
-    vscode.action('multiCommand.openRanger')
+    vscode.call('multiCommand.createShTerminal')
+    vscode.call('workbench.action.terminal.moveToEditor')
+    vim.defer_fn(function()
+      vscode.call('multiCommand.openFileManager')
+      vscode.call('workbench.action.moveEditorToNewWindow')
+    end, 200)
   end, { silent = true })
 
   -- git (use gitsigns.nvim instead)
