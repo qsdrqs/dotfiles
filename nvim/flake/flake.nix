@@ -68,7 +68,7 @@
       flake = false;
     };
     statuscolDOTnvim = {
-      url = "github:luukvbaal/statuscol.nvim";
+      url = "github:luukvbaal/statuscol.nvim?ref=0.10";
       flake = false;
     };
     nvim-lightbulb = {

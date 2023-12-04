@@ -460,6 +460,9 @@ nnoremap <leader>rs <cmd>cquit 100<cr>
 " 不要自动添加EOL
 set nofixeol
 
+" 自动删除trailing spaces
+autocmd BufWritePre * :%s/\s\+$//e
+
 "-------------------杂项-----------------------"}}}
 "
 "-------------------Syntax highlight-----------------------"{{{
