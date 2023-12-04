@@ -825,6 +825,7 @@ local plugins = {
 
   {
     "luukvbaal/statuscol.nvim",
+    branch = "0.10",
     cond = vim.g.vscode == nil,
     config = function()
       local builtin = require("statuscol.builtin")
@@ -3144,11 +3145,7 @@ local plugins = {
     init = function()
       vim.g.matchup_matchparen_offscreen = { method = "" }
       vim.g.matchup_matchparen_deferred = 1
-      if vim.g.vscode == nil then
-        vim.g.matchup_matchparen_hi_surround_always = 1
-      else
-        vim.g.matchup_matchparen_enabled = 0
-      end
+      vim.g.matchup_matchparen_hi_surround_always = 1
     end,
     config = function()
       require'nvim-treesitter.configs'.setup {

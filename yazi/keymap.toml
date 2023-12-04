@@ -13,7 +13,7 @@ keymap = [
 
 	{ on = [ "K" ], exec = "arrow -5", desc = "Move cursor up 5 lines" },
 	{ on = [ "J" ], exec = "arrow 5",  desc = "Move cursor down 5 lines" },
-	{ on = [ "S" ], exec = ["shell --block zsh"],  desc = "Move cursor down 5 lines" },
+	{ on = [ "S" ], exec = ["shell zsh --block --confirm"],  desc = "Open ZSH shell" },
 
 	{ on = [ "<S-Up>" ],   exec = "arrow -5", desc = "Move cursor up 5 lines" },
 	{ on = [ "<S-Down>" ], exec = "arrow 5",  desc = "Move cursor down 5 lines" },
@@ -66,9 +66,9 @@ keymap = [
 	{ on = [ "p", "l" ],        exec = "link",                                                 desc = "Symlink the absolute path of files" },
 	{ on = [ "p", "L" ],        exec = "link --relative",                                      desc = "Symlink the relative path of files" },
 	{ on = [ "D" ],         exec = [ "remove", "escape --visual --select" ],               desc = "Move the files to the trash" },
-	{ on = [ "d", "D" ],    exec = [ "remove --permanently", "escape --visual --select" ], desc = "Permanently delete the files" },
-	{ on = [ "a" ],         exec = "create",                                               desc = "Create a file or directory (ends with / for directories)" },
-	{ on = [ "I" ],         exec = "rename",                                               desc = "Rename a file or directory" },
+	{ on = [ "d", "D" ],    exec = [ "remove --permanently", "escape --visual --select" ],                  desc = "Permanently delete the files" },
+	{ on = [ "a" ],         exec = "rename",                                               desc = "Rename a file or directory" },
+	{ on = [ "c" ],         exec = "create",                                               desc = "Create a file or directory (ends with / for directories)" },
 	{ on = [ ";" ],         exec = "shell",                                                desc = "Run a shell command" },
 	{ on = [ ":" ],         exec = "shell --block",                                        desc = "Run a shell command (block the UI until the command finishes)" },
 	{ on = [ "<C-h>" ],     exec = "hidden toggle",                                        desc = "Toggle the visibility of hidden files" },
@@ -85,10 +85,10 @@ keymap = [
 	{ on = [ "m", "n" ], exec = "linemode none",        desc = "Set linemode to none" },
 
 	# Copy
-	{ on = [ "c", "c" ], exec = "copy path",             desc = "Copy the absolute path" },
-	{ on = [ "c", "d" ], exec = "copy dirname",          desc = "Copy the path of the parent directory" },
-	{ on = [ "c", "f" ], exec = "copy filename",         desc = "Copy the name of the file" },
-	{ on = [ "c", "n" ], exec = "copy name_without_ext", desc = "Copy the name of the file without the extension" },
+	{ on = [ "y", "p" ], exec = "copy path",             desc = "Copy the absolute path" },
+	{ on = [ "y", "d" ], exec = "copy dirname",          desc = "Copy the path of the parent directory" },
+	{ on = [ "y", "f" ], exec = "copy filename",         desc = "Copy the name of the file" },
+	{ on = [ "y", "n" ], exec = "copy name_without_ext", desc = "Copy the name of the file without the extension" },
 
 	# Find
 	{ on = [ "/" ], exec = "find --smart" },
@@ -134,6 +134,7 @@ keymap = [
 
 	# Goto
 	{ on = [ "g", "h" ],       exec = "cd ~",             desc = "Go to the home directory" },
+	{ on = [ "g", "H" ],       exec = "cd /mnt/c/Users/qsdrqs",             desc = "Go to the home directory" },
 	{ on = [ "g", "c" ],       exec = "cd ~/.config",     desc = "Go to the config directory" },
 	{ on = [ "g", "d" ],       exec = "cd ~/Downloads",   desc = "Go to the downloads directory" },
 	{ on = [ "g", "t" ],       exec = "cd /tmp",          desc = "Go to the temporary directory" },

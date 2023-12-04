@@ -5,8 +5,6 @@
   # nixpkgs.config.sync-before-registering = true;
 
   nixpkgs.config.permittedInsecurePackages = [
-    "nodejs-16.20.2"
-    "openssl-1.1.1w"
   ];
 
   environment.systemPackages = with pkgs; [
@@ -18,7 +16,7 @@
     cscope
     global
     ctags
-    nodejs_16
+    nodejs
     firejail
     cloudflare-warp
     openssl
@@ -53,6 +51,7 @@
       enable = true;
       user = "qsdrqs";
       configDir = "/home/qsdrqs/.config/syncthing";
+      dataDir = "/home/qsdrqs";
     };
     v2ray = {
       enable = true;

@@ -1,8 +1,8 @@
 [manager]
 layout         = [ 1, 4, 3 ]
-sort_by        = "modified"
+sort_by        = "alphabetical"
 sort_sensitive = true
-sort_reverse   = true
+sort_reverse   = false
 sort_dir_first = true
 linemode       = "none"
 show_hidden    = false
@@ -74,7 +74,9 @@ image_alloc   = 536870912  # 512MB
 image_bound   = [ 0, 0 ]
 
 [plugins]
-preload = []
+preload = [
+	"~/.config/yazi/plugins/status.lua"
+]
 
 [input]
 # cd
