@@ -10,13 +10,14 @@ with pkgs; {
     in
     mkShell {
       packages = [
-        rustup
         rustc
+        cargo
         rustfmt
         clippy
         rust-analyzer
         cmake
         llvmPackages_latest.llvm
+        # rustup
       ];
       shellHook = ''
         export LIBCLANG_PATH="${llvmPackages_latest.libclang.lib}/lib"

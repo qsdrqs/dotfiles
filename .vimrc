@@ -461,7 +461,17 @@ nnoremap <leader>rs <cmd>cquit 100<cr>
 set nofixeol
 
 " 自动删除trailing spaces
-autocmd BufWritePre * :%s/\s\+$//e
+function! s:deleteTrailing()
+  let l:match_line = search('^\s\+$', 'n')
+  if l:match_line > 0
+    echo "delete trailing spaces"
+    let l:curr_line = line('.')
+    let l:curr_col = col('.')
+    exec '%s/^\s\+$//e'
+    call cursor(l:curr_line, l:curr_col)
+  endif
+endfunction
+autocmd InsertLeave * call s:deleteTrailing()
 
 "-------------------杂项-----------------------"}}}
 "

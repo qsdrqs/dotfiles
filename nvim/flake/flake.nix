@@ -347,10 +347,6 @@
       url = "github:tpope/vim-sleuth";
       flake = false;
     };
-    vim-easy-align = {
-      url = "github:junegunn/vim-easy-align";
-      flake = false;
-    };
     pantranDOTnvim = {
       url = "github:potamides/pantran.nvim";
       flake = false;
@@ -540,7 +536,6 @@
         { name = "venv-selector.nvim"; dotname = "venv-selectorDOTnvim";source = inputs.venv-selectorDOTnvim; build = false; }
         { name = "vim-matchup"; dotname = "vim-matchup";source = inputs.vim-matchup; build = false; }
         { name = "vim-sleuth"; dotname = "vim-sleuth";source = inputs.vim-sleuth; build = false; }
-        { name = "vim-easy-align"; dotname = "vim-easy-align";source = inputs.vim-easy-align; build = false; }
         { name = "pantran.nvim"; dotname = "pantranDOTnvim";source = inputs.pantranDOTnvim; build = false; }
         { name = "rainbow"; dotname = "rainbow";source = inputs.rainbow; build = false; }
         { name = "markdown-preview.nvim"; dotname = "markdown-previewDOTnvim";source = inputs.markdown-previewDOTnvim; build = true; }

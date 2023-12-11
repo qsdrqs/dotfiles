@@ -2163,9 +2163,19 @@ local plugins = {
     'Vonr/align.nvim',
     lazy = true,
     keys = {{'al', mode = 'x'}},
+    cmd = "Align",
     config = function()
       local NS = { noremap = true, silent = true }
-      vim.keymap.set('x', 'al', function() require'align'.align_to_string(true, true, true)  end, NS)
+      vim.keymap.set('x', 'al', function() require'align'.align_to_string({preview = true, regex = true}) end, NS)
+      vim.api.nvim_create_user_command("Align", function(opts)
+        _, sr, sc, _ = unpack(vim.fn.getpos('v') or {0, 0, 0, 0})
+        _, er, ec, _ = unpack(vim.fn.getcurpos())
+        require'align'.align(opts.args, {
+          preview = true,
+          regex = true,
+          marks = {sr = opts.line1, sc = sc, er = opts.line2, ec = ec}
+        })
+      end, {nargs = 1, range = true})
     end
   },
 
@@ -2651,6 +2661,7 @@ local plugins = {
           and vim.g.started_by_firenvim == nil
     end,
     config = function ()
+      -- TODO: slow under WSL
       local alpha = require'alpha'
       local dashboard = require("alpha.themes.dashboard")
 
@@ -3175,8 +3186,6 @@ local plugins = {
   --   end
   -- },
 
-  {'junegunn/vim-easy-align', lazy = true, cmd = "EasyAlign"},
-
   {
     "potamides/pantran.nvim",
     cond = vim.g.vscode == nil,
@@ -3570,7 +3579,7 @@ local plugins = {
             {
               text = '-enable-pretty-printing',
               description =  'enable pretty printing',
-              ignoreFailures = false 
+              ignoreFailures = false
             },
           },
         },
@@ -3592,7 +3601,7 @@ local plugins = {
             {
               text = '-enable-pretty-printing',
               description =  'enable pretty printing',
-              ignoreFailures = false 
+              ignoreFailures = false
             },
             {
                 description =  "Set Disassembly Flavor to Intel",
@@ -3656,7 +3665,7 @@ local plugins = {
           mode = "test",
           program = "${file}"
         },
-        -- works with go.mod packages and sub packages 
+        -- works with go.mod packages and sub packages
         {
           type = "go",
           name = "Debug test (go.mod)",
@@ -4087,6 +4096,7 @@ if os.getenv("SSH_CONNECTION") ~= nil then
   -- use osc52
   local nvim_ver_minor = vim.version().minor
   if nvim_ver_minor >= 10 then
+    -- TODO: paste from ssh
     vim.g.clipboard = {
       name = 'OSC 52',
       copy = {
@@ -4117,6 +4127,7 @@ elseif vim.fn.has('wsl') == 1 then
   if vim.fn.executable("win32yank.exe") == 1 then
     vim.g.clipboard = {
       name = 'win32yank',
+      -- TODO: may change to async here
       copy = {
         ['+'] = {"win32yank.exe", "-i", "--crlf"},
         ['*'] = {"win32yank.exe", "-i", "--crlf"},
@@ -4147,53 +4158,59 @@ vim.api.nvim_create_autocmd("BufNewFile", {
 local im_switch
 local default_im
 local restored_im
+local is_windows = false
+local im_switch_job
 local function all_trim(s)
   return s:match("^%s*(.-)%s*$")
 end
 if vim.fn.has('wsl') == 1 then
   im_switch = "im-select.exe"
   default_im = "1033"
+  is_windows = true
 else
   im_switch = "fcitx5-remote"
   default_im = "keyboard-us"
 end
-vim.api.nvim_create_autocmd({"InsertLeave", "CmdlineLeave"}, {
-  callback = function()
-    if vim.fn.executable(im_switch) == 0 then
-      return
-    end
-    if im_switch == "fcitx5-remote" then
-      restored_im = all_trim(vim.fn.system(im_switch .. " -n"))
-      if restored_im ~= default_im then
-        vim.fn.system(im_switch .. " -s " .. default_im)
-      end
-    else
-      -- async switch
-      require'plenary.job':new({
-        command = im_switch,
-        on_stdout = vim.schedule_wrap(function(_, data)
-          restored_im = all_trim(data)
-          if restored_im ~= default_im then
-            vim.fn.system(im_switch .. " " .. default_im)
-          end
-        end),
-      }):start()
-    end
+if vim.fn.executable(im_switch) ~= 0 then
+  if is_windows then
+    im_switch_job = require'plenary.job':new({
+      command = im_switch,
+      on_stdout = vim.schedule_wrap(function(_, data)
+        restored_im = all_trim(data)
+        if restored_im ~= default_im then
+          -- TODO: may change to async here
+          vim.fn.system(im_switch .. " " .. default_im)
+        end
+      end),
+    })
   end
-})
-vim.api.nvim_create_autocmd({"InsertEnter", "CmdlineEnter"}, {
-  callback = function()
-    if im_switch == "fcitx5-remote" then
-      if restored_im ~= nil and restored_im ~= default_im then
-        vim.fn.system(im_switch .. " -s " .. restored_im)
-      end
-    else
-      if restored_im ~= nil and restored_im ~= default_im then
-        vim.fn.system(im_switch .. " " .. restored_im)
+  vim.api.nvim_create_autocmd({"InsertLeave"}, {
+    callback = function()
+      if not is_windows then
+        restored_im = all_trim(vim.fn.system(im_switch .. " -n"))
+        if restored_im ~= default_im then
+          vim.fn.system(im_switch .. " -s " .. default_im)
+        end
+      else
+        -- async switch
+        im_switch_job:start()
       end
     end
-  end
-})
+  })
+  vim.api.nvim_create_autocmd({"InsertEnter"}, {
+    callback = function()
+      if not is_windows then
+        if restored_im ~= nil and restored_im ~= default_im then
+          vim.fn.system(im_switch .. " -s " .. restored_im)
+        end
+      else
+        if restored_im ~= nil and restored_im ~= default_im then
+          vim.fn.system(im_switch .. " " .. restored_im)
+        end
+      end
+    end
+  })
+end
 -- end im switch
 
 -- workaround for https://github.com/neovim/neovim/issues/21856

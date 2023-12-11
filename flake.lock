@@ -1307,7 +1307,6 @@
         "vCoolorDOTvim": "vCoolorDOTvim",
         "venv-selectorDOTnvim": "venv-selectorDOTnvim",
         "vim-bookmarks": "vim-bookmarks",
-        "vim-easy-align": "vim-easy-align",
         "vim-flog": "vim-flog",
         "vim-fugitive": "vim-fugitive",
         "vim-gutentags": "vim-gutentags",
@@ -1327,7 +1326,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-M+/EDylWIKmST5KA4kHYpybSp6KuQcUPB8wSVEUfZ3o=",
+        "narHash": "sha256-MRyS18xfCXJroPt8+g+V6vho8t+y5Mam0k9fY+17fTY=",
         "path": "nvim/flake",
         "type": "path"
       },
@@ -2183,22 +2182,6 @@
       "original": {
         "owner": "MattesGroeger",
         "repo": "vim-bookmarks",
-        "type": "github"
-      }
-    },
-    "vim-easy-align": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1556512351,
-        "narHash": "sha256-BpjYYAfpUCLitNfRsRnfzxsOIHA6T/WmL05BjRRt7j4=",
-        "owner": "junegunn",
-        "repo": "vim-easy-align",
-        "rev": "12dd6316974f71ce333e360c0260b4e1f81169c3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "junegunn",
-        "repo": "vim-easy-align",
         "type": "github"
       }
     },

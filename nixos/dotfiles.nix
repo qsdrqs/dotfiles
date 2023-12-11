@@ -15,6 +15,15 @@ let
       };
     })
     entries);
+  symbfileTargetNoRecursive = entries: builtins.listToAttrs (map
+    (entry: {
+      name = entry.name + "_";
+      value = {
+        source = ../${entry.name};
+        target = entry.target;
+      };
+    })
+    entries);
 
   genZshPlugins = plugins: lib.genAttrs plugins (plugin: {
     source = inputs.zsh-config.inputs.${plugin};
@@ -41,6 +50,9 @@ in
     { name = ".vim"; target = ".config/nvim"; }
     { name = "after"; target = ".config/nvim/after"; }
     { name = ".vimrc"; target = ".config/nvim/init.vim"; }
+  ] //
+  symbfileTargetNoRecursive [
+    { name = "yazi"; target = ".config/yazi"; }
   ] //
   genZshPlugins inputs.zsh-config.plugins //
   genZshThemes inputs.zsh-config.themes //

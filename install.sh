@@ -67,6 +67,13 @@ function main {
     fi
     ln -s $PWD/ranger $HOME/.config/
 
+    # move yazi files
+    if [[ -d $HOME/.config/yazi ]] && [[ ! -L $HOME/.config/yazi ]] && [[ ! -L $HOME/.config/yazi/yazi.toml ]];then
+        echo "having yazi dir, deleting..."
+        rm -rf $HOME/.config/yazi
+    fi
+    ln -s $PWD/yazi $HOME/.config/
+
     # move tmux files
     ln -s $PWD/.tmux.conf $HOME/.tmux.conf
     ln -s $PWD/.tmux.conf.local $HOME/.tmux.conf.local

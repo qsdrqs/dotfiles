@@ -3,9 +3,12 @@ for i in range($1):
 	$2
 endsnippet
 
-snippet main "main thread"
-if __name__ == '__main__':
+snippet main "main funciton"
+def main():
 	${1:pass}
+
+if __name__ == '__main__':
+	main()
 endsnippet
 
 snippet pr "pring"
