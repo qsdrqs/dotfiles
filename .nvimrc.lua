@@ -532,7 +532,12 @@ local plugins = {
       vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
       -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
       vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
-      vim.keymap.set('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', opts)
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {"c", "cpp"},
+        callback = function(args)
+          vim.keymap.set('n', 'gh', '<cmd>ClangdSwitchSourceHeader <CR>', { buffer = true, silent = true, noremap = true })
+        end
+      })
 
       vim.diagnostic.config({
         virtual_text = false,

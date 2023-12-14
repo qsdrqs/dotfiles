@@ -114,6 +114,7 @@
       ];
     })
     linuxKernel.packages.linux_latest_libre.cpupower
+    linuxKernel.packages.linux_latest_libre.perf
     patchelf
     python3
     lsof

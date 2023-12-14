@@ -20,6 +20,7 @@
     firejail
     cloudflare-warp
     openssl
+    parted
 
     # pdf2txt
     poppler_utils

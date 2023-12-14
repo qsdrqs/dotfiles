@@ -23,6 +23,8 @@
 
   environment.systemPackages = with pkgs; [
     kitty
+    texlive.combined.scheme-full
+    zathura
   ];
   fonts.packages = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })

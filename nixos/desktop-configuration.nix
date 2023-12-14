@@ -146,7 +146,7 @@ in
     #   version = "3.9.5";
     # })
     qqmusic-hidpi
-    config.nur.repos.xddxdd.wechat-uos-bin
+    # config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
   ];
 
@@ -217,7 +217,7 @@ in
       powerManagement.enable = true;
       nvidiaSettings = true;
       open = true;
-      package = config.boot.kernelPackages.nvidiaPackages.production;
+      # package = config.boot.kernelPackages.nvidiaPackages.production;
     };
   };
 

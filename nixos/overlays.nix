@@ -37,7 +37,7 @@
       })).overrideAttrs (prev: {
         src = (builtins.fetchTarball {
           url = "https://update.code.visualstudio.com/latest/linux-x64/insider";
-          sha256 = "0cygds3h55fksxj5rsai9rk1qlrvkavmw8r8hnf1ndinvi17x8w5";
+          sha256 = "15n680mydgjfxz6cvg8c5057yzrwzx86y4aq1764kwhbzff23420";
         });
         version = "latest";
         buildInputs = prev.buildInputs ++ [ pkgs.krb5 ];
