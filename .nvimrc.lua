@@ -1281,9 +1281,18 @@ local plugins = {
   {
     -- smart fold
     'kevinhwang91/nvim-ufo',
-    commit = "ebbab711d909d5f675e38ad489765bd22bd2c6b3",
     dependencies = {'kevinhwang91/promise-async'},
     config = function()
+      -- FIXME: may fix this
+      -- if treesitter is going to load, it need to be loaded before ufo
+      if vim.b.treesitter_disable ~= 1 then
+        require('lazy').load {
+          plugins = {
+            'nvim-treesitter',
+          }
+        }
+      end
+
       vim.o.foldcolumn = '1'
       vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
       vim.o.foldlevelstart = 99
