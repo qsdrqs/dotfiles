@@ -35,10 +35,7 @@
         commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" "-g" ];
         isInsiders = true;
       })).overrideAttrs (prev: {
-        src = (builtins.fetchTarball {
-          url = "https://update.code.visualstudio.com/latest/linux-x64/insider";
-          sha256 = "15n680mydgjfxz6cvg8c5057yzrwzx86y4aq1764kwhbzff23420";
-        });
+        src = inputs.vscode-insiders;
         version = "latest";
         buildInputs = prev.buildInputs ++ [ pkgs.krb5 ];
       });

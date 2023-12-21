@@ -59,6 +59,11 @@
       url = "git+https://aur.archlinux.org/code-features.git?ref=master";
       flake = false;
     };
+
+    vscode-insiders = {
+      url = "tarball+https://update.code.visualstudio.com/latest/linux-x64/insider";
+      flake = false;
+    };
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository
