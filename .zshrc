@@ -233,9 +233,15 @@ alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bd
 # NixOS
 snr-switch() {
     if [[ $1 == "droid" ]]; then
-        cd $HOME/dotfiles && nix-on-droid switch --flake path:.
+        cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
+        ./install.sh nixpre
+        nix-on-droid switch --flake path:.
+        cd -
     else
-        cd $HOME/dotfiles && sudo nixos-rebuild switch --flake path:.#$@
+        cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
+        ./install.sh nixpre
+        sudo nixos-rebuild switch --flake path:.#$@
+        cd -
     fi
 }
 hm-switch() {

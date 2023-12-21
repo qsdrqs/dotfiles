@@ -124,6 +124,7 @@
           vscode-server.nixosModules.default
           ({ config, pkgs, ... }: {
             services.vscode-server.enable = true;
+            services.vscode-server.installPath = "~/.vscode-server-insiders";
           })
 
           # NUR

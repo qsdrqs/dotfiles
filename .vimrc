@@ -154,6 +154,7 @@ if $LIGHT == 1
   colorscheme ghlight
 else
   colorscheme ghdark
+  " colorscheme default_plus
 endif
 
 set termguicolors

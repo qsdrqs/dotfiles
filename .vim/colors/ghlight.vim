@@ -548,3 +548,6 @@ highlight! Color3 guifg=#9A6700
 highlight! Color4 guifg=#CF222E
 highlight! Color5 guifg=#BF3989
 highlight! Color6 guifg=#8250DF
+
+# hlargs
+highlight Hlargs guifg=#E36209

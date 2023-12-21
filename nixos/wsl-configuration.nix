@@ -8,7 +8,10 @@
 
   wsl = {
     enable = true;
-    wslConf.automount.root = "/mnt";
+    wslConf = {
+      automount.root = "/mnt";
+      interop.appendWindowsPath = true;
+    };
     defaultUser = "qsdrqs";
     startMenuLaunchers = true;
     nativeSystemd = true;

@@ -12,6 +12,10 @@ in
     )
   ];
 
+    environment.systemPackages = with pkgs; [
+      matrix-synapse-unwrapped
+    ];
+
   systemd = {
     services.rathole-server = {
       enable = false;

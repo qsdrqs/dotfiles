@@ -97,6 +97,26 @@
             ./patches/wine.patch
           ];
       });
+
+      matrix-synapse-unwrapped = super.matrix-synapse-unwrapped.overrideAttrs (oldAttrs:
+      let
+        pname = "matrix-synapse";
+        version = "1.99.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "element-hq";
+          repo = "synapse";
+          rev = "develop";
+          hash = "sha256-v8hVL6CcHPQ5i12nTgYN/h1zBaYffPPZOVqnG3Cf33I=";
+        };
+      in
+      {
+        src = src;
+        cargoDeps = pkgs.rustPlatform.fetchCargoTarball {
+          inherit src;
+          name = "${pname}-${version}";
+          hash = "sha256-FQhHpbp8Rkkqp6Ngly/HP8iWGlWh5CDaztgAwKB/afI=";
+        };
+      });
     })
   ];
 }

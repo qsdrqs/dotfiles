@@ -539,9 +539,24 @@ local plugins = {
         end
       })
 
+      local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
       vim.diagnostic.config({
         virtual_text = false,
-        virtual_lines = false
+        virtual_lines = false,
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = signs.Error,
+            [vim.diagnostic.severity.WARN] = signs.Warn,
+            [vim.diagnostic.severity.INFO] = signs.Info,
+            [vim.diagnostic.severity.HINT] = signs.Hint,
+          },
+          numhl = {
+            [vim.diagnostic.severity.ERROR] = "DiagnosticError",
+            [vim.diagnostic.severity.WARN] = "DiagnosticWarn",
+            [vim.diagnostic.severity.INFO] = "DiagnosticInfo",
+            [vim.diagnostic.severity.HINT] = "DiagnosticHint",
+          },
+        }
       })
       virtualLineEnabled = false
 
@@ -561,17 +576,6 @@ local plugins = {
           virtualLineEnabled = false
         end
       end
-
-      local border = {
-        {"🭽", "FloatBorder"},
-        {"▔", "FloatBorder"},
-        {"🭾", "FloatBorder"},
-        {"▕", "FloatBorder"},
-        {"🭿", "FloatBorder"},
-        {"▁", "FloatBorder"},
-        {"🭼", "FloatBorder"},
-        {"▏", "FloatBorder"},
-      }
 
       function get_lsp_common_config()
         local capabilities = require('cmp_nvim_lsp').default_capabilities()
@@ -593,8 +597,6 @@ local plugins = {
                 update_in_insert = false,
               }
             ),
-            ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = border }),
-            ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border }),
           }
         }
         return config
@@ -772,14 +774,8 @@ local plugins = {
       local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
       function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
         opts = opts or {}
-        opts.border = opts.border or border
+        opts.border = "rounded"
         return orig_util_open_floating_preview(contents, syntax, opts, ...)
-      end
-
-      local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-      for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
       end
 
       -- code len
@@ -1762,15 +1758,8 @@ local plugins = {
       return vim.g.treesitter_disable ~= true
     end,
     config = function()
-      if vim.g.colors_name == 'ghdark' then
-        require('hlargs').setup {
-          color = '#ef9062',
-        }
-      else
-        require('hlargs').setup {
-          color = '#E36209',
-        }
-      end
+      require('hlargs').setup()
+      -- TODO: what is this do?
       local get_marks_limits = require('hlargs.util').get_marks_limits
       require('hlargs.util').get_marks_limits = function(bufnr, marks_ns, extmark)
         local mark_data = vim.api.nvim_buf_get_extmark_by_id(bufnr, marks_ns, extmark, {details=true})

@@ -115,13 +115,13 @@ function! s:ghhl(group, guifg, ...)
     else
         let style = "NONE"
     endif
-    
+
     let hi_str = [ "hi", a:group,
             \ 'guifg=' . fg[0], "ctermfg=" . fg[1],
             \ 'guibg=' . bg[0], "ctermbg=" . bg[1],
             \ 'gui=' . style, "cterm=" . style
             \ ]
-    
+
     execute join(hi_str, ' ')
 endfunction
 
@@ -760,3 +760,6 @@ highlight! Color3 guifg=#FFA657
 highlight! Color4 guifg=#FA7970
 highlight! Color5 guifg=#FF9BCE
 highlight! Color6 guifg=#D2A8FF
+
+" hlargs
+highlight Hlargs guifg=#ef9062
