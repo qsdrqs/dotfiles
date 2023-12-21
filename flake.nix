@@ -266,7 +266,7 @@
         modules = [
           ./nixos/nix-on-droid.nix
         ];
-        extraSpecialArgs = { inherit inputs; pkgs = aarch64-linux-pkgs; hm-module = basicHomeModules;};
+        extraSpecialArgs = { inherit inputs; pkgs = aarch64-linux-pkgs; hm-module = basicHomeModules; };
       };
 
       # iso, build through #nixos-iso.config.system.build.isoImage

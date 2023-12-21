@@ -5,16 +5,16 @@ in
 {
   imports = [
     (if builtins.pathExists ./private/server-private.nix then
-        ./private/server-private.nix
-     else
-       lib.warn "No private files found"
-     ./empty.nix
+      ./private/server-private.nix
+    else
+      lib.warn "No private files found"
+        ./empty.nix
     )
   ];
 
-    environment.systemPackages = with pkgs; [
-      matrix-synapse-unwrapped
-    ];
+  environment.systemPackages = with pkgs; [
+    matrix-synapse-unwrapped
+  ];
 
   systemd = {
     services.rathole-server = {
@@ -34,14 +34,14 @@ in
       enable = false;
       description = "Certbot Renewal";
       serviceConfig = {
-        ExecStart="${pkgs.certbot}/bin/certbot renew";
+        ExecStart = "${pkgs.certbot}/bin/certbot renew";
         Restart = "on-failure";
         RestartSec = 5;
       };
     };
     timers.certbot-renew = {
       enable = false;
-      description="Daily renewal of Let's Encrypt's certificates by certbot";
+      description = "Daily renewal of Let's Encrypt's certificates by certbot";
       timerConfig = {
         OnCalendar = "daily";
         Persistent = true;
@@ -101,15 +101,16 @@ in
     enable = false;
   };
 
-  systemd.services.coturn = let
-    runConfig = "/run/coturn/turnserver.cfg";
-  in
-  {
-    enable = config.services.coturn.enable;
-    preStart = lib.mkForce ''
-      cat /etc/turnserver/turnserver.conf > ${runConfig}
-      chmod 640 ${runConfig}
-    '';
-  };
+  systemd.services.coturn =
+    let
+      runConfig = "/run/coturn/turnserver.cfg";
+    in
+    {
+      enable = config.services.coturn.enable;
+      preStart = lib.mkForce ''
+        cat /etc/turnserver/turnserver.conf > ${runConfig}
+        chmod 640 ${runConfig}
+      '';
+    };
 
 }
