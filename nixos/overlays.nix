@@ -98,25 +98,36 @@
           ];
       });
 
-      matrix-synapse-unwrapped = super.matrix-synapse-unwrapped.overrideAttrs (oldAttrs:
-      let
-        pname = "matrix-synapse";
-        version = "1.99.0";
-        src = pkgs.fetchFromGitHub {
-          owner = "element-hq";
-          repo = "synapse";
-          rev = "develop";
-          hash = "sha256-v8hVL6CcHPQ5i12nTgYN/h1zBaYffPPZOVqnG3Cf33I=";
-        };
-      in
-      {
-        src = src;
-        cargoDeps = pkgs.rustPlatform.fetchCargoTarball {
-          inherit src;
-          name = "${pname}-${version}";
-          hash = "sha256-FQhHpbp8Rkkqp6Ngly/HP8iWGlWh5CDaztgAwKB/afI=";
+      interception-tools-plugins.ctrl2esc = super.interception-tools-plugins.caps2esc.overrideAttrs (oldAttrs: {
+        pname = "ctrl2esc";
+        src = pkgs.fetchFromGitLab {
+          owner = "qsdrqs";
+          repo = "ctrl2esc";
+          rev = "master";
+          hash = "sha256-rpob9VLKt1aL0Jys9OkhwDZb0dCoch/A0SkHIBDhRSU=";
         };
       });
+      interception-tools-plugins.caps2esc = super.interception-tools-plugins.caps2esc;
+
+      matrix-synapse-unwrapped = super.matrix-synapse-unwrapped.overrideAttrs (oldAttrs:
+        let
+          pname = "matrix-synapse";
+          version = "1.99.0";
+          src = pkgs.fetchFromGitHub {
+            owner = "element-hq";
+            repo = "synapse";
+            rev = "develop";
+            hash = "sha256-v8hVL6CcHPQ5i12nTgYN/h1zBaYffPPZOVqnG3Cf33I=";
+          };
+        in
+        {
+          src = src;
+          cargoDeps = pkgs.rustPlatform.fetchCargoTarball {
+            inherit src;
+            name = "${pname}-${version}";
+            hash = "sha256-FQhHpbp8Rkkqp6Ngly/HP8iWGlWh5CDaztgAwKB/afI=";
+          };
+        });
     })
   ];
 }
