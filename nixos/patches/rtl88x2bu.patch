@@ -1,0 +1,43 @@
+--- a/Makefile	2023-12-25 03:34:35.286937381 -0600
++++ b/Makefile	2023-12-25 03:34:33.315921072 -0600
+@@ -2361,6 +2361,10 @@
+ 
+ endif
+ 
++KVER := $(KERNEL_VERSION)
++KSRC := $(KERNEL_DIR)
++MODDESTDIR := $(INSTALL_MOD_PATH)/lib/modules/$(KVER)/kernel/drivers/net/wireless/
++
+ ########### CUSTOMER ################################
+ ifeq ($(CONFIG_CUSTOMER_HUAWEI_GENERAL), y)
+ CONFIG_CUSTOMER_HUAWEI = y
+@@ -2526,12 +2530,11 @@
+ 	$(CROSS_COMPILE)strip $(MODULE_NAME).ko --strip-unneeded
+ 
+ install:
++	mkdir -p $(MODDESTDIR)
+ 	install -p -m 644 $(MODULE_NAME).ko  $(MODDESTDIR)
+-	/sbin/depmod -a ${KVER}
+ 
+ uninstall:
+ 	rm -f $(MODDESTDIR)$(MODULE_NAME).ko
+-	/sbin/depmod -a ${KVER}
+ 
+ sign:
+ 	@openssl req -new -x509 -newkey rsa:2048 -keyout MOK.priv -outform DER -out MOK.der -nodes -days 36500 -subj "/CN=Custom MOK/"
+@@ -2554,7 +2557,6 @@
+ 	@tar cPf $(MODDESTDIR)../backup_rtlwifi_driver.tar $(wildcard $(MODDESTDIR)rtl*)
+ 	@rm -fr $(wildcard $(MODDESTDIR)rtl*)
+ endif
+-	@/sbin/depmod -a ${KVER}
+ 	@echo "Please reboot your system"
+ 
+ restore_rtlwifi:
+@@ -2571,7 +2573,6 @@
+ 	@tar xPf $(MODDESTDIR)../backup_rtlwifi_driver.tar
+ 	@rm $(MODDESTDIR)../backup_rtlwifi_driver.tar
+ endif
+-	@/sbin/depmod -a ${KVER}
+ 	@echo "Please reboot your system"
+ 
+ config_r:

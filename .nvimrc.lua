@@ -745,7 +745,7 @@ local plugins = {
                 command = { "nixpkgs-fmt" }
               },
               nix = {
-                maxMemoryMB = 5120,
+                maxMemoryMB = 8192,
                 flake = {
                   autoArchive = true,
                   autoEvalInputs = true,

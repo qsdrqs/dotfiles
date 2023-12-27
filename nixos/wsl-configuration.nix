@@ -1,5 +1,10 @@
 { pkgs, config, modulesPath, inputs, ... }:
-
+let
+  python-packages = ps: with ps; [
+    rpi-gpio
+    gpiozero
+  ];
+in
 {
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
@@ -28,6 +33,7 @@
     kitty
     texlive.combined.scheme-full
     zathura
+    (python3.withPackages python-packages)
   ];
   fonts.packages = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })

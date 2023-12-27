@@ -18,7 +18,7 @@
     ctags
     nodejs
     firejail
-    cloudflare-warp
+    (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else hello)
     openssl
     parted
 
@@ -57,23 +57,10 @@
     v2ray = {
       enable = true;
       configFile = "/etc/v2ray/config.json";
-      # package = pkgs-master.v2ray;
     };
   };
 
   systemd = {
-    services.warp-svc = {
-      wantedBy = [ "multi-user.target" ];
-      after = [ "pre-network.target" ];
-      description = "CloudflareWARP daemon";
-      serviceConfig = {
-        ExecStart = ''${pkgs.cloudflare-warp}/bin/warp-svc'';
-        CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SYS_PTRACE";
-        AmbientCapabilities = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SYS_PTRACE";
-        Restart = "always";
-        DynamicUser = "no";
-      };
-    };
     services.rathole-client = {
       enable = false;
       wantedBy = [ "multi-user.target" ];
@@ -86,9 +73,22 @@
         RestartSec = 5;
       };
     };
+    services.warp-svc = {
+      enable = if config.nixpkgs.system == "x86_64-linux" then true else false;
+      wantedBy = [ "multi-user.target" ];
+      after = [ "pre-network.target" ];
+      description = "CloudflareWARP daemon";
+      serviceConfig =
+        if config.nixpkgs.system == "x86_64-linux" then {
+          ExecStart = ''${pkgs.cloudflare-warp}/bin/warp-svc'';
+          CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SYS_PTRACE";
+          AmbientCapabilities = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SYS_PTRACE";
+          Restart = "always";
+          DynamicUser = "no";
+        } else { };
+    };
   };
 
   # avoid v2ray service to create config file
   environment.etc."v2ray/config.json".enable = false;
-
 }

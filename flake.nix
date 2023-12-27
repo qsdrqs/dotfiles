@@ -28,8 +28,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+    };
+    brostrend-dkms = {
+      url = "https://linux.brostrend.com/rtl88x2bu-dkms.deb";
+      flake = false;
+    };
+
     nix-index-database = {
-      url = "github:Mic92/nix-index-database";
+      url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -70,9 +78,9 @@
   # inputs.c-hello.url = "path:../c-hello";
 
   outputs = { self, nixpkgs, home-manager, vscode-server, nur, nix-on-droid, ... }@inputs:
-    let
+    rec {
       pkgs-master = import inputs.nixpkgs-master {
-        system = "x86_64-linux";
+        hostPlatform = "x86_64-linux";
         config.allowUnfree = true;
       };
       minimalHomeModules = [
@@ -153,6 +161,12 @@
           ./nixos/server-configuration.nix
         ];
       };
+      rpiConfig = basicConfig // {
+        system = "aarch64-linux";
+        modules = basicConfig.modules ++ [
+          ./nixos/rpi-configuration.nix
+        ];
+      };
       guiConfig = minimalConfig // {
         modules = minimalConfig.modules ++ [
           ./nixos/gui-configuration.nix
@@ -197,6 +211,9 @@
       };
       basicHomeConfig = minimalHomeConfig // {
         modules = basicHomeModules;
+      };
+      rpiHomeConfig = basicHomeConfig // {
+        pkgs = aarch64-linux-pkgs;
       };
       desktopHomeConfig = guiHomeConfig // {
         modules = desktopHomeModules;
@@ -252,11 +269,13 @@
       });
       x86_64-linux-pkgs = pkgs' "x86_64-linux";
       aarch64-linux-pkgs = pkgs' "aarch64-linux";
-    in
-    {
+
+      #####################Configuration#####################
+
       nixosConfigurations.minimal = nixpkgs.lib.nixosSystem minimalConfig;
       nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
       nixosConfigurations.server = nixpkgs.lib.nixosSystem serverConfig;
+      nixosConfigurations.rpi = nixpkgs.lib.nixosSystem rpiConfig;
       nixosConfigurations.gui = nixpkgs.lib.nixosSystem guiConfig;
       nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem desktopConfig;
@@ -269,9 +288,11 @@
         extraSpecialArgs = { inherit inputs; pkgs = aarch64-linux-pkgs; hm-module = basicHomeModules; };
       };
 
-      # iso, build through #nixos-iso.config.system.build.isoImage
-      nixos-iso = nixpkgs.lib.nixosSystem isoConfig;
-      nixos-iso-gui = nixpkgs.lib.nixosSystem isoGuiConfig;
+      images = {
+        # iso, build through #images.nixos-iso
+        nixos-iso = (nixpkgs.lib.nixosSystem isoConfig).config.system.build.isoImage;
+        nixos-iso-gui = (nixpkgs.lib.nixosSystem isoGuiConfig).config.system.build.isoImage;
+      };
 
       # home-manager
       homeConfigurations.minimal = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
@@ -297,5 +318,6 @@
         aarch64-linux = aarch64-linux-pkgs;
       };
       legacyPackages = nixpkgs.legacyPackages;
+      inputs_ = inputs;
     };
 }

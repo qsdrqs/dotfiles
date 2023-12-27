@@ -123,6 +123,7 @@ in
 
     virt-manager
     qemu_full
+    linux-wifi-hotspot
 
     obs-studio
     steam-run

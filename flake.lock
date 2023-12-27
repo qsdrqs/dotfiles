@@ -128,6 +128,18 @@
         "type": "github"
       }
     },
+    "brostrend-dkms": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-g/Md7DpW3PuIPcevYMMuReFXOIrbtArniJYXywO39r8=",
+        "type": "file",
+        "url": "https://linux.brostrend.com/rtl88x2bu-dkms.deb"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://linux.brostrend.com/rtl88x2bu-dkms.deb"
+      }
+    },
     "bufdeleteDOTnvim": {
       "flake": false,
       "locked": {
@@ -958,15 +970,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1702864432,
-        "narHash": "sha256-xR5Igg2hnm979W3YgMDrSjErHFhHo4rbMboF6DC0mbc=",
-        "owner": "Mic92",
+        "lastModified": 1703387252,
+        "narHash": "sha256-XKJqGj0BaEn/zyctEnkgVIh6Ba1rgTRc+UBi9EU8Y54=",
+        "owner": "nix-community",
         "repo": "nix-index-database",
-        "rev": "4605ccd764fac78b9e4b5b058698cb9f04430b91",
+        "rev": "f4340c1a42c38d79293ba69bfd839fbd6268a538",
         "type": "github"
       },
       "original": {
-        "owner": "Mic92",
+        "owner": "nix-community",
         "repo": "nix-index-database",
         "type": "github"
       }
@@ -994,6 +1006,21 @@
       "original": {
         "owner": "t184256",
         "repo": "nix-on-droid",
+        "type": "github"
+      }
+    },
+    "nixos-hardware": {
+      "locked": {
+        "lastModified": 1702453208,
+        "narHash": "sha256-0wRi9SposfE2wHqjuKt8WO2izKB/ASDOV91URunIqgo=",
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "7763c6fd1f299cb9361ff2abf755ed9619ef01d6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
         "type": "github"
       }
     },
@@ -1817,6 +1844,7 @@
     },
     "root": {
       "inputs": {
+        "brostrend-dkms": "brostrend-dkms",
         "code-features": "code-features",
         "code-marketplace": "code-marketplace",
         "home-manager": "home-manager",
@@ -1824,6 +1852,7 @@
         "hyprland-contrib": "hyprland-contrib",
         "nix-index-database": "nix-index-database",
         "nix-on-droid": "nix-on-droid",
+        "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",
         "nixpkgs-master": "nixpkgs-master",

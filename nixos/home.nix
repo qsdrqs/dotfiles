@@ -10,6 +10,7 @@
   home.homeDirectory = "/home/qsdrqs";
   home.packages = with pkgs; [
     htop
+    iotop
     lazygit
   ];
 

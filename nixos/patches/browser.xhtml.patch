@@ -1,5 +1,5 @@
---- browser.xhtml	2023-10-05 13:14:23.144206463 -0500
-+++ browser.xhtml	2023-10-05 13:10:44.530077543 -0500
+--- a/browser.xhtml	2023-10-05 13:14:23.144206463 -0500
++++ b/browser.xhtml	2023-10-05 13:10:44.530077543 -0500
 @@ -281,9 +281,9 @@
      <key id="key_newNavigator"
           data-l10n-id="window-new-shortcut"
@@ -29,6 +29,6 @@
           command="cmd_quitApplication"
 -         reserved="true"/>
 +         reserved="false"/>
- 
+
      <key id="key_restoreLastClosedTabOrWindowOrSession" command="History:RestoreLastClosedTabOrWindowOrSession" data-l10n-id="tab-new-shortcut" modifiers="accel,shift"/>
      <key id="key_undoCloseWindow" command="History:UndoCloseWindow" data-l10n-id="window-new-shortcut" modifiers="accel,shift"/>

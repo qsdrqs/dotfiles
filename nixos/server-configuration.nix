@@ -55,7 +55,7 @@ in
           description = "backup keepass database";
           serviceConfig = {
             KillSignal = "SIGINT";
-            ExecStart = "${pkgs.bash}/bin/sh ${homeDir}/keepass_backup.sh ${homeDir}";
+            ExecStart = "${pkgs.bash}/bin/sh ${./private/keepass_backup.sh} ${homeDir}";
           };
         };
       };

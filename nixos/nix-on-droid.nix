@@ -73,7 +73,7 @@ systemConfig // {
     $DRY_RUN_CMD mkdir $VERBOSE_ARG --parents "${config.user.home}/.ssh"
     $DRY_RUN_CMD cat ${sshd.pathToPubKey} > "${config.user.home}/.ssh/authorized_keys"
 
-    if [[ ! -d "${sshd.sshdDirectory}" ]]; then
+    gf [[ ! -d "${sshd.sshdDirectory}" ]]; then
       $DRY_RUN_CMD rm $VERBOSE_ARG --recursive --force "${sshd.sshdTmpDirectory}"
       $DRY_RUN_CMD mkdir $VERBOSE_ARG --parents "${sshd.sshdTmpDirectory}"
 
