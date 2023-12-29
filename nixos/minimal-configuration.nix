@@ -54,6 +54,22 @@
         ./empty)
     ];
   };
+  system.activationScripts = {
+    root_sshconfig = ''
+      if [ -d "/root" ]; then
+          # Check if /root/.ssh does not exist
+          if [ ! -d "/root/.ssh" ]; then
+              echo "/root/.ssh does not exist. Creating directory."
+              mkdir /root/.ssh
+          fi
+          # Copy .ssh keys from /home/qsdrqs/.ssh to /root/.ssh
+          cp /home/qsdrqs/.ssh/* /root/.ssh/
+
+          # Change ownership to root for all files in /root/.ssh
+          chown root:root /root/.ssh/*
+      fi
+    '';
+  };
 
   # enable normal users to use reboot or shutdown
   security.polkit.enable = true;
@@ -76,6 +92,7 @@
     settings = {
       auto-optimise-store = true;
       experimental-features = [ "nix-command" "flakes" ];
+      trusted-users = [ "root" "qsdrqs" "@wheel" ];
     };
   };
 
@@ -91,7 +108,7 @@
     wget
     curl
     ranger
-    yazi
+    inputs.yazi.packages.${pkgs.system}.yazi
     tmux
     perl # for tmux to work
     neofetch
@@ -131,6 +148,7 @@
     duf
     lsb-release
     valgrind
+    sqlite
     sshfs
   ];
 

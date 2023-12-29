@@ -102,6 +102,9 @@ in
     };
   };
 
+  # enable qemu emulation compile
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   environment.systemPackages = with pkgs; [
     vscode-insiders
     keepassxc
@@ -124,6 +127,7 @@ in
     virt-manager
     qemu_full
     linux-wifi-hotspot
+    hotspot
 
     obs-studio
     steam-run

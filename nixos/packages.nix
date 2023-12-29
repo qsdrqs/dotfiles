@@ -6,7 +6,7 @@
     version = "5.13.1";
     name = "${pname}-${version}-${kernel.version}";
 
-    src = inputs.brostrend-dkms;
+    src = inputs.rtl88x2bu-dkms;
 
     sourceRoot = "usr/src/${pname}-${version}";
     hardeningDisable = [ "pic" "format" ];

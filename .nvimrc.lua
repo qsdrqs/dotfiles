@@ -749,7 +749,7 @@ local plugins = {
                 flake = {
                   autoArchive = true,
                   autoEvalInputs = true,
-                  nixpkgsInputName = os.getenv("HOME") .. "/dotfiles",
+                  -- nixpkgsInputName = os.getenv("HOME") .. "/dotfiles",
                 }
               }
             }
@@ -1448,7 +1448,7 @@ local plugins = {
       end
 
       local yazi = Terminal:new({
-        cmd = "export NVIM_YAZI=1 && yazi",
+        cmd = "export NVIM_YAZI=1 && yazi " .. vim.fn.expand('%'),
         hidden = true,
         direction = "float",
         float_opts = {

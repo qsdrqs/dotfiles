@@ -14,6 +14,10 @@
       url = "github:ranger/ranger";
       flake = false;
     };
+    yazi = {
+      url = "github:sxyazi/yazi";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,7 +35,9 @@
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware";
     };
-    brostrend-dkms = {
+
+    # brostrend rtl88x2bu wifi dkms
+    rtl88x2bu-dkms = {
       url = "https://linux.brostrend.com/rtl88x2bu-dkms.deb";
       flake = false;
     };
@@ -201,8 +207,9 @@
         ];
       };
 
-      minimalHomeConfig = {
-        pkgs = x86_64-linux-pkgs;
+      minimalHomeConfig = rec {
+        system = "x86_64-linux";
+        pkgs = pkgs' system;
         modules = minimalHomeModules;
         extraSpecialArgs = { inherit inputs; };
       };
@@ -212,8 +219,9 @@
       basicHomeConfig = minimalHomeConfig // {
         modules = basicHomeModules;
       };
-      rpiHomeConfig = basicHomeConfig // {
-        pkgs = aarch64-linux-pkgs;
+      rpiHomeConfig = basicHomeConfig // rec {
+        system = "aarch64-linux";
+        pkgs = pkgs' system;
       };
       desktopHomeConfig = guiHomeConfig // {
         modules = desktopHomeModules;
@@ -260,15 +268,15 @@
       pkgs' = (system: import nixpkgs {
         system = system;
         config.allowUnfree = true;
-        overlays = (import ./nixos/overlays.nix {
-          inherit inputs;
-          pkgs = nixpkgs.legacyPackages.${system};
-          config = nixpkgs.config;
-          lib = nixpkgs.lib;
-        }).nixpkgs.overlays;
+        overlays = (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
       });
-      x86_64-linux-pkgs = pkgs' "x86_64-linux";
-      aarch64-linux-pkgs = pkgs' "aarch64-linux";
+      archSpecConfig = func: archs: builtins.listToAttrs (builtins.map
+        (system: {
+          name = system;
+          value = func system;
+        })
+        archs);
+      archSpecConfigAll = func: archSpecConfig func [ "x86_64-linux" "aarch64-linux" "i686-linux" ];
 
       #####################Configuration#####################
 
@@ -281,42 +289,46 @@
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem desktopConfig;
 
       # nix-on-droid
-      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
+      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration rec {
+        system = "aarch64-linux";
         modules = [
           ./nixos/nix-on-droid.nix
         ];
-        extraSpecialArgs = { inherit inputs; pkgs = aarch64-linux-pkgs; hm-module = basicHomeModules; };
+        extraSpecialArgs = { inherit inputs; pkgs = pkgs' system; hm-module = basicHomeModules; };
       };
 
       images = {
         # iso, build through #images.nixos-iso
         nixos-iso = (nixpkgs.lib.nixosSystem isoConfig).config.system.build.isoImage;
         nixos-iso-gui = (nixpkgs.lib.nixosSystem isoGuiConfig).config.system.build.isoImage;
+        # rpi, build through #images.rpi
+        rpi = (nixpkgs.lib.nixosSystem (rpiConfig // {
+          modules = (nixpkgs.lib.lists.remove ./nixos/custom.nix rpiConfig.modules) ++ [
+            "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+            ({ config, pkgs, ... }: {
+              # empty passwd
+              users.users.qsdrqs.password = "";
+            })
+            # {
+            #   nixpkgs.hostPlatform.system = "aarch64-linux";
+            #   nixpkgs.buildPlatform.system = "x86_64-linux"; #If you build on x86 other wise changes this.
+            # }
+          ];
+        })).config.system.build.sdImage;
       };
 
       # home-manager
       homeConfigurations.minimal = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
       homeConfigurations.basic = home-manager.lib.homeManagerConfiguration basicHomeConfig;
+      homeConfigurations.rpi = home-manager.lib.homeManagerConfiguration rpiHomeConfig;
       homeConfigurations.gui = home-manager.lib.homeManagerConfiguration guiHomeConfig;
       homeConfigurations.wsl = home-manager.lib.homeManagerConfiguration wslHomeConfig;
 
       homeConfigurations.desktop = home-manager.lib.homeManagerConfiguration desktopHomeConfig;
       # dev shells
-      devShells = {
-        x86_64-linux = (import ./nixos/dev-shell.nix {
-          pkgs = x86_64-linux-pkgs;
-          lib = nixpkgs.lib;
-        });
-        aarch64-linux = (import ./nixos/dev-shell.nix {
-          pkgs = aarch64-linux-pkgs;
-          lib = nixpkgs.lib;
-        });
-      };
+      devShells = archSpecConfigAll (system: (pkgs' system).callPackage ./nixos/dev-shell.nix { inputs = inputs; });
       # direct nix run
-      packages = {
-        x86_64-linux = x86_64-linux-pkgs;
-        aarch64-linux = aarch64-linux-pkgs;
-      };
+      packages = archSpecConfigAll (system: pkgs' system);
       legacyPackages = nixpkgs.legacyPackages;
       inputs_ = inputs;
     };

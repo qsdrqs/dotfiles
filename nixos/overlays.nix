@@ -3,6 +3,9 @@
 {
   nixpkgs.overlays = [
     (self: super: {
+      makeModulesClosure = x:
+        super.makeModulesClosure (x // { allowMissing = true; });
+
       libvterm-neovim = super.libvterm-neovim.overrideAttrs (oldAttrs: {
         version = "0.3.3";
         src = builtins.fetchurl {
@@ -113,8 +116,8 @@
           src = pkgs.fetchFromGitHub {
             owner = "element-hq";
             repo = "synapse";
-            rev = "develop";
-            hash = "sha256-v8hVL6CcHPQ5i12nTgYN/h1zBaYffPPZOVqnG3Cf33I=";
+            rev = "8a50312099d8014a10ce36acf2f64d21c98bd4e6";
+            hash = "sha256-fpkKt4qqc1dErpg6TPsCK9SAGb3x8KRrJIYY6HtKcSQ=";
           };
         in
         {

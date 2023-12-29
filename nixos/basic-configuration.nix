@@ -22,12 +22,10 @@
     openssl
     parted
 
-    # pdf2txt
-    poppler_utils
+    poppler_utils # pdf2txt
 
     w3m
-    # flamegraph
-    inferno
+    inferno # flamegraph
   ];
 
   environment.variables = {
