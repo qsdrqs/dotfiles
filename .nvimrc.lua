@@ -1448,8 +1448,8 @@ local plugins = {
       end
 
       local yazi = Terminal:new({
-        cmd = "export NVIM_YAZI=1 && yazi " .. vim.fn.expand('%'),
-        hidden = true,
+        cmd = "NVIM_YAZI=1 yazi $CURR_FILE",
+        hidden = false,
         direction = "float",
         float_opts = {
           width = vim.fn.float2nr(0.7 * vim.o.columns),
@@ -1470,6 +1470,7 @@ local plugins = {
         end
       })
       local function yazi_toggle()
+        vim.fn.setenv("CURR_FILE", vim.fn.expand("%"))
         yazi:toggle()
       end
 
