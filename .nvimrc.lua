@@ -749,7 +749,7 @@ local plugins = {
                 flake = {
                   autoArchive = true,
                   autoEvalInputs = true,
-                  -- nixpkgsInputName = os.getenv("HOME") .. "/dotfiles",
+                  nixpkgsInputName = os.getenv("HOME") .. "/dotfiles",
                 }
               }
             }
