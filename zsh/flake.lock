@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1703103032,
-        "narHash": "sha256-IY+wsRu0pzBZhQrq1O1JYS87NNGU8C3iUm21D6tGT58=",
+        "lastModified": 1703797537,
+        "narHash": "sha256-tgc5YGzGbjFbD05lM9J5onGjcsIn9L1ymvSj07u7vaI=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "17e96bf91ee0bc3dc27fa65b0ea7b10d3b971f9d",
+        "rev": "667fdbf7746acc90aa29b316ef711180e7917aa2",
         "type": "github"
       },
       "original": {
@@ -71,6 +71,8 @@
         "omz": "omz",
         "powerlevel10k": "powerlevel10k",
         "spaceship": "spaceship",
+        "z": "z",
+        "z_lua": "z_lua",
         "zinit": "zinit",
         "zsh-autosuggestions": "zsh-autosuggestions",
         "zsh-vi-mode": "zsh-vi-mode"
@@ -92,14 +94,46 @@
         "type": "github"
       }
     },
+    "z": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1702161693,
+        "narHash": "sha256-HpZBhYgaLnF3SNhsx26U0uoXEOkgmw67q6oG1QbHX4E=",
+        "owner": "rupa",
+        "repo": "z",
+        "rev": "d37a763a6a30e1b32766fecc3b8ffd6127f8a0fd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rupa",
+        "repo": "z",
+        "type": "github"
+      }
+    },
+    "z_lua": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1702228274,
+        "narHash": "sha256-4htRLEGF1urQi3QqJmJ397vF9BBuZY+17Pb31r3X3vs=",
+        "owner": "skywind3000",
+        "repo": "z.lua",
+        "rev": "992134061a1b5b545fecb97189e993166d4fca9f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "skywind3000",
+        "repo": "z.lua",
+        "type": "github"
+      }
+    },
     "zinit": {
       "flake": false,
       "locked": {
-        "lastModified": 1702701625,
-        "narHash": "sha256-YfpNWMGZ2iIlHM8ilz8+HxFr2s4o7NkQciE8RdVWAfk=",
+        "lastModified": 1703466804,
+        "narHash": "sha256-SWvnNZyjZqt7xW3siJTtKqF+SH5h7arFhEVbnyR8Mv4=",
         "owner": "zdharma-continuum",
         "repo": "zinit",
-        "rev": "358ef03785a18e694e94fd4560e0582c4024bcc3",
+        "rev": "9cf5b171987c36f51800578f29c3b3b461e95eff",
         "type": "github"
       },
       "original": {
