@@ -91,13 +91,6 @@
         '';
       });
 
-      wineWowPackages.unstableFull = super.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: {
-        patches =
-          (oldAttrs.patches or [ ]) ++ [
-            ./patches/wine.patch
-          ];
-      });
-
       interception-tools-plugins.ctrl2esc = super.interception-tools-plugins.caps2esc.overrideAttrs (oldAttrs: {
         pname = "ctrl2esc";
         src = pkgs.fetchFromGitLab {

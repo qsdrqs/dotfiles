@@ -240,11 +240,32 @@ snr-switch() {
         cd $pwd
     else
         local pwd=$(pwd)
+        sudo echo "building system"
         cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
         ./install.sh nixpre
         sudo nixos-rebuild switch --flake path:.#$@
         cd $pwd
     fi
+}
+snr-switch-remote() {
+    local pwd=$(pwd)
+    sudo echo "building system"
+    cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
+
+    if [[ -L ./result ]];then
+        echo "find result link, directly use it"
+    else
+        ./install.sh nixpre
+        nixos-rebuild build --flake path:.#$@
+    fi
+    sudo nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
+    (
+        sudo ./result/bin/switch-to-configuration switch
+        if [[ -L ./result ]];then
+            rm result
+        fi
+    )
+    cd $pwd
 }
 hm-switch() {
     cd $HOME/dotfiles && home-manager switch --flake path:.#$@
@@ -383,10 +404,10 @@ GITSTATUS_LOG_LEVEL=DEBUG
 
 # z.sh
 if [[ -x `command -v lua` ]]; then
-    eval "$(lua $HOME/dotfiles/z.lua/z.lua --init zsh)"
+    eval "$(lua $HOME/zsh_custom/plugins/z_lua/z.lua --init zsh)"
 else
-    source $HOME/dotfiles/z/z.sh
-    export _Z_SRC=$HOME/dotfiles/z/z.sh
+    source $HOME/zsh_custom/plugins/z/z.sh
+    export _Z_SRC=$HOME/zsh_custom/plugins/z/z.sh
     ZSH_DISABLE_COMPFIX=true
 
     _z_zsh_tab_completion() {

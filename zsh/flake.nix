@@ -22,6 +22,14 @@
       url = "github:jeffreytse/zsh-vi-mode";
       flake = false;
     };
+    z = {
+      url = "github:rupa/z";
+      flake = false;
+    };
+    z_lua = {
+      url = "github:skywind3000/z.lua";
+      flake = false;
+    };
 
     powerlevel10k = {
       url = "github:romkatv/powerlevel10k";
@@ -40,7 +48,7 @@
   outputs = { self, ... }@inputs: {
     inputs = inputs;
 
-    plugins = [ "fzf-tab" "zsh-autosuggestions" "fast-syntax-highlighting" "zsh-vi-mode" ];
+    plugins = [ "fzf-tab" "zsh-autosuggestions" "fast-syntax-highlighting" "zsh-vi-mode" "z" "z_lua" ];
     themes = [ "powerlevel10k" "spaceship" ];
   };
 }

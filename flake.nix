@@ -6,6 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
+    nixpkgs-fix.url = "github:NixOS/nixpkgs/5f64a12a728902226210bf01d25ec6cbb9d9265b";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -85,10 +86,15 @@
 
   outputs = { self, nixpkgs, home-manager, vscode-server, nur, nix-on-droid, ... }@inputs:
     rec {
-      pkgs-master = import inputs.nixpkgs-master {
-        hostPlatform = "x86_64-linux";
-        config.allowUnfree = true;
-      };
+      pkgs-collect = builtins.listToAttrs (builtins.map
+        (pkg: {
+          name = pkg;
+          value = (system: import inputs.${pkg} {
+            system = system;
+            config.allowUnfree = true;
+          });
+        }) [ "nixpkgs-master" "nixpkgs-fix" ]
+      );
       minimalHomeModules = [
         ./nixos/home.nix
       ];
@@ -103,11 +109,12 @@
       ];
       desktopHomeModules = basicHomeModules ++ guiHomeModules;
 
-      minimalConfig = {
+      minimalConfig = rec {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
-          pkgs-master = pkgs-master;
+          pkgs-master = pkgs-collect.nixpkgs-master system;
+          pkgs-fix = pkgs-collect.nixpkgs-fix system;
         };
         modules = [
           (if builtins.pathExists ./nixos/custom.nix then
@@ -207,22 +214,29 @@
         ];
       };
 
-      minimalHomeConfig = rec {
-        system = "x86_64-linux";
-        pkgs = pkgs' system;
-        modules = minimalHomeModules;
-        extraSpecialArgs = { inherit inputs; };
-      };
+      minimalHomeConfig =
+        let
+          system = "x86_64-linux";
+        in
+        {
+          pkgs = pkgs' system;
+          modules = minimalHomeModules;
+          extraSpecialArgs = { inherit inputs; };
+        };
       guiHomeConfig = minimalHomeConfig // {
         modules = guiHomeModules;
       };
       basicHomeConfig = minimalHomeConfig // {
         modules = basicHomeModules;
       };
-      rpiHomeConfig = basicHomeConfig // rec {
-        system = "aarch64-linux";
-        pkgs = pkgs' system;
-      };
+      rpiHomeConfig = basicHomeConfig // (
+        let
+          system = "aarch64-linux";
+        in
+        {
+          pkgs = pkgs' system;
+        }
+      );
       desktopHomeConfig = guiHomeConfig // {
         modules = desktopHomeModules;
       };

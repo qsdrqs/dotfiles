@@ -21,6 +21,7 @@
     (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else hello)
     openssl
     parted
+    gh
 
     poppler_utils # pdf2txt
 

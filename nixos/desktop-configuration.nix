@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-master, inputs, ... }:
+{ config, pkgs, lib, pkgs-fix, inputs, ... }:
 let
   ida64-fhs = pkgs.buildFHSUserEnv {
     name = "ida64";
@@ -83,6 +83,12 @@ let
     sleep 3
     sed -i 's/"window.titleBarStyle": "native"/"window.titleBarStyle": "custom"/g' $CONFIG;
   '');
+  wineWowUnstable = pkgs-fix.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: {
+    patches =
+      (oldAttrs.patches or [ ]) ++ [
+        ./patches/wine.patch
+      ];
+  });
 in
 {
   boot.kernelModules = [ "v4l2loopback" ];
@@ -106,7 +112,6 @@ in
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   environment.systemPackages = with pkgs; [
-    vscode-insiders
     keepassxc
     telegram-desktop
     slack
@@ -118,11 +123,11 @@ in
     zoom-us
     kate
     scrcpy
-    wineWowPackages.unstableFull
+    wineWowUnstable
     wpsoffice-hidpi
     libreoffice
     (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
-    (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
+    # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
 
     virt-manager
     qemu_full

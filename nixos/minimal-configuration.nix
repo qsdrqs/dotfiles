@@ -66,7 +66,7 @@
           cp /home/qsdrqs/.ssh/* /root/.ssh/
 
           # Change ownership to root for all files in /root/.ssh
-          chown root:root /root/.ssh/*
+          chown root:root /root/.ssh/id*
       fi
     '';
   };

@@ -19,7 +19,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    vscode
+    vscode-insiders
     firefox-devedition
     kitty
     xclip

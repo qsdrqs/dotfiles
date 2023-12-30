@@ -13,6 +13,8 @@ function zsh_install {
     git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/zsh_custom/plugins/zsh-autosuggestions &
     git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git \
         $HOME/zsh_custom/plugins/fast-syntax-highlighting &
+    git clone https://github.com/rupa/z.git $HOME/zsh_custom/plugins/z &
+    git clone https://github.com/skywind3000/z.lua $HOME/zsh_custom/plugins/z_lua &
 
     # themes
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
