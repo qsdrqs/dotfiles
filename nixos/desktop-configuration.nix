@@ -136,6 +136,7 @@ in
 
     obs-studio
     steam-run
+    openconnect_openssl
 
     texlive.combined.scheme-full
 
@@ -224,10 +225,10 @@ in
   hardware = {
     nvidia = {
       modesetting.enable = true;
-      powerManagement.enable = true;
+      powerManagement.enable = false;
       nvidiaSettings = true;
-      open = true;
-      package = config.boot.kernelPackages.nvidiaPackages.production;
+      open = false;
+      # package = config.boot.kernelPackages.nvidiaPackages.production;
     };
   };
 

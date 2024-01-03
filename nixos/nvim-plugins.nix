@@ -4,6 +4,11 @@ let
   commonInstallPhase = ''
     mkdir $out
     cp -r * $out
+    runHook postInstall
+  '';
+  extraBuildPlugins = [ ];
+  dummyBuildPhase = ''
+    # do nothing
   '';
   build = {
     telescope-fzf-nativeDOTnvim = pkgs.stdenv.mkDerivation {
@@ -27,15 +32,14 @@ let
     nvim-fundo = pkgs.stdenv.mkDerivation {
       name = "nvim-fundo";
       src = inputs.nvim-config.inputs.nvim-fundo;
-      buildPhase = ''
-        # don't run make
-      '';
+      buildPhase = dummyBuildPhase;
       installPhase = commonInstallPhase;
     };
     nvim-treesitter = pkgs.stdenv.mkDerivation {
       name = "nvim-treesitter";
       src = inputs.nvim-config.inputs.nvim-treesitter;
-      installPhase = commonInstallPhase + ''
+      installPhase = commonInstallPhase;
+      postInstall = ''
         rm -rf $out/parser-info
         rm -rf $out/parser
         ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/nvim-treesitter/parser-info $out/parser-info
@@ -48,7 +52,7 @@ let
       name = entry.name + "_";
       value = {
         source =
-          if !entry.build then
+          if !entry.build && !builtins.elem entry.name extraBuildPlugins then
             entry.source
           else
             build.${entry.dotname};

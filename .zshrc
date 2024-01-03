@@ -268,7 +268,10 @@ snr-switch-remote() {
     cd $pwd
 }
 hm-switch() {
-    cd $HOME/dotfiles && home-manager switch --flake path:.#$@
+    local pwd=$(pwd)
+    cd $HOME/dotfiles
+    home-manager switch --flake path:.#$@
+    cd $pwd
 }
 nix-devel() {
     local last_env=$NIX_DEV

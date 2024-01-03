@@ -49,8 +49,8 @@ keymap = [
 
 	# Selection
 	{ on = [ "<Space>" ], exec = [ "select --state=none", "arrow 1" ], desc = "Toggle the current selection state" },
-	{ on = [ "v" ],       exec = "visual_mode",                        desc = "Enter visual mode (selection mode)" },
-	{ on = [ "V" ],       exec = "visual_mode --unset",                desc = "Enter visual mode (unset mode)" },
+	{ on = [ "V" ],       exec = "visual_mode",                        desc = "Enter visual mode (selection mode)" },
+	# { on = [ "V" ],       exec = "visual_mode --unset",                desc = "Enter visual mode (unset mode)" },
 	{ on = [ "<C-a>" ],   exec = "select_all --state=true",            desc = "Select all files" },
 	{ on = [ "<C-r>" ],   exec = "select_all --state=none",            desc = "Inverse selection of all files" },
 

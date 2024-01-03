@@ -6,13 +6,6 @@
       makeModulesClosure = x:
         super.makeModulesClosure (x // { allowMissing = true; });
 
-      libvterm-neovim = super.libvterm-neovim.overrideAttrs (oldAttrs: {
-        version = "0.3.3";
-        src = builtins.fetchurl {
-          url = "https://launchpad.net/libvterm/trunk/v0.3/+download/libvterm-0.3.3.tar.gz";
-          sha256 = "1q16fbznm54p24hqvw8c9v3347apk86ybsxyghsbsa11vm1ny589";
-        };
-      });
       neovim-unwrapped = super.neovim-unwrapped.overrideAttrs (oldAttrs: {
         src = inputs.nvim-config.neovim;
         version = "0.10.0-dev";

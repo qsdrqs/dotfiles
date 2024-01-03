@@ -27,6 +27,11 @@ open = [
 	{ exec = 'open "$@"',                 desc = "Open", for = "macos" },
 	{ exec = 'start "%1"', orphan = true, desc = "Open", for = "windows" }
 ]
+pdf = [
+	{ exec = 'zathura "$@"', desc = "Open", for = "unix" },
+	{ exec = 'open "$@"',    desc = "Open", for = "macos" },
+	{ exec = 'start "%1"',   desc = "Open", for = "windows" }
+]
 reveal = [
 	{ exec = 'open -R "$1"',                       desc = "Reveal", for = "macos" },
 	{ exec = 'explorer /select,%1', orphan = true, desc = "Reveal", for = "windows" },
@@ -56,6 +61,7 @@ rules = [
 	{ mime = "*/javascript",     use = [ "edit", "reveal" ] },
 
 	{ mime = "application/zip",             use = [ "extract", "reveal" ] },
+	{ name = "application/pdf",             use = [ "pdf", "reveal" ] },
 	{ mime = "application/gzip",            use = [ "extract", "reveal" ] },
 	{ mime = "application/x-tar",           use = [ "extract", "reveal" ] },
 	{ mime = "application/x-bzip",          use = [ "extract", "reveal" ] },

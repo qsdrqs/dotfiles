@@ -250,24 +250,11 @@
 
           home-manager.nixosModules.home-manager
           {
-            # impure
             home-manager.users.qsdrqs = import ./nixos/isohome.nix;
           }
 
           ({ config, pkgs, ... }: {
             services.getty.autologinUser = nixpkgs.lib.mkForce "qsdrqs";
-
-            services.interception-tools = {
-              enable = true;
-              plugins = [ pkgs.interception-tools-plugins.caps2esc ];
-              udevmonConfig = ''
-                - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins.caps2esc}/bin/caps2esc | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
-                  DEVICE:
-                    EVENTS:
-                      EV_KEY: [KEY_CAPSLOCK, KEY_ESC]
-              '';
-            };
-
             networking.networkmanager.enable = nixpkgs.lib.mkForce false;
           })
         ];
@@ -323,10 +310,6 @@
               # empty passwd
               users.users.qsdrqs.password = "";
             })
-            # {
-            #   nixpkgs.hostPlatform.system = "aarch64-linux";
-            #   nixpkgs.buildPlatform.system = "x86_64-linux"; #If you build on x86 other wise changes this.
-            # }
           ];
         })).config.system.build.sdImage;
       };

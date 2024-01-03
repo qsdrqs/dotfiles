@@ -3,7 +3,25 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, lib, inputs, options, ... }:
-
+let
+  nvim-wrapped = pkgs.writeShellScriptBin "nvim" ''
+    while true; do
+      ${pkgs.neovim-unwrapped}/bin/nvim "$@"
+      RET=$?
+      if [[ $RET != 100 ]]; then
+        exit $RET
+      fi
+    done
+  '';
+  nvim-final = pkgs.symlinkJoin {
+    name = "neovim-${lib.getVersion pkgs.neovim-unwrapped}";
+    paths = [ pkgs.neovim-unwrapped ];
+    postBuild = ''
+      rm $out/bin/nvim
+      cp ${nvim-wrapped}/bin/nvim $out/bin/nvim
+    '';
+  };
+in
 {
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.tmp.useTmpfs = true;
@@ -63,7 +81,7 @@
               mkdir /root/.ssh
           fi
           # Copy .ssh keys from /home/qsdrqs/.ssh to /root/.ssh
-          cp /home/qsdrqs/.ssh/* /root/.ssh/
+          cp -f /home/qsdrqs/.ssh/* /root/.ssh/
 
           # Change ownership to root for all files in /root/.ssh
           chown root:root /root/.ssh/id*
@@ -167,6 +185,7 @@
     neovim = {
       enable = true;
       defaultEditor = true;
+      package = nvim-final;
     };
     nix-ld.enable = true;
     gnupg.agent.enable = true;
@@ -192,6 +211,16 @@
       SystemMaxUse=500M
       RuntimeMaxUse=500M
     '';
+    interception-tools = {
+      enable = true;
+      plugins = [ pkgs.interception-tools-plugins.caps2esc pkgs.interception-tools-plugins.ctrl2esc ];
+      udevmonConfig = ''
+        - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins.ctrl2esc}/bin/ctrl2esc | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
+          DEVICE:
+            EVENTS:
+              EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
+      '';
+    };
   };
 
   # Open ports in the firewall.
