@@ -55,8 +55,8 @@
       url = "github:mfussenegger/nvim-jdtls";
       flake = false;
     };
-    rust-toolsDOTnvim = {
-      url = "github:simrat39/rust-tools.nvim";
+    rustaceanvim = {
+      url = "github:mrcjkb/rustaceanvim";
       flake = false;
     };
     clangd_extensionsDOTnvim = {
@@ -467,7 +467,7 @@
         { name = "nvim-hlslens"; dotname = "nvim-hlslens";source = inputs.nvim-hlslens; build = false; }
         { name = "mason.nvim"; dotname = "masonDOTnvim";source = inputs.masonDOTnvim; build = false; }
         { name = "nvim-jdtls"; dotname = "nvim-jdtls";source = inputs.nvim-jdtls; build = false; }
-        { name = "rust-tools.nvim"; dotname = "rust-toolsDOTnvim";source = inputs.rust-toolsDOTnvim; build = false; }
+        { name = "rustaceanvim"; dotname = "rustaceanvim";source = inputs.rustaceanvim; build = false; }
         { name = "clangd_extensions.nvim"; dotname = "clangd_extensionsDOTnvim";source = inputs.clangd_extensionsDOTnvim; build = false; }
         { name = "nvim-lspconfig"; dotname = "nvim-lspconfig";source = inputs.nvim-lspconfig; build = false; }
         { name = "statuscol.nvim"; dotname = "statuscolDOTnvim";source = inputs.statuscolDOTnvim; build = false; }
