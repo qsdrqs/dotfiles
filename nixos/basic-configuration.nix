@@ -1,5 +1,7 @@
 { config, pkgs, pkgs-master, lib, inputs, options, ... }:
-
+let
+  packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
+in
 {
   # repair nix store
   # nixpkgs.config.sync-before-registering = true;
@@ -18,7 +20,7 @@
     ctags
     nodejs
     firejail
-    (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else hello)
+    (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else packages.dummy)
     openssl
     parted
     gh

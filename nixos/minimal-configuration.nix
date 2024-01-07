@@ -21,6 +21,7 @@ let
       cp ${nvim-wrapped}/bin/nvim $out/bin/nvim
     '';
   };
+  packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
 in
 {
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -122,6 +123,7 @@ in
 
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    (if config.boot.loader.grub.enable then grub2 else packages.dummy)
     lsd
     wget
     curl
@@ -180,7 +182,8 @@ in
   programs = {
     zsh = {
       enable = true;
-      enableCompletion = false; # enabled in my own zshrc
+      enableCompletion = true;
+      enableGlobalCompInit = false; # enabled in my own zshrc
     };
     neovim = {
       enable = true;

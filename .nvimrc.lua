@@ -438,29 +438,26 @@ local plugins = {
   },
 
   {
-    "simrat39/rust-tools.nvim",
+    "mrcjkb/rustaceanvim",
     dependencies = 'nvim-lspconfig',
     config = function()
-      local rt = require("rust-tools")
+      vim.g.rustaceanvim = function()
+        local extension_path = vim.fn.stdpath('data') .. '/mason/'
+        local codelldb_path = extension_path .. 'bin/codelldb'
+        local liblldb_path = extension_path .. 'packages/codelldb/extension/lldb/lib/liblldb.so'
 
-      local extension_path = vim.fn.stdpath('data') .. '/mason/'
-      local codelldb_path = extension_path .. 'bin/codelldb'
-      local liblldb_path = extension_path .. 'packages/codelldb/extension/lldb/lib/liblldb.so'
+        local lsp_config = get_lsp_common_config()
+        -- lsp_config.capabilities.offsetEncoding = nil
 
-      local lsp_config = get_lsp_common_config()
-      lsp_config.capabilities.offsetEncoding = nil
-      rt.setup({
-        server = lsp_config,
-        dap = {
-          adapter = require('rust-tools.dap').get_codelldb_adapter(
-          codelldb_path, liblldb_path)
-        },
-        tools = {
-          inlay_hints = {
-            auto = false,
-          }
+        local cfg = require('rustaceanvim.config')
+        return {
+          server = lsp_config,
+          dap = {
+            adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
+          },
         }
-      })
+      end
+      vim.api.nvim_buf_create_user_command(0, "RustLspExpandMacro", function() vim.cmd.RustLsp('expandMacro') end, {})
     end
   },
 
@@ -747,9 +744,9 @@ local plugins = {
               nix = {
                 maxMemoryMB = 8192,
                 flake = {
-                  autoArchive = true,
+                  autoArchive = false,
                   autoEvalInputs = true,
-                  nixpkgsInputName = os.getenv("HOME") .. "/dotfiles",
+                  nixpkgsInputName = "nixpkgs",
                 }
               }
             }
@@ -1422,6 +1419,7 @@ local plugins = {
   {
     "akinsho/toggleterm.nvim",
     keys = {"<localleader>t", "<C-`>", "<localleader>T", "<leader>ra"},
+    cmd = "YaziToggle",
     config = function()
       require("toggleterm").setup {
         size = function(term)
@@ -1473,6 +1471,7 @@ local plugins = {
         vim.fn.setenv("CURR_FILE", vim.fn.expand("%"))
         yazi:toggle()
       end
+      vim.api.nvim_create_user_command("YaziToggle", yazi_toggle, {nargs = 0})
 
       vim.keymap.set("n", "<c-g>", lazygit_toggle, {noremap = true, silent = true})
       vim.keymap.set("n", "<leader>ra", yazi_toggle, {noremap = true, silent = true})
@@ -2819,12 +2818,13 @@ local plugins = {
       dashboard.section.buttons.val = {
         dashboard.button("e", "  New file", "<cmd>ene <CR>"),
         dashboard.button("l", "󰁯  Load session", "<cmd> RestoreSession <cr>"),
-        dashboard.button("r", "  Open file manager", "<cmd>RnvimrToggle <cr>"),
+        dashboard.button("r", "  Open file manager", "<cmd>YaziToggle <cr>"),
         dashboard.button("f", "󰍉  Find file", "<cmd>Telescope find_files<CR>"),
         dashboard.button("h", "󱔗  Recently opened files", "<cmd> Telescope oldfiles <CR>"),
         dashboard.button("g", "󰈬  Find word","<cmd>Telescope live_grep<CR>"),
         dashboard.button("m", "󰃃  Jump to bookmarks", "<cmd>Telescope vim_bookmarks<cr>"),
-        dashboard.button("u", "  Update plugins" , ":Lazy sync<CR>"),
+        -- dashboard.button("u", "  Update plugins" , ":Lazy sync<CR>"),
+        dashboard.button("c", "  Open Config" , "<cmd>e ~/dotfiles/.vimrc<cr><cmd>e ~/dotfiles/.nvimrc.lua<cr>"),
         dashboard.button("q", "󰅚  Quit" , ":qa<CR>"),
       }
 
@@ -3244,9 +3244,10 @@ local plugins = {
     'iamcco/markdown-preview.nvim',
     lazy = true,
     build = function() vim.fn["mkdp#util#install"]() end,
-    cmd = "MarkdownPreview",
+    cmd = {"MarkdownPreview", "MarkdownPreviewInstall"},
     config = function()
       vim.api.nvim_create_user_command("MarkdownPreview", "echo 'Not a markdown file!'", {})
+      vim.api.nvim_create_user_command("MarkdownPreviewInstall", function () vim.fn["mkdp#util#install"]() end, {})
       vim.api.nvim_exec_autocmds("BufEnter", {
         group = "mkdp_init",
       })
@@ -3900,21 +3901,46 @@ end
 
 --------------------------------------------------------------------------------------
 ----------------------------Lazy Load-------------------------------------------------
-function load_by_filetype(ft, plugins)
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = ft,
-    callback = function()
-      require('lazy').load{plugins = plugins}
+function load_by_filetype(ft_plugins)
+  for _, ft_plugin in pairs(ft_plugins) do
+    local loaded = false
+    for _, ft in pairs(ft_plugin.ft) do
+      if vim.bo.filetype == ft then
+        require('lazy').load { plugins = ft_plugin.plugins }
+        loaded = true
+        break
+      end
     end
-  })
+    if not loaded then
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = ft_plugin.ft,
+        callback = function()
+          require('lazy').load { plugins = ft_plugin.plugins }
+        end,
+        once = true
+      })
+    end
+  end
 end
 function lazyLoadPlugins()
-  load_by_filetype("java", {'nvim-jdtls'})
+  load_by_filetype {
+    {
+      ft = { "java" },
+      plugins = { 'nvim-jdtls' }
+    },
+    {
+      ft = { "c", "cpp" },
+      plugins = { 'clangd_extensions.nvim' }
+    },
+    {
+      ft = { "rust" },
+      plugins = { 'rustaceanvim' }
+    }
+  }
 
   require('lazy').load {
     plugins = {
       -- begin lsp
-      'rust-tools.nvim',
       'clangd_extensions.nvim',
       'nvim-lightbulb',
       'fidget.nvim',
@@ -4016,6 +4042,7 @@ function lazyLoadPlugins()
       }
     }
   else
+    vim.treesitter.stop()
     require('lazy').load {
       plugins = {
         'rainbow',

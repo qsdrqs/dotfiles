@@ -1,15 +1,56 @@
 { config, pkgs, lib, inputs, ... }:
-
+let
+  # Neovim Treesitter Parsers
+  # The following code is taken from {github.com/neovim/neovim}/contrib/flake.nix
+  # which is licensed under the Apache License, Version 2.0
+  # Copyright Neovim contributors
+  treesitter-parsers = (final: lib.pipe "${inputs.nvim-config.neovim}/cmake.deps/deps.txt" [
+    builtins.readFile
+    (lib.splitString "\n")
+    (map (builtins.match "TREESITTER_([A-Z_]+)_(URL|SHA256)[[:space:]]+([^[:space:]]+)[[:space:]]*"))
+    (lib.remove null)
+    (lib.flip builtins.foldl' { }
+      (acc: matches:
+        let
+          lang = lib.toLower (builtins.elemAt matches 0);
+          type = lib.toLower (builtins.elemAt matches 1);
+          value = builtins.elemAt matches 2;
+        in
+        acc // {
+          ${lang} = acc.${lang} or { } // {
+            ${type} = value;
+          };
+        }))
+    (builtins.mapAttrs (lib.const final.fetchurl))
+    (self: self // {
+      markdown = final.stdenv.mkDerivation {
+        inherit (self.markdown) name;
+        src = self.markdown;
+        installPhase = ''
+          mv tree-sitter-markdown $out
+        '';
+      };
+    })
+  ]);
+in
 {
   nixpkgs.overlays = [
     (self: super: {
       makeModulesClosure = x:
         super.makeModulesClosure (x // { allowMissing = true; });
 
-      neovim-unwrapped = super.neovim-unwrapped.overrideAttrs (oldAttrs: {
-        src = inputs.nvim-config.neovim;
-        version = "0.10.0-dev";
-      });
+      neovim-unwrapped = (super.neovim-unwrapped.override {
+        treesitter-parsers = treesitter-parsers self;
+      }).overrideAttrs
+        (oldAttrs: {
+          src = inputs.nvim-config.neovim;
+          version = "0.10.0-dev";
+          postInstall = (oldAttrs.postInstall or "") + ''
+            # disable treesitter by default for lua
+            substituteInPlace $out/share/nvim/runtime/ftplugin/lua.lua \
+            --replace "vim.treesitter.start()" "-- vim.treesitter.start()"
+          '';
+        });
 
       ranger = super.ranger.overrideAttrs (oldAttrs: {
         src = inputs.ranger;

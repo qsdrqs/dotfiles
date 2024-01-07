@@ -41,4 +41,8 @@
     };
   };
 
+  dummy = pkgs.writeShellScriptBin "_dummy" ''
+    echo "Dummy package as a placeholder for some other package"
+  '';
+
 }

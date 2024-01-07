@@ -326,6 +326,7 @@
       devShells = archSpecConfigAll (system: (pkgs' system).callPackage ./nixos/dev-shell.nix { inputs = inputs; });
       # direct nix run
       packages = archSpecConfigAll (system: pkgs' system);
+
       legacyPackages = nixpkgs.legacyPackages;
       inputs_ = inputs;
     };

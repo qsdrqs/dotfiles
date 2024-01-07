@@ -14,6 +14,7 @@ with pkgs; {
         cargo
         rustfmt
         clippy
+        cargo-depgraph
         rust-analyzer
         cmake
         llvmPackages_latest.llvm

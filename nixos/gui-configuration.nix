@@ -29,6 +29,7 @@ in
     baobab # disk usage
     mpv
     libsForQt5.gwenview
+    graphviz
 
     zathura
     ark
@@ -49,7 +50,7 @@ in
       enable = true;
       support32Bit = true;
     };
-    jack.enable = true;
+    # jack.enable = true;
   };
 
   systemd = {
