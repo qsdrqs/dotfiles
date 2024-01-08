@@ -1,7 +1,7 @@
 [manager]
-layout         = [ 1, 4, 3 ]
+ratio          = [ 1, 4, 3 ]
 sort_by        = "alphabetical"
-sort_sensitive = true
+sort_sensitive = false
 sort_reverse   = false
 sort_dir_first = true
 linemode       = "none"
@@ -26,11 +26,6 @@ open = [
 	{ exec = 'xdg-open "$@"',             desc = "Open", for = "linux" },
 	{ exec = 'open "$@"',                 desc = "Open", for = "macos" },
 	{ exec = 'start "%1"', orphan = true, desc = "Open", for = "windows" }
-]
-pdf = [
-	{ exec = 'zathura "$@"', desc = "Open", for = "unix" },
-	{ exec = 'open "$@"',    desc = "Open", for = "macos" },
-	{ exec = 'start "%1"',   desc = "Open", for = "windows" }
 ]
 reveal = [
 	{ exec = 'open -R "$1"',                       desc = "Reveal", for = "macos" },
@@ -61,27 +56,62 @@ rules = [
 	{ mime = "*/javascript",     use = [ "edit", "reveal" ] },
 
 	{ mime = "application/zip",             use = [ "extract", "reveal" ] },
-	{ name = "application/pdf",             use = [ "pdf", "reveal" ] },
 	{ mime = "application/gzip",            use = [ "extract", "reveal" ] },
 	{ mime = "application/x-tar",           use = [ "extract", "reveal" ] },
 	{ mime = "application/x-bzip",          use = [ "extract", "reveal" ] },
 	{ mime = "application/x-bzip2",         use = [ "extract", "reveal" ] },
 	{ mime = "application/x-7z-compressed", use = [ "extract", "reveal" ] },
 	{ mime = "application/x-rar",           use = [ "extract", "reveal" ] },
+	{ mime = "application/xz",              use = [ "extract", "reveal" ] },
 
 	{ mime = "*", use = [ "open", "edit", "reveal" ] },
 ]
 
 [tasks]
-micro_workers = 5
-macro_workers = 10
-bizarre_retry = 5
-image_alloc   = 536870912  # 512MB
-image_bound   = [ 0, 0 ]
+micro_workers    = 5
+macro_workers    = 10
+bizarre_retry    = 5
+image_alloc      = 536870912  # 512MB
+image_bound      = [ 0, 0 ]
+suppress_preload = false
 
-[plugins]
-preload = [
-	"~/.config/yazi/plugins/status.lua"
+[plugin]
+
+preloaders = [
+	{ name = "*", cond = "!mime", exec = "mime", multi = true, prio = "high" },
+	# Image
+	{ mime = "image/vnd.djvu", exec = "noop" },
+	{ mime = "image/*",        exec = "image" },
+	# Video
+	{ mime = "video/*", exec = "video" },
+	# PDF
+	{ mime = "application/pdf", exec = "pdf" },
+]
+previewers = [
+	{ name = "*/", exec = "folder", sync = true },
+	# Code
+	{ mime = "text/*",                 exec = "code" },
+	{ mime = "*/xml",                  exec = "code" },
+	{ mime = "*/javascript",           exec = "code" },
+	{ mime = "*/x-wine-extension-ini", exec = "code" },
+	# JSON
+	{ mime = "application/json", exec = "json" },
+	# Image
+	{ mime = "image/vnd.djvu", exec = "noop" },
+	{ mime = "image/*",        exec = "image" },
+	# Video
+	{ mime = "video/*", exec = "video" },
+	# PDF
+	{ mime = "application/pdf", exec = "pdf" },
+	# Archive
+	{ mime = "application/zip",             exec = "archive" },
+	{ mime = "application/gzip",            exec = "archive" },
+	{ mime = "application/x-tar",           exec = "archive" },
+	{ mime = "application/x-bzip",          exec = "archive" },
+	{ mime = "application/x-bzip2",         exec = "archive" },
+	{ mime = "application/x-7z-compressed", exec = "archive" },
+	{ mime = "application/x-rar",           exec = "archive" },
+	{ mime = "application/xz",              exec = "archive" },
 ]
 
 [input]
@@ -109,6 +139,11 @@ trash_offset	= [ 0, 2, 50, 3 ]
 delete_title 	= "Delete {n} selected file{s} permanently? (y/N)"
 delete_origin	= "top-center"
 delete_offset	= [ 0, 2, 50, 3 ]
+
+# filter
+filter_title  = "Filter:"
+filter_origin = "top-center"
+filter_offset = [ 0, 2, 50, 3 ]
 
 # find
 find_title  = [ "Find next:", "Find previous:" ]

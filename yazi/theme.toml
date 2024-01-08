@@ -27,10 +27,6 @@ tab_width    = 1
 border_symbol = "│"
 border_style  = { fg = "gray" }
 
-# Offset
-folder_offset  = [ 1, 0, 1, 0 ]
-preview_offset = [ 1, 1, 1, 1 ]
-
 # Highlighting
 syntect_theme = ""
 
@@ -141,14 +137,14 @@ footer  = { fg = "black", bg = "white" }
 
 rules = [
 	# symlinks
-	{ mime = "inode/symlink", fg = "red" },
+	{ mime = "inode/symlink", fg = "cyan" },
 
 	# Images
-	{ mime = "image/*", fg = "cyan" },
+	{ mime = "image/*", fg = "yellow" },
 
 	# Videos
-	{ mime = "video/*", fg = "yellow" },
-	{ mime = "audio/*", fg = "yellow" },
+	{ mime = "video/*", fg = "lightmagenta" },
+	{ mime = "audio/*", fg = "lightmagenta" },
 
 	# Archives
 	{ mime = "application/zip",             fg = "magenta" },
@@ -161,8 +157,8 @@ rules = [
 	{ mime = "application/xz",              fg = "magenta" },
 
 	# Documents
-	{ mime = "application/doc",   fg = "green" },
-	{ mime = "application/pdf",   fg = "green" },
+	{ mime = "application/doc",   fg = "blue" },
+	{ mime = "application/pdf",   fg = "red" },
 	{ mime = "application/rtf",   fg = "green" },
 	{ mime = "application/vnd.*", fg = "green" },
 
