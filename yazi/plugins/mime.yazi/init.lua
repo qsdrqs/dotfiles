@@ -1,5 +1,15 @@
 local M = {}
 
+local function executable(permission)
+	for i = 1, #permission do
+		local c = permission:sub(i, i)
+		if c == "x" or c == "s" or c == "S" or c == "t" or c == "T" then
+			return true
+		end
+	end
+	return false
+end
+
 function M:preload()
 	local urls = {}
 	for _, file in ipairs(self.files) do
@@ -10,7 +20,7 @@ function M:preload()
 	if ya.target_family() == "windows" then
 		args = { "-b", "--mime-type" }
 	else
-		args = { "-b", "--mime-type" }
+		args = { "-bL", "--mime-type" }
 	end
 
 	local child, code = Command("file"):args(args):args(urls):stdout(Command.PIPED):spawn()
@@ -42,6 +52,9 @@ function M:preload()
 
 		next = next:gsub("[\r\n]+$", "")
 		if ya.mime_valid(next) then
+			if executable(self.files[i].cha:permissions()) then
+				next = "application/x-executable"
+			end
 			j, mimes[urls[i]] = j + 1, next
 			flush(false)
 		end

@@ -139,6 +139,9 @@ rules = [
 	# symlinks
 	{ mime = "inode/symlink", fg = "cyan" },
 
+	# executables
+	{ mime = "application/x-executable", fg = "green", bold = true },
+
 	# Images
 	{ mime = "image/*", fg = "yellow" },
 
@@ -160,12 +163,14 @@ rules = [
 	{ mime = "application/doc",   fg = "blue" },
 	{ mime = "application/pdf",   fg = "red" },
 	{ mime = "application/rtf",   fg = "green" },
-	{ mime = "application/vnd.*", fg = "green" },
+	{ mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fg = "27" },
+	{ mime = "application/vnd.*", fg = "lightred" },
 
 	# Fallback
 	# { name = "*", fg = "white" },
 	{ name = "*/", fg = "blue" }
 ]
+
 
 [icons]
 
