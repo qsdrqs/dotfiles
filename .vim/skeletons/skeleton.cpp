@@ -1,9 +1,9 @@
 /*
- * `!v expand('%')`: ${1:introduction}
+ * `expand('%')`: ${1:introduction}
  *
- * Copyright (C) `date +%Y` qsdrqs
+ * Copyright (C) `strftime("%Y")` `g:skeleton_username`
  *
- * Author: qsdrqs <qsdrqs@gmail.com>
+ * Author: `g:skeleton_username` <`g:skeleton_email`>
  * All Right Reserved
  *
  */

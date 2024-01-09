@@ -6,7 +6,7 @@ let
     cp -r * $out
     runHook postInstall
   '';
-  extraBuildPlugins = [ ];
+  extraBuildPlugins = [ "LuaSnip" ];
   dummyBuildPhase = ''
     # do nothing
   '';
@@ -46,6 +46,17 @@ let
         ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/nvim-treesitter/parser $out/parser
       '';
     };
+    LuaSnip = pkgs.stdenv.mkDerivation {
+      name = "LuaSnip";
+      src = inputs.nvim-config.inputs.LuaSnip;
+      buildPhase = dummyBuildPhase;
+      installPhase = commonInstallPhase;
+      postInstall = ''
+        substituteInPlace $out/lua/luasnip/util/util.lua \
+          --replace "o<C-G><C-r>_" \
+          "<C-G><C-r>_"
+      '';
+    };
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
     (entry: {
@@ -62,10 +73,15 @@ let
     entries);
 in
 {
-  home.file = genNvimPlugins inputs.nvim-config.plugins_list;
+  home.file = genNvimPlugins inputs.nvim-config.plugins_list // {
+    dotfiles = {
+      source = inputs.nvim-config;
+      target = "${config.home.homeDirectory}/.local/share/nvim/nix/dotfiles";
+    };
+  };
 
   home.activation.updateNvimFlake = ''
-    cd ${config.home.homeDirectory}/dotfiles/nvim/flake
+    cd ${config.home.homeDirectory}/dotfiles/nvim
     export PATH=${pkgs.neovim}/bin:${pkgs.git}/bin:$PATH
     ${pkgs.python3}/bin/python3 dump_input.py
     nix flake lock path:.

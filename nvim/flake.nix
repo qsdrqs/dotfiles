@@ -95,14 +95,6 @@
       url = "github:nvimtools/none-ls.nvim";
       flake = false;
     };
-    ultisnips = {
-      url = "github:SirVer/ultisnips";
-      flake = false;
-    };
-    cmp-nvim-ultisnips = {
-      url = "github:quangnguyen30192/cmp-nvim-ultisnips";
-      flake = false;
-    };
     vim-vsnip = {
       url = "github:hrsh7th/vim-vsnip";
       flake = false;
@@ -145,6 +137,14 @@
     };
     lsp_signatureDOTnvim = {
       url = "github:ray-x/lsp_signature.nvim";
+      flake = false;
+    };
+    LuaSnip = {
+      url = "github:L3MON4D3/LuaSnip";
+      flake = false;
+    };
+    cmp_luasnip = {
+      url = "github:saadparwaiz1/cmp_luasnip";
       flake = false;
     };
     nvim-cmp = {
@@ -375,10 +375,6 @@
       url = "github:lfv89/vim-interestingwords";
       flake = false;
     };
-    vim-skeletons = {
-      url = "github:qsdrqs/vim-skeletons";
-      flake = false;
-    };
     vim-snippets = {
       url = "github:honza/vim-snippets";
       flake = false;
@@ -477,8 +473,6 @@
         { name = "nvim-autopairs"; dotname = "nvim-autopairs";source = inputs.nvim-autopairs; build = false; }
         { name = "auto-save.nvim"; dotname = "auto-saveDOTnvim";source = inputs.auto-saveDOTnvim; build = false; }
         { name = "none-ls.nvim"; dotname = "none-lsDOTnvim";source = inputs.none-lsDOTnvim; build = false; }
-        { name = "ultisnips"; dotname = "ultisnips";source = inputs.ultisnips; build = false; }
-        { name = "cmp-nvim-ultisnips"; dotname = "cmp-nvim-ultisnips";source = inputs.cmp-nvim-ultisnips; build = false; }
         { name = "vim-vsnip"; dotname = "vim-vsnip";source = inputs.vim-vsnip; build = false; }
         { name = "cmp-nvim-lsp"; dotname = "cmp-nvim-lsp";source = inputs.cmp-nvim-lsp; build = false; }
         { name = "cmp-nvim-lua"; dotname = "cmp-nvim-lua";source = inputs.cmp-nvim-lua; build = false; }
@@ -490,6 +484,8 @@
         { name = "cmp-dap"; dotname = "cmp-dap";source = inputs.cmp-dap; build = false; }
         { name = "cmp-cmdline"; dotname = "cmp-cmdline";source = inputs.cmp-cmdline; build = false; }
         { name = "lsp_signature.nvim"; dotname = "lsp_signatureDOTnvim";source = inputs.lsp_signatureDOTnvim; build = false; }
+        { name = "LuaSnip"; dotname = "LuaSnip";source = inputs.LuaSnip; build = false; }
+        { name = "cmp_luasnip"; dotname = "cmp_luasnip";source = inputs.cmp_luasnip; build = false; }
         { name = "nvim-cmp"; dotname = "nvim-cmp";source = inputs.nvim-cmp; build = false; }
         { name = "promise-async"; dotname = "promise-async";source = inputs.promise-async; build = false; }
         { name = "nvim-fundo"; dotname = "nvim-fundo";source = inputs.nvim-fundo; build = true; }
@@ -547,7 +543,6 @@
         { name = "vim-textobj-user"; dotname = "vim-textobj-user";source = inputs.vim-textobj-user; build = false; }
         { name = "vim-textobj-entire"; dotname = "vim-textobj-entire";source = inputs.vim-textobj-entire; build = false; }
         { name = "vim-interestingwords"; dotname = "vim-interestingwords";source = inputs.vim-interestingwords; build = false; }
-        { name = "vim-skeletons"; dotname = "vim-skeletons";source = inputs.vim-skeletons; build = false; }
         { name = "vim-snippets"; dotname = "vim-snippets";source = inputs.vim-snippets; build = false; }
         { name = "suda.vim"; dotname = "sudaDOTvim";source = inputs.sudaDOTvim; build = false; }
         { name = "undotree"; dotname = "undotree";source = inputs.undotree; build = false; }

@@ -136,6 +136,12 @@ end
 local function vscode_prev_hunk()
   require("vscode-neovim").action("workbench.action.editor.previousChange")
 end
+local dotfiles_nvim_dir
+if use_nix then
+  dotfiles_nvim_dir = vim.fn.stdpath("data") .. "/nix/dotfiles"
+else
+  dotfiles_nvim_dir = os.getenv("HOME") .. "/dotfiles/nvim"
+end
 
 local plugins = {
   -- auto load rtp in dotfiles
@@ -607,7 +613,7 @@ local plugins = {
       }
 
       -- add my magic python lsp
-      local ok, pycfg = pcall(require, 'private.magic_py_lsp')
+      local ok, pycfg = pcall(require, 'dotfiles.private.magic_py_lsp')
       if not ok or pycfg.config == nil then
         servers[#servers+1] = 'pyright'
       else
@@ -999,11 +1005,6 @@ local plugins = {
   },
 
   -- complete
-  {
-    'quangnguyen30192/cmp-nvim-ultisnips',
-    lazy = true,
-    dependencies = {"SirVer/ultisnips"}
-  },
   {'hrsh7th/vim-vsnip'},
   {
     'hrsh7th/cmp-nvim-lsp',
@@ -1093,13 +1094,13 @@ local plugins = {
 
   {
     'hrsh7th/nvim-cmp',
-    dependencies = {"hrsh7th/vim-vsnip"},
+    dependencies = {"L3MON4D3/LuaSnip", 'saadparwaiz1/cmp_luasnip'},
     config = function()
       local t = function(str)
         return vim.api.nvim_replace_termcodes(str, true, true, true)
       end
       local cmp = require('cmp')
-
+      local ls = require('luasnip')
 
       cmp.setup{
         window = {
@@ -1146,9 +1147,9 @@ local plugins = {
             -- Use vsnip to handles snips provided by lsp. Ultisnips has problems.
             -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
 
-            -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+            ls.lsp_expand(args.body) -- For `luasnip` users.
             -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
           end,
         },
         mapping = cmp.mapping.preset.insert({
@@ -1181,22 +1182,22 @@ local plugins = {
               if not ok then
                 copilot_keys = "empty"
               end
-              local ultisnips_ok, ultisnips_jump_forward = pcall(vim.fn["UltiSnips#CanJumpForwards"])
+              local luasnip_jump_forward = ls.jumpable(1)
               if cmp.visible() then
                 -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                 cmp.confirm()
               elseif copilot_keys ~= "empty" then
                 vim.api.nvim_feedkeys(copilot_keys, "i", true)
-              elseif ultisnips_ok and ultisnips_jump_forward == 1 then
-                vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
+              elseif luasnip_jump_forward == true then
+                ls.jump(1)
               else
                 vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
                 -- fallback()
               end
             end,
             s = function(fallback)
-              if vim.fn["UltiSnips#CanJumpForwards"]() == 1 then
-                vim.api.nvim_feedkeys(t("<Plug>(ultisnips_jump_forward)"), 'm', true)
+              if ls.jumpable(1) == true then
+                ls.jump(1)
               else
                 fallback()
               end
@@ -1213,15 +1214,15 @@ local plugins = {
             i = function(fallback)
               if cmp.visible() then
                 cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
-              elseif vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
-                return vim.api.nvim_feedkeys( t("<Plug>(ultisnips_jump_backward)"), 'm', true)
+              elseif ls.jumpable(-1) == true then
+                ls.jump(-1)
               else
                 fallback()
               end
             end,
             s = function(fallback)
-              if vim.fn["UltiSnips#CanJumpBackwards"]() == 1 then
-                return vim.api.nvim_feedkeys( t("<Plug>(ultisnips_jump_backward)"), 'm', true)
+              if ls.jumpable(-1) == true then
+                ls.jump(-1)
               else
                 fallback()
               end
@@ -1229,7 +1230,7 @@ local plugins = {
           }),
         }),
         sources = cmp.config.sources({
-          { name = 'ultisnips' }, -- For ultisnips users.
+          -- { name = 'ultisnips' }, -- For ultisnips users.
           -- { name = 'nvim_lsp_signature_help' },
           { name = 'nvim_lsp' },
           -- { name = 'omni' },
@@ -1237,7 +1238,7 @@ local plugins = {
           { name = 'path' },
           { name = 'nvim_lua' },
           { name = 'buffer' },
-          -- { name = 'luasnip' }, -- For luasnip users.
+          { name = 'luasnip' }, -- For luasnip users.
           -- { name = 'snippy' }, -- For snippy users.
         }),
 
@@ -3281,25 +3282,52 @@ local plugins = {
       vim.keymap.set('n', '<leader>H', "<cmd>call UncolorAllWords()<cr>", { silent = true })
     end
   },
-  {'qsdrqs/vim-skeletons', lazy = true },
   {'honza/vim-snippets', lazy = true },
   {
-    'SirVer/ultisnips',
+    'L3MON4D3/LuaSnip',
     lazy = true,
     dependencies = {
       {'honza/vim-snippets', rtp = '.'},
-      {'nvim-cmp'}
     },
     config = function()
-      vim.g.UltiSnipsExpandTrigger = '<Plug>(ultisnips_expand)'
-      vim.g.UltiSnipsJumpForwardTrigger = '<Plug>(ultisnips_jump_forward)'
-      vim.g.UltiSnipsJumpBackwardTrigger = '<Plug>(ultisnips_jump_backward)'
-      vim.g.UltiSnipsListSnippets = '<c-x><c-s>'
-      vim.g.UltiSnipsRemoveSelectModeMappings = 0
-      vim.g.UltiSnipsEditSplit="vertical"
-      vim.g.UltiSnipsSnippetDirectories={ "UltiSnips"}
-      vim.g.UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit = os.getenv("HOME") .. '/.vim/UltiSnips'
-      vim.keymap.set('n', '<leader>ss', '<cmd>UltiSnipsEdit<cr>', { silent = true })
+      vim.opt.rtp:prepend(os.getenv("HOME") .. '/dotfiles/.vim')
+      require("luasnip.loaders.from_snipmate").lazy_load()
+      require("dotfiles.luasnip")
+      local ls = require("luasnip")
+      ls.setup({
+          update_events = {"TextChanged", "TextChangedI"}
+      })
+
+      local t = function(str)
+        return vim.api.nvim_replace_termcodes(str, true, true, true)
+      end
+
+      vim.keymap.set({"i"}, "<Tab>", function()
+        if ls.expand_or_jumpable() then
+          return ls.expand_or_jump()
+        else
+          vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
+        end
+      end, {silent = true})
+      vim.keymap.set({"i", "s"}, "<Tab>", function()
+        if ls.jumpable(1) then
+          return ls.jump(1)
+        else
+          vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
+        end
+      end, {silent = true})
+      vim.keymap.set({"i", "s"}, "<S-Tab>", function()
+        if ls.jumpable(-1) then
+          return ls.jump(-1)
+        else
+          vim.api.nvim_feedkeys(t("<S-Tab>"), "n", true)
+        end
+      end, {silent = true})
+      local function snips_edit()
+        local ft = vim.bo.filetype
+        vim.cmd("e ~/dotfiles/.vim/snippets/" .. ft .. ".snippets")
+      end
+      vim.keymap.set('n', '<leader>ss', snips_edit, { silent = true })
       vim.api.nvim_create_autocmd("BufRead", {
         pattern = "*.snippets",
         callback = function()
@@ -4018,7 +4046,6 @@ function lazyLoadPlugins()
           'cmp-omni',
           'cmp-nvim-lsp-signature-help',
           'cmp-dictionary',
-          'cmp-nvim-ultisnips',
           -- end cmp
         }
       }
@@ -4190,10 +4217,10 @@ end
 -- vim skeletons
 vim.api.nvim_create_autocmd("BufNewFile", {
   callback = function()
-    vim.g["skeletons#autoRegister"] = 1
-    vim.g["skeletons#skeletonsDir"] = "~/.vim/skeletons"
-    require("lazy").load{ plugins = {"ultisnips", "vim-skeletons"} }
-    vim.call("skeletons#InsertSkeleton")
+    require("dotfiles.skeletons").insert_skeleton {
+      username = "qsdrqs",
+      email = "qsdrqs@gmail.com"
+    }
   end
 })
 

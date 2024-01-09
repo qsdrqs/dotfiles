@@ -1,0 +1,20 @@
+snippet cw "WriteLine"
+	Console.WriteLine($1);
+
+snippet cr "ReadLine"
+	Console.ReadLine();
+
+snippet i32 "ToInt32"
+	Convert.ToInt32($1);
+
+snippet cicr "read to int"
+	Convert.ToInt32(Console.ReadLine());
+
+snippet fori "fori"
+	for (${4:int} ${2:i} = 0; $2 < ${1:count}; ${3:++}$2)
+	{
+		${VISUAL}$0
+	}
+
+snippet us "using"
+	using

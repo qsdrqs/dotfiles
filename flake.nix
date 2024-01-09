@@ -25,7 +25,7 @@
     };
 
     zsh-config.url = "path:zsh";
-    nvim-config.url = "path:nvim/flake";
+    nvim-config.url = "path:nvim";
 
     # wsl
     nixos-wsl = {

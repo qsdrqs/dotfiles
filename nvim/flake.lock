@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "LuaSnip": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1704708087,
+        "narHash": "sha256-LokIHQfDzm8GvJCYO3xsG2aSKO65ow5wRySeqIGaU0c=",
+        "owner": "L3MON4D3",
+        "repo": "LuaSnip",
+        "rev": "82108e7e31cc6fc223cc5df5cae6d89f70bb199f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "L3MON4D3",
+        "repo": "LuaSnip",
+        "type": "github"
+      }
+    },
     "aerialDOTnvim": {
       "flake": false,
       "locked": {
@@ -304,22 +320,6 @@
         "type": "github"
       }
     },
-    "cmp-nvim-ultisnips": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1688578226,
-        "narHash": "sha256-GaEczmqw0RU6H7irmL5b3a+FFxSdOKfpNKnKsDuSMzs=",
-        "owner": "quangnguyen30192",
-        "repo": "cmp-nvim-ultisnips",
-        "rev": "24bca5c3e137b28cd87442d4fc51a2b312dd99cc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "quangnguyen30192",
-        "repo": "cmp-nvim-ultisnips",
-        "type": "github"
-      }
-    },
     "cmp-omni": {
       "flake": false,
       "locked": {
@@ -349,6 +349,22 @@
       "original": {
         "owner": "hrsh7th",
         "repo": "cmp-path",
+        "type": "github"
+      }
+    },
+    "cmp_luasnip": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696878902,
+        "narHash": "sha256-nUJJl2zyK/oSwz5RzI9j3gf9zpDfCImCYbPbVsyXgz8=",
+        "owner": "saadparwaiz1",
+        "repo": "cmp_luasnip",
+        "rev": "05a9ab28b53f71d1aece421ef32fee2cb857a843",
+        "type": "github"
+      },
+      "original": {
+        "owner": "saadparwaiz1",
+        "repo": "cmp_luasnip",
         "type": "github"
       }
     },
@@ -1236,6 +1252,7 @@
     "root": {
       "inputs": {
         "CommentDOTnvim": "CommentDOTnvim",
+        "LuaSnip": "LuaSnip",
         "aerialDOTnvim": "aerialDOTnvim",
         "alignDOTnvim": "alignDOTnvim",
         "alpha-nvim": "alpha-nvim",
@@ -1254,9 +1271,9 @@
         "cmp-nvim-lsp": "cmp-nvim-lsp",
         "cmp-nvim-lsp-signature-help": "cmp-nvim-lsp-signature-help",
         "cmp-nvim-lua": "cmp-nvim-lua",
-        "cmp-nvim-ultisnips": "cmp-nvim-ultisnips",
         "cmp-omni": "cmp-omni",
         "cmp-path": "cmp-path",
+        "cmp_luasnip": "cmp_luasnip",
         "copilotDOTvim": "copilotDOTvim",
         "cscope_mapsDOTnvim": "cscope_mapsDOTnvim",
         "dialDOTnvim": "dialDOTnvim",
@@ -1326,7 +1343,6 @@
         "toggletermDOTnvim": "toggletermDOTnvim",
         "treesj": "treesj",
         "troubleDOTnvim": "troubleDOTnvim",
-        "ultisnips": "ultisnips",
         "undotree": "undotree",
         "vCoolorDOTvim": "vCoolorDOTvim",
         "venv-selectorDOTnvim": "venv-selectorDOTnvim",
@@ -1339,7 +1355,6 @@
         "vim-log-highlighting": "vim-log-highlighting",
         "vim-matchup": "vim-matchup",
         "vim-sandwich": "vim-sandwich",
-        "vim-skeletons": "vim-skeletons",
         "vim-sleuth": "vim-sleuth",
         "vim-snippets": "vim-snippets",
         "vim-textobj-entire": "vim-textobj-entire",
@@ -1574,22 +1589,6 @@
         "type": "github"
       }
     },
-    "ultisnips": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1697556945,
-        "narHash": "sha256-hxWRg5ICwiuWwmhVEOw8BWlIqxYBSGfuo5FeO5oV2bw=",
-        "owner": "SirVer",
-        "repo": "ultisnips",
-        "rev": "b393ba65386d47664421e1f8b246a87a6e8b218c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "SirVer",
-        "repo": "ultisnips",
-        "type": "github"
-      }
-    },
     "undotree": {
       "flake": false,
       "locked": {
@@ -1779,22 +1778,6 @@
       "original": {
         "owner": "machakann",
         "repo": "vim-sandwich",
-        "type": "github"
-      }
-    },
-    "vim-skeletons": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1610978654,
-        "narHash": "sha256-O647/7pBPJpEMk1MzTfRF2pUTXw/ZVe3ss5KNVQjFjA=",
-        "owner": "qsdrqs",
-        "repo": "vim-skeletons",
-        "rev": "58d5d3ec92104d95d911e796e5b3fa9b7b1d9692",
-        "type": "github"
-      },
-      "original": {
-        "owner": "qsdrqs",
-        "repo": "vim-skeletons",
         "type": "github"
       }
     },

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 '''
-Copyright (C) `date +%Y`
+Copyright (C) `strftime("%Y")` `g:skeleton_username`
 
-Author: qsdrqs <qsdrqs@gmail.com>
+Author: `g:skeleton_username` <`g:skeleton_email`>
 All Right Reserved
 
 This file $1

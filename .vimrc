@@ -94,14 +94,13 @@ nnoremap <silent><left> :vertical resize-1<CR>
 "nnoremap <leader><leader> :w<CR>
 
 "快速翻页
-noremap J <nop>
-noremap K <nop>
 noremap J 7j
 noremap K 7k
-noremap H <nop>
-noremap L <nop>
 noremap H 7h
 noremap L 7l
+
+" 清除select模式下的mapping
+smapclear
 
 noremap <C-q> ^
 noremap <C-e> $
