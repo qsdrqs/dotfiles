@@ -139,9 +139,6 @@ rules = [
 	# symlinks
 	{ mime = "inode/symlink", fg = "cyan" },
 
-	# executables
-	{ mime = "application/x-executable", fg = "green", bold = true },
-
 	# Images
 	{ mime = "image/*", fg = "yellow" },
 
@@ -168,7 +165,7 @@ rules = [
 
 	# Fallback
 	# { name = "*", fg = "white" },
-	{ name = "*/", fg = "blue" }
+	{ name = "*/", fg = "12" }
 ]
 
 

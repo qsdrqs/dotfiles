@@ -18,7 +18,7 @@ ueberzug_offset = [ 0, 0, 0, 0 ]
 
 [opener]
 edit = [
-	{ exec = 'if [ "$NVIM_YAZI" = "1" ]; then echo "$@" > /tmp/yaziopen; kill $(ps -o ppid= -p $$); else $EDITOR "$@"; fi', block = true,  for = "unix" },
+	{ exec = 'nvim-yazi "$@"', block = true,  for = "unix" },
 	# { exec = '$EDITOR "$@"', block = true,  for = "unix" },
 	{ exec = 'code "%*"',    orphan = true, for = "windows" },
 ]

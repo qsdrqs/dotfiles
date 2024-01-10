@@ -1,3 +1,14 @@
+local function executable(file)
+	local permission = file.cha:permissions()
+	for i = 1, #permission do
+		local c = permission:sub(i, i)
+		if c == "x" or c == "s" or c == "S" or c == "t" or c == "T" then
+			return true
+		end
+	end
+	return false
+end
+
 function Status:name()
 	local h = cx.active.current.hovered
 	if h == nil then
@@ -16,8 +27,13 @@ function Status:name()
 		local gid = h.cha.gid
 		local user = ya.user_name(uid)
 		local group = ya.group_name(gid)
+		if group == nil then
+			group = gid
+		end
+		if user == nil then
+			user = uid
+		end
 		spans[#spans + 1] = ui.Span(user .. " " .. group .. " "):style(THEME.status.permissions_r)
-		-- return ui.Span(" " .. user .. " " .. group .. " " .. modified .. linked)
 	end
 
 	local modified = os.date("%Y-%m-%d %H:%M:%S", math.floor(h.cha.modified))
@@ -27,21 +43,65 @@ function Status:name()
 	return ui.Line(spans)
 end
 
+function Folder:highlighted_name(file)
+	-- Complete prefix when searching across directories
+	local length = 0
+	local prefix = file:prefix() or ""
+	if prefix ~= "" then
+		prefix = prefix .. "/"
+	end
+
+	-- Range highlighting for filenames
+	local highlights = file:highlights()
+	local spans = ui.highlight_ranges(prefix .. file.name, highlights)
+
+	-- hack to get the display length of the filename
+	length = length + #prefix + math.floor((utf8.len(file.name) + #file.name) / 2)
+
+	-- Show symlink target
+	if MANAGER.show_symlink and file.link_to ~= nil then
+		local str = " -> " .. tostring(file.link_to)
+		spans[#spans + 1] = ui.Span(str):italic()
+		length = length + math.floor((utf8.len(str) + #str) / 2)
+	end
+
+	if highlights == nil or not file:is_hovered() then
+		return spans, length
+	end
+
+	local found = file:found()
+	if found ~= nil then
+		spans[#spans + 1] = ui.Span("  ")
+		length = length + 2
+		local str = string.format("[%d/%d]", found[1] + 1, found[2])
+		spans[#spans + 1] = ui.Span(str):style(THEME.manager.find_position)
+		length = length + #str
+	end
+	return spans, length
+end
+
 function Current:render(area)
 	self.area = area
 
 	local markers = {}
 	local items = {}
+
 	for i, f in ipairs(Folder:by_kind(Folder.CURRENT).window) do
-		local name = Folder:highlighted_name(f)
+		local name, length = Folder:highlighted_name(f)
+		local file_size
+		file_size = ya.readable_size(f:size() or f.cha.length)
+
+		name[#name + 1] = ui.Span(string.rep(' ', area.w - 4 - #file_size - length) .. file_size)
+		local item = ui.ListItem(ui.Line { Folder:icon(f), table.unpack(name) })
 
 		-- Highlight hovered file
-		local item = ui.ListItem(ui.Line { Folder:icon(f), table.unpack(name) })
 		if f:is_hovered() then
 			item = item:style(THEME.manager.hovered)
 		else
 			if f.cha.is_symlink then
 				item = item:style(THEME.manager.cwd)
+			elseif executable(f) and not f.cha.is_dir then
+				item = item:style({ fg = "green", modifier = 1 })
 			else
 				item = item:style(f:style())
 			end
@@ -56,5 +116,63 @@ function Current:render(area)
 			markers[#markers + 1] = { i, 3 }
 		end
 	end
-	return ya.flat { ui.List(area, items), Folder:linemode(area), Folder:markers(area, markers) }
+	return { ya.flat { ui.List(area, items), Folder:linemode(area), Folder:markers(area, markers) } }
+end
+
+function Parent:render(area)
+	self.area = area
+
+	local folder = Folder:by_kind(Folder.PARENT)
+	if folder == nil then
+		return {}
+	end
+
+	local items = {}
+	for _, f in ipairs(folder.window) do
+		local item = ui.ListItem(ui.Line { Folder:icon(f), ui.Span(f.name) })
+		if f:is_hovered() then
+			item = item:style(THEME.manager.hovered)
+		else
+			if f.cha.is_symlink then
+				item = item:style(THEME.manager.cwd)
+			elseif executable(f) and not f.cha.is_dir then
+				item = item:style({ fg = "green", modifier = 1 })
+			else
+				item = item:style(f:style())
+			end
+		end
+
+		items[#items + 1] = item
+	end
+
+	return { ui.List(area, items) }
+end
+
+function Preview:render(area)
+	self.area = area
+
+	local folder = Folder:by_kind(Folder.PREVIEW)
+	if folder == nil then
+		return {}
+	end
+
+	local items = {}
+	for _, f in ipairs(folder.window) do
+		local item = ui.ListItem(ui.Line { Folder:icon(f), ui.Span(f.name) })
+		if f:is_hovered() then
+			item = item:style(THEME.manager.hovered)
+		else
+			if f.cha.is_symlink then
+				item = item:style(THEME.manager.cwd)
+			elseif executable(f) and not f.cha.is_dir then
+				item = item:style({ fg = "green", modifier = 1 })
+			else
+				item = item:style(f:style())
+			end
+		end
+
+		items[#items + 1] = item
+	end
+
+	return { ui.List(area, items) }
 end

@@ -13,6 +13,14 @@ let
       fi
     done
   '';
+  nvim-yazi = pkgs.writeShellScriptBin "nvim-yazi" ''
+    if [ "$NVIM_YAZI" = "1" ];
+      then echo "$@" > /tmp/yaziopen
+      kill $(ps -o ppid= -p $$)
+    else
+      $EDITOR "$@"
+    fi
+  '';
   nvim-final = pkgs.symlinkJoin {
     name = "neovim-${lib.getVersion pkgs.neovim-unwrapped}";
     paths = [ pkgs.neovim-unwrapped ];
@@ -124,6 +132,7 @@ in
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     (if config.boot.loader.grub.enable then grub2 else packages.dummy)
+    nvim-yazi
     lsd
     wget
     curl

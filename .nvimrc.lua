@@ -1419,7 +1419,13 @@ local plugins = {
 
   {
     "akinsho/toggleterm.nvim",
-    keys = {"<localleader>t", "<C-`>", "<localleader>T", "<leader>ra"},
+    keys = {
+      "<localleader>t",
+      "<C-`>",
+      "<C-Space>",
+      "<localleader>T",
+      "<leader>ra",
+    },
     cmd = "YaziToggle",
     config = function()
       require("toggleterm").setup {
@@ -1436,7 +1442,7 @@ local plugins = {
         }
       }
       vim.keymap.set('n', '<localleader>t', "<cmd>exe v:count1 . 'ToggleTerm direction=vertical'<cr>")
-      vim.keymap.set('n', '<localleader>T', "<cmd>exe v:count1 . 'ToggleTerm'<cr>")
+      vim.keymap.set('n', '<C-Space>', "<cmd>exe v:count1 . 'ToggleTerm'<cr>")
 
       -- lazy git
       local Terminal  = require('toggleterm.terminal').Terminal
@@ -3323,6 +3329,7 @@ local plugins = {
           vim.api.nvim_feedkeys(t("<S-Tab>"), "n", true)
         end
       end, {silent = true})
+
       local function snips_edit()
         local ft = vim.bo.filetype
         vim.cmd("e ~/dotfiles/.vim/snippets/" .. ft .. ".snippets")
@@ -3334,6 +3341,9 @@ local plugins = {
           vim.bo.filetype = "snippets"
         end
       })
+
+      -- map <BS> to <BS>i to get in insert
+      vim.keymap.set({"s"}, "<BS>", "<BS>i", {silent = true, noremap = true})
     end
   },
 
