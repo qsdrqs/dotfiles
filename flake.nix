@@ -298,21 +298,28 @@
         extraSpecialArgs = { inherit inputs; pkgs = pkgs' system; hm-module = basicHomeModules; };
       };
 
-      images = {
-        # iso, build through #images.nixos-iso
-        nixos-iso = (nixpkgs.lib.nixosSystem isoConfig).config.system.build.isoImage;
-        nixos-iso-gui = (nixpkgs.lib.nixosSystem isoGuiConfig).config.system.build.isoImage;
-        # rpi, build through #images.rpi
-        rpi = (nixpkgs.lib.nixosSystem (rpiConfig // {
-          modules = (nixpkgs.lib.lists.remove ./nixos/custom.nix rpiConfig.modules) ++ [
-            "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
-            ({ config, pkgs, ... }: {
-              # empty passwd
-              users.users.qsdrqs.password = "";
-            })
-          ];
-        })).config.system.build.sdImage;
-      };
+      images =
+        let
+          # we don't want to build the iso with custom.nix
+          removeCustom = (config: config // {
+            modules = (nixpkgs.lib.lists.remove ./nixos/custom.nix config.modules);
+          });
+        in
+        {
+          # iso, build through #images.nixos-iso
+          nixos-iso = (nixpkgs.lib.nixosSystem (removeCustom isoConfig)).config.system.build.isoImage;
+          nixos-iso-gui = (nixpkgs.lib.nixosSystem (removeCustom isoGuiConfig)).config.system.build.isoImage;
+          # rpi, build through #images.rpi
+          rpi = (nixpkgs.lib.nixosSystem (removeCustom rpiConfig // {
+            modules = rpiConfig.modules ++ [
+              "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+              ({ config, pkgs, ... }: {
+                # empty passwd
+                users.users.qsdrqs.password = "";
+              })
+            ];
+          })).config.system.build.sdImage;
+        };
 
       # home-manager
       homeConfigurations.minimal = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
