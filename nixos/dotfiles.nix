@@ -71,6 +71,14 @@ in
         ZSH_THEME="powerlevel10k"
       '';
     };
+    # gitstatusd
+    gitstatusd = let
+      arch_split = lib.strings.splitString "-" pkgs.system;
+      arch_reverse = lib.foldr (a: b: if b == "" then a else b + "-" + a) "" arch_split;
+    in {
+      source = "${pkgs.gitstatus}/bin/gitstatusd";
+      target = ".cache/gitstatus/gitstatusd-${arch_reverse}";
+    };
   };
 
   home.activation.updateZshFlake = ''
