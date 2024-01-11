@@ -512,7 +512,7 @@ function! TriggerPlugins() "加载插件配置以及一些原生vim插件
   if line('$') > max_line || getfsize(expand('%')) > max_size
     let b:treesitter_disable = 1
   endif
-  lua lazyLoadPlugins()
+  lua LazyLoadPlugins()
 
   let g:plugins_loaded = 1
   " execute autocmd

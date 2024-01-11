@@ -3939,28 +3939,35 @@ end
 
 --------------------------------------------------------------------------------------
 ----------------------------Lazy Load-------------------------------------------------
-function load_by_filetype(ft_plugins)
+local function load_by_filetype(ft_plugins)
   for _, ft_plugin in pairs(ft_plugins) do
-    local loaded = false
     for _, ft in pairs(ft_plugin.ft) do
       if vim.bo.filetype == ft then
         require('lazy').load { plugins = ft_plugin.plugins }
-        loaded = true
-        break
+        goto continue
       end
     end
-    if not loaded then
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = ft_plugin.ft,
-        callback = function()
-          require('lazy').load { plugins = ft_plugin.plugins }
-        end,
-        once = true
-      })
-    end
+
+    vim.api.nvim_create_augroup("LazyLoadFiletype", {})
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = ft_plugin.ft,
+      group = "LazyLoadFiletype",
+      callback = function(ev, opts)
+        require('lazy').load { plugins = ft_plugin.plugins }
+
+        -- load ftplugin, defer to avoid recursive call
+        vim.schedule_wrap(function()
+          vim.api.nvim_exec_autocmds("FileType", {
+            pattern = ft_plugin.ft,
+          })
+        end, 0)
+      end,
+      once = true
+    })
+    ::continue::
   end
 end
-function lazyLoadPlugins()
+function LazyLoadPlugins()
   load_by_filetype {
     {
       ft = { "java" },
