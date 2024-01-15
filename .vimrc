@@ -4,6 +4,14 @@
 "                \ V /  | || |  | |  _ <| |___
 "                 \_/  |___|_|  |_|_| \_\\____|
 "
+"-------------------无头模式下等待GUI-----------------------"{{{
+if has('nvim') && !exists('g:no_wait_headless')
+  while nvim_list_uis() == []
+    sleep 100m
+  endwhile
+endif
+"-------------------无头模式下等待GUI-----------------------"}}}
+
 "-------------------键位映射-----------------------"{{{
 let &t_ut=''
 let mapleader = ' '                     "The default leader is \, but a space is much better. 尽量减少小指的负担
@@ -222,7 +230,7 @@ let s:tablist = {
   \'nix': 2,
 \}
 autocmd BufWinEnter * call Tab_len()
-function Tab_len()
+function! Tab_len()
   for key in keys(s:tablist)
     if &filetype == key
       let b:tab_len = s:tablist[key]
@@ -236,7 +244,7 @@ function Tab_len()
   endfor
 endfunction
 
-function Delete8half()
+function! Delete8half()
   exec "normal 8dd"
   let halfcol = (col("$") - 1) / 2
   exec 'normal 0d' . halfcol . 'l'
@@ -268,10 +276,31 @@ autocmd BufReadPost *.md setlocal spell spelllang=en_us,cjk
 set magic
 set backspace=indent,eol,start          "Make backspace behave like every other editor
 
-set guifont=FiraCode\ Nerd\ Font:h20
+set guifont=FiraCode\ Nerd\ Font:h10.5
 set guioptions-=m
-let g:neovide_cursor_animation_length=0
-let g:neovide_refresh_rate=60
+
+function! SetupNeovide()
+  let g:neovide_cursor_animation_length=0
+
+  function! s:neovide_toggle_fullscreen()
+    if g:neovide_fullscreen == v:true
+      let g:neovide_fullscreen=v:false
+    else
+      let g:neovide_fullscreen=v:true
+    endif
+  endfunction
+  command! NeovideToggleFullScreen call <SID>neovide_toggle_fullscreen()
+  noremap <A-Enter> <cmd>call <SID>neovide_toggle_fullscreen()<cr>
+endfunction
+
+if exists("g:neovide")
+  call SetupNeovide()
+endif
+
+function! s:gui_connected()
+  source ~/.vimrc
+endfunction
+command! GuiConnected call <SID>gui_connected()
 
 "---------------------Search---------------------------------"
 set hlsearch
@@ -401,8 +430,17 @@ endif
 set foldlevel=99
 set foldcolumn=1
 
-" zsh shell
-set shell=zsh
+" set shell
+if has('win32')
+  " from :h shell-powershell
+  let &shell = 'pwsh'
+  let &shellcmdflag = '-NoLogo -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new();$PSDefaultParameterValues[''Out-File:Encoding'']=''utf8'';Remove-Alias -Force -ErrorAction SilentlyContinue tee;'
+  let &shellredir = '2>&1 | %%{ "$_" } | Out-File %s; exit $LastExitCode'
+  let &shellpipe  = '2>&1 | %%{ "$_" } | tee %s; exit $LastExitCode'
+  set shellquote= shellxquote=
+else
+  set shell=zsh
+endif
 
 " show current syntax highlighting
 " neovim can use ":Inspect" instead
@@ -455,7 +493,7 @@ if filereadable(expand(getcwd() . "/.prerc.vim"))
 endif
 
 " 重启vim，设置退出return 100为重启，需要shell相关函数支持
-nnoremap <leader>rs <cmd>cquit 100<cr>
+  nnoremap <leader>rs <cmd>cquit 100<cr>
 
 " 不要自动添加EOL
 set nofixeol

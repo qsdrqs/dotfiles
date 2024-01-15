@@ -46,9 +46,9 @@ in
           src = inputs.nvim-config.neovim;
           version = "0.10.0-dev";
           postInstall = (oldAttrs.postInstall or "") + ''
-            # disable treesitter by default for lua
-            substituteInPlace $out/share/nvim/runtime/ftplugin/lua.lua \
-            --replace "vim.treesitter.start()" "-- vim.treesitter.start()"
+            # disable treesitter by default for ftplugins
+            ${pkgs.gnugrep}/bin/grep -rl 'vim.treesitter.start()' $out/share/nvim/runtime/ftplugin |\
+            ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
           '';
         });
 

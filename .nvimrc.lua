@@ -215,7 +215,8 @@ local plugins = {
 
       -- lazy load telescope
       local telescope_buildin = require('telescope.builtin')
-      vim.keymap.set('n', '<leader>f', function() telescope_buildin.find_files{no_ignore=true} end, { silent = true })
+      vim.keymap.set('n', '<leader>f', telescope_buildin.find_files, { silent = true })
+      vim.keymap.set('n', '<leader>F', function() telescope_buildin.find_files{no_ignore=true} end, { silent = true })
       vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
       vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
       vim.keymap.set('v', '<leader>gs', telescope_grep_string_visual, { silent = true })
@@ -1422,7 +1423,7 @@ local plugins = {
     keys = {
       "<localleader>t",
       "<C-`>",
-      "<C-Space>",
+      {"<C-Space>", mode = 'n'},
       "<localleader>T",
       "<leader>ra",
     },
@@ -1442,40 +1443,45 @@ local plugins = {
         }
       }
       vim.keymap.set('n', '<localleader>t', "<cmd>exe v:count1 . 'ToggleTerm direction=vertical'<cr>")
-      vim.keymap.set('n', '<C-Space>', "<cmd>exe v:count1 . 'ToggleTerm'<cr>")
+      vim.keymap.set({'n', 't'}, '<C-Space>', "<cmd>exe v:count1 . 'ToggleTerm'<cr>")
 
       -- lazy git
       local Terminal  = require('toggleterm.terminal').Terminal
-      local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
 
       local function lazygit_toggle()
+        -- lazy call lazygit, to get currect cwd
+        local lazygit = Terminal:new({
+          cmd = "lazygit",
+          hidden = true,
+          direction = "float",
+        })
         lazygit:toggle()
       end
 
-      local yazi = Terminal:new({
-        cmd = "NVIM_YAZI=1 yazi $CURR_FILE",
-        hidden = false,
-        direction = "float",
-        float_opts = {
-          width = vim.fn.float2nr(0.7 * vim.o.columns),
-          height = vim.fn.float2nr(0.7 * vim.o.lines),
-        },
-        on_exit = function(t, job, exit_code, name)
-          local lf_temp_path = "/tmp/yaziopen"
-          local file = io.open(lf_temp_path, "r")
-          if file == nil then
-            return
-          end
-          local name = file:read("*a")
-          file:close()
-          os.remove(lf_temp_path)
-          vim.defer_fn(function()
-            vim.cmd("edit " .. name)
-          end, 0)
-        end
-      })
       local function yazi_toggle()
         vim.fn.setenv("CURR_FILE", vim.fn.expand("%"))
+        local yazi = Terminal:new({
+          cmd = "NVIM_YAZI=1 yazi $CURR_FILE",
+          hidden = false,
+          direction = "float",
+          float_opts = {
+            width = vim.fn.float2nr(0.7 * vim.o.columns),
+            height = vim.fn.float2nr(0.7 * vim.o.lines),
+          },
+          on_exit = function(t, job, exit_code, name)
+            local lf_temp_path = "/tmp/yaziopen"
+            local file = io.open(lf_temp_path, "r")
+            if file == nil then
+              return
+            end
+            local name = file:read("*a")
+            file:close()
+            os.remove(lf_temp_path)
+            vim.defer_fn(function()
+              vim.cmd("edit " .. name)
+            end, 0)
+          end
+        })
         yazi:toggle()
       end
       vim.api.nvim_create_user_command("YaziToggle", yazi_toggle, {nargs = 0})
@@ -2218,6 +2224,9 @@ local plugins = {
           augend.constant.new {
             elements = { "True", "False" },
           },
+          augend.constant.new {
+            elements = { "yes", "no" },
+          },
           augend.semver.alias.semver,
           augend.date.alias["%Y/%m/%d"],  -- date (2022/02/19, etc.)
         },
@@ -2824,7 +2833,7 @@ local plugins = {
 
       dashboard.section.buttons.val = {
         dashboard.button("e", "  New file", "<cmd>ene <CR>"),
-        dashboard.button("l", "󰁯  Load session", "<cmd> RestoreSession <cr>"),
+        dashboard.button("l", "󰁯  Load session", "<cmd> SessionRestore <cr>"),
         dashboard.button("r", "  Open file manager", "<cmd>YaziToggle <cr>"),
         dashboard.button("f", "󰍉  Find file", "<cmd>Telescope find_files<CR>"),
         dashboard.button("h", "󱔗  Recently opened files", "<cmd> Telescope oldfiles <CR>"),
@@ -3956,7 +3965,7 @@ local function load_by_filetype(ft_plugins)
         require('lazy').load { plugins = ft_plugin.plugins }
 
         -- load ftplugin, defer to avoid recursive call
-        vim.schedule_wrap(function()
+        vim.defer_fn(function()
           vim.api.nvim_exec_autocmds("FileType", {
             pattern = ft_plugin.ft,
           })
@@ -4321,7 +4330,6 @@ function VscodeNeovimHandler()
       "vim-matchup",
       "vim-sandwich",
       "gitsigns.nvim",
-      "vscode-multi-cursor.nvim",
     }
   }
 
@@ -4363,6 +4371,10 @@ function VscodeNeovimHandler()
     vscode.action("workbench.action.closeAuxiliaryBar")
     vscode.action("workbench.action.closeSidebar")
     vscode.action("workbench.action.closePanel")
+  end, { silent = true })
+
+  vim.keymap.set({'n', 'x'}, '<C-w>c',function()
+    vscode.action('workbench.action.closeEditorsInGroup')
   end, { silent = true })
 
   vim.keymap.set('n', '<leader>ra',function()
@@ -4426,6 +4438,8 @@ function VscodeNeovimHandler()
 
   vim.keymap.set('n', '<leader>f',function() vscode.action("workbench.action.quickOpen") end, { silent = true })
   vim.keymap.set('n', '<leader>b',function() vscode.action("workbench.action.quickOpen") end, { silent = true })
+  vim.keymap.set('n', '<leader>rf',function() vscode.action("workbench.action.gotoSymbol") end, { silent = true })
+  vim.keymap.set('n', '<leader>rw',function() vscode.action("workbench.action.showAllSymbols") end, { silent = true })
 
   -- recover =
   vim.keymap.del({'n', 'x'}, '=', { expr = true })

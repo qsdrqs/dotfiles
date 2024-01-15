@@ -133,6 +133,7 @@ in
     qemu_full
     linux-wifi-hotspot
     hotspot
+    neovide
 
     obs-studio
     steam-run
