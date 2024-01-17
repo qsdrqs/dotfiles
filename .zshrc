@@ -407,6 +407,40 @@ GITSTATUS_LOG_LEVEL=DEBUG
 
 # z.sh
 if [[ -x `command -v lua` ]]; then
+    export _ZO_FZF_OPTS="
+    --no-sort                             \
+    --bind=ctrl-z:ignore,btab:up,tab:down \
+    --cycle                               \
+    --keep-right                          \
+    --border=sharp                        \
+    --height=45%                          \
+    --info=inline                         \
+    --layout=reverse                      \
+    --tabstop=1                           \
+    --exit-0                              \
+    --select-1"
+
+    eval "$(zoxide init zsh)"
+
+    # Completions function rewrite
+    # Modified from github:ajeetdsouza/zoxide/templates/zsh.txt
+    # which is under MIT License: https://github.com/ajeetdsouza/zoxide/blob/main/LICENSE
+    function __zoxide_z_complete() {
+        # Only show completions when the cursor is at the end of the line.
+        # shellcheck disable=SC2154
+        [[ "${#words[@]}" -eq "${CURRENT}" ]] || return 0
+
+        \builtin local result
+        # shellcheck disable=SC2086,SC2312
+        if result="$(\command zoxide query --exclude "$(__zoxide_pwd)" --interactive -- ${words[2,-1]})"; then
+            result="${__zoxide_z_prefix}${result}"
+            # shellcheck disable=SC2296
+            compadd -U -Q "${(q-)result}"
+        fi
+        \builtin printf '\e[5n'
+        return 0
+    }
+elif [[ -x `command -v lua` ]]; then
     eval "$(lua $HOME/zsh_custom/plugins/z_lua/z.lua --init zsh)"
 else
     source $HOME/zsh_custom/plugins/z/z.sh

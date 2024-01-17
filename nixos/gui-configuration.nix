@@ -11,6 +11,9 @@ let
     swayidle
     inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
   ];
+  firefox-alias = pkgs.writeShellScriptBin "firefox" ''
+    ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
+  '';
 in
 {
   nix.settings = {
@@ -21,6 +24,7 @@ in
   environment.systemPackages = with pkgs; [
     vscode-insiders
     firefox-devedition
+    firefox-alias
     kitty
     xclip
     wl-clipboard
@@ -75,6 +79,7 @@ in
   # provide org.freedesktop.secrets
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
+  security.pam.services.sddm.enableGnomeKeyring = true; # TODO: this doesn't work
 
   fonts.packages = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })

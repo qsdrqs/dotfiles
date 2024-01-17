@@ -136,9 +136,6 @@ footer  = { fg = "black", bg = "white" }
 [filetype]
 
 rules = [
-	# symlinks
-	{ mime = "inode/symlink", fg = "cyan" },
-
 	# Images
 	{ mime = "image/*", fg = "yellow" },
 

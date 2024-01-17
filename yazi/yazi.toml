@@ -4,7 +4,7 @@ sort_by        = "alphabetical"
 sort_sensitive = false
 sort_reverse   = false
 sort_dir_first = true
-linemode       = "none"
+linemode       = "size"
 show_hidden    = false
 show_symlink   = true
 
@@ -79,6 +79,7 @@ suppress_preload = false
 
 preloaders = [
 	{ name = "*", cond = "!mime", exec = "mime", multi = true, prio = "high" },
+	# { name = "*/", exec = "dircount", multi = true, prio = "high" },
 	# Image
 	{ mime = "image/vnd.djvu", exec = "noop" },
 	{ mime = "image/*",        exec = "image" },

@@ -130,7 +130,6 @@ in
     # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
 
     virt-manager
-    qemu_full
     linux-wifi-hotspot
     hotspot
     neovide
@@ -229,7 +228,7 @@ in
       powerManagement.enable = false;
       nvidiaSettings = true;
       open = false;
-      # package = config.boot.kernelPackages.nvidiaPackages.production;
+      package = config.boot.kernelPackages.nvidiaPackages.production;
     };
   };
 
@@ -247,4 +246,5 @@ in
       TIMELINE_LIMIT_YEARLY = 0;
     };
   };
+  services.btrfs.autoScrub.enable = true;
 }

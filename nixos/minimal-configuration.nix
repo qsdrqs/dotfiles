@@ -132,12 +132,13 @@ in
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     (if config.boot.loader.grub.enable then grub2 else packages.dummy)
+    zoxide
     nvim-yazi
     lsd
     wget
     curl
     ranger
-    inputs.yazi.packages.${pkgs.system}.yazi
+    yazi
     tmux
     perl # for tmux to work
     neofetch

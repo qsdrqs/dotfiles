@@ -136,6 +136,10 @@ in
       });
       interception-tools-plugins.caps2esc = super.interception-tools-plugins.caps2esc;
 
+      yazi = inputs.yazi.packages.${pkgs.system}.yazi.overrideAttrs (oldAttrs: {
+        patches = oldAttrs.patches ++ [ ./patches/yazi.patch ];
+      });
+
       matrix-synapse-unwrapped = super.matrix-synapse-unwrapped.overrideAttrs (oldAttrs:
         let
           pname = "matrix-synapse";

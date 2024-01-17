@@ -2904,7 +2904,7 @@ local plugins = {
     cond = vim.g.vscode == nil,
     config = function()
       local bindkey
-      if os.getenv("TMUX") ~= nil then
+      if os.getenv("TMUX") ~= nil and vim.g.neovide == nil then
         bindkey = {
           line = '<c-_>',
           block = '<c-s-_>',
@@ -4186,53 +4186,56 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 
 -- vim.g.suda_smart_edit = 1
 
--- osc52 support on ssh
-if os.getenv("SSH_CONNECTION") ~= nil then
-  -- disable the xclip under SSH due to high lantency
-  -- use osc52
-  local nvim_ver_minor = vim.version().minor
-  if nvim_ver_minor >= 10 then
-    -- TODO: paste from ssh
-    vim.g.clipboard = {
-      name = 'OSC 52',
-      copy = {
-        ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-        ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
-      },
-      paste = {
-        ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-        ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
-      },
-    }
-  else
-    vim.api.nvim_create_autocmd("TextYankPost", {
-      callback = function()
-        if have_load_osc52 == nil then
-          have_load_osc52 = 1
-          require("lazy").load{ plugins = {"nvim-osc52"} }
+-- neovide has its own clipboard system
+if vim.g.neovide == nil then
+  -- osc52 support on ssh
+  if os.getenv("SSH_CONNECTION") ~= nil then
+    -- disable the xclip under SSH due to high lantency
+    -- use osc52
+    local nvim_ver_minor = vim.version().minor
+    if nvim_ver_minor >= 10 then
+      -- TODO: paste from ssh
+      vim.g.clipboard = {
+        name = 'OSC 52',
+        copy = {
+          ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+          ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+        },
+        paste = {
+          ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+          ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+        },
+      }
+    else
+      vim.api.nvim_create_autocmd("TextYankPost", {
+        callback = function()
+          if have_load_osc52 == nil then
+            have_load_osc52 = 1
+            require("lazy").load{ plugins = {"nvim-osc52"} }
+          end
+          if vim.v.event.operator == 'y' and vim.v.event.regname == '' then
+            local osc52_copy_register = require('osc52').copy_register
+            pcall(osc52_copy_register, '"')
+          end
         end
-        if vim.v.event.operator == 'y' and vim.v.event.regname == '' then
-          local osc52_copy_register = require('osc52').copy_register
-          pcall(osc52_copy_register, '"')
-        end
-      end
-    })
-  end
-elseif vim.fn.has('wsl') == 1 then
-  -- wsl without ssh connection
-  if vim.fn.executable("win32yank.exe") == 1 then
-    vim.g.clipboard = {
-      name = 'win32yank',
-      -- TODO: may change to async here
-      copy = {
-        ['+'] = {"win32yank.exe", "-i", "--crlf"},
-        ['*'] = {"win32yank.exe", "-i", "--crlf"},
-      },
-      paste = {
-        ['+'] = {"win32yank.exe", "-o", "--lf"},
-        ['*'] = {"win32yank.exe", "-o", "--lf"},
-      },
-    }
+      })
+    end
+  elseif vim.fn.has('wsl') == 1 then
+    -- wsl without ssh connection
+    if vim.fn.executable("win32yank.exe") == 1 then
+      vim.g.clipboard = {
+        name = 'win32yank',
+        -- TODO: may change to async here
+        copy = {
+          ['+'] = {"win32yank.exe", "-i", "--crlf"},
+          ['*'] = {"win32yank.exe", "-i", "--crlf"},
+        },
+        paste = {
+          ['+'] = {"win32yank.exe", "-o", "--lf"},
+          ['*'] = {"win32yank.exe", "-o", "--lf"},
+        },
+      }
+    end
   end
 end
 
