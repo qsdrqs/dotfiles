@@ -1413,7 +1413,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-7DWvU5KW5mLCrvtiV0OtYPaYCOT5LONqH3pqrGGwVcc=",
+        "narHash": "sha256-EJMucSubd2I+Dw/rKOAJnR5phnRns6ddo0vZyJXtj+A=",
         "path": "nvim",
         "type": "path"
       },

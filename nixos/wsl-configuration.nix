@@ -21,6 +21,13 @@ in
     startMenuLaunchers = true;
     nativeSystemd = true;
 
+    # Enable extra bin, for vscode server to work
+    extraBin = with pkgs; [
+      { src = "${coreutils}/bin/uname"; }
+      { src = "${coreutils}/bin/dirname"; }
+      { src = "${coreutils}/bin/readlink"; }
+    ];
+
     # Enable native Docker support
     # docker-native.enable = true;
 
