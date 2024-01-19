@@ -25,8 +25,30 @@ let
     })
     entries);
 
+  commonInstallPhase = ''
+    mkdir $out
+    cp -r * $out
+    runHook postInstall
+  '';
+
+  buildDerivations = {
+    fzf-tab = pkgs.stdenv.mkDerivation {
+      name = "fzf-tab";
+      src = inputs.zsh-config.inputs.fzf-tab;
+      installPhase = commonInstallPhase;
+      postInstall = ''
+        substituteInPlace $out/fzf-tab.zsh \
+        --replace "COLUMNS=500 _ftb__main_complete" "_ftb__main_complete"
+      '';
+    };
+  };
+
   genZshPlugins = plugins: lib.genAttrs plugins (plugin: {
-    source = inputs.zsh-config.inputs.${plugin};
+    source =
+      if !builtins.hasAttr plugin buildDerivations then
+        inputs.zsh-config.inputs.${plugin}
+      else
+        buildDerivations.${plugin};
     target = "zsh_custom/plugins/${plugin}";
   });
 
@@ -72,13 +94,15 @@ in
       '';
     };
     # gitstatusd
-    gitstatusd = let
-      arch_split = lib.strings.splitString "-" pkgs.system;
-      arch_reverse = lib.foldr (a: b: if b == "" then a else b + "-" + a) "" arch_split;
-    in {
-      source = "${pkgs.gitstatus}/bin/gitstatusd";
-      target = ".cache/gitstatus/gitstatusd-${arch_reverse}";
-    };
+    gitstatusd =
+      let
+        arch_split = lib.strings.splitString "-" pkgs.system;
+        arch_reverse = lib.foldr (a: b: if b == "" then a else b + "-" + a) "" arch_split;
+      in
+      {
+        source = "${pkgs.gitstatus}/bin/gitstatusd";
+        target = ".cache/gitstatus/gitstatusd-${arch_reverse}";
+      };
   };
 
   home.activation.updateZshFlake = ''

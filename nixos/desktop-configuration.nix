@@ -145,6 +145,8 @@ in
     android-tools
 
     pandoc
+    zotero_7
+    ffmpeg
 
     # NUR
     qq-hidpi
@@ -228,7 +230,7 @@ in
       powerManagement.enable = false;
       nvidiaSettings = true;
       open = false;
-      package = config.boot.kernelPackages.nvidiaPackages.production;
+      # package = config.boot.kernelPackages.nvidiaPackages.production;
     };
   };
 

@@ -641,6 +641,38 @@
         "type": "github"
       }
     },
+    "litee-calltreeDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1699714603,
+        "narHash": "sha256-xUndoYceb9op/Td/gs27inkZrBgvUpOOlf57O7Ow1no=",
+        "owner": "ldelossa",
+        "repo": "litee-calltree.nvim",
+        "rev": "14b66cc6ff76deb67259db99196c0da5a6c75ca2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ldelossa",
+        "repo": "litee-calltree.nvim",
+        "type": "github"
+      }
+    },
+    "liteeDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1699714588,
+        "narHash": "sha256-VAH+CN/NrQPVetjvVENWP/rVqRM6N2GeO2qR+in+yPg=",
+        "owner": "ldelossa",
+        "repo": "litee.nvim",
+        "rev": "3c51764a615566e4c0223362f4be00acc23c430e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ldelossa",
+        "repo": "litee.nvim",
+        "type": "github"
+      }
+    },
     "lsp_linesDOTnvim": {
       "flake": false,
       "locked": {
@@ -1291,6 +1323,8 @@
         "inc-renameDOTnvim": "inc-renameDOTnvim",
         "indent-blanklineDOTnvim": "indent-blanklineDOTnvim",
         "lazyDOTnvim": "lazyDOTnvim",
+        "litee-calltreeDOTnvim": "litee-calltreeDOTnvim",
+        "liteeDOTnvim": "liteeDOTnvim",
         "lsp_linesDOTnvim": "lsp_linesDOTnvim",
         "lsp_signatureDOTnvim": "lsp_signatureDOTnvim",
         "lualineDOTnvim": "lualineDOTnvim",

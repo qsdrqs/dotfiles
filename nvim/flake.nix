@@ -343,6 +343,14 @@
       url = "github:Wansmer/treesj";
       flake = false;
     };
+    liteeDOTnvim = {
+      url = "github:ldelossa/litee.nvim";
+      flake = false;
+    };
+    litee-calltreeDOTnvim = {
+      url = "github:ldelossa/litee-calltree.nvim";
+      flake = false;
+    };
     vim-matchup = {
       url = "github:andymass/vim-matchup";
       flake = false;
@@ -535,6 +543,8 @@
         { name = "nvim-dap-python"; dotname = "nvim-dap-python";source = inputs.nvim-dap-python; build = false; }
         { name = "venv-selector.nvim"; dotname = "venv-selectorDOTnvim";source = inputs.venv-selectorDOTnvim; build = false; }
         { name = "treesj"; dotname = "treesj";source = inputs.treesj; build = false; }
+        { name = "litee.nvim"; dotname = "liteeDOTnvim";source = inputs.liteeDOTnvim; build = false; }
+        { name = "litee-calltree.nvim"; dotname = "litee-calltreeDOTnvim";source = inputs.litee-calltreeDOTnvim; build = false; }
         { name = "vim-matchup"; dotname = "vim-matchup";source = inputs.vim-matchup; build = false; }
         { name = "vim-sleuth"; dotname = "vim-sleuth";source = inputs.vim-sleuth; build = false; }
         { name = "pantran.nvim"; dotname = "pantranDOTnvim";source = inputs.pantranDOTnvim; build = false; }

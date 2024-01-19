@@ -24,6 +24,7 @@ in
     openssl
     parted
     gh
+    exiftool
 
     poppler_utils # pdf2txt
 

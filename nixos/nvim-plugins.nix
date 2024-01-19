@@ -10,7 +10,7 @@ let
   dummyBuildPhase = ''
     # do nothing
   '';
-  build = {
+  buildDerivations = {
     telescope-fzf-nativeDOTnvim = pkgs.stdenv.mkDerivation {
       name = "telescope-fzf-native.nvim";
       buildInputs = with pkgs; [ gnumake ];
@@ -63,10 +63,10 @@ let
       name = entry.name + "_";
       value = {
         source =
-          if !entry.build && !builtins.elem entry.name extraBuildPlugins then
+          if !entry.build && !builtins.hasAttr entry.dotname buildDerivations then
             entry.source
           else
-            build.${entry.dotname};
+            buildDerivations.${entry.dotname};
         target = "${config.home.homeDirectory}/.local/share/nvim/nix/${entry.name}";
       };
     })

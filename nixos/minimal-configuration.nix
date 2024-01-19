@@ -162,6 +162,7 @@ in
     })
     linuxKernel.packages.linux_latest_libre.cpupower
     linuxKernel.packages.linux_latest_libre.perf
+    memtester
     patchelf
     python3
     lsof

@@ -1,122 +1,73 @@
-snippet \[ "mathline" A 
-\[${1:fomular}\
-
-snippet $ "Math" 
-$${1}$`!p
-if t[2] and t[2][0] not in [',', '.', '?', '-', ' ']:
-    snip.rv = ' '
-else:
-    snip.rv = ''
-`$2
-endsnippet
-
-snippet '([A-Za-z])(\d)' "auto subscript" wr
-`!p snip.rv = match.group(1)`_`!p snip.rv = match.group(2)`
-endsnippet
-
-snippet '([A-Za-z])_(\d\d)' "auto subscript2" wrA
-`!p snip.rv = match.group(1)`_{`!p snip.rv = match.group(2)`}
-endsnippet
-
-snippet ^ "superscript" iA
-^{$1}$0
-endsnippet
-
-snippet _ "lowerscript" iA
-_{$1}$0
-endsnippet
+autosnippet \[ "mathline"
+	\[${1:fomular}\
 
 snippet qq "qquad"
-\qquad $1
-endsnippet
+	\qquad $1
 
 snippet dqq "double qquad"
-\qquad\qquad $1
-endsnippet
+	\qquad\qquad $1
 
 snippet \dfrac "\dfrac" iA
-\dfrac{$1}{$2}$0
-endsnippet
-
-# 若输入 ‘/’，则检查符号前的字符是否为数字或者字母，
-# 将数字或字母作为分子扩展为Latex分数形式然后在分母部分等待输入
-snippet '((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/' "Fraction" wr
-\\frac{`!p snip.rv = match.group(1)`}{$1}$0
-endsnippet
+	\dfrac{$1}{$2}$0
 
 snippet lst "lstlisting"
-\begin{lstlisting}[language=${1:language}]
-	$0
-\end{lstlisting}
-endsnippet
+	\begin{lstlisting}[language=${1:language}]
+		$0
+	\end{lstlisting}
 
 snippet lsti "lstinputlisting"
-\lstinputlisting[language=${1:language}]{${2:filepath}}
-endsnippet
+	\lstinputlisting[language=${1:language}]{${2:filepath}}
 
 snippet ~a "alpha" A
-\alpha 
-endsnippet
+	\alpha 
 
-snippet ~T "alpha" A
-\Theta 
-endsnippet
+snippet ~T "Theta" A
+	\Theta 
 
 snippet ~D "Delta" A
-\Delta 
-endsnippet
+	\Delta 
 
 snippet x "times"
-\times 
-endsnippet
+	\times 
 
 snippet if "pseudocode if"
-\If{$$1$}
-	$0
-\EndIf
-endsnippet
+	\If{$$1$}
+		$0
+	\EndIf
 
 snippet fori "pseudocode for"
-\For{$${1:i} = ${2:1} \to ${3:n} $}
-	$0
-\EndFor
-endsnippet
+	\For{$${1:i} = ${2:1} \to ${3:n} $}
+		$0
+	\EndFor
 
 snippet st "pseudocode state"
-\State $$1$
-endsnippet
+	\State $$1$
 
 snippet ret "pseudocode return"
-\State \Return $$1$
-endsnippet
+	\State \Return $$1$
 
 snippet elif "pseudocode else if"
-\ElsIf
-endsnippet
+	\ElsIf
 
 snippet els "pseudocode else"
-\Else
-endsnippet
+	\Else
 
 snippet = "pseudocode ="
-\gets
-endsnippet
+	\gets
 
 snippet while "pseudocode while"
-\While{$$1$}
-	$0
-\EndWhile
-endsnippet
+	\While{$$1$}
+		$0
+	\EndWhile
 
 snippet sq "sqrt"
-\sqrt{$1}
-endsnippet
+	\sqrt{$1}
 
 snippet tab "table"
-\begin{table}[${1:htbp}]
-	\centering
-	\begin{tabular}{${2:|c|}}
-		$0
-	\end{tabular}
-\end{table}
-endsnippet
+	\begin{table}[${1:htbp}]
+		\centering
+		\begin{tabular}{${2:|c|}}
+			$0
+		\end{tabular}
+	\end{table}
+

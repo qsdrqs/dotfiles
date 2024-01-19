@@ -729,7 +729,13 @@ local plugins = {
           end
         elseif lsp == "grammarly" then
           lsp_common_config.filetypes = { "markdown", "tex" }
-          lsp_common_config.cmd = {os.getenv("HOME") .. "/grammarly/packages/grammarly-languageserver/bin/server.js", "--stdio"}
+          lsp_common_config.cmd = (function()
+            if vim.fn.isdirectory(os.getenv("HOME") .. "/grammarly") == true then
+              return {os.getenv("HOME") .. "/grammarly/packages/grammarly-languageserver/bin/server.js", "--stdio"}
+            else
+              return {"grammarly-languageserver", "--stdio"}
+            end
+          end)()
           lsp_common_config.init_options = {
             clientId = "client_BaDkMgx4X19X9UxxYRCXZo"
           }
@@ -1183,14 +1189,14 @@ local plugins = {
               if not ok then
                 copilot_keys = "empty"
               end
-              local luasnip_jump_forward = ls.jumpable(1)
+              local luasnip_jump_forward = ls.expand_or_jumpable()
               if cmp.visible() then
                 -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                 cmp.confirm()
               elseif copilot_keys ~= "empty" then
                 vim.api.nvim_feedkeys(copilot_keys, "i", true)
               elseif luasnip_jump_forward == true then
-                ls.jump(1)
+                ls.expand_or_jump()
               else
                 vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
                 -- fallback()
@@ -3182,6 +3188,22 @@ local plugins = {
     end,
   },
 
+  {
+    'ldelossa/litee-calltree.nvim',
+    dependencies = { 'ldelossa/litee.nvim' },
+    config = function()
+      -- configure the litee.nvim library 
+      require('litee.lib').setup {}
+      -- configure litee-calltree.nvim
+      require('litee.calltree').setup {
+        keymaps = {
+          expand = 'o'
+        }
+      }
+
+    end
+  },
+
   -- vim plugins
   {
     "andymass/vim-matchup",
@@ -3310,7 +3332,8 @@ local plugins = {
       require("dotfiles.luasnip")
       local ls = require("luasnip")
       ls.setup({
-          update_events = {"TextChanged", "TextChangedI"}
+          update_events = {"TextChanged", "TextChangedI"},
+          enable_autosnippets = true
       })
 
       local t = function(str)
@@ -4001,6 +4024,7 @@ function LazyLoadPlugins()
       'none-ls.nvim',
       'lsp_signature.nvim',
       'dropbar.nvim',
+      'litee-calltree.nvim',
       -- end lsp
 
       -- begin git
