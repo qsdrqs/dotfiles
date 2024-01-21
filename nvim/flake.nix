@@ -163,6 +163,10 @@
       url = "github:kevinhwang91/nvim-ufo";
       flake = false;
     };
+    flattenDOTnvim = {
+      url = "github:willothy/flatten.nvim";
+      flake = false;
+    };
     toggletermDOTnvim = {
       url = "github:akinsho/toggleterm.nvim";
       flake = false;
@@ -498,6 +502,7 @@
         { name = "promise-async"; dotname = "promise-async";source = inputs.promise-async; build = false; }
         { name = "nvim-fundo"; dotname = "nvim-fundo";source = inputs.nvim-fundo; build = true; }
         { name = "nvim-ufo"; dotname = "nvim-ufo";source = inputs.nvim-ufo; build = false; }
+        { name = "flatten.nvim"; dotname = "flattenDOTnvim";source = inputs.flattenDOTnvim; build = false; }
         { name = "toggleterm.nvim"; dotname = "toggletermDOTnvim";source = inputs.toggletermDOTnvim; build = false; }
         { name = "nvim-treesitter"; dotname = "nvim-treesitter";source = inputs.nvim-treesitter; build = true; }
         { name = "playground"; dotname = "playground";source = inputs.playground; build = false; }
