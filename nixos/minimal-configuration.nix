@@ -13,9 +13,9 @@ let
       fi
     done
   '';
-  nvim-yazi = pkgs.writeShellScriptBin "nvim-yazi" ''
-    if [ "$NVIM_YAZI" = "1" ];
-      then echo "$@" > /tmp/yaziopen
+  editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
+    if [ "$QUIT_ON_OPEN" = "1" ]; then
+      $EDITOR "$@"
       kill $(ps -o ppid= -p $$)
     else
       $EDITOR "$@"
@@ -133,7 +133,7 @@ in
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     (if config.boot.loader.grub.enable then grub2 else packages.dummy)
     zoxide
-    nvim-yazi
+    editor-wrapped
     lsd
     wget
     curl

@@ -18,7 +18,7 @@ ueberzug_offset = [ 0, 0, 0, 0 ]
 
 [opener]
 edit = [
-	{ exec = 'nvim-yazi "$@"', block = true,  for = "unix" },
+	{ exec = 'editor-wrapped "$@"', block = true,  for = "unix" },
 	# { exec = '$EDITOR "$@"', block = true,  for = "unix" },
 	{ exec = 'code "%*"',    orphan = true, for = "windows" },
 ]
@@ -55,14 +55,15 @@ rules = [
 	{ mime = "application/json", use = [ "edit", "reveal" ] },
 	{ mime = "*/javascript",     use = [ "edit", "reveal" ] },
 
-	{ mime = "application/zip",             use = [ "extract", "reveal" ] },
-	{ mime = "application/gzip",            use = [ "extract", "reveal" ] },
-	{ mime = "application/x-tar",           use = [ "extract", "reveal" ] },
-	{ mime = "application/x-bzip",          use = [ "extract", "reveal" ] },
-	{ mime = "application/x-bzip2",         use = [ "extract", "reveal" ] },
-	{ mime = "application/x-7z-compressed", use = [ "extract", "reveal" ] },
-	{ mime = "application/x-rar",           use = [ "extract", "reveal" ] },
-	{ mime = "application/xz",              use = [ "extract", "reveal" ] },
+	{ mime = "application/zip",             use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/gzip",            use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/x-tar",           use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/x-bzip",          use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/x-bzip2",         use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/x-7z-compressed", use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/x-rar",           use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/x-xz",            use = [ "open", "extract", "reveal" ] },
+	{ mime = "application/xz",              use = [ "open", "extract", "reveal" ] },
 
 	{ mime = "*", use = [ "open", "edit", "reveal" ] },
 ]

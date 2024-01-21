@@ -5,7 +5,7 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-local use_nix = true
+local use_nix = false
 local lazypath
 if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
   lazypath = vim.fn.stdpath("data") .. "/nix/lazy.nvim"
@@ -1425,6 +1425,31 @@ local plugins = {
   },
 
   {
+    'willothy/flatten.nvim',
+    lazy = false,
+    config = function()
+      local saved_terminal
+      require('flatten').setup {
+        window = {
+          open = "alternate",
+        },
+        callbacks = {
+          pre_open = function()
+            local term = require("toggleterm.terminal")
+            local termid = term.get_focused_id()
+            saved_terminal = term.get(termid)
+          end,
+          post_open = function(bufnr, winnr, ft, is_blocking)
+            if is_blocking and saved_terminal then
+              saved_terminal:close()
+            end
+          end
+        }
+      }
+    end
+  },
+
+  {
     "akinsho/toggleterm.nvim",
     keys = {
       "<localleader>t",
@@ -1467,26 +1492,13 @@ local plugins = {
       local function yazi_toggle()
         vim.fn.setenv("CURR_FILE", vim.fn.expand("%"))
         local yazi = Terminal:new({
-          cmd = "NVIM_YAZI=1 yazi $CURR_FILE",
+          cmd = "yazi $CURR_FILE",
           hidden = false,
           direction = "float",
           float_opts = {
             width = vim.fn.float2nr(0.7 * vim.o.columns),
             height = vim.fn.float2nr(0.7 * vim.o.lines),
           },
-          on_exit = function(t, job, exit_code, name)
-            local lf_temp_path = "/tmp/yaziopen"
-            local file = io.open(lf_temp_path, "r")
-            if file == nil then
-              return
-            end
-            local name = file:read("*a")
-            file:close()
-            os.remove(lf_temp_path)
-            vim.defer_fn(function()
-              vim.cmd("edit " .. name)
-            end, 0)
-          end
         })
         yazi:toggle()
       end
