@@ -355,6 +355,10 @@
       url = "github:ldelossa/litee-calltree.nvim";
       flake = false;
     };
+    direnvDOTvim = {
+      url = "github:direnv/direnv.vim";
+      flake = false;
+    };
     vim-matchup = {
       url = "github:andymass/vim-matchup";
       flake = false;
@@ -550,6 +554,7 @@
         { name = "treesj"; dotname = "treesj";source = inputs.treesj; build = false; }
         { name = "litee.nvim"; dotname = "liteeDOTnvim";source = inputs.liteeDOTnvim; build = false; }
         { name = "litee-calltree.nvim"; dotname = "litee-calltreeDOTnvim";source = inputs.litee-calltreeDOTnvim; build = false; }
+        { name = "direnv.vim"; dotname = "direnvDOTvim";source = inputs.direnvDOTvim; build = false; }
         { name = "vim-matchup"; dotname = "vim-matchup";source = inputs.vim-matchup; build = false; }
         { name = "vim-sleuth"; dotname = "vim-sleuth";source = inputs.vim-sleuth; build = false; }
         { name = "pantran.nvim"; dotname = "pantranDOTnvim";source = inputs.pantranDOTnvim; build = false; }

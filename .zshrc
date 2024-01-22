@@ -314,6 +314,7 @@ alias ta="python ~/.vim/plugged/asynctasks.vim/bin/asynctask.py -f"
 alias rm="rm -i"
 alias cp="cp -i"
 alias mv="mv -i"
+alias g="gh copilot suggest -t shell"
 mkcd() {
     mkdir -p $1 && cd $1
 }

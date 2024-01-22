@@ -21,35 +21,35 @@ let maplocalleader = '\'
 " LEADER  ALT+N 切换 tab
 "----------------------------------------------------------------------
 if has('nvim') || has('gui_running')
-  nnoremap <silent><leader>1 :tabn 1<cr>
-  nnoremap <silent><leader>2 :tabn 2<cr>
-  nnoremap <silent><leader>3 :tabn 3<cr>
-  nnoremap <silent><leader>4 :tabn 4<cr>
-  nnoremap <silent><leader>5 :tabn 5<cr>
-  nnoremap <silent><leader>6 :tabn 6<cr>
-  nnoremap <silent><leader>7 :tabn 7<cr>
-  nnoremap <silent><leader>8 :tabn 8<cr>
-  nnoremap <silent><leader>9 :tabn 9<cr>
-  nnoremap <silent><leader>0 :tabn 10<cr>
-  nnoremap <silent><leader><m-n> :tabnew<cr>
-  nnoremap <silent><leader><m-c> :tabclose<cr>
-  nnoremap <silent><leader><m-o> :tabonly<cr>
-  nnoremap <silent><leader><m-s> :tab split<cr>
+  nnoremap <silent><leader>1 <cmd>tabn 1<cr>
+  nnoremap <silent><leader>2 <cmd>tabn 2<cr>
+  nnoremap <silent><leader>3 <cmd>tabn 3<cr>
+  nnoremap <silent><leader>4 <cmd>tabn 4<cr>
+  nnoremap <silent><leader>5 <cmd>tabn 5<cr>
+  nnoremap <silent><leader>6 <cmd>tabn 6<cr>
+  nnoremap <silent><leader>7 <cmd>tabn 7<cr>
+  nnoremap <silent><leader>8 <cmd>tabn 8<cr>
+  nnoremap <silent><leader>9 <cmd>tabn 9<cr>
+  nnoremap <silent><leader>0 <cmd>tabn 10<cr>
+  nnoremap <silent><leader><m-n> <cmd>tabnew<cr>
+  nnoremap <silent><leader><m-c> <cmd>tabclose<cr>
+  nnoremap <silent><leader><m-o> <cmd>tabonly<cr>
+  nnoremap <silent><leader><m-s> <cmd>tab split<cr>
 else
-  nnoremap <silent><leader>1 :tabn 1<cr>
-  nnoremap <silent><leader>2 :tabn 2<cr>
-  nnoremap <silent><leader>3 :tabn 3<cr>
-  nnoremap <silent><leader>4 :tabn 4<cr>
-  nnoremap <silent><leader>5 :tabn 5<cr>
-  nnoremap <silent><leader>6 :tabn 6<cr>
-  nnoremap <silent><leader>7 :tabn 7<cr>
-  nnoremap <silent><leader>8 :tabn 8<cr>
-  nnoremap <silent><leader>9 :tabn 9<cr>
-  nnoremap <silent><leader>0 :tabn 10<cr>
-  nnoremap <silent><leader>n :tabnew<cr>
-  nnoremap <silent><leader>c :tabclose<cr>
-  nnoremap <silent><leader>o :tabonly<cr>
-  nnoremap <silent><leader>s :tab split<cr>
+  nnoremap <silent><leader>1 <cmd>tabn 1<cr>
+  nnoremap <silent><leader>2 <cmd>tabn 2<cr>
+  nnoremap <silent><leader>3 <cmd>tabn 3<cr>
+  nnoremap <silent><leader>4 <cmd>tabn 4<cr>
+  nnoremap <silent><leader>5 <cmd>tabn 5<cr>
+  nnoremap <silent><leader>6 <cmd>tabn 6<cr>
+  nnoremap <silent><leader>7 <cmd>tabn 7<cr>
+  nnoremap <silent><leader>8 <cmd>tabn 8<cr>
+  nnoremap <silent><leader>9 <cmd>tabn 9<cr>
+  nnoremap <silent><leader>0 <cmd>tabn 10<cr>
+  nnoremap <silent><leader>n <cmd>tabnew<cr>
+  nnoremap <silent><leader>c <cmd>tabclose<cr>
+  nnoremap <silent><leader>o <cmd>tabonly<cr>
+  nnoremap <silent><leader>s <cmd>tab split<cr>
 endif
 
 "----------------------------------------------------------------------
@@ -69,8 +69,8 @@ if has('nvim') || has('gui_running')
   inoremap <M-j> <C-\><C-N><C-w>j
   inoremap <M-k> <C-\><C-N><C-w>k
   inoremap <M-l> <C-\><C-N><C-w>l
-  nnoremap <silent><M-,> :bprevious<CR>
-  nnoremap <silent><M-.> :bnext<CR>
+  nnoremap <silent><M-,> <cmd>bprevious<CR>
+  nnoremap <silent><M-.> <cmd>bnext<CR>
   nnoremap <silent><M-s> <C-W>s
   nnoremap <silent><M-v> <C-W>v
   nnoremap <silent><M-c> <C-W>c
@@ -85,21 +85,21 @@ else
   tnoremap k <C-\><C-N><C-w>k
   tnoremap l <C-\><C-N><C-w>l
   tnoremap q <C-\><C-n>
-  nnoremap <silent>, :bprevious<CR>
-  nnoremap <silent>. :bnext<CR>
+  nnoremap <silent>, <CMD>bprevious<CR>
+  nnoremap <silent>. <CMD>bnext<CR>
   nnoremap <silent>s <C-W>s
   nnoremap <silent>v <C-W>v
   nnoremap <silent>c <C-W>c
   nnoremap <silent>o <C-W>o
 endif
 
-nnoremap <silent><right> :vertical resize+1<CR>
-nnoremap <silent><up> :res +1<CR>
-nnoremap <silent><down> :res -1<CR>
-nnoremap <silent><left> :vertical resize-1<CR>
+nnoremap <silent><right> <CMD>vertical resize+1<CR>
+nnoremap <silent><up> <CMD>res +1<CR>
+nnoremap <silent><down> <CMD>res -1<CR>
+nnoremap <silent><left> <CMD>vertical resize-1<CR>
 
 "保存
-"nnoremap <leader><leader> :w<CR>
+"nnoremap <leader><leader> <CMD>w<CR>
 
 "快速翻页
 noremap J 7j
@@ -141,14 +141,14 @@ if has('nvim')
   "noremap <localleader>t :set splitright<CR>:exec float2nr(&columns * 0.40) . 'vsplit'<cr>:term<cr>i
 else
   "nnoremap \t :set splitbelow<CR>:terminal ++rows=15<CR>
-  nnoremap \t :set splitbelow<CR>:terminal<CR>
+  nnoremap \t <CMD>set splitbelow<CR><CMD>terminal<CR>
 endif
 
 "lazygit
-nnoremap <c-g> :tabe<CR>:-tabmove<CR>:term lazygit<CR>i
+nnoremap <c-g> <CMD>tabe<CR><CMD>-tabmove<CR><CMD>term lazygit<CR>i
 
 "quickfix
-autocmd FileType qf nnoremap <silent>q :q<CR>
+autocmd FileType qf nnoremap <silent>q <CMD>q<CR>
 
 " 防止visual下复制之后光标移动
 vnoremap y ygv<esc>
@@ -306,7 +306,7 @@ command! GuiConnected call <SID>gui_connected()
 set hlsearch
 set incsearch
 exec "nohlsearch"
-nnoremap <silent><C-l> :nohlsearch<CR>
+nnoremap <silent><C-l> <CMD>nohlsearch<CR>
 " syntax highlight 在光标小于1万行时从文件头开始分析
 autocmd BufEnter * if line('.') < 10000 | syntax sync fromstart | endif
 " syntax highlight 在文件大于20万行之后就关闭
@@ -423,7 +423,7 @@ for i in ['c', 'cpp', 'lua', 'python']
 endfor
 
 if mapcheck("<leader>x") == ""
-  nmap <leader>x :bd!<CR>
+  nmap <leader>x <CMD>bd!<CR>
 endif
 
 " open all folds by default

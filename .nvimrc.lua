@@ -5,7 +5,7 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-local use_nix = false
+local use_nix = true
 local lazypath
 if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
   lazypath = vim.fn.stdpath("data") .. "/nix/lazy.nvim"
@@ -154,8 +154,8 @@ local plugins = {
       "PlenaryProfileStop",
     },
     config = function()
-      vim.api.nvim_create_user_command("PlenaryProfile", function() require'plenary.profile'.start("profile.log", {flame = true}) end, {})
-      vim.api.nvim_create_user_command("PlenaryProfileStop", function() require'plenary.profile'.stop() end, {})
+      vim.api.nvim_create_user_command("PlenaryProfile", function() require'plenary.profile'.start("profile.log", {flame = true}) end, { nargs = 0 })
+      vim.api.nvim_create_user_command("PlenaryProfileStop", function() require'plenary.profile'.stop() end, { nargs = 0 })
     end
   },
   {
@@ -427,8 +427,8 @@ local plugins = {
         bundles = bundles,
       }
 
-      vim.api.nvim_create_user_command("JdtDebugTestClass", "lua require('jdtls').test_class()", {})
-      vim.api.nvim_create_user_command("JdtDebugTestMethod", "lua require('jdtls').test_nearest_method()", {})
+      vim.api.nvim_create_user_command("JdtDebugTestClass", "lua require('jdtls').test_class()", { nargs = 0 })
+      vim.api.nvim_create_user_command("JdtDebugTestMethod", "lua require('jdtls').test_nearest_method()", { nargs = 0 })
 
       jdt_config.on_attach = function(client, bufnr)
         -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
@@ -828,7 +828,7 @@ local plugins = {
         pattern = "*",
         callback = formatToggleHandler,
       })
-      vim.api.nvim_create_user_command("AFToggle", formatToggle, {nargs = 0})
+      vim.api.nvim_create_user_command("AFToggle", formatToggle, { nargs = 0 })
       vim.keymap.set({"n", "v"}, "<leader>af", formatBuf, { silent = true })
 
     end
@@ -1458,7 +1458,10 @@ local plugins = {
       "<localleader>T",
       "<leader>ra",
     },
-    cmd = "YaziToggle",
+    cmd = {
+      "YaziToggle",
+      "ZjumpToggle"
+    },
     config = function()
       require("toggleterm").setup {
         size = function(term)
@@ -1502,7 +1505,46 @@ local plugins = {
         })
         yazi:toggle()
       end
+
+      local function zjump_toggle()
+        local tmp_file = vim.fn.tempname()
+        local zjump = Terminal:new({
+          cmd = "zoxide query --exclude " .. vim.fn.getcwd() .. " --interactive 1>" .. tmp_file,
+          hidden = false,
+          direction = "float",
+          float_opts = {
+            width = vim.fn.float2nr(0.7 * vim.o.columns),
+            height = vim.fn.float2nr(0.7 * vim.o.lines),
+          },
+          on_exit = function(_, _, exit_code)
+            if exit_code == 0 then
+              local f = io.open(tmp_file, "r")
+              if f ~= nil then
+                local path = f:read("*a")
+                f:close()
+                vim.cmd("cd " .. path)
+                -- try to restore session
+                vim.api.nvim_create_autocmd("User", {
+                  pattern = "DirenvLoaded",
+                  callback = function()
+                    vim.defer_fn(function()
+                      require('auto-session').RestoreSession()
+                    end, 0)
+                  end,
+                  once = true,
+                })
+              else
+                vim.notify("failed to read zoxide output", vim.log.levels.ERROR)
+              end
+            end
+            vim.fn.delete(tmp_file)
+          end,
+        })
+        zjump:toggle()
+      end
+
       vim.api.nvim_create_user_command("YaziToggle", yazi_toggle, {nargs = 0})
+      vim.api.nvim_create_user_command("ZjumpToggle", zjump_toggle, {nargs = 0})
 
       vim.keymap.set("n", "<c-g>", lazygit_toggle, {noremap = true, silent = true})
       vim.keymap.set("n", "<leader>ra", yazi_toggle, {noremap = true, silent = true})
@@ -2853,6 +2895,7 @@ local plugins = {
         dashboard.button("e", "  New file", "<cmd>ene <CR>"),
         dashboard.button("l", "󰁯  Load session", "<cmd> SessionRestore <cr>"),
         dashboard.button("r", "  Open file manager", "<cmd>YaziToggle <cr>"),
+        dashboard.button("z", "  Z jump", "<cmd>ZjumpToggle <cr>"),
         dashboard.button("f", "󰍉  Find file", "<cmd>Telescope find_files<CR>"),
         dashboard.button("h", "󱔗  Recently opened files", "<cmd> Telescope oldfiles <CR>"),
         dashboard.button("g", "󰈬  Find word","<cmd>Telescope live_grep<CR>"),
@@ -2963,8 +3006,8 @@ local plugins = {
       }
 
       local api = require('Comment.api')
-      vim.api.nvim_create_user_command("ToggleComment", api.toggle.linewise.current, {})
-      vim.api.nvim_create_user_command("ToggleBlockComment", api.toggle.blockwise.current, {})
+      vim.api.nvim_create_user_command("ToggleComment", api.toggle.linewise.current, { nargs = 0 })
+      vim.api.nvim_create_user_command("ToggleBlockComment", api.toggle.blockwise.current, { nargs = 0 })
     end
   },
 
@@ -3202,6 +3245,7 @@ local plugins = {
 
   {
     'ldelossa/litee-calltree.nvim',
+    cmd = { "IncomingCalls", "OutgoingCalls" },
     dependencies = { 'ldelossa/litee.nvim' },
     config = function()
       -- configure the litee.nvim library 
@@ -3209,14 +3253,24 @@ local plugins = {
       -- configure litee-calltree.nvim
       require('litee.calltree').setup {
         keymaps = {
-          expand = 'o'
+          expand = 'o',
+          collapse = 'O'
         }
       }
-
+      vim.api.nvim_create_user_command("IncomingCalls", vim.lsp.buf.incoming_calls, { nargs = 0 })
+      vim.api.nvim_create_user_command("OutgoingCalls", vim.lsp.buf.outgoing_calls, { nargs = 0 })
+      vim.keymap.set('n', '<c-l>', "<cmd>LTClearJumpHL<cr><cmd>nohlsearch<cr>", { silent = true })
     end
   },
 
   -- vim plugins
+  {
+    'direnv/direnv.vim',
+    lazy = true,
+    init = function()
+      vim.g.direnv_silent_load = 1
+    end
+  },
   {
     "andymass/vim-matchup",
     init = function()
@@ -3296,8 +3350,8 @@ local plugins = {
     build = function() vim.fn["mkdp#util#install"]() end,
     cmd = {"MarkdownPreview", "MarkdownPreviewInstall"},
     config = function()
-      vim.api.nvim_create_user_command("MarkdownPreview", "echo 'Not a markdown file!'", {})
-      vim.api.nvim_create_user_command("MarkdownPreviewInstall", function () vim.fn["mkdp#util#install"]() end, {})
+      vim.api.nvim_create_user_command("MarkdownPreview", "echo 'Not a markdown file!'", { nargs = 0 })
+      vim.api.nvim_create_user_command("MarkdownPreviewInstall", function () vim.fn["mkdp#util#install"]() end, { nargs = 0 })
       vim.api.nvim_exec_autocmds("BufEnter", {
         group = "mkdp_init",
       })
@@ -4036,7 +4090,6 @@ function LazyLoadPlugins()
       'none-ls.nvim',
       'lsp_signature.nvim',
       'dropbar.nvim',
-      'litee-calltree.nvim',
       -- end lsp
 
       -- begin git
@@ -4070,6 +4123,7 @@ function LazyLoadPlugins()
       'nvim-ufo',
       'toggleterm.nvim',
       'copilot.vim',
+      'direnv.vim',
       -- end misc
 
       -- begin cmp
