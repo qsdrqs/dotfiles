@@ -25,6 +25,7 @@ in
     parted
     gh
     exiftool
+    nix-serve
 
     poppler_utils # pdf2txt
 

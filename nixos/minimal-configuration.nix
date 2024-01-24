@@ -119,7 +119,7 @@ in
     settings = {
       auto-optimise-store = true;
       experimental-features = [ "nix-command" "flakes" ];
-      trusted-users = [ "root" "qsdrqs" "@wheel" ];
+      trusted-users = [ "root" "qsdrqs" "@wheel" "nix-serve" ];
     };
   };
 

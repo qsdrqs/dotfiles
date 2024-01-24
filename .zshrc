@@ -34,6 +34,7 @@ fi
 
 setopt nonomatch
 setopt autocd
+setopt re_match_pcre
 
 # history
 export HISTFILE="$HOME/.zsh_history"
@@ -407,7 +408,7 @@ unset LS_COLORS
 GITSTATUS_LOG_LEVEL=DEBUG
 
 # z.sh
-if [[ -x `command -v lua` ]]; then
+if [[ -x `command -v zoxide` ]]; then
     export _ZO_FZF_OPTS="
     --no-sort                             \
     --bind=ctrl-z:ignore,btab:up,tab:down \
@@ -473,3 +474,5 @@ vim() {
         fi
     done
 }
+
+if [ -e /data/data/com.termux/files/home/.nix-profile/etc/profile.d/nix.sh ]; then . /data/data/com.termux/files/home/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer

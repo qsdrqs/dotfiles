@@ -1,3 +1,7 @@
+# A TOML linter such as https://taplo.tamasfe.dev/ can use this schema to validate your config.
+# If you encounter any issues, please make an issue at https://github.com/yazi-rs/schemas.
+"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+
 [manager]
 
 keymap = [
@@ -25,8 +29,8 @@ keymap = [
 
 	{ on = [ "<C-PageUp>" ],   exec = "arrow -50%",  desc = "Move cursor up half page" },
 	{ on = [ "<C-PageDown>" ], exec = "arrow 50%",   desc = "Move cursor down half page" },
-	{ on = [ "<PageUp>" ],     exec = "arrow -100%", desc = "Move cursor up one page" },
-	{ on = [ "<PageDown>" ],   exec = "arrow 100%",  desc = "Move cursor down one page" },
+	# { on = [ "<PageUp>" ],     exec = "arrow -100%", desc = "Move cursor up one page" },
+	# { on = [ "<PageDown>" ],   exec = "arrow 100%",  desc = "Move cursor down one page" },
 
 	{ on = [ "h" ], exec = [ "leave", "escape --visual --select" ], desc = "Go back to the parent directory" },
 	{ on = [ "l" ], exec = [ "enter", "escape --visual --select" ], desc = "Enter the child directory" },
@@ -34,10 +38,10 @@ keymap = [
 	{ on = [ "H" ], exec = "back",    desc = "Go back to the previous directory" },
 	{ on = [ "L" ], exec = "forward", desc = "Go forward to the next directory" },
 
-	{ on = [ "<A-k>" ], exec = "peek -5", desc = "Peek up 5 units in the preview" },
-	{ on = [ "<A-j>" ], exec = "peek 5",  desc = "Peek down 5 units in the preview" },
-	{ on = [ "<A-PageUp>" ],   exec = "peek -5", desc = "Peek up 5 units in the preview" },
-	{ on = [ "<A-PageDown>" ], exec = "peek 5",  desc = "Peek down 5 units in the preview" },
+	{ on = [ "<A-k>" ], exec = "seek -5", desc = "Seek up 5 units in the preview" },
+	{ on = [ "<A-j>" ], exec = "seek 5",  desc = "Seek down 5 units in the preview" },
+	{ on = [ "<PageUp>" ],   exec = "seek -5", desc = "Seek up 5 units in the preview" },
+	{ on = [ "<PageDown>" ], exec = "seek 5",  desc = "Seek down 5 units in the preview" },
 
 	{ on = [ "<Up>" ],    exec = "arrow -1", desc = "Move cursor up" },
 	{ on = [ "<Down>" ],  exec = "arrow 1",  desc = "Move cursor down" },
@@ -67,7 +71,8 @@ keymap = [
 	{ on = [ "p", "L" ],        exec = "link --relative",                                      desc = "Symlink the relative path of files" },
 	{ on = [ "D" ],         exec = [ "remove", "escape --visual --select" ],               desc = "Move the files to the trash" },
 	{ on = [ "d", "D" ],    exec = [ "remove --permanently", "escape --visual --select" ],                  desc = "Permanently delete the files" },
-	{ on = [ "a" ],         exec = "rename",                                               desc = "Rename a file or directory" },
+	{ on = [ "a" ],         exec = "rename --cursor=before_ext",                                               desc = "Rename a file or directory" },
+	{ on = [ "A" ],         exec = "rename",                                               desc = "Rename a file or directory" },
 	{ on = [ "c" ],         exec = "create",                                               desc = "Create a file or directory (ends with / for directories)" },
 	{ on = [ ";" ],         exec = "shell",                                                desc = "Run a shell command" },
 	{ on = [ ":" ],         exec = "shell --block",                                        desc = "Run a shell command (block the UI until the command finishes)" },
@@ -90,25 +95,28 @@ keymap = [
 	{ on = [ "y", "f" ], exec = "copy filename",         desc = "Copy the name of the file" },
 	{ on = [ "y", "n" ], exec = "copy name_without_ext", desc = "Copy the name of the file without the extension" },
 
+	# Filter
+	{ on = [ "f" ], exec = "filter --smart", desc = "Filter the files" },
+
 	# Find
-	{ on = [ "/" ], exec = "find --smart" },
-	{ on = [ "?" ], exec = "find --previous --smart" },
-	{ on = [ "n" ], exec = "find_arrow" },
-	{ on = [ "N" ], exec = "find_arrow --previous" },
+	{ on = [ "/" ], exec = "find --smart",            desc = "Find next file" },
+	{ on = [ "?" ], exec = "find --previous --smart", desc = "Find previous file" },
+	{ on = [ "n" ], exec = "find_arrow",              desc = "Go to next found file" },
+	{ on = [ "N" ], exec = "find_arrow --previous",   desc = "Go to previous found file" },
 
 	# Sorting
-	{ on = [ ",", "m" ], exec = "sort modified --dir_first",               desc = "Sort by modified time" },
-	{ on = [ ",", "M" ], exec = "sort modified --reverse --dir_first",     desc = "Sort by modified time (reverse)" },
-	{ on = [ ",", "c" ], exec = "sort created --dir_first",                desc = "Sort by created time" },
-	{ on = [ ",", "C" ], exec = "sort created --reverse --dir_first",      desc = "Sort by created time (reverse)" },
-	{ on = [ ",", "e" ], exec = "sort extension --dir_first",         	   desc = "Sort by extension" },
-	{ on = [ ",", "E" ], exec = "sort extension --reverse --dir_first",    desc = "Sort by extension (reverse)" },
-	{ on = [ ",", "a" ], exec = "sort alphabetical --dir_first",           desc = "Sort alphabetically" },
-	{ on = [ ",", "A" ], exec = "sort alphabetical --reverse --dir_first", desc = "Sort alphabetically (reverse)" },
-	{ on = [ ",", "n" ], exec = "sort natural --dir_first",                desc = "Sort naturally" },
-	{ on = [ ",", "N" ], exec = "sort natural --reverse --dir_first",      desc = "Sort naturally (reverse)" },
-	{ on = [ ",", "s" ], exec = "sort size --dir_first",                   desc = "Sort by size" },
-	{ on = [ ",", "S" ], exec = "sort size --reverse --dir_first",         desc = "Sort by size (reverse)" },
+	{ on = [ ",", "m" ], exec = "sort modified --dir-first",               desc = "Sort by modified time" },
+	{ on = [ ",", "M" ], exec = "sort modified --reverse --dir-first",     desc = "Sort by modified time (reverse)" },
+	{ on = [ ",", "c" ], exec = "sort created --dir-first",                desc = "Sort by created time" },
+	{ on = [ ",", "C" ], exec = "sort created --reverse --dir-first",      desc = "Sort by created time (reverse)" },
+	{ on = [ ",", "e" ], exec = "sort extension --dir-first",         	   desc = "Sort by extension" },
+	{ on = [ ",", "E" ], exec = "sort extension --reverse --dir-first",    desc = "Sort by extension (reverse)" },
+	{ on = [ ",", "a" ], exec = "sort alphabetical --dir-first",           desc = "Sort alphabetically" },
+	{ on = [ ",", "A" ], exec = "sort alphabetical --reverse --dir-first", desc = "Sort alphabetically (reverse)" },
+	{ on = [ ",", "n" ], exec = "sort natural --dir-first",                desc = "Sort naturally" },
+	{ on = [ ",", "N" ], exec = "sort natural --reverse --dir-first",      desc = "Sort naturally (reverse)" },
+	{ on = [ ",", "s" ], exec = "sort size --dir-first",                   desc = "Sort by size" },
+	{ on = [ ",", "S" ], exec = "sort size --reverse --dir-first",         desc = "Sort by size (reverse)" },
 
 	# Tabs
 	{ on = [ "t" ], exec = "tab_create --current", desc = "Create a new tab using the current path" },
@@ -135,6 +143,8 @@ keymap = [
 	# Goto
 	{ on = [ "g", "h" ],       exec = "cd ~",             desc = "Go to the home directory" },
 	{ on = [ "g", "H" ],       exec = "cd /mnt/c/Users/qsdrqs",             desc = "Go to the home directory" },
+	{ on = [ "g", "w" ],       exec = "cd /home/qsdrqs/Documents/WeChat\\ Files/wxid_ap6bpq3h92zg22/FileStorage/File",             desc = "Go to the WeChat directory" },
+	{ on = [ "g", "q" ],       exec = "cd /home/qsdrqs/Documents/Tencent\\ Files/1143661020/FileRecv",             desc = "Go to the QQ directory" },
 	{ on = [ "g", "c" ],       exec = "cd ~/.config",     desc = "Go to the config directory" },
 	{ on = [ "g", "d" ],       exec = "cd ~/Downloads",   desc = "Go to the downloads directory" },
 	{ on = [ "g", "t" ],       exec = "cd /tmp",          desc = "Go to the temporary directory" },
@@ -253,8 +263,9 @@ keymap = [
 [completion]
 
 keymap = [
-	{ on = [ "<C-q>" ], exec = "close",          desc = "Cancel completion" },
-	{ on = [ "<Tab>" ], exec = "close --submit", desc = "Submit the completion" },
+	{ on = [ "<C-q>" ],   exec = "close",                                      desc = "Cancel completion" },
+	{ on = [ "<Tab>" ],   exec = "close --submit",                             desc = "Submit the completion" },
+	{ on = [ "<Enter>" ], exec = [ "close --submit", "close_input --submit" ], desc = "Submit the completion and input" },
 
 	{ on = [ "<A-k>" ], exec = "arrow -1", desc = "Move cursor up" },
 	{ on = [ "<A-j>" ], exec = "arrow 1",  desc = "Move cursor down" },
