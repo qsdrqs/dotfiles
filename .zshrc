@@ -270,7 +270,8 @@ snr-switch-remote() {
 }
 hm-switch() {
     local pwd=$(pwd)
-    cd $HOME/dotfiles
+    cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
+    ./install.sh nixpre
     home-manager switch --flake path:.#$@
     cd $pwd
 }

@@ -107,6 +107,9 @@
       wslHomeModules = basicHomeModules ++ [
         ./nixos/wsl-home.nix
       ];
+      standaloneHomeModules = basicHomeModules ++ [
+        ./nixos/standalone-home.nix
+      ];
       desktopHomeModules = basicHomeModules ++ guiHomeModules;
 
       minimalConfig = rec {
@@ -223,9 +226,6 @@
           modules = minimalHomeModules;
           extraSpecialArgs = { inherit inputs; };
         };
-      guiHomeConfig = minimalHomeConfig // {
-        modules = guiHomeModules;
-      };
       basicHomeConfig = minimalHomeConfig // {
         modules = basicHomeModules;
       };
@@ -237,11 +237,17 @@
           pkgs = pkgs' system;
         }
       );
-      desktopHomeConfig = guiHomeConfig // {
-        modules = desktopHomeModules;
-      };
       wslHomeConfig = basicHomeConfig // {
         modules = wslHomeModules;
+      };
+      # for non-NixOS systems
+      standaloneHomeConfig = basicHomeConfig // {
+        modules = standaloneHomeModules;
+      };
+      termuxHomeConfig = rpiHomeConfig // {
+        modules = standaloneHomeModules ++ [
+          ./nixos/termux-home.nix
+        ];
       };
 
       isoConfig = minimalConfig // {
@@ -325,10 +331,10 @@
       homeConfigurations.minimal = home-manager.lib.homeManagerConfiguration minimalHomeConfig;
       homeConfigurations.basic = home-manager.lib.homeManagerConfiguration basicHomeConfig;
       homeConfigurations.rpi = home-manager.lib.homeManagerConfiguration rpiHomeConfig;
-      homeConfigurations.gui = home-manager.lib.homeManagerConfiguration guiHomeConfig;
       homeConfigurations.wsl = home-manager.lib.homeManagerConfiguration wslHomeConfig;
+      homeConfigurations.standalone = home-manager.lib.homeManagerConfiguration standaloneHomeConfig;
+      homeConfigurations.termux = home-manager.lib.homeManagerConfiguration termuxHomeConfig;
 
-      homeConfigurations.desktop = home-manager.lib.homeManagerConfiguration desktopHomeConfig;
       # dev shells
       devShells = archSpecConfigAll (system: (pkgs' system).callPackage ./nixos/dev-shell.nix { inputs = inputs; });
       # direct nix run

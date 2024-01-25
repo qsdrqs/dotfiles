@@ -5,7 +5,7 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-local use_nix = true
+local use_nix = false
 local lazypath
 if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
   lazypath = vim.fn.stdpath("data") .. "/nix/lazy.nvim"
@@ -952,17 +952,18 @@ local plugins = {
   },
 
   {
-    "Pocco81/auto-save.nvim",
+    "okuuva/auto-save.nvim",
     event = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
     cond = vim.g.vscode == nil,
     opts = {
       execution_message = {
-        message = function() -- message to print on save
-          return ""
-        end,
-        dim = 0.18, -- dim the color of `message`
+        enabled = false,
       },
-      trigger_events = {"InsertLeave", "TextChanged", "WinLeave", "BufLeave"},
+      trigger_events = { -- See :h events
+        immediate_save = { "BufLeave", "FocusLost" }, -- vim events that trigger an immediate save
+        defer_save = { "InsertLeave", "TextChanged" }, -- vim events that trigger a deferred save (saves after `debounce_delay`)
+        cancel_defered_save = { "InsertEnter" }, -- vim events that cancel a pending deferred save
+      },
     }
   },
 

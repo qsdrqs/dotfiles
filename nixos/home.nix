@@ -6,8 +6,8 @@
   ];
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "qsdrqs";
-  home.homeDirectory = "/home/qsdrqs";
+  home.username = lib.mkDefault "qsdrqs";
+  home.homeDirectory = lib.mkDefault "/home/qsdrqs";
   home.packages = with pkgs; [
     htop
     iotop

@@ -4,31 +4,6 @@
 
 { config, pkgs, lib, inputs, options, ... }:
 let
-  nvim-wrapped = pkgs.writeShellScriptBin "nvim" ''
-    while true; do
-      ${pkgs.neovim-unwrapped}/bin/nvim "$@"
-      RET=$?
-      if [[ $RET != 100 ]]; then
-        exit $RET
-      fi
-    done
-  '';
-  editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
-    if [ "$QUIT_ON_OPEN" = "1" ]; then
-      $EDITOR "$@"
-      kill $(ps -o ppid= -p $$)
-    else
-      $EDITOR "$@"
-    fi
-  '';
-  nvim-final = pkgs.symlinkJoin {
-    name = "neovim-${lib.getVersion pkgs.neovim-unwrapped}";
-    paths = [ pkgs.neovim-unwrapped ];
-    postBuild = ''
-      rm $out/bin/nvim
-      cp ${nvim-wrapped}/bin/nvim $out/bin/nvim
-    '';
-  };
   packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
 in
 {
@@ -199,7 +174,7 @@ in
     neovim = {
       enable = true;
       defaultEditor = true;
-      package = nvim-final;
+      package = pkgs.nvim-final;
     };
     nix-ld.enable = true;
     gnupg.agent.enable = true;
