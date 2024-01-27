@@ -115,15 +115,15 @@
     "auto-saveDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1667329943,
-        "narHash": "sha256-bWGil73YiCKZEaY7IuUOIU4Q7k7qCMjSeQ4I+cAVe44=",
-        "owner": "Pocco81",
+        "lastModified": 1699432242,
+        "narHash": "sha256-/t+gGEddIYFqgr82xRMMmtb2O/DRD+nCoj6y+PtgSek=",
+        "owner": "okuuva",
         "repo": "auto-save.nvim",
-        "rev": "979b6c82f60cfa80f4cf437d77446d0ded0addf0",
+        "rev": "e98cafef75271ec83dc84c933f124ab1bb675ef8",
         "type": "github"
       },
       "original": {
-        "owner": "Pocco81",
+        "owner": "okuuva",
         "repo": "auto-save.nvim",
         "type": "github"
       }

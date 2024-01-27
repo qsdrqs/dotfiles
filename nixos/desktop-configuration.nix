@@ -126,6 +126,7 @@ in
     wineWowUnstable
     wpsoffice-hidpi
     libreoffice
+    gnome.seahorse # keyring manager
     (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
     # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
 

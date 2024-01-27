@@ -356,9 +356,12 @@ hi! link cssUnitDecorators Normal
 
 " diff
 
-hi! diffAdded guifg=#7ce38b guibg=#0d1117
-hi! diffRemoved guifg=#fa7970 guibg=#0d1117
-hi! diffChanged guifg=#faa356 guibg=#0d1117
+hi! Added guifg=#7ce38b guibg=#0d1117
+hi! Removed guifg=#fa7970 guibg=#0d1117
+hi! Changed guifg=#faa356 guibg=#0d1117
+hi! link diffAdded Added
+hi! link diffRemoved Removed
+hi! link diffChanged Changed
 hi! link diffBDiffer WarningMsg
 hi! link diffCommon WarningMsg
 hi! link diffDiffer WarningMsg

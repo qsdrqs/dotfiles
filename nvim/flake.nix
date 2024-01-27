@@ -88,7 +88,7 @@
       flake = false;
     };
     auto-saveDOTnvim = {
-      url = "github:Pocco81/auto-save.nvim";
+      url = "github:okuuva/auto-save.nvim";
       flake = false;
     };
     none-lsDOTnvim = {

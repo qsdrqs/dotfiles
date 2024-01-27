@@ -5,7 +5,7 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
-local use_nix = false
+local use_nix = true
 local lazypath
 if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
   lazypath = vim.fn.stdpath("data") .. "/nix/lazy.nvim"

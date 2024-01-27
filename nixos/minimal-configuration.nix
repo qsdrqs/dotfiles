@@ -180,9 +180,6 @@ in
     gnupg.agent.enable = true;
     command-not-found.enable = false;
     nix-index.enable = true;
-    bash.interactiveShellInit = ''
-      source ${pkgs.nix-index}/etc/profile.d/command-not-found.sh
-    '';
   };
   # List services that you want to enable:
 

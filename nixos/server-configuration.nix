@@ -18,7 +18,7 @@ in
 
   systemd = {
     services.rathole-server = {
-      enable = false;
+      enable = lib.mkDefault false;
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
       description = "Start the rathole server";
@@ -31,7 +31,7 @@ in
 
     # certbot renew
     services.certbot-renew = {
-      enable = false;
+      enable = lib.mkDefault false;
       description = "Certbot Renewal";
       serviceConfig = {
         ExecStart = "${pkgs.certbot}/bin/certbot renew";
@@ -40,7 +40,7 @@ in
       };
     };
     timers.certbot-renew = {
-      enable = false;
+      enable = config.services.certbot-renew.enable;
       description = "Daily renewal of Let's Encrypt's certificates by certbot";
       timerConfig = {
         OnCalendar = "daily";
@@ -78,7 +78,7 @@ in
   };
 
   services.matrix-synapse = {
-    enable = false;
+    enable = lib.mkDefault false;
     configFile = "/etc/synapse/homeserver.yaml";
     dataDir = "/var/lib/synapse";
     settings = {
@@ -98,7 +98,7 @@ in
   };
 
   services.coturn = {
-    enable = false;
+    enable = lib.mkDefault false;
   };
 
   systemd.services.coturn =

@@ -6,7 +6,6 @@ let
     cp -r * $out
     runHook postInstall
   '';
-  extraBuildPlugins = [ "LuaSnip" ];
   dummyBuildPhase = ''
     # do nothing
   '';

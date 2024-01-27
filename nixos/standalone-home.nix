@@ -18,6 +18,5 @@
   home.packages = with pkgs; [
     nvim-final
     yazi
-    zsh
   ];
 }
