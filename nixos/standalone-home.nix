@@ -10,7 +10,7 @@
       ./home-custom.nix
     else
       lib.warn "home-custom.nix not found"
-        lib.warn "will use username qsdrqs and home directory /home/qsdrqs"
+        lib.warn "will use username `qsdrqs` and home directory `/home/qsdrqs`"
         ./empty.nix
     )
   ];

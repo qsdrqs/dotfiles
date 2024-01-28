@@ -730,7 +730,7 @@ local plugins = {
         elseif lsp == "grammarly" then
           lsp_common_config.filetypes = { "markdown", "tex" }
           lsp_common_config.cmd = (function()
-            if vim.fn.isdirectory(os.getenv("HOME") .. "/grammarly") == true then
+            if vim.fn.isdirectory(os.getenv("HOME") .. "/grammarly") == 1 then
               return {os.getenv("HOME") .. "/grammarly/packages/grammarly-languageserver/bin/server.js", "--stdio"}
             else
               return {"grammarly-languageserver", "--stdio"}

@@ -40,7 +40,7 @@ in
       };
     };
     timers.certbot-renew = {
-      enable = config.services.certbot-renew.enable;
+      enable = config.systemd.services.certbot-renew.enable;
       description = "Daily renewal of Let's Encrypt's certificates by certbot";
       timerConfig = {
         OnCalendar = "daily";

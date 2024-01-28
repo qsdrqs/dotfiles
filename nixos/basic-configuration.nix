@@ -1,6 +1,7 @@
 { config, pkgs, pkgs-master, lib, inputs, options, ... }:
 let
   packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
+  homeDir = config.users.users.qsdrqs.home;
 in
 {
   # repair nix store
@@ -31,6 +32,7 @@ in
 
     w3m
     inferno # flamegraph
+    wireguard-tools
   ];
 
   environment.variables = {
@@ -94,4 +96,12 @@ in
 
   # avoid v2ray service to create config file
   environment.etc."v2ray/config.json".enable = false;
+
+  networking.wireguard.interfaces = {
+    wg0 = {
+      listenPort = 51820;
+      privateKeyFile = "${homeDir}/.wireguard/private";
+      peers = (pkgs.callPackage ./private/wireguard-peers.nix { inputs = inputs; });
+    };
+  };
 }
