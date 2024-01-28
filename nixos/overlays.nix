@@ -39,6 +39,9 @@ in
       makeModulesClosure = x:
         super.makeModulesClosure (x // { allowMissing = true; });
 
+      # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+      # End Temporary self updated packages
+
       neovim-reloadable = pkgs.writeShellScriptBin "nvim" ''
         while true; do
           ${pkgs.neovim-unwrapped}/bin/nvim "$@"
@@ -166,25 +169,6 @@ in
         patches = oldAttrs.patches ++ [ ./patches/yazi.patch ];
       });
 
-      matrix-synapse-unwrapped = super.matrix-synapse-unwrapped.overrideAttrs (oldAttrs:
-        let
-          pname = "matrix-synapse";
-          version = "1.99.0";
-          src = pkgs.fetchFromGitHub {
-            owner = "element-hq";
-            repo = "synapse";
-            rev = "8a50312099d8014a10ce36acf2f64d21c98bd4e6";
-            hash = "sha256-fpkKt4qqc1dErpg6TPsCK9SAGb3x8KRrJIYY6HtKcSQ=";
-          };
-        in
-        {
-          src = src;
-          cargoDeps = pkgs.rustPlatform.fetchCargoTarball {
-            inherit src;
-            name = "${pname}-${version}";
-            hash = "sha256-FQhHpbp8Rkkqp6Ngly/HP8iWGlWh5CDaztgAwKB/afI=";
-          };
-        });
     })
   ];
 }
