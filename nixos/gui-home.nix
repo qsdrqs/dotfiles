@@ -11,6 +11,7 @@
       "image/gif" = [ "org.kde.gwenview.desktop" ];
       "application/pdf" = [ "org.pwmt.zathura.desktop" ];
       "inode/directory" = [ "org.kde.dolphin.desktop" ]; # TODO: can't find dolphin
+      "x-scheme-handler/tg" = [ "userapp-Telegram Desktop-FKA2H2.desktop" ];
     };
   };
 }

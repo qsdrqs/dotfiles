@@ -86,47 +86,6 @@ function Status:name()
 	return ui.Line(spans)
 end
 
-function Folder:highlighted_name(file)
-	-- Complete prefix when searching across directories
-	local length = 0
-	local prefix = file:prefix() or ""
-	if prefix ~= "" then
-		prefix = prefix .. "/"
-	end
-
-	-- Range highlighting for filenames
-	local highlights = file:highlights()
-	local spans = ui.highlight_ranges(prefix .. file.name, highlights)
-
-	-- hack to get the display length of the filename
-	length = length + #prefix + math.floor((utf8.len(file.name) + #file.name) / 2)
-
-	-- Show symlink target
-	if MANAGER.show_symlink and file.link_to ~= nil then
-		local str = " -> " .. tostring(file.link_to)
-		spans[#spans + 1] = ui.Span(str):italic()
-		length = length + math.floor((utf8.len(str) + #str) / 2)
-	end
-
-	if highlights == nil or not file:is_hovered() then
-		return spans, length
-	end
-
-	local found = file:found()
-	if found ~= nil then
-		spans[#spans + 1] = ui.Span("  ")
-		length = length + 2
-		local str = string.format("[%d/%d]", found[1] + 1, found[2])
-		spans[#spans + 1] = ui.Span(str):style(THEME.manager.find_position)
-		length = length + #str
-	end
-	return spans, length
-end
-
-local function get_file_count(url)
-	-- print(Command)
-end
-
 function Current:render(area)
 	self.area = area
 
@@ -134,7 +93,7 @@ function Current:render(area)
 	local items = {}
 
 	for i, f in ipairs(Folder:by_kind(Folder.CURRENT).window) do
-		local name, length = Folder:highlighted_name(f)
+		local name = Folder:highlighted_name(f)
 		-- local file_size
 		-- file_size = ya.readable_size(f:size() or f.cha.length)
 		--

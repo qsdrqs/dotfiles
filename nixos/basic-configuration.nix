@@ -97,11 +97,11 @@ in
   # avoid v2ray service to create config file
   environment.etc."v2ray/config.json".enable = false;
 
-  networking.wireguard.interfaces = {
+  networking.wg-quick.interfaces = {
     wg0 = {
       listenPort = 51820;
       privateKeyFile = "${homeDir}/.wireguard/private";
-      peers = (pkgs.callPackage ./private/wireguard-peers.nix { inputs = inputs; });
+      peers = lib.mkDefault (pkgs.callPackage ./private/wireguard-server.nix { inputs = inputs; });
     };
   };
 }

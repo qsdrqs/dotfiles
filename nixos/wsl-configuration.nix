@@ -1,4 +1,4 @@
-{ pkgs, config, modulesPath, inputs, ... }:
+{ pkgs, config, modulesPath, inputs, lib, ... }:
 let
   python-packages = ps: with ps; [
     rpi-gpio

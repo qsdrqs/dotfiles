@@ -207,6 +207,11 @@ in
               EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
       '';
     };
+    locate = {
+      enable = true;
+      package = pkgs.plocate;
+      interval = "hourly";
+    };
   };
 
   # Open ports in the firewall.

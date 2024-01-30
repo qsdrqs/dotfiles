@@ -42,32 +42,6 @@ in
       # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
       # End Temporary self updated packages
 
-      neovim-reloadable = pkgs.writeShellScriptBin "nvim" ''
-        while true; do
-          ${pkgs.neovim-unwrapped}/bin/nvim "$@"
-          RET=$?
-          if [[ $RET != 100 ]]; then
-            exit $RET
-          fi
-        done
-      '';
-      editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
-        if [ "$QUIT_ON_OPEN" = "1" ]; then
-          $EDITOR "$@"
-          kill $(ps -o ppid= -p $$)
-        else
-          $EDITOR "$@"
-        fi
-      '';
-      nvim-final = pkgs.symlinkJoin {
-        name = "neovim-${lib.getVersion pkgs.neovim-unwrapped}";
-        paths = [ pkgs.neovim-unwrapped ];
-        postBuild = ''
-          rm $out/bin/nvim
-          cp ${neovim-reloadable}/bin/nvim $out/bin/nvim
-        '';
-      };
-
       neovim-unwrapped = (super.neovim-unwrapped.override {
         treesitter-parsers = treesitter-parsers self;
       }).overrideAttrs
@@ -80,6 +54,36 @@ in
             ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
           '';
         });
+
+      editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
+        if [ "$QUIT_ON_OPEN" = "1" ]; then
+          $EDITOR "$@"
+          kill $(ps -o ppid= -p $$)
+        else
+          $EDITOR "$@"
+        fi
+      '';
+      nvim-final = pkgs.symlinkJoin (
+        let
+          neovim-reloadable = pkgs.writeShellScriptBin "nvim" ''
+            while true; do
+              ${neovim-unwrapped}/bin/nvim "$@"
+              RET=$?
+              if [[ $RET != 100 ]]; then
+                exit $RET
+              fi
+            done
+          '';
+        in
+        {
+          name = "neovim-${lib.getVersion neovim-unwrapped}";
+          paths = [ neovim-unwrapped ];
+          postBuild = ''
+            rm $out/bin/nvim
+            cp ${neovim-reloadable}/bin/nvim $out/bin/nvim
+          '';
+        }
+      );
 
       ranger = super.ranger.overrideAttrs (oldAttrs: {
         src = inputs.ranger;
