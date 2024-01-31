@@ -1,4 +1,4 @@
-{ pkgs, config, modulesPath, inputs, lib, ... }:
+{ pkgs, config, modulesPath, inputs, lib, options, utils, ... }:
 let
   python-packages = ps: with ps; [
     rpi-gpio
@@ -49,6 +49,19 @@ in
   # Set syncthing GUI address to 0.0.0.0
   # So that it's accessible from Windows
   services.syncthing.guiAddress = "0.0.0.0:8384";
+
+  # WSL2 does not support modprobe for wireguard
+  systemd.services.wg-quick-wg0.serviceConfig.ExecStart = lib.mkForce (
+    utils.systemdUtils.lib.makeJobScript
+      "wg-quick-wg0-start"
+      (
+        let
+          str2list = lib.strings.splitString "\n" config.systemd.services.wg-quick-wg0.script;
+          listRemove = lib.lists.remove "${pkgs.kmod}/bin/modprobe wireguard" str2list;
+        in
+        lib.strings.concatStrings listRemove
+      )
+  );
 
   # use vcxsrv instead of wslg
   # environment.variables.DISPLAY =

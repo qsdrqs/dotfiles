@@ -211,8 +211,14 @@ in
       enable = true;
       package = pkgs.plocate;
       interval = "hourly";
+      localuser = null;
+      prunePaths = options.services.locate.prunePaths.default ++ [
+        "/mnt"
+      ];
     };
   };
+  # TODO: github:NixOS/nixpkgs/issues/281271
+  environment.variables.LOCATE_PATH = lib.mkForce "";
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
