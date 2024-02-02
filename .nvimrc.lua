@@ -1457,7 +1457,7 @@ local plugins = {
       "<C-`>",
       {"<C-Space>", mode = 'n'},
       "<localleader>T",
-      "<leader>ra",
+      "<leader>ya",
     },
     cmd = {
       "YaziToggle",
@@ -1548,7 +1548,7 @@ local plugins = {
       vim.api.nvim_create_user_command("ZjumpToggle", zjump_toggle, {nargs = 0})
 
       vim.keymap.set("n", "<c-g>", lazygit_toggle, {noremap = true, silent = true})
-      vim.keymap.set("n", "<leader>ra", yazi_toggle, {noremap = true, silent = true})
+      vim.keymap.set("n", "<leader>ya", yazi_toggle, {noremap = true, silent = true})
 
       -- repl
       vim.keymap.set("n", "<c-c><c-c>", "<cmd>ToggleTermSendCurrentLine<cr>")
@@ -2491,10 +2491,10 @@ local plugins = {
     'kevinhwang91/rnvimr',
     lazy = true,
     cond = vim.g.vscode == nil,
-    -- keys = "<leader>ra",
+    keys = "<leader>ra",
     cmd = "RnvimrToggle",
     config = function()
-      -- vim.keymap.set('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', {silent = true})
+      vim.keymap.set('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', {silent = true})
       vim.g.rnvimr_enable_picker = 1
     end
   },
@@ -2895,7 +2895,7 @@ local plugins = {
       dashboard.section.buttons.val = {
         dashboard.button("e", "  New file", "<cmd>ene <CR>"),
         dashboard.button("l", "󰁯  Load session", "<cmd> SessionRestore <cr>"),
-        dashboard.button("r", "  Open file manager", "<cmd>YaziToggle <cr>"),
+        dashboard.button("y", "  Open file manager", "<cmd>YaziToggle <cr>"),
         dashboard.button("z", "  Z jump", "<cmd>ZjumpToggle <cr>"),
         dashboard.button("f", "󰍉  Find file", "<cmd>Telescope find_files<CR>"),
         dashboard.button("h", "󱔗  Recently opened files", "<cmd> Telescope oldfiles <CR>"),
@@ -3357,6 +3357,7 @@ local plugins = {
         group = "mkdp_init",
       })
       vim.g.mkdp_open_to_the_world = 1
+      vim.g.mkdp_echo_preview_url = 1
 
       vim.cmd[[
       function! Mkdp_handler(url)
@@ -3660,12 +3661,17 @@ local plugins = {
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
       "mfussenegger/nvim-dap-python",
-      "rcarriga/cmp-dap"
+      "rcarriga/cmp-dap",
+      'Weissle/persistent-breakpoints.nvim',
     },
     keys = {
       "<F5>",
       "<F9>",
     },
+    init = function()
+      vim.cmd('hi debugRed guifg=red')
+      vim.fn.sign_define('DapBreakpoint', {text='🛑', texthl='debugRed', linehl='', numhl=''})
+    end,
     config = function()
       local function term_dap()
         require("dapui").close()
@@ -3673,8 +3679,7 @@ local plugins = {
       end
 
       local dap = require('dap')
-      vim.cmd('hi debugRed guifg=red')
-      vim.fn.sign_define('DapBreakpoint', {text='🛑', texthl='debugRed', linehl='', numhl=''})
+      local persist_bp = require('persistent-breakpoints.api')
       dap.defaults.fallback.terminal_win_cmd = 'vertical rightbelow 50new'
       vim.keymap.set('n', '<F2>', function() dap.terminate({},{terminateDebuggee=true}, term_dap()) end, { silent = true })
       vim.keymap.set('n', '<F5>', dap.continue, { silent = true })
@@ -3684,8 +3689,8 @@ local plugins = {
       vim.keymap.set('n', '<F10>', dap.step_over, { silent = true })
       vim.keymap.set('n', '<F11>', dap.step_into, { silent = true })
       vim.keymap.set('n', '<F12>', dap.step_out, { silent = true })
-      vim.keymap.set('n', '<F9>', dap.toggle_breakpoint,  { silent = true })
-      vim.keymap.set('n', '<leader><F9>', dap.clear_breakpoints, { silent = true })
+      vim.keymap.set('n', '<F9>', persist_bp.toggle_breakpoint,  { silent = true })
+      vim.keymap.set('n', '<leader><F9>', persist_bp.clear_all_breakpoints, { silent = true })
       vim.keymap.set('n', '<F7>', require("dapui").eval, { silent = true })
       vim.keymap.set('v', '<F7>', require("dapui").eval, { silent = true })
 
@@ -3831,10 +3836,7 @@ local plugins = {
 
       -- Dap load launch.json from vscode when avaliable
       if vim.fn.filereadable("./.vscode/launch.json") and vim.g.load_launchjs ~= 1 then
-        require('dap.ext.vscode').load_launchjs(nil, {
-          cppdbg = {'c', 'cpp', 'asm'},
-          lldb = {'rust'},
-        })
+        require('dap.ext.vscode').load_launchjs(nil, { cppdbg = { 'c', 'cpp', 'asm' }, lldb = { 'rust' } })
         vim.g.load_launchjs = 1
       end
     end
@@ -3948,6 +3950,16 @@ local plugins = {
         virt_text_win_col = nil             -- position the virtual text at a fixed window column (starting from the first text column) ,
         -- e.g. 80 to position at column 80, see `:h nvim_buf_set_extmark()`
       }
+    end
+  },
+  {
+    'Weissle/persistent-breakpoints.nvim',
+    config = function()
+      require('persistent-breakpoints').setup{
+        load_breakpoints_event = { "BufReadPost" }
+      }
+      -- load for once on plugin loaded
+      require("persistent-breakpoints.api").load_breakpoints()
     end
   },
 }
@@ -4125,6 +4137,7 @@ function LazyLoadPlugins()
       'toggleterm.nvim',
       'copilot.vim',
       'direnv.vim',
+      'nvim-dap',
       -- end misc
 
       -- begin cmp
@@ -4353,7 +4366,7 @@ local im_switch_job
 local function all_trim(s)
   return s:match("^%s*(.-)%s*$")
 end
-if vim.fn.has('wsl') == 1 then
+if vim.fn.has('wsl') == 1 and os.getenv("SSH_CONNECTION") == nil then
   im_switch = "im-select.exe"
   default_im = "1033"
   is_windows = true
@@ -4471,7 +4484,7 @@ function VscodeNeovimHandler()
     vscode.action('workbench.action.closeEditorsInGroup')
   end, { silent = true })
 
-  vim.keymap.set('n', '<leader>ra',function()
+  vim.keymap.set('n', '<leader>ya',function()
     vscode.call('multiCommand.createShTerminal')
     vscode.call('workbench.action.terminal.moveToEditor')
     vim.defer_fn(function()

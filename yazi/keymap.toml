@@ -63,7 +63,7 @@ keymap = [
 	{ on = [ "O" ],         exec = "open --interactive",                                   desc = "Open the selected files interactively" },
 	{ on = [ "<Enter>" ],   exec = "open",                                                 desc = "Open the selected files" },
 	{ on = [ "r" ],         exec = "open --interactive",                                   desc = "Open the selected files interactively" },
-	{ on = [ "y" ],         exec = [ "yank", "escape --visual --select" ],                 desc = "Copy the selected files" },
+	{ on = [ "y", "y" ],         exec = [ "yank", "escape --visual --select" ],                 desc = "Copy the selected files" },
 	{ on = [ "d", "d" ],        exec = [ "yank --cut", "escape --visual --select" ],           desc = "Cut the selected files" },
 	{ on = [ "p", "p" ],        exec = "paste",                                                desc = "Paste the files" },
 	{ on = [ "P" ],         exec = "paste --force",                                        desc = "Paste the files (overwrite if the destination exists)" },
