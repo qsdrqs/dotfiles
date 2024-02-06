@@ -198,13 +198,7 @@ in
 
   virtualisation = {
     libvirtd.enable = true;
-    docker = {
-      enable = true;
-      rootless = {
-        enable = true;
-        setSocketVariable = true;
-      };
-    };
+    docker.enable = true;
   };
 
   users.users.qsdrqs.extraGroups = [ "wireshark" "libvirtd" "docker" ];

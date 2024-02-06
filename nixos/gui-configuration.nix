@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-master, inputs, ... }:
+{ config, pkgs, lib, pkgs-master, inputs, options, ... }:
 let
   hyprlandPackages = with pkgs; [
     qt6.qtwayland
@@ -37,7 +37,6 @@ in
 
     zathura
     ark
-    dolphin
     deadd-notification-center
     pulseaudio
     rofi-wayland
@@ -69,6 +68,21 @@ in
           Type = "dbus";
           BusName = "org.freedesktop.Notifications";
           ExecStart = "${pkgs.deadd-notification-center}/bin/deadd-notification-center";
+        };
+      };
+      plasma-dolphin = {
+        unitConfig = {
+          Description = "Dolphin file manager";
+          PartOf = [ "graphical-session.target" ];
+        };
+        path = [ "/run/current-system/sw" ];
+        environment = {
+          QT_QPA_PLATFORM = "wayland";
+        };
+        serviceConfig = {
+          Type = "dbus";
+          BusName = "org.freedesktop.FileManager1";
+          ExecStart = "${pkgs.dolphin}/bin/dolphin";
         };
       };
     };

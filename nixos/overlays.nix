@@ -35,11 +35,12 @@ let
 in
 {
   nixpkgs.overlays = [
-    (self: super: rec {
+    (self: super: {
       makeModulesClosure = x:
         super.makeModulesClosure (x // { allowMissing = true; });
 
       # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+      tree-sitter = inputs.nixpkgs-tree-sitter.legacyPackages.${pkgs.system}.tree-sitter;
       # End Temporary self updated packages
 
       neovim-unwrapped = (super.neovim-unwrapped.override {
@@ -56,18 +57,31 @@ in
         });
 
       editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
-        if [ "$QUIT_ON_OPEN" = "1" ]; then
+        if [[ $QUIT_ON_OPEN == "1" ]]; then
           $EDITOR "$@"
-          kill $(ps -o ppid= -p $$)
+          kill -9 $(ps -o ppid= -p $$)
         else
           $EDITOR "$@"
         fi
       '';
+
+      # for config.programs.neovim
+      wrapNeovim = (nvim: args: super.wrapNeovim nvim (args // {
+        withPython3 = true;
+        extraPython3Packages = p: with p; [
+          # for CopilotChat.nvim
+          python-dotenv
+          requests
+          prompt-toolkit
+          tiktoken
+        ];
+      }));
+
       nvim-final = pkgs.symlinkJoin (
         let
           neovim-reloadable = pkgs.writeShellScriptBin "nvim" ''
             while true; do
-              ${neovim-unwrapped}/bin/nvim "$@"
+              ${self.neovim-unwrapped}/bin/nvim "$@"
               RET=$?
               if [[ $RET != 100 ]]; then
                 exit $RET
@@ -76,8 +90,8 @@ in
           '';
         in
         {
-          name = "neovim-${lib.getVersion neovim-unwrapped}";
-          paths = [ neovim-unwrapped ];
+          name = "neovim-${lib.getVersion self.neovim-unwrapped}";
+          paths = [ self.neovim-unwrapped ];
           postBuild = ''
             rm $out/bin/nvim
             cp ${neovim-reloadable}/bin/nvim $out/bin/nvim

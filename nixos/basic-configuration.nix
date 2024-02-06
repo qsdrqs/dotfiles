@@ -65,6 +65,16 @@ in
     };
   };
 
+  virtualisation = {
+    docker = {
+      enable = lib.mkDefault false;
+      rootless = {
+        enable = true;
+        setSocketVariable = true;
+      };
+    };
+  };
+
   systemd = {
     services.rathole-client = {
       enable = false;

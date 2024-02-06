@@ -45,13 +45,22 @@ with pkgs; {
   };
   python = mkShell {
     packages = [
-      python3Packages.virtualenv
-      python3Packages.numpy
-      python3Packages.matplotlib
-      python3Packages.autopep8
-      python3Packages.debugpy
-      python3Packages.isort
+      python3.withPackages
+      (python-pkgs: with python-pkgs; [
+        virtualenv
+        numpy
+        matplotlib
+        autopep8
+        debugpy
+        isort
+      ])
       nodePackages.pyright
+    ];
+  };
+  java = mkShell {
+    packages = [
+      jdk8
+      maven
     ];
   };
   go = mkShell {

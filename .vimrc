@@ -7,6 +7,7 @@
 "-------------------无头模式下等待GUI-----------------------"{{{
 if has('nvim') && !exists('g:no_wait_headless')
   while nvim_list_uis() == []
+    let g:remote_ui = 1
     sleep 100m
   endwhile
 endif
@@ -234,11 +235,11 @@ function! Tab_len()
   for key in keys(s:tablist)
     if &filetype == key
       let b:tab_len = s:tablist[key]
-      exec "set shiftwidth=".b:tab_len
+      exec "setlocal shiftwidth=".b:tab_len
       " 让 vim 把连续数量的空格视为一个制表符
-      exec "set softtabstop=".b:tab_len
+      exec "setlocal softtabstop=".b:tab_len
       " " 设置编辑时制表符占用空格数
-      exec "set tabstop=".b:tab_len
+      exec "setlocal tabstop=".b:tab_len
       " 设置格式化时制表符占用空格数
     endif
   endfor
@@ -463,7 +464,7 @@ if has('nvim')
 endif
 
 " limit textwidth in markdown and latex
-autocmd FileType markdown,tex set textwidth=80
+autocmd FileType markdown,tex setlocal textwidth=80
 set formatoptions+=m
 
 function! s:wrapPara()
@@ -510,6 +511,26 @@ function! s:deleteTrailing()
   endif
 endfunction
 autocmd InsertLeave * call s:deleteTrailing()
+
+function s:is_xxd_layout()
+  " check if the first line is starting with 00000000
+  let l:line = getline(1)
+  return l:line[0:7] == '00000000'
+endfunction
+
+function! s:toggleBinaryEdit()
+  if !executable('xxd')
+    echo "xxd is not installed"
+    return
+  endif
+
+  if !s:is_xxd_layout()
+    execute "%!xxd"
+  else
+    execute "%!xxd -r"
+  endif
+endfunction
+command! -nargs=0 BinaryEditToggle call s:toggleBinaryEdit()
 
 "-------------------杂项-----------------------"}}}
 "

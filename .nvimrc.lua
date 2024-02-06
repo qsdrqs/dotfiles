@@ -326,9 +326,11 @@ local plugins = {
     "williamboman/mason.nvim",
     lazy = true,
     cmd = "Mason",
+    init = function()
+      vim.fn.setenv("PATH", vim.fn.getenv("PATH") .. ":" .. vim.fn.stdpath("data") .. "/mason/bin")
+    end,
     config = function()
       require("mason").setup()
-      vim.fn.setenv("PATH", vim.fn.getenv("PATH") .. ":" .. vim.fn.stdpath("data") .. "/mason/bin")
     end
   },
 
@@ -1495,14 +1497,38 @@ local plugins = {
 
       local function yazi_toggle()
         vim.fn.setenv("CURR_FILE", vim.fn.expand("%"))
+        local cmd = "yazi $CURR_FILE"
+        local tmp_file = nil
+        if vim.g.remote_ui == 1 then
+          if vim.fn.executable("echoerr") == 0 then
+            vim.notify("echoerr is not available", vim.log.levels.ERROR)
+            return
+          end
+          vim.fn.setenv("EDITOR", "echoerr")
+          tmp_file = vim.fn.tempname()
+          cmd = "QUIT_ON_OPEN=1 yazi $CURR_FILE 2>" .. tmp_file
+        end
         local yazi = Terminal:new({
-          cmd = "yazi $CURR_FILE",
+          cmd = cmd,
           hidden = false,
           direction = "float",
           float_opts = {
             width = vim.fn.float2nr(0.7 * vim.o.columns),
             height = vim.fn.float2nr(0.7 * vim.o.lines),
           },
+          on_exit = function(_, _, exit_code)
+            if tmp_file then
+              local f = io.open(tmp_file, "r")
+              if f ~= nil then
+                local content = f:read("*a")
+                f:close()
+                vim.defer_fn(function()
+                  vim.cmd("edit " .. content)
+                end, 0)
+              end
+              vim.fn.delete(tmp_file)
+            end
+          end,
         })
         yazi:toggle()
       end
@@ -3264,6 +3290,18 @@ local plugins = {
     end
   },
 
+  {
+    'levouh/tint.nvim',
+    lazy = false,
+    cond = vim.g.vscode == nil,
+    config = function()
+      require("tint").setup {
+        tint = -45,  -- Darken colors, use a positive value to brighten
+        saturation = 0.6,  -- Saturation to preserve
+      }
+    end
+  },
+
   -- vim plugins
   {
     'direnv/direnv.vim',
@@ -3478,6 +3516,22 @@ local plugins = {
       vim.keymap.set('i', '<C-e>', "<Cmd>lua copilot_dismiss()<CR>", { silent = true})
       vim.keymap.set('i', '<M-\\>', "<Cmd>Copilot panel<CR>", { silent = true})
     end
+  },
+
+  {
+    "jellydn/CopilotChat.nvim",
+    dependencies = { "github/copilot.vim" },
+    build = ":UpdateRemotePlugins",
+    opts = {
+      show_help = "yes", -- Show help text for CopilotChatInPlace, default: yes
+      debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
+    },
+    cmd = {
+      "CopilotChatExplain",
+      "CopilotChatTests",
+      "CopilotChatVisual",
+      "CopilotChatInPlace",
+    },
   },
 
   {
@@ -3835,9 +3889,16 @@ local plugins = {
       }
 
       -- Dap load launch.json from vscode when avaliable
-      if vim.fn.filereadable("./.vscode/launch.json") and vim.g.load_launchjs ~= 1 then
+      vim.api.nvim_create_autocmd("DirChanged", {
+        pattern = "*",
+        callback = function()
+          if vim.fn.filereadable("./.vscode/launch.json") then
+            require('dap.ext.vscode').load_launchjs(nil, { cppdbg = { 'c', 'cpp', 'asm' }, lldb = { 'rust' } })
+          end
+        end
+      })
+      if vim.fn.filereadable("./.vscode/launch.json") then
         require('dap.ext.vscode').load_launchjs(nil, { cppdbg = { 'c', 'cpp', 'asm' }, lldb = { 'rust' } })
-        vim.g.load_launchjs = 1
       end
     end
   },
@@ -4541,7 +4602,7 @@ function VscodeNeovimHandler()
 
   -- same bindings
   vim.keymap.set('n', '<leader>d',function() vscode.action("editor.action.showHover") end, { silent = true })
-  vim.keymap.set('n', '<leader>e',function() vscode.action("editor.action.showHover") end, { silent = true })
+  vim.keymap.set('n', '<leader>e',function() vscode.action("errorLens.toggleInlineMessage") end, { silent = true })
 
   vim.keymap.set('n', '<leader>f',function() vscode.action("workbench.action.quickOpen") end, { silent = true })
   vim.keymap.set('n', '<leader>b',function() vscode.action("workbench.action.quickOpen") end, { silent = true })

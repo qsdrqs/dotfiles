@@ -411,19 +411,6 @@ GITSTATUS_LOG_LEVEL=DEBUG
 
 # z.sh
 if [[ -x `command -v zoxide` ]]; then
-    export _ZO_FZF_OPTS="
-    --no-sort                             \
-    --bind=ctrl-z:ignore,btab:up,tab:down \
-    --cycle                               \
-    --keep-right                          \
-    --border=sharp                        \
-    --height=45%                          \
-    --info=inline                         \
-    --layout=reverse                      \
-    --tabstop=1                           \
-    --exit-0                              \
-    --select-1"
-
     eval "$(zoxide init zsh)"
 
     # Completions function rewrite

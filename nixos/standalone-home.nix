@@ -16,7 +16,9 @@
   ];
 
   home.packages = with pkgs; [
-    nvim-final
+    (wrapNeovim nvim-final {
+      withPython3 = true;
+    })
     yazi
     editor-wrapped
   ];

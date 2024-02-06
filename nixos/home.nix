@@ -12,6 +12,9 @@
     htop
     iotop
     lazygit
+    (pkgs.writeShellScriptBin "echoerr" ''
+      echo "$@" 1>&2
+    '')
   ];
 
   # This value determines the Home Manager release that your
@@ -81,16 +84,28 @@
   # provide org.freedesktop.secrets
   services.gnome-keyring = {
     enable = true;
-    components = ["pkcs11" "secrets" "ssh"];
+    components = [ "pkcs11" "secrets" "ssh" ];
   };
 
   services.ssh-agent.enable = true;
 
   home.sessionVariables = {
-    CREDENTIALS_FILE="${config.home.homeDirectory}/.git-credentials";
+    CREDENTIALS_FILE = "${config.home.homeDirectory}/.git-credentials";
     NIX_CONFIG = "access-tokens = github.com=$(${pkgs.coreutils-full}/bin/cat ${config.home.homeDirectory}/.git-credentials 2>/dev/null \\
     | ${pkgs.gnugrep}/bin/grep github.com \\
     | ${pkgs.gawk}/bin/awk -F'[:@]' '{print $3}')";
+    _ZO_FZF_OPTS ="
+    --no-sort                             \
+    --bind=ctrl-z:ignore,btab:up,tab:down \
+    --cycle                               \
+    --keep-right                          \
+    --border=sharp                        \
+    --height=45%                          \
+    --info=inline                         \
+    --layout=reverse                      \
+    --tabstop=1                           \
+    --exit-0                              \
+    --select-1";
   };
 
   # Windows Fonts

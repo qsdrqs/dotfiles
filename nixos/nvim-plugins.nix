@@ -12,7 +12,7 @@ let
   buildDerivations = {
     telescope-fzf-nativeDOTnvim = pkgs.stdenv.mkDerivation {
       name = "telescope-fzf-native.nvim";
-      buildInputs = with pkgs; [ gnumake ];
+      nativeBuildInputs = with pkgs; [ gnumake ];
       src = inputs.nvim-config.inputs.telescope-fzf-nativeDOTnvim;
       installPhase = commonInstallPhase;
     };
@@ -55,6 +55,12 @@ let
           --replace "o<C-G><C-r>_" \
           "<C-G><C-r>_"
       '';
+    };
+    CopilotChatDOTnvim = pkgs.stdenv.mkDerivation {
+      name = "CopilotChat.nvim";
+      src = inputs.nvim-config.inputs.CopilotChatDOTnvim;
+      buildInputs = with pkgs; [ python3Packages.python-dotenv ];
+      installPhase = commonInstallPhase;
     };
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
