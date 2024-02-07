@@ -9,6 +9,12 @@ let
   dummyBuildPhase = ''
     # do nothing
   '';
+  trivialDerivation = name: src: pkgs.stdenv.mkDerivation {
+    name = name;
+    src = src;
+    buildPhase = dummyBuildPhase;
+    installPhase = commonInstallPhase;
+  };
   buildDerivations = {
     telescope-fzf-nativeDOTnvim = pkgs.stdenv.mkDerivation {
       name = "telescope-fzf-native.nvim";
@@ -16,11 +22,7 @@ let
       src = inputs.nvim-config.inputs.telescope-fzf-nativeDOTnvim;
       installPhase = commonInstallPhase;
     };
-    firenvim = pkgs.stdenv.mkDerivation {
-      name = "firenvim";
-      src = inputs.nvim-config.inputs.firenvim;
-      installPhase = commonInstallPhase;
-    };
+    firenvim = trivialDerivation "firenvim" inputs.nvim-config.inputs.firenvim;
     markdown-previewDOTnvim = pkgs.stdenv.mkDerivation {
       name = "markdown-preview.nvim";
       src = inputs.nvim-config.inputs.markdown-previewDOTnvim;
@@ -28,12 +30,7 @@ let
         ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/markdown-preview.nvim/app/bin $out/app/bin
       '';
     };
-    nvim-fundo = pkgs.stdenv.mkDerivation {
-      name = "nvim-fundo";
-      src = inputs.nvim-config.inputs.nvim-fundo;
-      buildPhase = dummyBuildPhase;
-      installPhase = commonInstallPhase;
-    };
+    nvim-fundo = trivialDerivation "nvim-fundo" inputs.nvim-config.inputs.nvim-fundo;
     nvim-treesitter = pkgs.stdenv.mkDerivation {
       name = "nvim-treesitter";
       src = inputs.nvim-config.inputs.nvim-treesitter;
@@ -56,12 +53,7 @@ let
           "<C-G><C-r>_"
       '';
     };
-    CopilotChatDOTnvim = pkgs.stdenv.mkDerivation {
-      name = "CopilotChat.nvim";
-      src = inputs.nvim-config.inputs.CopilotChatDOTnvim;
-      buildInputs = with pkgs; [ python3Packages.python-dotenv ];
-      installPhase = commonInstallPhase;
-    };
+    CopilotChatDOTnvim = trivialDerivation "CopilotChat.nvim" inputs.nvim-config.inputs.CopilotChatDOTnvim;
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
     (entry: {

@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "CopilotChatDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1707140491,
+        "narHash": "sha256-RAq/ZRjPvkgBPqAWVgMS4x+DFbQpgla+YOgiQholHII=",
+        "owner": "jellydn",
+        "repo": "CopilotChat.nvim",
+        "rev": "4c510acf31be9378730b75202ad4b3c2540259f1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jellydn",
+        "repo": "CopilotChat.nvim",
+        "type": "github"
+      }
+    },
     "LuaSnip": {
       "flake": false,
       "locked": {
@@ -1185,6 +1201,22 @@
         "type": "github"
       }
     },
+    "persistent-breakpointsDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1706019951,
+        "narHash": "sha256-TSnieTf1zLcS755DJ9ZxwREcm+MbGwMXUs4XOdqe0bM=",
+        "owner": "Weissle",
+        "repo": "persistent-breakpoints.nvim",
+        "rev": "01e43512ef8d137f2b9e5c1c74fd35c37e787b59",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Weissle",
+        "repo": "persistent-breakpoints.nvim",
+        "type": "github"
+      }
+    },
     "playground": {
       "flake": false,
       "locked": {
@@ -1316,6 +1348,7 @@
     "root": {
       "inputs": {
         "CommentDOTnvim": "CommentDOTnvim",
+        "CopilotChatDOTnvim": "CopilotChatDOTnvim",
         "LuaSnip": "LuaSnip",
         "aerialDOTnvim": "aerialDOTnvim",
         "alignDOTnvim": "alignDOTnvim",
@@ -1389,6 +1422,7 @@
         "nvim-ufo": "nvim-ufo",
         "nvim-web-devicons": "nvim-web-devicons",
         "pantranDOTnvim": "pantranDOTnvim",
+        "persistent-breakpointsDOTnvim": "persistent-breakpointsDOTnvim",
         "playground": "playground",
         "plenaryDOTnvim": "plenaryDOTnvim",
         "projectDOTnvim": "projectDOTnvim",
@@ -1407,6 +1441,7 @@
         "telescope-live-grep-argsDOTnvim": "telescope-live-grep-argsDOTnvim",
         "telescope-vim-bookmarksDOTnvim": "telescope-vim-bookmarksDOTnvim",
         "telescopeDOTnvim": "telescopeDOTnvim",
+        "tintDOTnvim": "tintDOTnvim",
         "todo-commentsDOTnvim": "todo-commentsDOTnvim",
         "toggletermDOTnvim": "toggletermDOTnvim",
         "treesj": "treesj",
@@ -1590,6 +1625,22 @@
       "original": {
         "owner": "nvim-telescope",
         "repo": "telescope.nvim",
+        "type": "github"
+      }
+    },
+    "tintDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1693240840,
+        "narHash": "sha256-epKJsF1PILgk8ff/QNhXBI7m8soiTY2EC5BXGJP/AFQ=",
+        "owner": "levouh",
+        "repo": "tint.nvim",
+        "rev": "862835626941d263466754b9c8e2ce2cb004f5ac",
+        "type": "github"
+      },
+      "original": {
+        "owner": "levouh",
+        "repo": "tint.nvim",
         "type": "github"
       }
     },

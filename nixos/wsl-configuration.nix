@@ -29,7 +29,7 @@ in
     ];
 
     # Enable integration with Docker Desktop (needs to be installed)
-    docker-desktop.enable = true;
+    docker-desktop.enable = config.virtualisation.docker.enable;
   };
 
   environment.systemPackages = with pkgs; [

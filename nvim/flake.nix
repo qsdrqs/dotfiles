@@ -355,6 +355,10 @@
       url = "github:ldelossa/litee-calltree.nvim";
       flake = false;
     };
+    tintDOTnvim = {
+      url = "github:levouh/tint.nvim";
+      flake = false;
+    };
     direnvDOTvim = {
       url = "github:direnv/direnv.vim";
       flake = false;
@@ -393,6 +397,10 @@
     };
     vim-snippets = {
       url = "github:honza/vim-snippets";
+      flake = false;
+    };
+    CopilotChatDOTnvim = {
+      url = "github:jellydn/CopilotChat.nvim";
       flake = false;
     };
     sudaDOTvim = {
@@ -457,6 +465,10 @@
     };
     nvim-dap-virtual-text = {
       url = "github:theHamsta/nvim-dap-virtual-text";
+      flake = false;
+    };
+    persistent-breakpointsDOTnvim = {
+      url = "github:Weissle/persistent-breakpoints.nvim";
       flake = false;
     };
     nvim-dap = {
@@ -554,6 +566,7 @@
         { name = "treesj"; dotname = "treesj";source = inputs.treesj; build = false; }
         { name = "litee.nvim"; dotname = "liteeDOTnvim";source = inputs.liteeDOTnvim; build = false; }
         { name = "litee-calltree.nvim"; dotname = "litee-calltreeDOTnvim";source = inputs.litee-calltreeDOTnvim; build = false; }
+        { name = "tint.nvim"; dotname = "tintDOTnvim";source = inputs.tintDOTnvim; build = false; }
         { name = "direnv.vim"; dotname = "direnvDOTvim";source = inputs.direnvDOTvim; build = false; }
         { name = "vim-matchup"; dotname = "vim-matchup";source = inputs.vim-matchup; build = false; }
         { name = "vim-sleuth"; dotname = "vim-sleuth";source = inputs.vim-sleuth; build = false; }
@@ -564,6 +577,7 @@
         { name = "vim-textobj-entire"; dotname = "vim-textobj-entire";source = inputs.vim-textobj-entire; build = false; }
         { name = "vim-interestingwords"; dotname = "vim-interestingwords";source = inputs.vim-interestingwords; build = false; }
         { name = "vim-snippets"; dotname = "vim-snippets";source = inputs.vim-snippets; build = false; }
+        { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim";source = inputs.CopilotChatDOTnvim; build = true; }
         { name = "suda.vim"; dotname = "sudaDOTvim";source = inputs.sudaDOTvim; build = false; }
         { name = "undotree"; dotname = "undotree";source = inputs.undotree; build = false; }
         { name = "vim-sandwich"; dotname = "vim-sandwich";source = inputs.vim-sandwich; build = false; }
@@ -580,6 +594,7 @@
         { name = "gutentags_plus"; dotname = "gutentags_plus";source = inputs.gutentags_plus; build = false; }
         { name = "nvim-dap-ui"; dotname = "nvim-dap-ui";source = inputs.nvim-dap-ui; build = false; }
         { name = "nvim-dap-virtual-text"; dotname = "nvim-dap-virtual-text";source = inputs.nvim-dap-virtual-text; build = false; }
+        { name = "persistent-breakpoints.nvim"; dotname = "persistent-breakpointsDOTnvim";source = inputs.persistent-breakpointsDOTnvim; build = false; }
         { name = "nvim-dap"; dotname = "nvim-dap";source = inputs.nvim-dap; build = false; }
       ];
     } //
