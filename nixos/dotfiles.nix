@@ -103,7 +103,7 @@ in
         target = ".cache/gitstatus/gitstatusd-${arch_reverse}";
       };
 
-    ranger_static = {
+    ranger = {
       source = pkgs.stdenv.mkDerivation {
         name = "ranger-config";
         src = inputs.ranger-config;
