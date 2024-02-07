@@ -100,7 +100,7 @@ in
       );
 
       ranger = super.ranger.overrideAttrs (oldAttrs: {
-        src = inputs.ranger;
+        src = inputs.ranger-config.ranger;
         propagatedBuildInputs = oldAttrs.propagatedBuildInputs ++ [ pkgs.python3Packages.pylint ];
       });
 

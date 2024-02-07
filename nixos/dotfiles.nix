@@ -68,7 +68,6 @@ in
     ".vim"
   ] //
   symbfileTarget [
-    { name = "ranger"; target = ".config/ranger"; }
     { name = ".vim"; target = ".config/nvim"; }
     { name = "after"; target = ".config/nvim/after"; }
     { name = ".vimrc"; target = ".config/nvim/init.vim"; }
@@ -103,13 +102,23 @@ in
         source = "${pkgs.gitstatus}/bin/gitstatusd";
         target = ".cache/gitstatus/gitstatusd-${arch_reverse}";
       };
-  };
 
-  home.activation.updateZshFlake = ''
-    cd ${config.home.homeDirectory}/dotfiles/zsh
-    nix flake lock path:.
-    cd ${config.home.homeDirectory}/dotfiles
-    nix flake lock --update-input zsh-config path:.
-  '';
+    ranger_static = {
+      source = pkgs.stdenv.mkDerivation {
+        name = "ranger-config";
+        src = inputs.ranger-config;
+        installPhase = commonInstallPhase;
+        postInstall = ''
+          cp -r ${inputs.ranger-config.colorschemes} $out/colorschemes
+        '' + lib.strings.concatStrings (map
+          (plugin: ''
+            ln -s ${inputs.ranger-config.inputs.${plugin}} $out/plugins/${plugin}
+          '')
+          inputs.ranger-config.plugins);
+      };
+      target = ".config/ranger";
+      recursive = true;
+    };
+  };
 
 }

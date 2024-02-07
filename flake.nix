@@ -12,10 +12,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    ranger = {
-      url = "github:ranger/ranger";
-      flake = false;
-    };
     yazi = {
       url = "github:sxyazi/yazi";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -25,6 +21,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    ranger-config.url = "path:ranger";
     zsh-config.url = "path:zsh";
     nvim-config.url = "path:nvim";
 
