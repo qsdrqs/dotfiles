@@ -1859,15 +1859,6 @@ local plugins = {
     end,
     config = function()
       require('hlargs').setup()
-      -- TODO: what is this do?
-      local get_marks_limits = require('hlargs.util').get_marks_limits
-      require('hlargs.util').get_marks_limits = function(bufnr, marks_ns, extmark)
-        local mark_data = vim.api.nvim_buf_get_extmark_by_id(bufnr, marks_ns, extmark, {details=true})
-        if #mark_data == 0 then
-          return 0, 0
-        end
-        return mark_data[1], mark_data[3].end_row
-      end
     end
   },
 
@@ -2767,7 +2758,7 @@ local plugins = {
           and vim.g.started_by_firenvim == nil
     end,
     config = function ()
-      -- TODO: slow under WSL
+      -- TODO: slow under WSL, because of PATH
       local alpha = require'alpha'
       local dashboard = require("alpha.themes.dashboard")
 

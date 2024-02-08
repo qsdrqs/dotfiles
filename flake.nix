@@ -24,6 +24,7 @@
     ranger-config.url = "path:ranger";
     zsh-config.url = "path:zsh";
     nvim-config.url = "path:nvim";
+    dev-shell.url = "path:nixos/dev-shell";
 
     # wsl
     nixos-wsl = {
@@ -82,7 +83,7 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, vscode-server, nur, nix-on-droid, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, vscode-server, nur, nix-on-droid, dev-shell, ... }@inputs:
     rec {
       pkgs-collect = builtins.listToAttrs (builtins.map
         (pkg: {
@@ -334,7 +335,7 @@
       homeConfigurations.termux = home-manager.lib.homeManagerConfiguration termuxHomeConfig;
 
       # dev shells
-      devShells = archSpecConfigAll (system: (pkgs' system).callPackage ./nixos/dev-shell.nix { inputs = inputs; });
+      devShells = archSpecConfigAll (system: (pkgs' system).callPackage dev-shell.shells { inputs = inputs; });
       # direct nix run
       packages = archSpecConfigAll (system: pkgs' system);
 

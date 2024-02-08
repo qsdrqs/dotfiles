@@ -466,6 +466,18 @@
         "type": "github"
       }
     },
+    "dev-shell": {
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-Q/jZoDEYTPpsACYoIJseyN9wis0oDOhzlZRaLop/pyM=",
+        "path": "nixos/dev-shell",
+        "type": "path"
+      },
+      "original": {
+        "path": "nixos/dev-shell",
+        "type": "path"
+      }
+    },
     "dialDOTnvim": {
       "flake": false,
       "locked": {
@@ -2125,6 +2137,7 @@
       "inputs": {
         "code-features": "code-features",
         "code-marketplace": "code-marketplace",
+        "dev-shell": "dev-shell",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
         "hyprland-contrib": "hyprland-contrib",

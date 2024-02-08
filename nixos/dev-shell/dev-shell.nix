@@ -45,15 +45,14 @@ with pkgs; {
   };
   python = mkShell {
     packages = [
-      python3.withPackages
-      (python-pkgs: with python-pkgs; [
+      (python3.withPackages (pypkgs: with pypkgs; [
         virtualenv
         numpy
         matplotlib
         autopep8
         debugpy
         isort
-      ])
+      ]))
       nodePackages.pyright
     ];
   };
