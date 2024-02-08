@@ -1,0 +1,112 @@
+{
+  "nodes": {
+    "colorschemes": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1707286762,
+        "narHash": "sha256-bI+PCmEwpyPC5rUUlld5R3lyTlMFQMzWbydT77eCcP4=",
+        "owner": "qsdrqs",
+        "repo": "colorschemes",
+        "rev": "700e4a1f5efac792f6ce015a50aa07bee77f7b6f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qsdrqs",
+        "repo": "colorschemes",
+        "type": "github"
+      }
+    },
+    "ranger": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1692788718,
+        "narHash": "sha256-nW4KlatugmPRPXl+XvV0/mo+DE5o8FLRrsJuiKbFGyY=",
+        "owner": "ranger",
+        "repo": "ranger",
+        "rev": "136416c7e2ecc27315fe2354ecadfe09202df7dd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ranger",
+        "repo": "ranger",
+        "type": "github"
+      }
+    },
+    "ranger-archives": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1675507175,
+        "narHash": "sha256-hSwTsWrbX+unvm9f7dkCRljc6EM9bhGOHRaLNo7ehio=",
+        "owner": "maximtrp",
+        "repo": "ranger-archives",
+        "rev": "62783ddb84c8fd25eba1be1607d3a47e8efe8b31",
+        "type": "github"
+      },
+      "original": {
+        "owner": "maximtrp",
+        "repo": "ranger-archives",
+        "type": "github"
+      }
+    },
+    "ranger-fzf-marks": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1626604734,
+        "narHash": "sha256-6Li/vLdtKItCpLwa+wX/C2FO+AW1hWPcKy/sx7KSZrM=",
+        "owner": "laggardkernel",
+        "repo": "ranger-fzf-marks",
+        "rev": "1d0c42cd4fd01c73bcb02e3cebcec22987b8a46d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "laggardkernel",
+        "repo": "ranger-fzf-marks",
+        "type": "github"
+      }
+    },
+    "ranger-zjumper": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1690706848,
+        "narHash": "sha256-VB+W9iEBstQI4yZmyB8d/Ff+N8PM2y6fI7xuJhszCBw=",
+        "owner": "ask1234560",
+        "repo": "ranger-zjumper",
+        "rev": "217f87df69ff67077d53d8220f0e79a475fb2a8e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ask1234560",
+        "repo": "ranger-zjumper",
+        "type": "github"
+      }
+    },
+    "ranger_devicons": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1707118400,
+        "narHash": "sha256-HLeiV3c+8fl3kiht01s3H/HGPABPC2033rMB/uXKwLM=",
+        "owner": "alexanderjeurissen",
+        "repo": "ranger_devicons",
+        "rev": "2c3c19dffb4238d01c74515c9eed5088066db243",
+        "type": "github"
+      },
+      "original": {
+        "owner": "alexanderjeurissen",
+        "repo": "ranger_devicons",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "colorschemes": "colorschemes",
+        "ranger": "ranger",
+        "ranger-archives": "ranger-archives",
+        "ranger-fzf-marks": "ranger-fzf-marks",
+        "ranger-zjumper": "ranger-zjumper",
+        "ranger_devicons": "ranger_devicons"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

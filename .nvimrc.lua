@@ -757,7 +757,7 @@ local plugins = {
                 command = { "nixpkgs-fmt" }
               },
               nix = {
-                maxMemoryMB = 8192,
+                maxMemoryMB = math.floor((vim.uv.get_free_memory() * 0.9) / math.pow(2, 20)),
                 flake = {
                   autoArchive = false,
                   autoEvalInputs = true,
