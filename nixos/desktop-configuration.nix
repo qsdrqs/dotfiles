@@ -147,7 +147,6 @@ in
 
     pandoc
     zotero_7
-    ffmpeg
 
     # NUR
     qq-hidpi

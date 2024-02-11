@@ -36,6 +36,7 @@ in
     kitty
     texlive.combined.scheme-full
     zathura
+    xdg-utils
     (python3.withPackages python-packages)
   ];
   fonts.packages = with pkgs; [

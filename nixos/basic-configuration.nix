@@ -33,6 +33,7 @@ in
     w3m
     inferno # flamegraph
     wireguard-tools
+    ffmpeg
   ];
 
   environment.variables = {
