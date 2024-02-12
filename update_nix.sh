@@ -4,4 +4,6 @@ cd nvim/flake && nix flake update
 cd $pwd
 cd zsh && nix flake update
 cd $pwd
+cd ranger && nix flake update
+cd $pwd
 nix flake update
