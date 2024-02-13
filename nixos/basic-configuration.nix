@@ -1,6 +1,6 @@
 { config, pkgs, pkgs-master, lib, inputs, options, ... }:
 let
-  packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
+  # packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
   homeDir = config.users.users.qsdrqs.home;
 in
 {
@@ -21,7 +21,7 @@ in
     ctags
     nodejs
     firejail
-    (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else packages.dummy)
+    # (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else packages.dummy)
     openssl
     parted
     gh
@@ -75,6 +75,13 @@ in
       };
     };
   };
+
+  # enable qemu emulation compile, only for x86_64-linux to emulate aarch64-linux
+  boot.binfmt.emulatedSystems =
+    if config.nixpkgs.system == "aarch64-linux" then
+      [ ]
+    else
+      [ "aarch64-linux" ];
 
   systemd = {
     services.rathole-client = {

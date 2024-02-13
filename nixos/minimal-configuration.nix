@@ -4,7 +4,7 @@
 
 { config, pkgs, lib, inputs, options, ... }:
 let
-  packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
+  dummy = pkgs.callPackage (import ./packages.nix).dummy { };
 in
 {
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -108,7 +108,7 @@ in
 
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    (if config.boot.loader.grub.enable then grub2 else packages.dummy)
+    (if config.boot.loader.grub.enable then grub2 else dummy)
     zoxide
     editor-wrapped
     lsd
@@ -125,8 +125,6 @@ in
     fd
     ripgrep
     gnutar
-    unzip
-    zip
     p7zip
     gcc
     gnumake

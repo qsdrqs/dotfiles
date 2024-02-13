@@ -1,7 +1,6 @@
 { config, pkgs, lib, inputs, options, ... }:
 let
-  packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
-  rtl88x2bu_module = config.boot.kernelPackages.callPackage packages.rtl88x2bu { };
+  rtl88x2bu_module = config.boot.kernelPackages.callPackage (import ./packages.nix).rtl88x2bu { inputs = inputs; };
   python-packages = ps: with ps; [
     rpi-gpio
     gpiozero

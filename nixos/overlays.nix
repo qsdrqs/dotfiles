@@ -40,21 +40,25 @@ in
         super.makeModulesClosure (x // { allowMissing = true; });
 
       # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
-      tree-sitter = inputs.nixpkgs-tree-sitter.legacyPackages.${pkgs.system}.tree-sitter;
       # End Temporary self updated packages
 
-      neovim-unwrapped = (super.neovim-unwrapped.override {
-        treesitter-parsers = treesitter-parsers self;
-      }).overrideAttrs
-        (oldAttrs: {
-          src = inputs.nvim-config.neovim;
-          version = "0.10.0-dev";
-          postInstall = (oldAttrs.postInstall or "") + ''
-            # disable treesitter by default for ftplugins
-            ${pkgs.gnugrep}/bin/grep -rl 'vim.treesitter.start()' $out/share/nvim/runtime/ftplugin |\
-            ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
-          '';
-        });
+      neovim-unwrapped =
+        let
+          tree-sitter-209 = inputs.nixpkgs-tree-sitter.legacyPackages.${pkgs.system}.tree-sitter;
+        in
+        (super.neovim-unwrapped.override {
+          tree-sitter = tree-sitter-209;
+          treesitter-parsers = treesitter-parsers self;
+        }).overrideAttrs
+          (oldAttrs: {
+            src = inputs.nvim-config.neovim;
+            version = "0.10.0-dev";
+            postInstall = (oldAttrs.postInstall or "") + ''
+              # disable treesitter by default for ftplugins
+              ${pkgs.gnugrep}/bin/grep -rl 'vim.treesitter.start()' $out/share/nvim/runtime/ftplugin |\
+              ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
+            '';
+          });
 
       editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
         if [[ $QUIT_ON_OPEN == "1" ]]; then
@@ -158,7 +162,7 @@ in
         buildCommand = (oldAttrs.buildCommand or "") + ''
           mkdir -p $out/tmp/firefox-omni
           cd $out/tmp/firefox-omni
-          ${pkgs.unzip}/bin/unzip $out/lib/firefox/browser/omni.ja
+          echo $(${pkgs.unzip}/bin/unzip $out/lib/firefox/browser/omni.ja) # TODO: workaround for omni.ja breaking
           patch chrome/browser/content/browser/browser.xhtml < ${patches/browser.xhtml.patch}
           ${pkgs.zip}/bin/zip -0DXqr $out/tmp/omni.ja *
           cp -f $out/tmp/omni.ja $out/lib/firefox/browser/omni.ja
