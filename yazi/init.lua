@@ -89,66 +89,86 @@ end
 function Current:render(area)
 	self.area = area
 
-	local markers = {}
-	local items = {}
+	local files = Folder:by_kind(Folder.CURRENT).window
+	if #files == 0 then
+		return {}
+	end
 
-	for i, f in ipairs(Folder:by_kind(Folder.CURRENT).window) do
+	local items, markers = {}, {}
+	for i, f in ipairs(files) do
 		local name = Folder:highlighted_name(f)
-		-- local file_size
-		-- file_size = ya.readable_size(f:size() or f.cha.length)
-		--
-		-- name[#name + 1] = ui.Span(string.rep(' ', area.w - 4 - #file_size - length) .. file_size)
-		local item = ui.ListItem(ui.Line { Folder:icon(f), table.unpack(name) })
 
 		-- Highlight hovered file
+		local item = ui.ListItem(ui.Line { Folder:icon(f), table.unpack(name) })
 		item = item:style(get_style(f))
 		items[#items + 1] = item
 
-		-- Mark yanked/selected files
-		local yanked = f:is_yanked()
-		if yanked ~= 0 then
-			markers[#markers + 1] = { i, yanked }
-		elseif f:is_selected() then
-			markers[#markers + 1] = { i, 3 }
+		-- Yanked/marked/selected files
+		local marker = Folder:marker(f)
+		if marker ~= 0 then
+			markers[#markers + 1] = { i, marker }
 		end
 	end
-	return { ya.flat { ui.List(area, items), Folder:linemode(area), Folder:markers(area, markers) } }
+
+	return ya.flat {
+		ui.List(area, items),
+		Folder:linemode(area, files),
+		Folder:markers(area, markers),
+	}
 end
 
 function Parent:render(area)
 	self.area = area
 
 	local folder = Folder:by_kind(Folder.PARENT)
-	if folder == nil then
+	if not folder then
 		return {}
 	end
 
-	local items = {}
-	for _, f in ipairs(folder.window) do
+	local items, markers = {}, {}
+	for i, f in ipairs(folder.window) do
+		-- Highlight hovered file
 		local item = ui.ListItem(ui.Line { Folder:icon(f), ui.Span(f.name) })
 		item = item:style(get_style(f))
-
 		items[#items + 1] = item
+
+		-- Yanked/marked/selected files
+		local marker = Folder:marker(f)
+		if marker ~= 0 then
+			markers[#markers + 1] = { i, marker }
+		end
 	end
 
-	return { ui.List(area, items) }
+	return ya.flat {
+		ui.List(area, items),
+		Folder:markers(area, markers),
+	}
 end
 
 function Preview:render(area)
 	self.area = area
 
 	local folder = Folder:by_kind(Folder.PREVIEW)
-	if folder == nil then
+	if not folder then
 		return {}
 	end
 
-	local items = {}
-	for _, f in ipairs(folder.window) do
+	local items, markers = {}, {}
+	for i, f in ipairs(folder.window) do
+		-- Highlight hovered file
 		local item = ui.ListItem(ui.Line { Folder:icon(f), ui.Span(f.name) })
 		item = item:style(get_style(f))
-
 		items[#items + 1] = item
+
+		-- Yanked/marked/selected files
+		local marker = Folder:marker(f)
+		if marker ~= 0 then
+			markers[#markers + 1] = { i, marker }
+		end
 	end
 
-	return { ui.List(area, items) }
+	return ya.flat {
+		ui.List(area, items),
+		Folder:markers(area, markers),
+	}
 end
