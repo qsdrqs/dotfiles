@@ -170,12 +170,6 @@ in
         '';
       });
 
-      grc = super.grc.overrideAttrs (oldAttrs: {
-        postInstall = (oldAttrs.postInstall or "") + ''
-          sed -i 's/.{commands\[\$0\]}/\$0/g' $out/etc/grc.zsh
-        '';
-      });
-
       interception-tools-plugins.ctrl2esc = super.interception-tools-plugins.caps2esc.overrideAttrs (oldAttrs: {
         pname = "ctrl2esc";
         src = pkgs.fetchFromGitLab {

@@ -56,22 +56,6 @@ in
         ./empty)
     ];
   };
-  system.activationScripts = {
-    root_sshconfig = ''
-      if [ -d "/root" ]; then
-          # Check if /root/.ssh does not exist
-          if [ ! -d "/root/.ssh" ]; then
-              echo "/root/.ssh does not exist. Creating directory."
-              mkdir /root/.ssh
-          fi
-          # Copy .ssh keys from /home/qsdrqs/.ssh to /root/.ssh
-          cp -f /home/qsdrqs/.ssh/* /root/.ssh/
-
-          # Change ownership to root for all files in /root/.ssh
-          chown root:root /root/.ssh/id*
-      fi
-    '';
-  };
 
   # enable normal users to use reboot or shutdown
   security.polkit.enable = true;
@@ -125,6 +109,8 @@ in
     fd
     ripgrep
     gnutar
+    zip
+    unzip
     p7zip
     gcc
     gnumake
@@ -156,6 +142,7 @@ in
     valgrind
     sqlite
     sshfs
+    (lib.hiPrio inetutils)
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

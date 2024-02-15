@@ -3190,6 +3190,12 @@ local plugins = {
           print(msg)
           return
         end
+        if string.find(msg, "auto-session ERROR: Error restoring session!", 1, true) then
+          vim.cmd("normal! zR")
+          print(msg)
+          require('auto-session').SaveSession()
+          return
+        end
         require("notify")(msg, ...)
       end
     end
@@ -3840,7 +3846,20 @@ local plugins = {
       dap.configurations.c = dap.configurations.cpp
       dap.configurations.rust = dap.configurations.cpp
       dap.configurations.asm = dap.configurations.cpp
-
+      vim.api.nvim_create_user_command("DapGDBMemory", function(opts)
+        local fargs = opts.fargs
+        local tmpfile = vim.fn.tempname()
+        print(tmpfile)
+        local address = fargs[1] or vim.fn.input('Address: ')
+        local size = fargs[2] or 1000
+        local cmd = string.format("-exec dump binary memory %s %s %s", tmpfile, address, address .. "+" .. size)
+        dap.repl.execute(cmd)
+        vim.defer_fn(function()
+          vim.cmd("e " .. tmpfile)
+          vim.cmd("%!xxd")
+        end, 0)
+      end, { nargs = '*' })
+      vim.api.nvim_create_user_command("DapListBreakpoints", dap.list_breakpoints, { nargs = 0 })
       -- Java use nvim-jdtls
       -- Python use nvim-dap-python
 
