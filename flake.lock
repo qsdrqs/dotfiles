@@ -1262,22 +1262,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-tree-sitter": {
-      "locked": {
-        "lastModified": 1706284898,
-        "narHash": "sha256-2Fd/VGVsFt7UYZ1MEgacNFyY6nAZDiJm9KJS6ewT8Gk=",
-        "owner": "polarmutex",
-        "repo": "nixpkgs",
-        "rev": "494e53c2578f80e25ac95774402beb4ca137e17b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "polarmutex",
-        "ref": "update-treesitter",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nmd": {
       "flake": false,
       "locked": {
@@ -2148,7 +2132,6 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-fix": "nixpkgs-fix",
         "nixpkgs-master": "nixpkgs-master",
-        "nixpkgs-tree-sitter": "nixpkgs-tree-sitter",
         "nur": "nur",
         "nvim-config": "nvim-config",
         "ranger-config": "ranger-config",

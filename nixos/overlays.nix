@@ -43,11 +43,7 @@ in
       # End Temporary self updated packages
 
       neovim-unwrapped =
-        let
-          tree-sitter-209 = inputs.nixpkgs-tree-sitter.legacyPackages.${pkgs.system}.tree-sitter;
-        in
         (super.neovim-unwrapped.override {
-          tree-sitter = tree-sitter-209;
           treesitter-parsers = treesitter-parsers self;
         }).overrideAttrs
           (oldAttrs: {
