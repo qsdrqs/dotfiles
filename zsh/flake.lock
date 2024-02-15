@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1707403294,
-        "narHash": "sha256-7S6UZCcUgBguoVaDWG4xGGQI2ePIVjz2L8aketzYbOw=",
+        "lastModified": 1707909248,
+        "narHash": "sha256-0bU/wJkICS+KwTMVzs/NqFJ0QBhiHiO6NLI9rCJbxv4=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "fff073b55defed72a0a1aac4e853b165f208735b",
+        "rev": "872b5cd4086a5547dbf788dda4e96ab3868cf59b",
         "type": "github"
       },
       "original": {
@@ -51,11 +51,11 @@
     "powerlevel10k": {
       "flake": false,
       "locked": {
-        "lastModified": 1707209786,
-        "narHash": "sha256-zXIKt06Snsj3qiFmBhb6HGE/zeWy8WyRru1rhAkRAq8=",
+        "lastModified": 1708007549,
+        "narHash": "sha256-P78Uve6fK2K8TxiWKzB6+aK7/VQNj3IqAmpTVV3q7o4=",
         "owner": "romkatv",
         "repo": "powerlevel10k",
-        "rev": "5bba4b849b04da665d9776930f47371ebb9974a4",
+        "rev": "17cd9e354a283edeb657d340e1bbc0a30de5f967",
         "type": "github"
       },
       "original": {
