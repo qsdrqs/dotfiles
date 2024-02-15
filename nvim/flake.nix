@@ -316,7 +316,7 @@
       flake = false;
     };
     nvim-notify = {
-      url = "github:ls-devs/nvim-notify";
+      url = "github:rcarriga/nvim-notify";
       flake = false;
     };
     lsp_linesDOTnvim = {

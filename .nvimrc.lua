@@ -3171,7 +3171,7 @@ local plugins = {
   },
 
   {
-    "ls-devs/nvim-notify",
+    "rcarriga/nvim-notify",
     config = function()
       local banned_messages = {
         "method textDocument/codeLens is not supported by any of the servers registered for the current buffer",
