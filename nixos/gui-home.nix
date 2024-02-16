@@ -14,4 +14,10 @@
       "x-scheme-handler/tg" = [ "userapp-Telegram Desktop-FKA2H2.desktop" ];
     };
   };
+
+  home.file."rofi-hyprwindow" = {
+    source = ../hypr/rofi-hyprwindow.sh;
+    target = ".local/bin/rofi-hyprwindow";
+    executable = true;
+  };
 }

@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-fix.url = "github:NixOS/nixpkgs/842d9d80cfd4560648c785f8a4e6f3b096790e19";
+    nixpkgs-fix.url = "github:NixOS/nixpkgs/a4d4fe8c5002202493e87ec8dbc91335ff55552c";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -336,8 +336,9 @@
       # dev shells
       devShells = archSpecConfigAll (system: (pkgs' system).callPackage dev-shell.shells { inputs = inputs; });
       # direct nix run
-      packages = archSpecConfigAll (system: pkgs' system);
-
+      packages = archSpecConfigAll (system: pkgs' system) // {
+        x86_64-linux.hack-pylsp = (pkgs' "x86_64-linux").callPackage ./nixos/hack-pylsp.nix { };
+      };
       legacyPackages = nixpkgs.legacyPackages;
       inputs_ = inputs;
     };
