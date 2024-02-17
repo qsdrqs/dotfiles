@@ -3192,7 +3192,7 @@ local plugins = {
         end
         if string.find(msg, "auto-session ERROR: Error restoring session!", 1, true) then
           vim.cmd("normal! zR")
-          print(msg)
+          vim.notify("Auto session corrupted, restored the old", "info", { title = "Auto Session" })
           require('auto-session').SaveSession()
           return
         end

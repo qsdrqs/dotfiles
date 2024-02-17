@@ -21,7 +21,7 @@ if [[ $NOTMUX != 1 ]]; then
         elif [[ "$SSH_CONNECTION" != ""  ]]; then
             session_name="ssh"
             if [[ -x `command -v notify-send` ]]; then
-                timeout 5 notify-send "ssh connected"
+                timeout 3 notify-send "ssh connected"
             fi
             call_tmux $session_name
             #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then
