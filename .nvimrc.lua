@@ -456,7 +456,7 @@ local plugins = {
         local liblldb_path = extension_path .. 'packages/codelldb/extension/lldb/lib/liblldb.so'
 
         local lsp_config = get_lsp_common_config()
-        -- lsp_config.capabilities.offsetEncoding = nil
+        lsp_config.capabilities.offsetEncoding = nil
 
         local cfg = require('rustaceanvim.config')
         return {
@@ -3745,6 +3745,19 @@ local plugins = {
       vim.keymap.set('n', '<F7>', require("dapui").eval, { silent = true })
       vim.keymap.set('v', '<F7>', require("dapui").eval, { silent = true })
 
+      ---------------------------temp solution------------------------------------------------------
+      -- TODO: remove this after
+      local function toggle_bp(c, h, l, r)
+        require("dap.breakpoints").toggle({
+          condition = c,
+          hit_condition = h,
+          log_message = l,
+          replace = r,
+        })
+      end
+      dap.toggle_breakpoint = toggle_bp
+      ----------------------------------------------------------------------------------------------
+
       -- C/C++
       dap.adapters.cppdbg = {
         id = 'cppdbg',
@@ -3860,6 +3873,44 @@ local plugins = {
         end, 0)
       end, { nargs = '*' })
       vim.api.nvim_create_user_command("DapListBreakpoints", dap.list_breakpoints, { nargs = 0 })
+
+      -- jump between breakpoints
+      local function jump_breakpoints(up)
+        local bufnr = vim.api.nvim_get_current_buf()
+        local bps = require("dap.breakpoints").get()[bufnr]
+        if bps == nil or #bps == 0 then
+          vim.api.nvim_echo({{"No breakpoints", "WarningMsg"}}, false, {})
+          return
+        end
+        local lnum = vim.api.nvim_win_get_cursor(0)[1]
+        local nearest = nil
+        for _, bp in ipairs(bps) do
+          if up then
+            if bp.line < lnum then
+              nearest = bp
+            else
+              break
+            end
+          else
+            if bp.line > lnum then
+              nearest = bp
+              break
+            end
+          end
+        end
+        if nearest then
+          vim.api.nvim_win_set_cursor(0, {nearest.line, 0})
+          return
+        end
+        if up then
+          vim.api.nvim_win_set_cursor(0, {bps[#bps].line, 0})
+        else
+          vim.api.nvim_win_set_cursor(0, {bps[1].line, 0})
+        end
+      end
+      vim.keymap.set('n', ']b', function() jump_breakpoints(false) end, { silent = true })
+      vim.keymap.set('n', '[b', function() jump_breakpoints(true) end, { silent = true })
+
       -- Java use nvim-jdtls
       -- Python use nvim-dap-python
 

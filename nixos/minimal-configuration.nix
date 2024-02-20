@@ -204,8 +204,11 @@ in
       ];
     };
   };
-  # TODO: github:NixOS/nixpkgs/issues/281271
-  environment.variables.LOCATE_PATH = lib.mkForce "";
+  environment.variables = {
+    # TODO: github:NixOS/nixpkgs/issues/281271
+    LOCATE_PATH = lib.mkForce "";
+    NIX_CURR_PROFILE_SOURCE = ./.;
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
