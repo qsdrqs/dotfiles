@@ -1,10 +1,6 @@
 { config, pkgs, inputs, lib, ... }:
 
 {
-  ### add the customizations here for different machines
-  # home.username = "qsdrqs";
-  # home.homeDirectory = "/home/qsdrqs";
-  ###
   imports = [
     (if builtins.pathExists ./home-custom.nix then
       ./home-custom.nix
@@ -20,6 +16,13 @@
       withPython3 = true;
     })
     yazi
+    zoxide
     editor-wrapped
+    lsd
+    fd
+    ripgrep
+    grc
+    neofetch
+    tmux
   ];
 }

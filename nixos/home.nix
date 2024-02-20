@@ -58,6 +58,12 @@
     target = ".ssh/extra_config";
   };
 
+  # enable fzf
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
@@ -106,6 +112,7 @@
     --tabstop=1                           \
     --exit-0                              \
     --select-1";
+    NIX_CURR_PROFILE_SOURCE = ../.;
   };
 
   # Windows Fonts

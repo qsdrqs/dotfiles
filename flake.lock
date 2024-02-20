@@ -469,7 +469,7 @@
     "dev-shell": {
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-Q/jZoDEYTPpsACYoIJseyN9wis0oDOhzlZRaLop/pyM=",
+        "narHash": "sha256-7vkLRF5MS+7Vb8iMCnkVHbLmaUb55+xAE5f0gqOHBgE=",
         "path": "nixos/dev-shell",
         "type": "path"
       },

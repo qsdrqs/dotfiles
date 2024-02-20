@@ -43,18 +43,28 @@ with pkgs; {
       pkg-config
     ];
   };
-  python = mkShell {
-    packages = [
-      (python3.withPackages (pypkgs: with pypkgs; [
+  python =
+    let
+      defaultPyPkgs = (pypkgs: with pypkgs; [
         virtualenv
         numpy
         matplotlib
         autopep8
         debugpy
         isort
-      ]))
-      nodePackages.pyright
-    ];
+      ]);
+    in
+    (mkShell {
+      packages = [
+        (python3.withPackages defaultPyPkgs)
+        nodePackages.pyright
+      ];
+    }) // {
+    extraPyPkgs = (extraPyPkgs: mkShell {
+      packages = [
+        (python3.withPackages (pypkgs: (defaultPyPkgs pypkgs) ++ (extraPyPkgs pypkgs)))
+      ];
+    });
   };
   java = mkShell {
     packages = [

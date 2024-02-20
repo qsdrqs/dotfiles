@@ -178,6 +178,7 @@ in
         PasswordAuthentication = false;
         KbdInteractiveAuthentication = false;
         X11Forwarding = true;
+        # AllowTcpForwarding = true;
       };
     };
     journald.extraConfig = ''
@@ -207,7 +208,6 @@ in
   environment.variables = {
     # TODO: github:NixOS/nixpkgs/issues/281271
     LOCATE_PATH = lib.mkForce "";
-    NIX_CURR_PROFILE_SOURCE = ./.;
   };
 
   # Open ports in the firewall.
