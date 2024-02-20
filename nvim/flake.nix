@@ -19,6 +19,10 @@
       url = "github:nvim-telescope/telescope-fzf-native.nvim";
       flake = false;
     };
+    telescope-cmdlineDOTnvim = {
+      url = "github:jonarrien/telescope-cmdline.nvim";
+      flake = false;
+    };
     telescope-vim-bookmarksDOTnvim = {
       url = "github:tom-anders/telescope-vim-bookmarks.nvim";
       flake = false;
@@ -482,6 +486,7 @@
         { name = "lazy.nvim"; dotname = "lazyDOTnvim";source = inputs.lazyDOTnvim; build = false; }
         { name = "plenary.nvim"; dotname = "plenaryDOTnvim";source = inputs.plenaryDOTnvim; build = false; }
         { name = "telescope-fzf-native.nvim"; dotname = "telescope-fzf-nativeDOTnvim";source = inputs.telescope-fzf-nativeDOTnvim; build = true; }
+        { name = "telescope-cmdline.nvim"; dotname = "telescope-cmdlineDOTnvim";source = inputs.telescope-cmdlineDOTnvim; build = false; }
         { name = "telescope-vim-bookmarks.nvim"; dotname = "telescope-vim-bookmarksDOTnvim";source = inputs.telescope-vim-bookmarksDOTnvim; build = false; }
         { name = "telescope.nvim"; dotname = "telescopeDOTnvim";source = inputs.telescopeDOTnvim; build = false; }
         { name = "sigsegvim"; dotname = "sigsegvim";source = inputs.sigsegvim; build = false; }

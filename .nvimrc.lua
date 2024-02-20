@@ -163,6 +163,7 @@ local plugins = {
     dependencies = {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope-fzf-native.nvim',
+      'jonarrien/telescope-cmdline.nvim',
       'tom-anders/telescope-vim-bookmarks.nvim',
     },
     keys = {
@@ -184,6 +185,16 @@ local plugins = {
         action_set.shift_selection(prompt_bufnr, -5)
       end
 
+      local t = function(str)
+        return vim.api.nvim_replace_termcodes(str, true, true, true)
+      end
+      local function move_left_7()
+        return vim.api.nvim_feedkeys(t "7h", "n", true)
+      end
+      local function move_right_7()
+        return vim.api.nvim_feedkeys(t "7l", "n", true)
+      end
+
       local status_ok, trouble_telscope = pcall(require, "trouble.providers.telescope")
       local opts = {
         defaults = {
@@ -195,6 +206,9 @@ local plugins = {
             n = {
               ["K"] = move_selection_previous_5,
               ["J"] = move_selection_next_5,
+              ["H"] = move_left_7,
+              ["L"] = move_right_7,
+              ["q"] = require("telescope.actions").close,
             },
           }
         }
@@ -2685,6 +2699,14 @@ local plugins = {
   },
 
   {
+    'jonarrien/telescope-cmdline.nvim',
+    config = function()
+      require("telescope").load_extension('cmdline')
+      require('cmdline.config').values.picker.layout_config = nil
+    end
+  },
+
+  {
     'MattesGroeger/vim-bookmarks',
     lazy = true,
     keys = {
@@ -4333,7 +4355,7 @@ function LazyLoadPlugins()
   end
 
   -- change <leader><leader> to telescope commands
-  vim.keymap.set('n', '<leader><leader>', '<cmd>Telescope commands<cr>', { silent = true })
+  vim.keymap.set('n', '<leader><leader>', '<cmd>Telescope cmdline<cr>', { silent = true })
 end
 
 function loadTags()

@@ -1437,6 +1437,7 @@
         "statuscolDOTnvim": "statuscolDOTnvim",
         "sudaDOTvim": "sudaDOTvim",
         "telescope-asynctasksDOTnvim": "telescope-asynctasksDOTnvim",
+        "telescope-cmdlineDOTnvim": "telescope-cmdlineDOTnvim",
         "telescope-fzf-nativeDOTnvim": "telescope-fzf-nativeDOTnvim",
         "telescope-live-grep-argsDOTnvim": "telescope-live-grep-argsDOTnvim",
         "telescope-vim-bookmarksDOTnvim": "telescope-vim-bookmarksDOTnvim",
@@ -1561,6 +1562,22 @@
       "original": {
         "owner": "GustavoKatel",
         "repo": "telescope-asynctasks.nvim",
+        "type": "github"
+      }
+    },
+    "telescope-cmdlineDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1707945853,
+        "narHash": "sha256-ciLHd+9SbpnI/l/vUgq4QZSUUNCRIkAq+UG5OEGYLv4=",
+        "owner": "jonarrien",
+        "repo": "telescope-cmdline.nvim",
+        "rev": "d4c3bf279b6b2d80aae5dc145dc28b0de4b6ff7c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jonarrien",
+        "repo": "telescope-cmdline.nvim",
         "type": "github"
       }
     },
