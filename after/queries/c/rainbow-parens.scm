@@ -1,3 +1,5 @@
+; inherits: c
+
 (
   "[" @opening
   "]" @closing)
