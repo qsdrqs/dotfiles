@@ -97,21 +97,25 @@
 
   home.sessionVariables = {
     CREDENTIALS_FILE = "${config.home.homeDirectory}/.git-credentials";
-    NIX_CONFIG = "access-tokens = github.com=$(${pkgs.coreutils-full}/bin/cat ${config.home.homeDirectory}/.git-credentials 2>/dev/null \\
-    | ${pkgs.gnugrep}/bin/grep github.com \\
-    | ${pkgs.gawk}/bin/awk -F'[:@]' '{print $3}')";
-    _ZO_FZF_OPTS ="
-    --no-sort                             \
-    --bind=ctrl-z:ignore,btab:up,tab:down \
-    --cycle                               \
-    --keep-right                          \
-    --border=sharp                        \
-    --height=45%                          \
-    --info=inline                         \
-    --layout=reverse                      \
-    --tabstop=1                           \
-    --exit-0                              \
-    --select-1";
+    NIX_CONFIG = ''$(
+      github_token=$(cat /home/qsdrqs/.git-credentials 2>/dev/null | grep github.com | awk -F'[:@]' '{print $3}')
+      if [ -n "$github_token" ]; then
+        echo "access-tokens = github.com=$github_token";
+      fi
+    )'';
+    _ZO_FZF_OPTS = ''
+      --no-sort
+      --bind=ctrl-z:ignore,btab:up,tab:down
+      --cycle
+      --keep-right
+      --border=sharp
+      --height=45%
+      --info=inline
+      --layout=reverse
+      --tabstop=1
+      --exit-0
+      --select-1
+    '';
     NIX_CURR_PROFILE_SOURCE = ../.;
   };
 

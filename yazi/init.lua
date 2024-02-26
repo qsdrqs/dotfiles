@@ -57,7 +57,7 @@ function File:style(file)
 	if file.cha.is_link then
 		style:fg(link_style.fg)
 	end
-	if executable(file) then
+	if executable(file) and not file.cha.is_link then
 		if white_style then
 			style:fg("green")
 		end
