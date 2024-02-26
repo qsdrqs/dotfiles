@@ -74,6 +74,7 @@ in
   ] //
   symbfileTargetNoRecursive [
     { name = "yazi"; target = ".config/yazi"; }
+    { name = "nvim/lua"; target = ".config/nvim/lua"; }
   ] //
   genZshPlugins inputs.zsh-config.plugins //
   genZshThemes inputs.zsh-config.themes //

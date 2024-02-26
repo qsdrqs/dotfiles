@@ -70,12 +70,7 @@ let
     entries);
 in
 {
-  home.file = genNvimPlugins inputs.nvim-config.plugins_list // {
-    dotfiles = {
-      source = inputs.nvim-config;
-      target = "${config.home.homeDirectory}/.local/share/nvim/nix/dotfiles";
-    };
-  };
+  home.file = genNvimPlugins inputs.nvim-config.plugins_list;
 
   home.activation.updateNvimFlake = ''
     cd ${config.home.homeDirectory}/dotfiles/nvim

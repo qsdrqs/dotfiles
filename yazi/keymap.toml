@@ -32,8 +32,8 @@ keymap = [
 	# { on = [ "<PageUp>" ],     exec = "arrow -100%", desc = "Move cursor up one page" },
 	# { on = [ "<PageDown>" ],   exec = "arrow 100%",  desc = "Move cursor down one page" },
 
-	{ on = [ "h" ], exec = [ "leave", "escape --visual --select" ], desc = "Go back to the parent directory" },
-	{ on = [ "l" ], exec = [ "enter", "escape --visual --select" ], desc = "Enter the child directory" },
+	{ on = [ "h" ], exec = "leave", desc = "Go back to the parent directory" },
+	{ on = [ "l" ], exec = "enter", desc = "Enter the child directory" },
 
 	{ on = [ "H" ], exec = "back",    desc = "Go back to the previous directory" },
 	{ on = [ "L" ], exec = "forward", desc = "Go forward to the next directory" },
@@ -226,13 +226,16 @@ keymap = [
 	{ on = [ "<A-f>" ], exec = "forward --end-of-word", desc = "Move forward to the end of the current or next word" },
 
 	# Line-wise movement
-	{ on = [ "0" ],     exec = "move -999", desc = "Move to the BOL" },
-	{ on = [ "$" ],     exec = "move 999",  desc = "Move to the EOL" },
-	{ on = [ "<C-a>" ], exec = "move -999", desc = "Move to the BOL" },
-	{ on = [ "<C-e>" ], exec = "move 999",  desc = "Move to the EOL" },
+	{ on = [ "0" ],      exec = "move -999", desc = "Move to the BOL" },
+	{ on = [ "$" ],      exec = "move 999",  desc = "Move to the EOL" },
+	{ on = [ "<C-a>" ],  exec = "move -999", desc = "Move to the BOL" },
+	{ on = [ "<C-e>" ],  exec = "move 999",  desc = "Move to the EOL" },
+	{ on = [ "<Home>" ], exec = "move -999", desc = "Move to the BOL" },
+	{ on = [ "<End>" ],  exec = "move 999",  desc = "Move to the EOL" },
 
 	# Delete
 	{ on = [ "<Backspace>" ], exec = "backspace",	        desc = "Delete the character before the cursor" },
+	{ on = [ "<Delete>" ],    exec = "backspace --under", desc = "Delete the character under the cursor" },
 	{ on = [ "<C-h>" ],       exec = "backspace",         desc = "Delete the character before the cursor" },
 	{ on = [ "<C-d>" ],       exec = "backspace --under", desc = "Delete the character under the cursor" },
 

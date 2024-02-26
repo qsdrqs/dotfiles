@@ -136,16 +136,8 @@ end
 local function vscode_prev_hunk()
   require("vscode-neovim").action("workbench.action.editor.previousChange")
 end
-local dotfiles_nvim_dir
-if use_nix then
-  dotfiles_nvim_dir = vim.fn.stdpath("data") .. "/nix/dotfiles"
-else
-  dotfiles_nvim_dir = os.getenv("HOME") .. "/dotfiles/nvim"
-end
 
 local plugins = {
-  -- auto load rtp in dotfiles
-  {'dotfiles', lazy = false, dir = os.getenv("HOME") .. "/dotfiles/nvim"},
   {'folke/lazy.nvim', lazy = false},
   {
     'nvim-lua/plenary.nvim',
@@ -986,18 +978,23 @@ local plugins = {
   {
     -- can be used as formatter
     "nvimtools/none-ls.nvim",
+    depedencies = {
+      "nvimtools/none-ls-extras.nvim",
+    },
     config = function()
       local null_ls = require("null-ls")
+      local eslint =  require('none-ls.diagnostics.eslint')
+      local autopep8 = require('dotfiles.none-ls.autopep8')
 
       null_ls.setup({
         sources = {
-          null_ls.builtins.diagnostics.eslint,
+          eslint,
           -- null_ls.builtins.completion.spell,
           null_ls.builtins.formatting.prettier,
           null_ls.builtins.completion.tags,
           null_ls.builtins.code_actions.gitsigns,
           -- python
-          null_ls.builtins.formatting.autopep8.with({
+          autopep8.with({
             runtime_condition = function(params)
               if params.options.isort == true then
                 return false
@@ -1027,6 +1024,7 @@ local plugins = {
       })
     end
   },
+  { "nvimtools/none-ls-extras.nvim" },
 
   -- complete
   {'hrsh7th/vim-vsnip'},

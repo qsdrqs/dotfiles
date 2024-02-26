@@ -99,6 +99,10 @@
       url = "github:nvimtools/none-ls.nvim";
       flake = false;
     };
+    none-ls-extrasDOTnvim = {
+      url = "github:nvimtools/none-ls-extras.nvim";
+      flake = false;
+    };
     vim-vsnip = {
       url = "github:hrsh7th/vim-vsnip";
       flake = false;
@@ -506,6 +510,7 @@
         { name = "nvim-autopairs"; dotname = "nvim-autopairs";source = inputs.nvim-autopairs; build = false; }
         { name = "auto-save.nvim"; dotname = "auto-saveDOTnvim";source = inputs.auto-saveDOTnvim; build = false; }
         { name = "none-ls.nvim"; dotname = "none-lsDOTnvim";source = inputs.none-lsDOTnvim; build = false; }
+        { name = "none-ls-extras.nvim"; dotname = "none-ls-extrasDOTnvim";source = inputs.none-ls-extrasDOTnvim; build = false; }
         { name = "vim-vsnip"; dotname = "vim-vsnip";source = inputs.vim-vsnip; build = false; }
         { name = "cmp-nvim-lsp"; dotname = "cmp-nvim-lsp";source = inputs.cmp-nvim-lsp; build = false; }
         { name = "cmp-nvim-lua"; dotname = "cmp-nvim-lua";source = inputs.cmp-nvim-lua; build = false; }
