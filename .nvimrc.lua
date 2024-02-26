@@ -1708,7 +1708,7 @@ local plugins = {
       if vim.g.treesitter_disable == true then
         return
       end
-      require'nvim-treesitter.configs'.setup {
+      local opts = {
         textobjects = {
           select = {
             enable = true,
@@ -1737,6 +1737,25 @@ local plugins = {
           },
         },
       }
+      if vim.bo.filetype ~= "lua" then
+        opts.textobjects.move = {
+            enable = true,
+            set_jumps = true, -- whether to set jumps in the jumplist
+            goto_next_start = {
+              ["]m"] = "@function.outer",
+            },
+            goto_next_end = {
+              ["]M"] = "@function.outer",
+            },
+            goto_previous_start = {
+              ["[m"] = "@function.outer",
+            },
+            goto_previous_end = {
+              ["[M"] = "@function.outer",
+            },
+        }
+      end
+      require'nvim-treesitter.configs'.setup(opts)
     end
   },
 
@@ -2753,11 +2772,20 @@ local plugins = {
       end
     end,
     config = function()
+      local restore_last = false
+      if vim.g.neovide ~= nil
+        and #vim.fn.argv() == 0
+        and vim.g.remote_ui == nil then
+        restore_last = true
+        vim.defer_fn(function() -- execute after function exit (setted up)
+          require('auto-session').RestoreSession()
+        end, 0)
+      end
       require('auto-session').setup {
         log_level = 'error',
         auto_session_suppress_dirs = {'~/', '~/Downloads', '~/Documents'},
         auto_session_create_enabled = false,
-        -- auto_session_enable_last_session = true,
+        auto_session_enable_last_session = restore_last,
         auto_save_enabled = true,
         auto_restore_enabled = true,
         post_restore_cmds = {'silent !kill -s SIGWINCH $PPID'},
@@ -4107,6 +4135,7 @@ local plugins = {
     end
   },
 }
+
 local pattern
 if use_nix then pattern = "." else pattern = "*" end
 local lazy_opts =  {

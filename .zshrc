@@ -189,6 +189,9 @@ fi
 # 使用nvim作为默认pager
 # export PAGER=nvimpager
 
+# 添加家目录
+hash -d nvim=~/.local/share/nvim
+
 # python虚拟环境
 if [ -e "/usr/bin/virtualenvwrapper.sh" ]; then
     export VIRTUALENVWRAPPER_PYTHON=/bin/python3
