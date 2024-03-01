@@ -200,15 +200,18 @@ in
       package = pkgs.plocate;
       interval = "hourly";
       localuser = null;
+      pruneBindMounts = false; # btrfs can't be pruned
       prunePaths = options.services.locate.prunePaths.default ++ [
         "/mnt"
+        "/btrfs_root"
+        "/home/.snapshots"
       ];
     };
   };
-  environment.variables = {
-    # TODO: github:NixOS/nixpkgs/issues/281271
-    LOCATE_PATH = lib.mkForce "";
-  };
+  # TODO: https://github.com/NixOS/nixpkgs/issues/281271
+  environment.extraInit = ''
+    unset LOCATE_PATH
+  '';
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

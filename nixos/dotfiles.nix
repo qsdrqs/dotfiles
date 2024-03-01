@@ -66,6 +66,7 @@ in
     ".tmux.conf.local"
     ".zshrc"
     ".vim"
+    ".editorconfig"
   ] //
   symbfileTarget [
     { name = ".vim"; target = ".config/nvim"; }

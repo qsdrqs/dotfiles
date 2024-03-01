@@ -12,10 +12,15 @@ This file is for getting the input for the flake
 
 import subprocess
 import json
+import os
 
 
 def main():
-    cmd = 'nvim --headless --cmd "let g:plugins_loaded=1 | let g:no_wait_headless = 1" -c \'lua DumpPluginsList(); vim.cmd("q")\''
+    dotfiles_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    cmd = f'nvim --clean --headless \
+        --cmd "let g:plugins_loaded=1 | let g:no_wait_headless = 1" \
+        -c \'lua DumpPluginsList(); vim.cmd("q")\' \
+        -u {dotfiles_dir}/.nvimrc.lua'
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     plugins: list[str] = []

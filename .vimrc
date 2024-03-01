@@ -510,7 +510,8 @@ function! s:deleteTrailing()
     call cursor(l:curr_line, l:curr_col)
   endif
 endfunction
-autocmd InsertLeave * call s:deleteTrailing()
+" use editorconfig instead
+" autocmd InsertLeave * call s:deleteTrailing()
 
 function s:is_xxd_layout()
   " check if the first line is starting with 00000000
