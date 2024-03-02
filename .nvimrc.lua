@@ -1973,7 +1973,7 @@ local plugins = {
         return table.concat(parts, separator)
       end
 
-      winbar_aerial = function()
+      local winbar_aerial = function()
         -- Get a list representing the symbol path by aerial.get_location (see
         -- https://github.com/stevearc/aerial.nvim/blob/master/lua/aerial/init.lua#L127),
         -- and format the list to get the symbol path.
@@ -1989,7 +1989,7 @@ local plugins = {
         return ""
       end
 
-      filename_with_icon = function()
+      local filename_with_icon = function()
         local winbar_aerial_ft_exclude = {}
 
         for _, ft in ipairs(winbar_aerial_ft_exclude) do
@@ -2399,8 +2399,8 @@ local plugins = {
         -- Lsp server name .
         function()
           local no_lsp = ''
-          local buf_ft = vim.api.nvim_buf_get_option(0, 'filetype')
-          local clients = vim.lsp.get_active_clients()
+          local buf_ft = vim.api.nvim_get_option_value('filetype', { buf = 0 })
+          local clients = vim.lsp.get_clients()
           if next(clients) == nil then
             return no_lsp
           end
@@ -3320,7 +3320,7 @@ local plugins = {
     cmd = { "IncomingCalls", "OutgoingCalls" },
     dependencies = { 'ldelossa/litee.nvim' },
     config = function()
-      -- configure the litee.nvim library 
+      -- configure the litee.nvim library
       require('litee.lib').setup {}
       -- configure litee-calltree.nvim
       require('litee.calltree').setup {

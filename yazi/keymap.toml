@@ -33,7 +33,7 @@ keymap = [
 	# { on = [ "<PageDown>" ],   exec = "arrow 100%",  desc = "Move cursor down one page" },
 
 	{ on = [ "h" ], exec = "leave", desc = "Go back to the parent directory" },
-	{ on = [ "l" ], exec = "enter", desc = "Enter the child directory" },
+	{ on = [ "l" ], exec = "plugin --sync smart-enter", desc = "Enter the child directory, , or open the file" },
 
 	{ on = [ "H" ], exec = "back",    desc = "Go back to the previous directory" },
 	{ on = [ "L" ], exec = "forward", desc = "Go forward to the next directory" },
@@ -80,8 +80,8 @@ keymap = [
 	{ on = [ "s" ],         exec = "search fd",                                            desc = "Search files by name using fd" },
 	{ on = [ "S" ],         exec = "search rg",                                            desc = "Search files by content using ripgrep" },
 	{ on = [ "<C-s>" ],     exec = "search none",                                          desc = "Cancel the ongoing search" },
-	{ on = [ "z" ],         exec = "jump zoxide",                                          desc = "Jump to a directory using zoxide" },
-	{ on = [ "Z" ],         exec = "jump fzf",                                             desc = "Jump to a directory, or reveal a file using fzf" },
+	{ on = [ "z" ],         exec = "plugin --sync smart-goto --args='jump zoxide'",        desc = "Jump to a directory using zoxide" },
+	{ on = [ "Z" ],         exec = "plugin --sync smart-goto --args='jump fzf'",           desc = "Jump to a directory, or reveal a file using fzf" },
 
 	# Linemode
 	{ on = [ "m", "s" ], exec = "linemode size",        desc = "Set linemode to size" },
@@ -141,14 +141,16 @@ keymap = [
 	{ on = [ "w" ], exec = "tasks_show", desc = "Show the tasks manager" },
 
 	# Goto
-	{ on = [ "g", "h" ],       exec = "cd ~",             desc = "Go to the home directory" },
-	{ on = [ "g", "H" ],       exec = "cd /mnt/c/Users/qsdrqs",             desc = "Go to the home directory" },
+	{ on = [ "g", "h" ],       exec = "plugin --sync smart-goto --args='jump ~'",             desc = "Go to the home directory" },
+	{ on = [ "g", "H" ],       exec = "plugin --sync smart-goto --args='jump /mnt/c/Users/qsdrqs'",     desc = "Go to the Windows home directory" },
 	{ on = [ "g", "w" ],       exec = "cd /home/qsdrqs/Documents/WeChat\\ Files/wxid_ap6bpq3h92zg22/FileStorage/File",             desc = "Go to the WeChat directory" },
 	{ on = [ "g", "q" ],       exec = "cd /home/qsdrqs/Documents/Tencent\\ Files/1143661020/FileRecv",             desc = "Go to the QQ directory" },
 	{ on = [ "g", "c" ],       exec = "cd ~/.config",     desc = "Go to the config directory" },
-	{ on = [ "g", "d" ],       exec = "cd ~/Downloads",   desc = "Go to the downloads directory" },
+	{ on = [ "g", "d" ],       exec = "plugin --sync smart-goto --args='jump follow ~/Downloads/'",   desc = "Follow the link, or go to the downloads directory" },
+	{ on = [ "<C-o>" ],        exec = "plugin --sync smart-goto --args='back'",   desc = "Jump back" },
+	{ on = [ "<Tab>" ],        exec = "plugin --sync smart-goto --args='forward'",   desc = "Jump forward" },
 	{ on = [ "g", "t" ],       exec = "cd /tmp",          desc = "Go to the temporary directory" },
-	{ on = [ "g", "<Space>" ], exec = "cd --interactive", desc = "Go to a directory interactively" },
+	{ on = [ "g", "<Space>" ], exec = "plugin --sync smart-goto --args='jump interactive'", desc = "Go to a directory interactively" },
 
 	# Help
 	{ on = [ "~" ], exec = "help", desc = "Open help" },
@@ -267,7 +269,7 @@ keymap = [
 
 keymap = [
 	{ on = [ "<C-q>" ],   exec = "close",                                      desc = "Cancel completion" },
-	{ on = [ "<Tab>" ],   exec = "close --submit",                             desc = "Submit the completion" },
+	# { on = [ "<Tab>" ],   exec = "close --submit",                             desc = "Submit the completion" },
 	{ on = [ "<Enter>" ], exec = [ "close --submit", "close_input --submit" ], desc = "Submit the completion and input" },
 
 	{ on = [ "<A-k>" ], exec = "arrow -1", desc = "Move cursor up" },
