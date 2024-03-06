@@ -408,7 +408,7 @@
       flake = false;
     };
     CopilotChatDOTnvim = {
-      url = "github:jellydn/CopilotChat.nvim";
+      url = "github:CopilotC-Nvim/CopilotChat.nvim?ref=canary";
       flake = false;
     };
     sudaDOTvim = {
@@ -587,7 +587,7 @@
         { name = "vim-textobj-entire"; dotname = "vim-textobj-entire"; source = inputs.vim-textobj-entire; build = false; }
         { name = "vim-interestingwords"; dotname = "vim-interestingwords"; source = inputs.vim-interestingwords; build = false; }
         { name = "vim-snippets"; dotname = "vim-snippets"; source = inputs.vim-snippets; build = false; }
-        { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = true; }
+        { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
         { name = "suda.vim"; dotname = "sudaDOTvim"; source = inputs.sudaDOTvim; build = false; }
         { name = "undotree"; dotname = "undotree"; source = inputs.undotree; build = false; }
         { name = "vim-sandwich"; dotname = "vim-sandwich"; source = inputs.vim-sandwich; build = false; }

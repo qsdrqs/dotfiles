@@ -2770,20 +2770,19 @@ local plugins = {
       end
     end,
     config = function()
-      local restore_last = false
       if vim.g.neovide ~= nil
         and #vim.fn.argv() == 0
         and vim.g.remote_ui == nil then
-        restore_last = true
         vim.defer_fn(function() -- execute after function exit (setted up)
-          require('auto-session').RestoreSession()
+          local last_session = require('auto-session').get_latest_session()
+          require('auto-session').RestoreSession(last_session)
         end, 0)
       end
       require('auto-session').setup {
         log_level = 'error',
         auto_session_suppress_dirs = {'~/', '~/Downloads', '~/Documents'},
         auto_session_create_enabled = false,
-        auto_session_enable_last_session = restore_last,
+        auto_session_enable_last_session = false,
         auto_save_enabled = true,
         auto_restore_enabled = true,
         post_restore_cmds = {'silent !kill -s SIGWINCH $PPID'},
@@ -2794,12 +2793,17 @@ local plugins = {
           end
         },
       }
+      vim.api.nvim_create_user_command("SessionClose", function()
+        require('auto-session').SaveSession()
+        vim.cmd("Alpha")
+      end, { nargs = 0 })
     end
   },
 
   {
     'goolord/alpha-nvim',
     dependencies = { 'rmagatti/auto-session' },
+    cmd = "Alpha",
     cond = function()
       return vim.g.not_start_alpha ~= true
           and #vim.fn.argv() == 0
@@ -2998,6 +3002,24 @@ local plugins = {
       }
 
       alpha.setup(dashboard.config)
+
+      -- override the Alpha command
+      vim.api.nvim_create_user_command("Alpha", function(_)
+        vim.cmd [[
+          silent %bd
+          cd ~
+        ]]
+        require('alpha').start(false)
+        local buf_list = vim.fn.getbufinfo({buflisted = 1})
+        for _, buf in ipairs(buf_list) do
+          vim.api.nvim_buf_delete(buf.bufnr, {force = true})
+        end
+      end, {
+          bang = true,
+          desc = 'require"alpha".start(false)',
+          nargs = 0,
+          bar = true,
+      })
 
     end
   },
@@ -3564,18 +3586,23 @@ local plugins = {
   },
 
   {
-    "jellydn/CopilotChat.nvim",
-    dependencies = { "github/copilot.vim" },
-    build = ":UpdateRemotePlugins",
+    "CopilotC-Nvim/CopilotChat.nvim",
+    branch = "canary",
+    dependencies = {
+      "github/copilot.vim",
+      'nvim-lua/plenary.nvim',
+    },
     opts = {
-      show_help = "yes", -- Show help text for CopilotChatInPlace, default: yes
       debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
     },
     cmd = {
+      "CopilotChat",
+      "CopilotChatToggle",
       "CopilotChatExplain",
       "CopilotChatTests",
-      "CopilotChatVisual",
-      "CopilotChatInPlace",
+      "CopilotChatFixDiagnostic",
+      "CopilotChatCommit",
+      "CopilotChatCommitStaged",
     },
   },
 

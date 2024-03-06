@@ -53,17 +53,29 @@ with pkgs; {
         debugpy
         isort
       ]);
+      common_shell = rec {
+        packages = [
+          nodePackages.pyright
+        ];
+        buildInputs = [
+          zlib
+          glibc
+        ];
+        shellHook = ''
+          export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath buildInputs}:$LD_LIBRARY_PATH"
+          export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib.outPath}/lib:$LD_LIBRARY_PATH"
+        '';
+      };
     in
-    (mkShell {
+    (mkShell common_shell // {
       packages = [
         (python3.withPackages defaultPyPkgs)
-        nodePackages.pyright
-      ];
+      ] ++ common_shell.packages;
     }) // {
-    extraPyPkgs = (extraPyPkgs: mkShell {
+    extraPyPkgs = (extraPyPkgs: mkShell common_shell // {
       packages = [
         (python3.withPackages (pypkgs: (defaultPyPkgs pypkgs) ++ (extraPyPkgs pypkgs)))
-      ];
+      ] ++ common_shell.packages;
     });
   };
   java = mkShell {

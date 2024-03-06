@@ -53,7 +53,6 @@ let
           "<C-G><C-r>_"
       '';
     };
-    CopilotChatDOTnvim = trivialDerivation "CopilotChat.nvim" inputs.nvim-config.inputs.CopilotChatDOTnvim;
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
     (entry: {
