@@ -470,7 +470,7 @@
     "dev-shell": {
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-Vb6zEpEs1tJXDfxwW9kzusY3nKsPWdQj2XZdvMePiqQ=",
+        "narHash": "sha256-MJDU2LSXpHpdq7bYis3sA2lEoMCCQUHI+kgCydKbu5E=",
         "path": "nixos/dev-shell",
         "type": "path"
       },
@@ -1557,7 +1557,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-oET/0L06iLIVUims0P5LcOfnZs6/ULETnp+f4HxZjrU=",
+        "narHash": "sha256-uBp/GFmOoRcc7Zjjet2nYK6NSNZs/UO7/3HZz1H+bj0=",
         "path": "nvim",
         "type": "path"
       },

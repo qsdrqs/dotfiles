@@ -269,7 +269,7 @@ keymap = [
 
 keymap = [
 	{ on = [ "<C-q>" ],   exec = "close",                                      desc = "Cancel completion" },
-	# { on = [ "<Tab>" ],   exec = "close --submit",                             desc = "Submit the completion" },
+	{ on = [ "<Tab>" ],   exec = "close --submit",                             desc = "Submit the completion" },
 	{ on = [ "<Enter>" ], exec = [ "close --submit", "close_input --submit" ], desc = "Submit the completion and input" },
 
 	{ on = [ "<A-k>" ], exec = "arrow -1", desc = "Move cursor up" },

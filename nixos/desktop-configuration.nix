@@ -144,6 +144,7 @@ in
 
     pandoc
     zotero_7
+    xournalpp
 
     # NUR
     qq-hidpi
