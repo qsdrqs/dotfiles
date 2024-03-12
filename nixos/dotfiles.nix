@@ -49,12 +49,12 @@ let
         inputs.zsh-config.inputs.${plugin}
       else
         buildDerivations.${plugin};
-    target = "zsh_custom/plugins/${plugin}";
+    target = ".zsh_custom/plugins/${plugin}";
   });
 
   genZshThemes = themes: lib.genAttrs themes (theme: {
     source = inputs.zsh-config.inputs.${theme};
-    target = "zsh_custom/themes/${theme}";
+    target = ".zsh_custom/themes/${theme}";
   });
 in
 {

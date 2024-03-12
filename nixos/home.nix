@@ -37,7 +37,7 @@
     dotDir = ".config/zsh";
     initExtraFirst = ''
       if [ -e $HOME/.zshrc ]; then
-        ZSH_CUSTOM="$HOME/zsh_custom"
+        ZSH_CUSTOM="$HOME/.zsh_custom"
         # source grc
         source ${pkgs.grc}/etc/grc.zsh
 
@@ -116,7 +116,6 @@
       --exit-0
       --select-1
     '';
-    NIX_CURR_PROFILE_SOURCE = ../.;
   };
 
   # Windows Fonts

@@ -213,6 +213,17 @@ in
     unset LOCATE_PATH
   '';
 
+  environment.variables = {
+      NIX_CURR_PROFILE_SOURCE = ../.;
+  };
+
+  environment.etc = {
+    "nix_current_profile_source" = {
+      source = ../.;
+      target = "nix/current-profile-source";
+    };
+  };
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];

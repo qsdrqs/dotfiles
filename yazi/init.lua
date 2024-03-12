@@ -71,3 +71,4 @@ function File:style(file)
 		return style and style:patch(THEME.manager.hovered) or THEME.manager.hovered
 	end
 end
+
