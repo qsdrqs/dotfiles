@@ -5,21 +5,21 @@ function zsh_install {
     git clone https://github.com/ohmyzsh/ohmyzsh $HOME/.oh-my-zsh
     # zinit
     git clone https://github.com/zdharma-continuum/zinit $HOME/.zinit
-    mkdir -p $HOME/.zsh_custom/plugins
-    mkdir -p $HOME/.zsh_custom/themes
+    mkdir -p $HOME/.zsh/plugins
+    mkdir -p $HOME/.zsh/themes
 
     # plugins
-    git clone https://github.com/Aloxaf/fzf-tab $HOME/.zsh_custom/plugins/fzf-tab &
-    git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.zsh_custom/plugins/zsh-autosuggestions &
+    git clone https://github.com/Aloxaf/fzf-tab $HOME/.zsh/plugins/fzf-tab &
+    git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.zsh/plugins/zsh-autosuggestions &
     git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git \
-        $HOME/.zsh_custom/plugins/fast-syntax-highlighting &
-    git clone https://github.com/rupa/z.git $HOME/.zsh_custom/plugins/z &
-    git clone https://github.com/skywind3000/z.lua $HOME/.zsh_custom/plugins/z_lua &
+        $HOME/.zsh/plugins/fast-syntax-highlighting &
+    git clone https://github.com/rupa/z.git $HOME/.zsh/plugins/z &
+    git clone https://github.com/skywind3000/z.lua $HOME/.zsh/plugins/z_lua &
 
     # themes
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
-        $HOME/.zsh_custom/themes/powerlevel10k &
-    git clone https://github.com/denysdovhan/spaceship-prompt $HOME/.zsh_custom/themes/spaceship-prompt &
+        $HOME/.zsh/themes/powerlevel10k &
+    git clone https://github.com/denysdovhan/spaceship-prompt $HOME/.zsh/themes/spaceship-prompt &
 
     echo "#ZSH_THEME=\"spaceship-prompt\"" > $HOME/theme.zsh
     echo "ZSH_THEME=\"powerlevel10k\"" > $HOME/theme.zsh

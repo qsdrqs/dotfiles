@@ -77,6 +77,16 @@
       url = "tarball+https://update.code.visualstudio.com/latest/linux-x64/insider";
       flake = false;
     };
+
+    # tmux
+    tmux-resurrect = {
+      url = "github:tmux-plugins/tmux-resurrect";
+      flake = false;
+    };
+    tmux-continuum = {
+      url = "github:tmux-plugins/tmux-continuum";
+      flake = false;
+    };
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository

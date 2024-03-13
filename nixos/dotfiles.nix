@@ -49,12 +49,17 @@ let
         inputs.zsh-config.inputs.${plugin}
       else
         buildDerivations.${plugin};
-    target = ".zsh_custom/plugins/${plugin}";
+    target = ".zsh/plugins/${plugin}";
   });
 
   genZshThemes = themes: lib.genAttrs themes (theme: {
     source = inputs.zsh-config.inputs.${theme};
-    target = ".zsh_custom/themes/${theme}";
+    target = ".zsh/themes/${theme}";
+  });
+
+  genTmuxPlugins = plugins: lib.genAttrs plugins (plugin: {
+    source = inputs.${plugin};
+    target = ".tmux/plugins/${plugin}";
   });
 in
 {
@@ -79,6 +84,10 @@ in
   ] //
   genZshPlugins inputs.zsh-config.plugins //
   genZshThemes inputs.zsh-config.themes //
+  genTmuxPlugins [
+    "tmux-resurrect"
+    "tmux-continuum"
+  ] //
   {
     omz = {
       source = inputs.zsh-config.inputs.omz;

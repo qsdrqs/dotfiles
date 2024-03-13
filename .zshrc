@@ -127,11 +127,11 @@ source "${ZINIT_HOME}/zinit.zsh"
 
 # load zinit plugins
 # need compinit
-zinit light $HOME/zsh_custom/plugins/fzf-tab
+zinit light $HOME/.zsh/plugins/fzf-tab
 zicompinit
-zinit light $HOME/zsh_custom/plugins/fast-syntax-highlighting
-zinit light $HOME/zsh_custom/plugins/zsh-vi-mode
-zinit light $HOME/zsh_custom/plugins/zsh-autosuggestions
+zinit light $HOME/.zsh/plugins/fast-syntax-highlighting
+zinit light $HOME/.zsh/plugins/zsh-vi-mode
+zinit light $HOME/.zsh/plugins/zsh-autosuggestions
 
 # load plugins from oh-my-zsh
 zinit snippet $HOME/.oh-my-zsh/lib/completion.zsh
@@ -141,7 +141,7 @@ zinit light $HOME/.oh-my-zsh/plugins/fd
 zinit wait lucid for $HOME/.oh-my-zsh/plugins/fzf
 
 # load zinit themes
-zinit light $HOME/zsh_custom/themes/$ZSH_THEME
+zinit light $HOME/.zsh/themes/$ZSH_THEME
 
 # 光标形状随模式改变
 function zle-keymap-select {
@@ -206,7 +206,7 @@ fi
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# users are encouraged to define aliases within the .zsh folder.
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
@@ -310,7 +310,7 @@ alias tra="~/translate-shell/build/trans :zh+en"
 # alias vim="$EDITOR"
 alias vimm="/usr/bin/env vim"
 alias vi="$EDITOR --cmd 'let g:vim_startup=1'"
-#Turn off the touch pad 
+#Turn off the touch pad
 #Sometimes system suspend will make touchpad unable to work, so it needs 3 times to make it work.
 alias to="/sbin/trackpad-toggle.sh"
 alias sshconfig="vim ~/.ssh/config"
@@ -391,7 +391,7 @@ KEYTIMEOUT=1
 if [[ -x `command -v thefuck` ]]; then
     eval $(thefuck --alias)
 fi
-# This speeds up pasting w/ autosuggest 
+# This speeds up pasting w/ autosuggest
 # https://github.com/zsh-users/zsh-autosuggestions/issues/238
 paste-init() {
   OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
@@ -401,7 +401,7 @@ paste-init() {
 paste-finish() {
   zle -N self-insert $OLD_SELF_INSERT
 }
-zstyle :bracketed-paste-magic paste-init pasteinit 
+zstyle :bracketed-paste-magic paste-init pasteinit
 zstyle :bracketed-paste-magic paste-finish pastefinish
 
 alias ls='lsd'
@@ -435,10 +435,10 @@ if [[ -x `command -v zoxide` ]]; then
         return 0
     }
 elif [[ -x `command -v lua` ]]; then
-    eval "$(lua $HOME/zsh_custom/plugins/z_lua/z.lua --init zsh)"
+    eval "$(lua $HOME/.zsh/plugins/z_lua/z.lua --init zsh)"
 else
-    source $HOME/zsh_custom/plugins/z/z.sh
-    export _Z_SRC=$HOME/zsh_custom/plugins/z/z.sh
+    source $HOME/.zsh/plugins/z/z.sh
+    export _Z_SRC=$HOME/.zsh/plugins/z/z.sh
     ZSH_DISABLE_COMPFIX=true
 
     _z_zsh_tab_completion() {

@@ -37,7 +37,7 @@
     dotDir = ".config/zsh";
     initExtraFirst = ''
       if [ -e $HOME/.zshrc ]; then
-        ZSH_CUSTOM="$HOME/.zsh_custom"
+        ZSH_CUSTOM="$HOME/.zsh"
         # source grc
         source ${pkgs.grc}/etc/grc.zsh
 
