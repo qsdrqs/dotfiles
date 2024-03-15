@@ -176,8 +176,6 @@ in
         };
       });
       interception-tools-plugins.caps2esc = super.interception-tools-plugins.caps2esc;
-
-      yazi = inputs.yazi.packages.${pkgs.system}.yazi;
     })
   ];
 }

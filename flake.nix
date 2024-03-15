@@ -49,11 +49,11 @@
     # nur
     nur.url = "github:nix-community/NUR";
 
-    nix-on-droid = {
-      url = "github:t184256/nix-on-droid";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
+    # nix-on-droid = {
+    #   url = "github:t184256/nix-on-droid";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    #   inputs.home-manager.follows = "home-manager";
+    # };
 
     hyprland = {
       url = "github:hyprwm/Hyprland";
@@ -92,7 +92,7 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, vscode-server, nur, nix-on-droid, dev-shell, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, vscode-server, nur, dev-shell, ... }@inputs:
     rec {
       pkgs-collect = builtins.listToAttrs (builtins.map
         (pkg: {
@@ -304,13 +304,13 @@
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem desktopConfig;
 
       # nix-on-droid
-      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration rec {
-        system = "aarch64-linux";
-        modules = [
-          ./nixos/nix-on-droid.nix
-        ];
-        extraSpecialArgs = { inherit inputs; pkgs = pkgs' system; hm-module = basicHomeModules; };
-      };
+      # nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration rec {
+      #   system = "aarch64-linux";
+      #   modules = [
+      #     ./nixos/nix-on-droid.nix
+      #   ];
+      #   extraSpecialArgs = { inherit inputs; pkgs = pkgs' system; hm-module = basicHomeModules; };
+      # };
 
       images =
         let

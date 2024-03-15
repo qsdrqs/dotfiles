@@ -309,6 +309,9 @@ alias prox="export http_proxy=http://$PROX:1081\
 alias tra="~/translate-shell/build/trans :zh+en"
 # alias vim="$EDITOR"
 alias vimm="/usr/bin/env vim"
+if [[ -x `command -v code-insiders` ]]; then
+    alias code="code-insiders"
+fi
 alias vi="$EDITOR --cmd 'let g:vim_startup=1'"
 #Turn off the touch pad
 #Sometimes system suspend will make touchpad unable to work, so it needs 3 times to make it work.

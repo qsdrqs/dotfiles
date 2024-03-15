@@ -49,13 +49,13 @@ with pkgs; {
         virtualenv
         numpy
         matplotlib
-        autopep8
-        debugpy
-        isort
       ]);
       common_shell = rec {
         packages = [
           nodePackages.pyright
+          python3Packages.autopep8
+          python3Packages.isort
+          python3Packages.debugpy
         ];
         buildInputs = [
           zlib
