@@ -3413,7 +3413,7 @@ local plugins = {
   -- },
 
   {
-    "potamides/pantran.nvim",
+    "qsdrqs/pantran.nvim",
     cond = vim.g.vscode == nil,
     keys = {{"<leader>y", mode = {'n', 'x'}}},
     config = function()

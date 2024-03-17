@@ -83,12 +83,7 @@ let
     sleep 3
     sed -i 's/"window.titleBarStyle": "native"/"window.titleBarStyle": "custom"/g' $CONFIG;
   '');
-  wineWowUnstable = pkgs-fix.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: {
-    patches =
-      (oldAttrs.patches or [ ]) ++ [
-        ./patches/wine.patch
-      ];
-  });
+  wechat-uos = pkgs.callPackage ./private/wechat-uos.nix {};
 in
 {
   boot.kernelModules = [ "v4l2loopback" ];
@@ -108,6 +103,11 @@ in
     };
   };
 
+  # For wechat-uos
+  nixpkgs.config.permittedInsecurePackages = [
+    "openssl-1.1.1w"
+  ];
+
   environment.systemPackages = with pkgs; [
     keepassxc
     telegram-desktop
@@ -120,7 +120,7 @@ in
     zoom-us
     kate
     scrcpy
-    wineWowUnstable
+    wineWowPackages.unstableFull
     wpsoffice-hidpi
     libreoffice
     gnome.seahorse # keyring manager
@@ -148,17 +148,9 @@ in
 
     # NUR
     qq-hidpi
-    # wine wechat
-    # (config.nur.repos.xddxdd.wine-wechat.override {
-    #   setupSrc = fetchurl {
-    #     url = "https://dldir1.qq.com/weixin/Windows/WeChatSetup_x86.exe";
-    #     sha256 = "sha256-dXmpS/zzqJ7zPEaxbCK/XLJU9gktXVI/1eoy1AZSa/4=";
-    #   };
-    #   version = "3.9.5";
-    # })
     qqmusic-hidpi
-    # config.nur.repos.xddxdd.wechat-uos-bin
     config.nur.repos.linyinfeng.wemeet
+    wechat-uos
   ];
 
   services.teamviewer.enable = true;

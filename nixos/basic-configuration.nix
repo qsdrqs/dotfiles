@@ -7,9 +7,6 @@ in
   # repair nix store
   # nixpkgs.config.sync-before-registering = true;
 
-  nixpkgs.config.permittedInsecurePackages = [
-  ];
-
   environment.systemPackages = with pkgs; [
     appimage-run
     nil # nix language server

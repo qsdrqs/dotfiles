@@ -1205,15 +1205,15 @@
     "pantranDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1690502265,
-        "narHash": "sha256-3ry6OWDmiGciCiqWBOP9dfTY9Hc0d9EoqZhHilGEAL4=",
-        "owner": "potamides",
+        "lastModified": 1710642925,
+        "narHash": "sha256-u1h406qOs3yfDS0H6FnwSD3TB4CAK803FD5GzL2tHqo=",
+        "owner": "qsdrqs",
         "repo": "pantran.nvim",
-        "rev": "461799624948bfb66f73b20b6fffa7e4c8ca6d08",
+        "rev": "3f41f9ae39cd8dede8ad971b716314fd8cae5c7d",
         "type": "github"
       },
       "original": {
-        "owner": "potamides",
+        "owner": "qsdrqs",
         "repo": "pantran.nvim",
         "type": "github"
       }

@@ -380,7 +380,7 @@
       flake = false;
     };
     pantranDOTnvim = {
-      url = "github:potamides/pantran.nvim";
+      url = "github:qsdrqs/pantran.nvim";
       flake = false;
     };
     rainbow = {

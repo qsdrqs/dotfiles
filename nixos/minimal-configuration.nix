@@ -121,8 +121,8 @@ in
       targetPkgs = pkgs: with pkgs; [
       ];
     })
-    linuxKernel.packages.linux_latest_libre.cpupower
-    linuxKernel.packages.linux_latest_libre.perf
+    config.boot.kernelPackages.cpupower
+    config.boot.kernelPackages.perf
     memtester
     patchelf
     python3
