@@ -263,9 +263,12 @@
             home-manager.users.qsdrqs = import ./nixos/isohome.nix;
           }
 
-          ({ config, pkgs, ... }: {
+          ({ config, pkgs, lib, ... }: {
             services.getty.autologinUser = nixpkgs.lib.mkForce "qsdrqs";
             networking.networkmanager.enable = nixpkgs.lib.mkForce false;
+
+            # Disable ZFS for latest kernel, see https://github.com/NixOS/nixpkgs/issues/58959
+            boot.supportedFilesystems = lib.mkForce [ "btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs" ];
           })
         ];
       };

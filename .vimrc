@@ -581,7 +581,7 @@ endfunction
 
 "运行无插件vim
 if get(g:, 'vim_startup', 0) == 1
-
+  " do nothing
 elseif exists('g:vscode')
   if file_readable(expand("~/.nvimrc.lua"))
     source ~/.nvimrc.lua

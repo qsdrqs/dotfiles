@@ -8,7 +8,7 @@
         -- dummy function to prevent errors
         local function dummy() end
 
-        lazyLoadPlugins = dummy
+        LazyLoadPlugins = dummy
         VscodeNeovimHandler = dummy
       '';
     };
