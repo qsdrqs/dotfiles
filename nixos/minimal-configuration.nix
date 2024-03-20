@@ -185,16 +185,6 @@ in
       SystemMaxUse=500M
       RuntimeMaxUse=500M
     '';
-    interception-tools = {
-      enable = true;
-      plugins = [ pkgs.interception-tools-plugins.caps2esc pkgs.interception-tools-plugins.ctrl2esc ];
-      udevmonConfig = ''
-        - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins.ctrl2esc}/bin/ctrl2esc | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
-          DEVICE:
-            EVENTS:
-              EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
-      '';
-    };
     locate = {
       enable = true;
       package = pkgs.plocate;
@@ -213,8 +203,41 @@ in
     unset LOCATE_PATH
   '';
 
+  # interception tools
+  systemd.services =
+    let
+      interception-tools-plugins = [
+        pkgs.interception-tools-plugins.caps2esc
+        pkgs.interception-tools-plugins.ctrl2esc
+      ];
+      udevmonConfig = plugin: ''
+        - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins."${plugin}"}/bin/${plugin} | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
+          DEVICE:
+            EVENTS:
+              EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
+      '';
+      interception-tools-service = plugin: {
+        description = "Interception tools";
+        path = [ pkgs.bash pkgs.interception-tools ] ++ interception-tools-plugins;
+        serviceConfig = {
+          ExecStart = ''
+            ${pkgs.interception-tools}/bin/udevmon -c \
+            ${if builtins.typeOf (udevmonConfig plugin) == "path"
+            then (udevmonConfig plugin)
+            else pkgs.writeText "udevmon.yaml" (udevmonConfig plugin)}
+          '';
+          Nice = -20;
+        };
+        wantedBy = [ "multi-user.target" ];
+      };
+    in
+    {
+      interception-tools-caps2esc = interception-tools-service "caps2esc" // { wantedBy = []; }; # disable by default
+      interception-tools-ctrl2esc = interception-tools-service "ctrl2esc";
+    };
+
   environment.variables = {
-      NIX_CURR_PROFILE_SOURCE = ../.;
+    NIX_CURR_PROFILE_SOURCE = ../.;
   };
 
   environment.etc = {
