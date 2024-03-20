@@ -49,7 +49,7 @@ in
   boot.initrd.kernelModules = [ ];
 
   boot.kernelModules = [ "88x2bu" ];
-  boot.extraModulePackages = [ rtl88x2bu_module ];
+  boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu ];
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
