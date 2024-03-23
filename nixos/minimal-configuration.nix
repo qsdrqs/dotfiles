@@ -122,7 +122,6 @@ in
       ];
     })
     config.boot.kernelPackages.cpupower
-    config.boot.kernelPackages.perf
     memtester
     patchelf
     python3
@@ -143,6 +142,11 @@ in
     sqlite
     sshfs
     (lib.hiPrio inetutils)
+
+    # perfing
+    config.boot.kernelPackages.perf
+    strace
+    ltrace
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
