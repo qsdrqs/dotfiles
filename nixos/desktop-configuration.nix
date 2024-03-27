@@ -133,7 +133,6 @@ in
     neovide
 
     obs-studio
-    steam-run
     openconnect_openssl
 
     texlive.combined.scheme-full
@@ -208,15 +207,27 @@ in
   };
   services.desktopManager.plasma6.enable = true;
 
+  nixpkgs.config.nvidia.acceptLicense = true;
   hardware = {
     nvidia = {
       modesetting.enable = true;
       powerManagement.enable = false;
       nvidiaSettings = true;
       open = false;
-      package = config.boot.kernelPackages.nvidiaPackages.production;
+      package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {
+        version = "535.154.05";
+        pkgSuffix = oldAttrs.pkgSuffix or "";
+        src = builtins.fetchurl {
+          url = "https://download.nvidia.com/XFree86/Linux-x86_64/${version}/NVIDIA-Linux-x86_64-${version}${pkgSuffix}.run";
+          sha256 = "sha256-fpUGXKprgt6SYRDxSCemGXLrEsIA6GOinp+0eGbqqJg=";
+        };
+      }));
     };
   };
+  # https://wiki.hyprland.org/Nvidia/#fixing-random-flickering-nuclear-method
+  # environment.etc."modprobe.d/nvidia.conf".text = ''
+  #   options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerLevel=0x3; PowerMizerDefault=0x3; PowerMizerDefaultAC=0x3"
+  # '';
 
   # snapshots
   services.snapper.configs = {

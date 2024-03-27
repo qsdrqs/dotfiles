@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-fix.url = "github:NixOS/nixpkgs/a4d4fe8c5002202493e87ec8dbc91335ff55552c";
+    nixpkgs-fix.url = "github:NixOS/nixpkgs/c75037bbf9093a2acb617804ee46320d6d1fea5a";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,6 +53,10 @@
 
     hyprland = {
       url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    xdph = {
+      url = "github:hyprwm/xdg-desktop-portal-hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hyprland-contrib = {

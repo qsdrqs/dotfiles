@@ -87,6 +87,7 @@ suppress_preload = false
 [plugin]
 
 preloaders = [
+	{ name = "*/", run = "dircount", multi = true },
 	{ name = "*", cond = "!mime", run = "mime", multi = true, prio = "high" },
 	# Image
 	{ mime = "image/vnd.djvu", run = "noop" },

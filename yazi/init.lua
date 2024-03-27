@@ -72,3 +72,36 @@ function File:style(file)
 	end
 end
 
+function File:count(file)
+	return nil
+end
+
+function Folder:linemode(area, files)
+	local mode = cx.active.conf.linemode
+	if mode == "none" then
+		return {}
+	end
+
+	local lines = {}
+	for _, f in ipairs(files) do
+		local spans = { ui.Span(" ") }
+		if mode == "size" then
+			if not f.cha.is_dir then
+				local size = f:size()
+				spans[#spans + 1] = ui.Span(size and ya.readable_size(size) or "")
+			else
+				local count = File:count(f)
+				spans[#spans + 1] = ui.Span(count and tostring(count) or "")
+			end
+		elseif mode == "mtime" then
+			local time = f.cha.modified
+			spans[#spans + 1] = ui.Span(time and os.date("%y-%m-%d %H:%M", time // 1) or "")
+		elseif mode == "permissions" then
+			spans[#spans + 1] = ui.Span(f.cha:permissions() or "")
+		end
+
+		spans[#spans + 1] = ui.Span(" ")
+		lines[#lines + 1] = ui.Line(spans)
+	end
+	return ui.Paragraph(area, lines):align(ui.Paragraph.RIGHT)
+end

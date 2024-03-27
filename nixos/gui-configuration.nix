@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-master, inputs, options, ... }:
+{ config, pkgs, lib, pkgs-master, pkgs-fix, inputs, options, ... }:
 let
   hyprlandPackages = with pkgs; [
     qt6.qtwayland
@@ -54,6 +54,8 @@ in
       support32Bit = true;
     };
     # jack.enable = true;
+    package = pkgs-fix.pipewire;
+    wireplumber.package = pkgs-fix.wireplumber;
   };
 
   systemd = {
@@ -108,8 +110,8 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-    portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
+    package = inputs.hyprland.packages.${pkgs.system}.default;
+    portalPackage = inputs.xdph.packages.${pkgs.system}.default;
   };
   programs.waybar = {
     enable = true;

@@ -4046,6 +4046,9 @@ local plugins = {
   },
   {
     "rcarriga/nvim-dap-ui",
+    dependencies = {
+      "nvim-neotest/nvim-nio"
+    },
     config = function()
       local dapui = require("dapui")
       dapui.setup({

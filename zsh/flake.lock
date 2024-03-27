@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1710563208,
-        "narHash": "sha256-kz/DzldvJEsjebQ2TbWBV4z+I6rJpUzXQjgatvVohrk=",
+        "lastModified": 1711050400,
+        "narHash": "sha256-7gdabhnL7b6BRi0TXXxEruohj6eXQqRctCMSoLnwJPs=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "0fed36688f9a60d8b1f2182f27de7fdc8a1e6b72",
+        "rev": "d157fc60c93fa59e757921b503e9594bd23b422c",
         "type": "github"
       },
       "original": {
@@ -51,11 +51,11 @@
     "powerlevel10k": {
       "flake": false,
       "locked": {
-        "lastModified": 1710601435,
-        "narHash": "sha256-KkjJXxQl7wo0Yi3KIGlQQCcFbpJFl869xKRqsQvejxg=",
+        "lastModified": 1710835996,
+        "narHash": "sha256-QX31mPZLhsW2HTUNULXjjzDOlXBGj7EKXex2dpGioHA=",
         "owner": "romkatv",
         "repo": "powerlevel10k",
-        "rev": "6836bfe2da51bf32472b67df062347cfc4b1952e",
+        "rev": "da9b03777c4f2390c7e3f5c720ee4689336f811b",
         "type": "github"
       },
       "original": {
@@ -81,11 +81,11 @@
     "spaceship": {
       "flake": false,
       "locked": {
-        "lastModified": 1696936081,
-        "narHash": "sha256-473Srq7aDe4R9UIVdQiG0P4vXNRPtg0r8Vgc+HIxZMQ=",
+        "lastModified": 1711113695,
+        "narHash": "sha256-LrRFi4jqTmnTWsrFcXAGqfrV69dRKynXxo0AJDxVbLQ=",
         "owner": "denysdovhan",
         "repo": "spaceship-prompt",
-        "rev": "be826cbe2bb11a0675dd71f548ff1396608da7ea",
+        "rev": "134d97984900285db2c2ec0c992f4d82b74d5e17",
         "type": "github"
       },
       "original": {
@@ -113,11 +113,11 @@
     "z_lua": {
       "flake": false,
       "locked": {
-        "lastModified": 1708404023,
-        "narHash": "sha256-zhhrRTteKv6VvTbM7ao2Z3nWRN181nqLLcOA+qi88fc=",
+        "lastModified": 1710944366,
+        "narHash": "sha256-QSwZhdBXO+x4vcwRnZjdYdIdWW0Nfu0oImftUgm4wyo=",
         "owner": "skywind3000",
         "repo": "z.lua",
-        "rev": "30220996cae675f9ec12fc3aeb2b5c3d957af8c8",
+        "rev": "ef9a49d73d2b4f262c6fbb23262253dcda7c19a7",
         "type": "github"
       },
       "original": {
@@ -129,11 +129,11 @@
     "zinit": {
       "flake": false,
       "locked": {
-        "lastModified": 1709531028,
-        "narHash": "sha256-QeJUqnFMg9yRsMu73e1291GgK7UXI1BvB6G+i+/jyHk=",
+        "lastModified": 1710915517,
+        "narHash": "sha256-OJTdm2ymDYTrzbw94oqcyZH+8GE6dx1l+WtDcOFidco=",
         "owner": "zdharma-continuum",
         "repo": "zinit",
-        "rev": "b7b8347cadfedfb9cec4f940e4cf60d4c42f3fb1",
+        "rev": "e8c3205a2fa88e26e4e8dbe34374ddf40720ae36",
         "type": "github"
       },
       "original": {

@@ -483,6 +483,10 @@
       url = "github:mfussenegger/nvim-dap";
       flake = false;
     };
+    nvim-nio = {
+      url = "github:nvim-neotest/nvim-nio";
+      flake = false;
+    };
   };
   outputs = { self, ... }@inputs:
     {
@@ -606,6 +610,7 @@
         { name = "nvim-dap-virtual-text"; dotname = "nvim-dap-virtual-text"; source = inputs.nvim-dap-virtual-text; build = false; }
         { name = "persistent-breakpoints.nvim"; dotname = "persistent-breakpointsDOTnvim"; source = inputs.persistent-breakpointsDOTnvim; build = false; }
         { name = "nvim-dap"; dotname = "nvim-dap"; source = inputs.nvim-dap; build = false; }
+        { name = "nvim-nio"; dotname = "nvim-nio"; source = inputs.nvim-nio; build = false; }
       ];
     } //
     import ./flake_out.nix {

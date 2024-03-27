@@ -154,6 +154,7 @@ keymap = [
 
 	# Help
 	{ on = [ "~" ], run = "help", desc = "Open help" },
+	{ on = [ "b", "b"], run = "plugin dircount"}
 ]
 
 [tasks]

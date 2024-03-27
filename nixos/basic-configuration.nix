@@ -20,6 +20,7 @@ in
     firejail
     # (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else packages.dummy)
     openssl
+    openssl.out # openssl lib
     parted
     gh
     exiftool
