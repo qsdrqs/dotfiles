@@ -76,6 +76,10 @@ function File:count(file)
 	return nil
 end
 
+function File:gitstatus(file)
+	return nil
+end
+
 function Folder:linemode(area, files)
 	local mode = cx.active.conf.linemode
 	if mode == "none" then
@@ -101,6 +105,12 @@ function Folder:linemode(area, files)
 		end
 
 		spans[#spans + 1] = ui.Span(" ")
+
+		local gitstatus = File:gitstatus(f)
+		if gitstatus then
+			spans[#spans + 1] = ui.Span(gitstatus)
+		end
+
 		lines[#lines + 1] = ui.Line(spans)
 	end
 	return ui.Paragraph(area, lines):align(ui.Paragraph.RIGHT)

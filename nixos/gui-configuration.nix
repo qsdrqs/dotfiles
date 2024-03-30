@@ -110,8 +110,6 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = inputs.hyprland.packages.${pkgs.system}.default;
-    portalPackage = inputs.xdph.packages.${pkgs.system}.default;
   };
   programs.waybar = {
     enable = true;

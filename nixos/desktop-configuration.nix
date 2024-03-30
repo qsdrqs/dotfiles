@@ -64,6 +64,16 @@ let
       sed -i "s|Exec=.*|Exec=$out/bin/qq|" $out/share/applications/qq.desktop
     '';
   };
+  wechat-uos-hidpi = pkgs.symlinkJoin {
+    name = "qq";
+    paths = [ config.nur.repos.xddxdd.wechat-uos ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/wechat-uos \
+        --set QT_FONT_DPI 144
+      sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/wechat-uos.desktop
+    '';
+  };
   qqmusic-hidpi = pkgs.symlinkJoin {
     name = "qqmusic";
     paths = [ config.nur.repos.xddxdd.qqmusic ];
@@ -83,7 +93,6 @@ let
     sleep 3
     sed -i 's/"window.titleBarStyle": "native"/"window.titleBarStyle": "custom"/g' $CONFIG;
   '');
-  wechat-uos = pkgs.callPackage ./private/wechat-uos.nix {};
 in
 {
   boot.kernelModules = [ "v4l2loopback" ];
@@ -149,7 +158,7 @@ in
     qq-hidpi
     qqmusic-hidpi
     config.nur.repos.linyinfeng.wemeet
-    wechat-uos
+    wechat-uos-hidpi
   ];
 
   services.teamviewer.enable = true;
