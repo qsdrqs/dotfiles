@@ -302,8 +302,8 @@ hi! link DiagnosticUnderlineWarn WarningMsg
 hi! link DiagnosticUnderlineInfo GhLightBlue
 hi! link DiagnosticUnderlineHint GhBase3
 
-hi! DiagnosticError guifg=#fa7970 guibg=None guisp=#Fa7970
-hi! DiagnosticWarn guifg=#faa356 guibg=None guisp=#faa356
+hi! DiagnosticError guifg=#fa7970 guibg=NONE guisp=#Fa7970
+hi! DiagnosticWarn guifg=#faa356 guibg=NONE guisp=#faa356
 hi! link DiagnosticInfo GhLightBlue
 hi! link DiagnosticHint GhBase3
 
@@ -338,7 +338,7 @@ hi! link cssClassName LocalIdent
 hi! link cssColor LightBlue
 hi! link cssCommonAttr cssBoxAttr
 hi! link cssFlexibleBoxAttr cssBoxAttr
-hi! link cssFunction None
+hi! link cssFunction NONE
 hi! link cssIdentifier LocalIdent
 hi! link cssMediaType Normal
 hi! link cssMultiColumnAttr cssBoxAttr
@@ -487,7 +487,7 @@ hi! link pythonBoolean GhBlue
 hi! link pythonBuiltin GhBlue
 hi! link pythonBuiltinType GhBase5
 hi! link pythonClassVar GhBase5
-hi! link pythonOperator None
+hi! link pythonOperator NONE
 hi! link pythonOperator GhBlue
 hi! link pythonRun GhBase3
 hi! link pythonDecorator GhPurp
@@ -581,7 +581,7 @@ hi! link typescriptBOMWindowCons LibraryType
 hi! link typescriptBOMWindowMethod LibraryFunc
 hi! link typescriptBOMWindowProp LibraryType
 hi! link typescriptBraces Delimiter
-hi! link typescriptCall None
+hi! link typescriptCall NONE
 hi! link typescriptClassHeritage Type
 hi! link typescriptClassName TypeDef
 hi! link typescriptDOMDocMethod LibraryFunc
@@ -700,16 +700,16 @@ hi! link NonText Whitespace
 hi IncSearch term=reverse cterm=reverse ctermfg=193 ctermbg=16 gui=reverse guifg=#C4BE89 guibg=#000000
 hi! link Special Preproc
 if has('nvim')
-  hi! PmenuSel guifg=None guibg=#393F47
+  hi! PmenuSel guifg=NONE guibg=#393F47
 endif
 hi! link helpSectionDelim Comment
 if has('nvim')
-hi! ErrorMsg guifg=#fa7970 guibg=None guisp=#Fa7970 gui=undercurl
-hi! WarningMsg guifg=#faa356 guibg=None guisp=#faa356 gui=undercurl
-hi! DiffChange guifg=None guibg=#462D10
-hi! DiffAdd guifg=None guibg=#104731
-hi! DiffDelete guifg=None guibg=#4C111F
-hi! DiffText guifg=None guibg=#7A5614
+hi! ErrorMsg guifg=#fa7970 guibg=NONE guisp=#Fa7970 gui=undercurl
+hi! WarningMsg guifg=#faa356 guibg=NONE guisp=#faa356 gui=undercurl
+hi! DiffChange guifg=NONE guibg=#462D10
+hi! DiffAdd guifg=NONE guibg=#104731
+hi! DiffDelete guifg=NONE guibg=#4C111F
+hi! DiffText guifg=NONE guibg=#7A5614
 endif
 hi! Context guibg=#0D2341
 hi! FileName guifg=#C4CBD7

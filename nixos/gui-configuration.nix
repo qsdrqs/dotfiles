@@ -22,7 +22,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    vscode-insiders
+    vscode
     firefox-devedition
     firefox-alias
     kitty
@@ -54,8 +54,7 @@ in
       support32Bit = true;
     };
     # jack.enable = true;
-    package = pkgs-fix.pipewire;
-    wireplumber.package = pkgs-fix.wireplumber;
+    # wireplumber.package = pkgs-fix.wireplumber;
   };
 
   systemd = {

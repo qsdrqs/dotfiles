@@ -133,7 +133,8 @@ in
     wpsoffice-hidpi
     libreoffice
     gnome.seahorse # keyring manager
-    (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
+
+    # (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
     # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
 
     virt-manager
@@ -234,9 +235,9 @@ in
     };
   };
   # https://wiki.hyprland.org/Nvidia/#fixing-random-flickering-nuclear-method
-  # environment.etc."modprobe.d/nvidia.conf".text = ''
-  #   options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerLevel=0x3; PowerMizerDefault=0x3; PowerMizerDefaultAC=0x3"
-  # '';
+  environment.etc."modprobe.d/nvidia.conf".text = ''
+    options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerLevel=0x3; PowerMizerDefault=0x3; PowerMizerDefaultAC=0x3"
+  '';
 
   # snapshots
   services.snapper.configs = {

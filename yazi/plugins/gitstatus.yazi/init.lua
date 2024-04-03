@@ -11,25 +11,13 @@ local update_tracked = ya.sync(function(st, git_root, tracked)
 	end
 	st.tracked[git_root] = tracked
 	File.gitstatus = function(self, file)
-		local url = tostring(file.url)
-		if url:match(".git$") then
-			return " "
-		end
-		if tracked[url] ~= nil then
-			return tracked[url]
-		end
-		local base_url = url:match("^(.*/)[^/]*$")
-		-- if git_root is not a prefix of base_url, it is not in the git repository
-		if not base_url:find(git_root, 1, true) then
-			return ""
-		end
-		return "✓"
+		return tracked[tostring(file.url)]
 	end
 	ya.render()
 end)
 
 local get_tracked = ya.sync(function(st, git_root)
-	if st.tracked then
+	if st.tracked and st.tracked[git_root] then
 		return st.tracked[git_root]
 	end
 end)
@@ -37,14 +25,14 @@ end)
 local get_git_status = function(git_root)
 	local tracked = {}
 	-- check tracked files
-	child, code = Command("git"):args({"status", "--ignored", "--short"}):cwd(git_root):stdout(Command.PIPED):spawn()
+	local child, code = Command("git"):args({"status", "--ignored", "--short"}):cwd(git_root):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
-		return 2
+		return {}
 	end
 
 	repeat
-		next, event = child:read_line_with { timeout = 10000 }
+		local next, event = child:read_line_with { timeout = 10000 }
 		if event == 3 then
 			ya.err("timeout")
 			break
@@ -54,7 +42,7 @@ local get_git_status = function(git_root)
 
 		local trimed_next = next:match("^(.*)\n$")
 		-- if match "^!! ", it is ignored file
-		local type
+		local type = nil
 		if trimed_next:match("^!! ") then
 			type = "·"
 			trimed_next = trimed_next:sub(4)
@@ -64,8 +52,12 @@ local get_git_status = function(git_root)
 		elseif trimed_next:match("^ M") then
 			type = "+"
 			trimed_next = trimed_next:sub(4)
+		elseif trimed_next:match("^A ") then
+			type = "*"
+			trimed_next = trimed_next:sub(4)
 		else
 			ya.err("unknown status: " .. trimed_next)
+			return {}
 		end
 		-- if trimed_next ends with /, it is a directory
 		if trimed_next:match("/$") then
@@ -75,6 +67,7 @@ local get_git_status = function(git_root)
 		tracked[url] = type
 		::continue::
 	until not next
+	return tracked
 end
 
 function M:preload()
@@ -100,10 +93,7 @@ function M:preload()
 	local git_root = next:match("^(.*)\n$")
 
 	local tracked = get_tracked(git_root)
-	if tracked ~= nil then
-		-- already checked
-		return 3
-	else
+	if tracked == nil then
 		tracked = get_git_status(git_root)
 	end
 
@@ -117,6 +107,9 @@ function M:preload()
 		if tracked[url] ~= nil then
 			update_track[url] = tracked[url]
 		end
+
+		-- match directory
+
 		base_url = url:match("^(.*/)[^/]*$")
 		-- if git_root is not a prefix of base_url, it is not in the git repository
 		if not base_url:find(git_root, 1, true) then
@@ -124,6 +117,7 @@ function M:preload()
 			goto continue
 		end
 		update_track[url] = "✓"
+		ya.err("tracked: " .. url .. " " .. update_track[url])
 		::continue::
 	end
 
