@@ -117,9 +117,9 @@ echo -ne '\e[5 q'
 [[ -s "$HOME/grc/grc.zsh"  ]] && source $HOME/grc/grc.zsh
 
 # 加快加载速度
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+#    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# fi
 
 # init zinit
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}}/zinit"

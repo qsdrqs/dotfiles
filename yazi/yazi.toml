@@ -88,7 +88,7 @@ suppress_preload = false
 
 preloaders = [
 	{ name = "*/", run = "dircount", multi = true },
-	# { name = "*", run = "gitstatus", multi = true },
+	{ mime = "*", run = "gitstatus", multi = true },
 	{ name = "*", cond = "!mime", run = "mime", multi = true, prio = "high" },
 	# Image
 	{ mime = "image/vnd.djvu", run = "noop" },

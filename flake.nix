@@ -97,11 +97,12 @@
       pkgs-collect = builtins.listToAttrs (builtins.map
         (pkg: {
           name = pkg;
-          value = (system: import inputs.${pkg} {
+          value = (system: import inputs."nix${pkg}" {
             system = system;
             config.allowUnfree = true;
+            overlays = (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
           });
-        }) [ "nixpkgs-master" "nixpkgs-fix" ]
+        }) [ "pkgs-master" "pkgs-fix" "pkgs" ]
       );
       minimalHomeModules = [
         ./nixos/home.nix
@@ -120,13 +121,15 @@
       ];
       desktopHomeModules = basicHomeModules ++ guiHomeModules;
 
+      special-args = system: {
+        inherit inputs;
+        pkgs-master = pkgs-collect.pkgs-master system;
+        pkgs-fix = pkgs-collect.pkgs-fix system;
+      };
+
       minimalConfig = rec {
         system = "x86_64-linux";
-        specialArgs = {
-          inherit inputs;
-          pkgs-master = pkgs-collect.nixpkgs-master system;
-          pkgs-fix = pkgs-collect.nixpkgs-fix system;
-        };
+        specialArgs = special-args system;
         modules = [
           (if builtins.pathExists ./nixos/custom.nix then
             ./nixos/custom.nix
@@ -148,7 +151,7 @@
 
             # Optionally, use home-manager.extraSpecialArgs to pass
             # arguments to home.nix
-            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.extraSpecialArgs = specialArgs;
           }
 
         ];
@@ -176,7 +179,7 @@
             home-manager.users.qsdrqs = {
               imports = basicHomeModules;
             };
-            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.extraSpecialArgs = special-args minimalConfig.system;
           }
         ];
       };
@@ -189,6 +192,15 @@
         system = "aarch64-linux";
         modules = basicConfig.modules ++ [
           ./nixos/rpi-configuration.nix
+
+          # aarch64-linux home-manager
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.qsdrqs = {
+              imports = basicHomeModules;
+            };
+            home-manager.extraSpecialArgs = special-args "aarch64-linux";
+          }
         ];
       };
       guiConfig = minimalConfig // {
@@ -200,7 +212,7 @@
             home-manager.users.qsdrqs = {
               imports = guiHomeModules;
             };
-            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.extraSpecialArgs = special-args minimalConfig.system;
           }
         ];
       };
@@ -214,7 +226,7 @@
             home-manager.users.qsdrqs = {
               imports = wslHomeModules;
             };
-            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.extraSpecialArgs = special-args minimalConfig.system;
           }
         ];
       };
@@ -230,9 +242,9 @@
           system = "x86_64-linux";
         in
         {
-          pkgs = pkgs' system;
+          pkgs = pkgs-collect.pkgs system;
           modules = minimalHomeModules;
-          extraSpecialArgs = { inherit inputs; };
+          extraSpecialArgs = special-args system;
         };
       basicHomeConfig = minimalHomeConfig // {
         modules = basicHomeModules;
@@ -242,7 +254,8 @@
           system = "aarch64-linux";
         in
         {
-          pkgs = pkgs' system;
+          pkgs = pkgs-collect.pkgs system;
+          extraSpecialArgs = special-args system;
         }
       );
       wslHomeConfig = basicHomeConfig // {
@@ -283,11 +296,6 @@
         ];
       };
 
-      pkgs' = (system: import nixpkgs {
-        system = system;
-        config.allowUnfree = true;
-        overlays = (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
-      });
       archSpecConfig = func: archs: builtins.listToAttrs (builtins.map
         (system: {
           name = system;
@@ -347,10 +355,10 @@
       homeConfigurations.termux = home-manager.lib.homeManagerConfiguration termuxHomeConfig;
 
       # dev shells
-      devShells = archSpecConfigAll (system: (pkgs' system).callPackage dev-shell.shells { inputs = inputs; });
+      devShells = archSpecConfigAll (system: (pkgs-collect.pkgs system).callPackage dev-shell.shells { inputs = inputs; });
       # direct nix run
-      packages = archSpecConfigAll (system: pkgs' system) // {
-        x86_64-linux.hack-pylsp = (pkgs' "x86_64-linux").callPackage ./nixos/hack-pylsp.nix { };
+      packages = archSpecConfigAll (system: pkgs-collect.pkgs system) // {
+        x86_64-linux.hack-pylsp = (pkgs-collect.pkgs "x86_64-linux").callPackage ./nixos/hack-pylsp.nix { };
       };
       legacyPackages = nixpkgs.legacyPackages;
       inputs_ = inputs;

@@ -46,12 +46,12 @@ with pkgs; {
   python =
     let
       defaultPyPkgs = (pypkgs: with pypkgs; [
-        virtualenv
         numpy
         matplotlib
       ]);
       common_shell = rec {
         packages = [
+          python3Packages.virtualenv
           nodePackages.pyright
           python3Packages.autopep8
           python3Packages.isort

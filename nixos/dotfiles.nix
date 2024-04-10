@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, pkgs-fix, lib, inputs, ... }:
 
 let
   symbfile = filenames: lib.genAttrs filenames (filename: {
@@ -41,6 +41,17 @@ let
         --replace "COLUMNS=500 _ftb__main_complete" "_ftb__main_complete"
       '';
     };
+    powerlevel10k = pkgs.stdenv.mkDerivation {
+      name = "powerlevel10k";
+      src = inputs.zsh-config.inputs.powerlevel10k;
+      installPhase = commonInstallPhase;
+      # ignore version in the script
+      postInstall = ''
+        substituteInPlace $out/gitstatus/install \
+        --replace '[ $# = 0 ] || "$@" "$daemon" "$version" "$installed"' \
+        '[ $# = 0 ] || "$@" "$daemon" "*" "$installed"'
+      '';
+    };
   };
 
   genZshPlugins = plugins: lib.genAttrs plugins (plugin: {
@@ -53,7 +64,11 @@ let
   });
 
   genZshThemes = themes: lib.genAttrs themes (theme: {
-    source = inputs.zsh-config.inputs.${theme};
+    source =
+      if !builtins.hasAttr theme buildDerivations then
+        inputs.zsh-config.inputs.${theme}
+      else
+        buildDerivations.${theme};
     target = ".zsh/themes/${theme}";
   });
 

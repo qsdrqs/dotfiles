@@ -1,4 +1,9 @@
 local link_style = { fg = "cyan" }
+local gitstatus_dot = { fg = "white" }
+local gitstatus_check = { fg = "green" }
+local gitstatus_star = { fg = "green" }
+local gitstatus_plus = { fg = "red" }
+local gitstatus_question = { fg = "cyan" }
 
 local function executable(file)
 	local permission = file.cha:permissions()
@@ -56,6 +61,7 @@ function File:style(file)
 	end
 	if file.cha.is_link then
 		style:fg(link_style.fg)
+		white_style = false
 	end
 	if executable(file) then
 		if white_style then
@@ -77,7 +83,7 @@ function File:count(file)
 end
 
 function File:gitstatus(file)
-	return nil
+	return " "
 end
 
 function Folder:linemode(area, files)
@@ -108,7 +114,23 @@ function Folder:linemode(area, files)
 
 		local gitstatus = File:gitstatus(f)
 		if gitstatus then
-			spans[#spans + 1] = ui.Span(gitstatus)
+			if f:is_hovered() then
+				spans[#spans + 1] = ui.Span(gitstatus)
+			elseif gitstatus == '·' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_dot)
+			elseif gitstatus == '*' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_star)
+			elseif gitstatus == '+' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
+			elseif gitstatus == '?' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_question)
+			elseif gitstatus == '✓' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_check)
+			elseif gitstatus == '󰊢' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
+			else
+				spans[#spans + 1] = ui.Span(gitstatus)
+			end
 		end
 
 		lines[#lines + 1] = ui.Line(spans)
