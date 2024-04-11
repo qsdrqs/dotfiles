@@ -469,5 +469,3 @@ vim() {
         fi
     done
 }
-
-if [ -e /data/data/com.termux/files/home/.nix-profile/etc/profile.d/nix.sh ]; then . /data/data/com.termux/files/home/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer

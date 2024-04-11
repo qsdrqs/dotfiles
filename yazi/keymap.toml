@@ -154,7 +154,10 @@ keymap = [
 
 	# Help
 	{ on = [ "~" ], run = "help", desc = "Open help" },
-	{ on = [ "b", "b"], run = "plugin dircount"}
+	{ on = [ "b", "b"], run = "plugin dircount"},
+
+	# Plugins
+	{ on = [ "g", "i" ], run = "plugin --sync gitstatus", desc = "Move cursor to the top" }
 ]
 
 [tasks]

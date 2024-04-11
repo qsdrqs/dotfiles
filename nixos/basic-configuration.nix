@@ -32,6 +32,7 @@ in
     inferno # flamegraph
     wireguard-tools
     ffmpeg
+    scc
   ];
 
   environment.variables = {

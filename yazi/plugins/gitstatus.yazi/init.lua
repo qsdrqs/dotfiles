@@ -11,6 +11,16 @@ local get_hovered = ya.sync(function(st)
 	return tostring(h.url)
 end)
 
+
+local clean_up_all = ya.sync(function(st)
+	st.git_roots = {}
+	st.git_roots_sub = {}
+	st.git_roots_curr = {}
+	st.tracked = {}
+	st.status = {}
+	ya.render()
+end)
+
 local get_git_roots = ya.sync(function(st, sub)
 	if not st.git_roots then
 		st.git_roots = {}
@@ -70,16 +80,19 @@ local update_git_roots_curr = ya.sync(function(st, git_roots_curr)
 	ya.render()
 end)
 
-local update_status = ya.sync(function(st, git_root, status)
+local update_status = ya.sync(function(st, git_root, status, dir_status)
 	if not st.status then
 		st.status = {}
 	end
-	st.status[git_root] = status
+	st.status[git_root] = {
+		status = status,
+		dir_status = dir_status,
+	}
 end)
 
 local get_status = ya.sync(function(st, git_root)
 	if st.status and st.status[git_root] then
-		return st.status[git_root]
+		return st.status[git_root].status, st.status[git_root].dir_status
 	end
 end)
 
@@ -89,7 +102,8 @@ local get_git_status = function(git_root)
 	local child, code = Command("git"):args({"status", "--ignored", "--short"}):cwd(git_root):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
-		return {}
+		ya.err("cwd: " .. git_root)
+		return {}, {}
 	end
 
 	repeat
@@ -114,8 +128,14 @@ local get_git_status = function(git_root)
 		elseif trimed_next:match("^ M") then
 			type = "+"
 			trimed_next = trimed_next:sub(4)
+		elseif trimed_next:match("^MM") then
+			type = "+"
+			trimed_next = trimed_next:sub(4)
 		elseif trimed_next:match("^A ") then
 			type = "*"
+			trimed_next = trimed_next:sub(4)
+		elseif trimed_next:match("^ D") then
+			type = "-"
 			trimed_next = trimed_next:sub(4)
 		elseif trimed_next:match("^ %?") then
 			-- sub module
@@ -129,7 +149,7 @@ local get_git_status = function(git_root)
 			update_git_root = true
 		else
 			ya.err("unknown status: " .. trimed_next)
-			return {}
+			return {}, {}
 		end
 		-- if trimed_next ends with /, it is a directory
 		if trimed_next:match("/$") then
@@ -143,35 +163,40 @@ local get_git_status = function(git_root)
 		::continue::
 	until not next
 
-	-- add parent dirs
+	-- add parent dirs, which is used to see the directory status
+	local dir_tracked = {}
 	for url, type in pairs(tracked) do
 		local base_url = url:match("^(.*/)[^/]*/*$")
-		while base_url:find(git_root, 1, true) do
+		while base_url ~= nil and base_url:find(git_root, 1, true) do
 			if tracked[base_url] == nil then
 				local base_url_without_slash = base_url:match("^(.*)/$")
-				if base_url_without_slash == git_root then
+				if base_url_without_slash ~= nil and base_url_without_slash == git_root then
 					-- git root should not have any status
 					break
 				end
 				if type ~= "·" then
-					tracked[base_url_without_slash] = type
+					dir_tracked[base_url_without_slash] = type
 				end
 			end
 			base_url = base_url:match("^(.*/)[^/]*/$")
 		end
 	end
 
-	return tracked
+	return tracked, dir_tracked
 end
 
 local get_git_root = function(url)
 	local url = url:match("^(.*)/$")
+	if url == nil then
+		-- root directory
+		return 3
+	end
 	local git_roots = get_git_roots(false)
 	if git_roots[url] then
 		return url
 	end
 	local sub_url = url:match("^(.*)/[^/]+/?$")
-	while sub_url:find("/", 1, true) do
+	while sub_url ~= nil and sub_url:find("/", 1, true) do
 		if git_roots[sub_url] then
 			return sub_url
 		end
@@ -182,6 +207,7 @@ local get_git_root = function(url)
 	local child, code = Command("git"):args({"rev-parse", "--show-toplevel"}):cwd(url):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
+		ya.err("cwd: " .. url)
 		return 2
 	end
 
@@ -241,6 +267,7 @@ function M:preload()
 				local child, code = Command("ls"):args({"-d", ".git"}):cwd(sub_url):stdout(Command.PIPED):spawn()
 				if not child then
 					ya.err("spawn `ls` command returns " .. tostring(code))
+					ya.err("cwd: " .. sub_url)
 					return 2
 				end
 
@@ -259,16 +286,21 @@ function M:preload()
 		return 3
 	end
 
-	local git_status = get_status(git_root)
+	local git_status, dir_git_status = get_status(git_root)
 	if git_status == nil then
-		git_status = get_git_status(git_root)
-		update_status(git_root, git_status)
+		git_status, dir_git_status = get_git_status(git_root)
+		update_status(git_root, git_status, dir_git_status)
+	end
+
+	if dir_git_status == nil then
+		ya.err("dir_git_status is nil")
+		return 2
 	end
 
 	local update_track = {}
 	for _, file in ipairs(self.files) do
 		local url = tostring(file.url)
-		if url:match(".git$") then
+		if url ~= nil and url:match(".git$") then
 			update_track[url] = " "
 			goto continue
 		end
@@ -277,10 +309,15 @@ function M:preload()
 			update_track[url] = git_status[url]
 			goto continue
 		end
+		if dir_git_status[url] ~= nil then
+			-- check if it is a directory
+			update_track[url] = dir_git_status[url]
+			goto continue
+		end
 
 		-- check if parent dirs have status
 		local sub_url = url:match("^(.*)/[^/]+/?$")
-		while sub_url:find(git_root, 1, true) do
+		while sub_url ~= nil and sub_url:find(git_root, 1, true) do
 			if git_status[sub_url] ~= nil then
 				if git_status[sub_url] ~= nil then
 					update_track[url] = git_status[sub_url]
@@ -297,6 +334,24 @@ function M:preload()
 	update_tracked(git_root, update_track)
 
 	return 3
+end
+
+function M.entry()
+	-- re-evaluate git status
+	clean_up_all()
+	local hovered = get_hovered()
+	local base_url = hovered:match("^(.*/)[^/]*$")
+	if base_url == nil then
+		ya.err("base_url is nil")
+		return
+	end
+	if base_url == "/" then
+		ya.manager_emit("enter", {})
+		ya.manager_emit("leave", {})
+		return
+	end
+	ya.manager_emit("leave", {})
+	ya.manager_emit("enter", {})
 end
 
 return M

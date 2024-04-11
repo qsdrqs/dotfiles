@@ -3,6 +3,8 @@ local gitstatus_dot = { fg = "white" }
 local gitstatus_check = { fg = "green" }
 local gitstatus_star = { fg = "green" }
 local gitstatus_plus = { fg = "red" }
+local gitstatus_minus = { fg = "red" }
+local gitstatus_git = { fg = "yellow" }
 local gitstatus_question = { fg = "cyan" }
 
 local function executable(file)
@@ -122,12 +124,14 @@ function Folder:linemode(area, files)
 				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_star)
 			elseif gitstatus == '+' then
 				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
+			elseif gitstatus == '-' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_minus)
 			elseif gitstatus == '?' then
 				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_question)
 			elseif gitstatus == '✓' then
 				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_check)
 			elseif gitstatus == '󰊢' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_git)
 			else
 				spans[#spans + 1] = ui.Span(gitstatus)
 			end
