@@ -22,6 +22,7 @@
     fd
     ripgrep
     grc
+    fastfetch
     neofetch
     tmux
   ];

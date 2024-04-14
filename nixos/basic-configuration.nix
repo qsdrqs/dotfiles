@@ -1,6 +1,6 @@
 { config, pkgs, pkgs-master, lib, inputs, options, ... }:
 let
-  # packages = pkgs.callPackage ./packages.nix { inputs = inputs; };
+  # dummy = pkgs.callPackage (import ./packages.nix).dummy { };
   homeDir = config.users.users.qsdrqs.home;
 in
 {
@@ -18,7 +18,7 @@ in
     ctags
     nodejs
     firejail
-    # (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else packages.dummy)
+    # (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else dummy)
     openssl
     openssl.out # openssl lib
     parted

@@ -159,7 +159,7 @@ ZSH_COLORIZE_STYLE="colorful"
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=blue"
 
 zstyle ':fzf-tab:complete:cd:*' extra-opts --preview=$extract'exa -1 --color=always $realpath'
-export FZF_BASE=/usr/share/fzf
+# export FZF_BASE=/usr/share/fzf
 export FZF_DEFAULT_COMMAND='fd'
 # TODO: 预览有问题
 #export FZF_DEFAULT_OPTS='--preview "[[ $(file --mime {}) =~ binary ]] && echo {} is a binary file || (ccat --color=always {} || highlight -O ansi -l {} || cat {}) 2> /dev/null | head -500"'
@@ -216,6 +216,7 @@ alias af="alias-finder"
 alias lg="lazygit"
 alias t="tmux"
 alias c="clear"
+alias f="fastfetch"
 alias n="neofetch"
 alias ra="ranger"
 alias ya="yazi"

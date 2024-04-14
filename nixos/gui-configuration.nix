@@ -41,6 +41,7 @@ in
     pulseaudio
     rofi-wayland
     networkmanagerapplet
+    xdotool
   ] ++ hyprlandPackages;
 
   qt.platformTheme = "kde";
