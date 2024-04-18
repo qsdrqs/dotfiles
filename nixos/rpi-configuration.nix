@@ -150,7 +150,29 @@ in
       wantedBy = [ "multi-user.target" ];
       description = "Auto control fan on/off";
       serviceConfig = {
-        ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./autofan.py} ${builtins.toString low} ${builtins.toString high}'';
+        ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-autofan.py} ${builtins.toString low} ${builtins.toString high}'';
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+    };
+
+  systemd.services.wifi-rebuild =
+    let
+      wifi-interface = "wlp1s0u1u2";
+      rpi-config = "rpi";
+    in
+    {
+      wantedBy = [ "multi-user.target" ];
+      description = "Auto detect wifi down and rebuild nixos";
+      path = [
+        pkgs.iproute
+        pkgs.gnugrep
+        pkgs.bash
+        pkgs.nixos-rebuild
+        pkgs.nix
+      ];
+      serviceConfig = {
+        ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-wifi-rebuild.py} ${wifi-interface} ${rpi-config}'';
         Restart = "on-failure";
         RestartSec = 5;
       };

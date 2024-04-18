@@ -84,13 +84,15 @@ function main {
 }
 
 function nixpre {
-    local pwd=$(pwd)
-    cd $HOME/dotfiles
+    # check if flake.nix exists
+    if [[ ! -f flake.nix ]];then
+        echo "flake.nix not found"
+        exit 1
+    fi
     nix flake lock --update-input nvim-config path:. --experimental-features 'nix-command flakes'
     nix flake lock --update-input zsh-config path:. --experimental-features 'nix-command flakes'
     nix flake lock --update-input ranger-config path:. --experimental-features 'nix-command flakes'
     nix flake lock --update-input dev-shell path:. --experimental-features 'nix-command flakes'
-    cd $pwd
     echo "preinstall done"
     echo "now run: nixos-rebuild switch --flake .#[config-name]"
 }

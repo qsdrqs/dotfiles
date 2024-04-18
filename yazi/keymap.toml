@@ -75,6 +75,7 @@ keymap = [
 	{ on = [ "d", "D" ],    run = [ "plugin delete" ],                  desc = "Permanently delete the files" },
 	{ on = [ "a" ],         run = "rename --cursor=before_ext",                                               desc = "Rename a file or directory" },
 	{ on = [ "A" ],         run = "rename",                                               desc = "Rename a file or directory" },
+	{ on = [ "I" ],         run = "rename --cursor=start",                                desc = "Rename a file or directory" },
 	{ on = [ "c" ],         run = "create",                                               desc = "Create a file or directory (ends with / for directories)" },
 	{ on = [ ";" ],         run = "shell",                                                desc = "Run a shell command" },
 	{ on = [ ":" ],         run = "shell --block",                                        desc = "Run a shell command (block the UI until the command finishes)" },
