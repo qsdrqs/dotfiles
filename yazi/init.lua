@@ -124,6 +124,8 @@ function Folder:linemode(area, files)
 				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_star)
 			elseif gitstatus == '+' then
 				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
+			elseif gitstatus == '!' then
+				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
 			elseif gitstatus == '-' then
 				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_minus)
 			elseif gitstatus == '?' then

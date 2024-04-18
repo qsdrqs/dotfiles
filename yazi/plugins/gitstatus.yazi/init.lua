@@ -134,6 +134,9 @@ local get_git_status = function(git_root)
 		elseif trimed_next:match("^A ") then
 			type = "*"
 			trimed_next = trimed_next:sub(4)
+		elseif trimed_next:match("^ A") then
+			type = "!"
+			trimed_next = trimed_next:sub(4)
 		elseif trimed_next:match("^ D") then
 			type = "-"
 			trimed_next = trimed_next:sub(4)

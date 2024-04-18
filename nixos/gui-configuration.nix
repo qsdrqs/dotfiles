@@ -100,12 +100,10 @@ in
     (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })
   ];
 
-  services.xserver = {
+  services.xserver.enable = true;
+  services.displayManager.sddm = {
     enable = true;
-    displayManager.sddm = {
-      enable = true;
-      autoNumlock = true;
-    };
+    autoNumlock = true;
   };
 
   programs.hyprland = {

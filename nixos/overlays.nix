@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ pkgs, lib, inputs, ... }:
 let
   # Neovim Treesitter Parsers
   # The following code is taken from {github.com/neovim/neovim}/contrib/flake.nix
@@ -32,14 +32,21 @@ let
       };
     })
   ]);
+  pkgs-master = import inputs.nixpkgs-master {
+    system = pkgs.system;
+  };
 in
 {
   nixpkgs.overlays = [
-    (self: super: {
+    (self: super:
+    {
       makeModulesClosure = x:
         super.makeModulesClosure (x // { allowMissing = true; });
 
       # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+      fzf = pkgs-master.fzf;
+
+      yazi = inputs.yazi.packages.${super.system}.yazi;
       # End Temporary self updated packages
 
       neovim-unwrapped =

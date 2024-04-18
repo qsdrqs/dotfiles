@@ -43,6 +43,15 @@ with pkgs; {
       pkg-config
     ];
   };
+  automake = mkShell {
+    buildInputs = [
+      gcc
+      autoconf
+      automake
+      libtool
+      pkg-config
+    ];
+  };
   python =
     let
       defaultPyPkgs = (pypkgs: with pypkgs; [
