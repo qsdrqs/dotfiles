@@ -1455,8 +1455,8 @@ local plugins = {
             saved_terminal = term.get(termid)
           end,
           post_open = function(bufnr, winnr, ft, is_blocking)
-            if is_blocking and saved_terminal then
-              saved_terminal:close()
+            if saved_terminal then
+              saved_terminal:shutdown()
             end
           end
         }
