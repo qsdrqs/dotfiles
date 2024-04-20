@@ -368,14 +368,14 @@ let g:loaded_netrwPlugin = 1
 " let g:netrw_liststyle= 3
 
 "-------------------netrw-----------------------"}}}
-set diffopt=vertical
+set diffopt+=indent-heuristic,algorithm:histogram
 if has('nvim')
+  let &stc='%=%s%{v:virtnum>0?"":(v:relnum?v:relnum:v:lnum)} %C'
+  set diffopt+=linematch:60
   " get the version of neovim
   let nvim_ver = luaeval("vim.version()")
   if nvim_ver.minor >= 9
-    set diffopt+=linematch:50
     if !exists('g:vscode')
-      let &stc='%=%s%{v:virtnum>0?"":(v:relnum?v:relnum:v:lnum)} %C'
     endif
   end
 end

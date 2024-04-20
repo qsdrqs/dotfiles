@@ -107,7 +107,7 @@ local get_git_status = function(git_root)
 	end
 
 	repeat
-		local next, event = child:read_line_with { timeout = 300 }
+		local next, event = child:read_line_with { timeout = 10000 }
 		if event == 3 then
 			ya.err("timeout")
 			break
