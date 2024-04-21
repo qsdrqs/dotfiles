@@ -6,6 +6,7 @@ local gitstatus_plus = { fg = "red" }
 local gitstatus_minus = { fg = "red" }
 local gitstatus_git = { fg = "yellow" }
 local gitstatus_question = { fg = "cyan" }
+local gitstatus_conflict = { fg = "magenta" }
 
 local function executable(file)
 	local permission = file.cha:permissions()
@@ -115,25 +116,23 @@ function Folder:linemode(area, files)
 		spans[#spans + 1] = ui.Span(" ")
 
 		local gitstatus = File:gitstatus(f)
+
+		local status_color_tbl = {
+			['·'] = gitstatus_dot,
+			['*'] = gitstatus_star,
+			['+'] = gitstatus_plus,
+			['!'] = gitstatus_plus,
+			['-'] = gitstatus_minus,
+			['?'] = gitstatus_question,
+			['✓'] = gitstatus_check,
+			['X'] = gitstatus_conflict,
+			['󰊢'] = gitstatus_git,
+		}
 		if gitstatus then
 			if f:is_hovered() then
 				spans[#spans + 1] = ui.Span(gitstatus)
-			elseif gitstatus == '·' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_dot)
-			elseif gitstatus == '*' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_star)
-			elseif gitstatus == '+' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
-			elseif gitstatus == '!' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_plus)
-			elseif gitstatus == '-' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_minus)
-			elseif gitstatus == '?' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_question)
-			elseif gitstatus == '✓' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_check)
-			elseif gitstatus == '󰊢' then
-				spans[#spans + 1] = ui.Span(gitstatus):style(gitstatus_git)
+			elseif status_color_tbl[gitstatus] then
+				spans[#spans + 1] = ui.Span(gitstatus):style(status_color_tbl[gitstatus])
 			else
 				spans[#spans + 1] = ui.Span(gitstatus)
 			end

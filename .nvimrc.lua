@@ -2827,7 +2827,7 @@ local plugins = {
 
       -- https://github.com/AdamWhittingham/vim-config/blob/nvim/lua/config/startup_screen.lua
       local nvim_web_devicons = require "nvim-web-devicons"
-      path = require"plenary.path"
+      local path = require"plenary.path"
       local function get_extension(fn)
         local match = fn:match("^.+(%..+)$")
         local ext = ""
@@ -2913,10 +2913,17 @@ local plugins = {
             short_fn = vim.fn.fnamemodify(fn, ":~")
           end
 
-          if(#short_fn > target_width) then
+          if #short_fn > target_width then
             short_fn = path.new(short_fn):shorten(1, {-2, -1})
-            if(#short_fn > target_width) then
+            if #short_fn > target_width then
               short_fn = path.new(short_fn):shorten(1, {-1})
+              if #short_fn > target_width then
+                -- trim last path
+                local fname = vim.fn.fnamemodify(fn, ":t")
+                local path_without_fname = short_fn:sub(1, #short_fn - #fname)
+                local remain_space = target_width - #path_without_fname
+                short_fn = path_without_fname .. "..." .. fname:sub(#fname - remain_space + 1)
+              end
             end
           end
 

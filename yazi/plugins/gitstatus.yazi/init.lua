@@ -96,10 +96,59 @@ local get_status = ya.sync(function(st, git_root)
 	end
 end)
 
+local parse_git_status = function(git_status_line)
+	local type, update_git_root = nil, false
+	local status_code = git_status_line:sub(1, 2)
+	local status_translations = {
+		-- X (index) codes, Y (working tree) codes, translated status
+		{ x = "MADRC",  y = " ",   status = "staged" },
+		{ x = " MADRC", y = "M",   status = "changed" },
+		{ x = " MARC",  y = "D",   status = "deleted" },
+		{ x = "D",      y = "DU",  status = "conflict" },
+		{ x = "A",      y = "AU",  status = "conflict" },
+		{ x = "U",      y = "ADU", status = "conflict" },
+		{ x = "?",      y = "?",   status = "untracked" },
+		{ x = "!",      y = "!",   status = "ignored" },
+		{ x = " MADRC", y = "m",   status = "changed_sub" },
+		{ x = " ",      y = "?",   status = "untracked_sub" },
+	}
+	local status_icon = {
+		staged = "*",
+		changed = "+",
+		deleted = "-",
+		conflict = "X",
+		untracked = "?",
+		ignored = "·",
+		changed_sub = "+",
+		untracked_sub = "?",
+	}
+
+	local x = status_code:sub(1, 1)
+	local y = status_code:sub(2, 2)
+
+	for _, rule in ipairs(status_translations) do
+		if rule.x:find(x) and rule.y:find(y) then
+			if rule.status:find("sub") then
+				update_git_root = true
+			end
+			type = status_icon[rule.status]
+			break
+		end
+	end
+
+	if type == nil then
+		ya.err("unknown status: " .. status_code)
+		return nil, false, trimed_next
+	end
+
+	return type, update_git_root, trimed_next
+end
+
 local get_git_status = function(git_root)
 	local tracked = {}
 	-- check tracked files
-	local child, code = Command("git"):args({"status", "--ignored", "--short"}):cwd(git_root):stdout(Command.PIPED):spawn()
+	local child, code = Command("git"):args({ "status", "--ignored", "--short" }):cwd(git_root):stdout(Command.PIPED)
+			:spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
 		ya.err("cwd: " .. git_root)
@@ -117,46 +166,14 @@ local get_git_status = function(git_root)
 
 		local trimed_next = next:match("^(.*)\n$")
 		-- if match "^!! ", it is ignored file
-		local type = nil
-		local update_git_root = false
-		if trimed_next:match("^!! ") then
-			type = "·"
-			trimed_next = trimed_next:sub(4)
-		elseif trimed_next:match("^%?%? ") then
-			type = "?"
-			trimed_next = trimed_next:sub(4)
-		elseif trimed_next:match("^ M") then
-			type = "+"
-			trimed_next = trimed_next:sub(4)
-		elseif trimed_next:match("^MM") then
-			type = "+"
-			trimed_next = trimed_next:sub(4)
-		elseif trimed_next:match("^A ") then
-			type = "*"
-			trimed_next = trimed_next:sub(4)
-		elseif trimed_next:match("^ A") then
-			type = "!"
-			trimed_next = trimed_next:sub(4)
-		elseif trimed_next:match("^ D") then
-			type = "-"
-			trimed_next = trimed_next:sub(4)
-		elseif trimed_next:match("^ %?") then
-			-- sub module
-			type = "?"
-			trimed_next = trimed_next:sub(4)
-			update_git_root = true
-		elseif trimed_next:match("^ m") then
-			-- sub module
-			type = "+"
-			trimed_next = trimed_next:sub(4)
-			update_git_root = true
-		else
-			ya.err("unknown status: " .. trimed_next)
-			return {}, {}
+		local type, update_git_root = parse_git_status(trimed_next)
+		if update_git_root then
+			ya.err("update" .. trimed_next)
 		end
+		trimed_next = trimed_next:sub(4)
 		-- if trimed_next ends with /, it is a directory
 		if trimed_next:match("/$") then
-			trimed_next = trimed_next:sub(1, -2)
+			trimed_next = trimed_next:sub(1, -2) -- remove last /
 		end
 		local url = git_root .. "/" .. trimed_next
 		if update_git_root then
@@ -207,7 +224,7 @@ local get_git_root = function(url)
 	end
 
 	-- not found in cache, get git root by git command
-	local child, code = Command("git"):args({"rev-parse", "--show-toplevel"}):cwd(url):stdout(Command.PIPED):spawn()
+	local child, code = Command("git"):args({ "rev-parse", "--show-toplevel" }):cwd(url):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
 		ya.err("cwd: " .. url)
@@ -267,7 +284,7 @@ function M:preload()
 					goto continue
 				end
 				-- use ls -d to check if it is a git repository
-				local child, code = Command("ls"):args({"-d", ".git"}):cwd(sub_url):stdout(Command.PIPED):spawn()
+				local child, code = Command("ls"):args({ "-d", ".git" }):cwd(sub_url):stdout(Command.PIPED):spawn()
 				if not child then
 					ya.err("spawn `ls` command returns " .. tostring(code))
 					ya.err("cwd: " .. sub_url)
