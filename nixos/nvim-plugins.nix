@@ -75,9 +75,9 @@ in
     cd ${config.home.homeDirectory}/dotfiles/nvim
     export PATH=${pkgs.neovim}/bin:${pkgs.git}/bin:$PATH
     ${pkgs.python3}/bin/python3 dump_input.py
-    nix flake lock path:.
+    nix flake lock
     cd ${config.home.homeDirectory}/dotfiles
-    nix flake lock --update-input nvim-config path:.
+    nix flake lock --update-input nvim-config
   '';
 
   home.activation.createBuildDirs = ''

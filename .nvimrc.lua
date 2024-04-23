@@ -511,12 +511,12 @@ local plugins = {
         end
 
         -- inlay hints
-        vim.lsp.inlay_hint.enable(bufnr, true)
+        vim.lsp.inlay_hint.enable()
 
       end
 
       local function showDocument()
-        local clients = vim.lsp.get_active_clients()
+        local clients = vim.lsp.get_clients()
         if next(clients) ~= nil then
           vim.lsp.buf.hover()
         elseif vim.o.filetype == "help" or vim.o.filetype == "vim" or vim.o.filetype == "lua" then

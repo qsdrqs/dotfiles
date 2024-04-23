@@ -34,6 +34,11 @@ let
   ]);
   pkgs-master = import inputs.nixpkgs-master {
     system = pkgs.system;
+    config.allowUnfree = true;
+  };
+  pkgs-fix = import inputs.nixpkgs-fix {
+    system = pkgs.system;
+    config.allowUnfree = true;
   };
 in
 {
@@ -44,10 +49,12 @@ in
         super.makeModulesClosure (x // { allowMissing = true; });
 
       # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
-      fzf = pkgs-master.fzf;
-
       yazi = inputs.yazi.packages.${super.system}.yazi;
       # End Temporary self updated packages
+
+      # Begin Temporary fixed version packages
+      google-chrome = pkgs-fix.google-chrome;
+      # End Temporary fixed version packages
 
       neovim-unwrapped =
         (super.neovim-unwrapped.override {

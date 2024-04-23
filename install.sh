@@ -89,10 +89,10 @@ function nixpre {
         echo "flake.nix not found"
         exit 1
     fi
-    nix flake lock --update-input nvim-config path:. --experimental-features 'nix-command flakes'
-    nix flake lock --update-input zsh-config path:. --experimental-features 'nix-command flakes'
-    nix flake lock --update-input ranger-config path:. --experimental-features 'nix-command flakes'
-    nix flake lock --update-input dev-shell path:. --experimental-features 'nix-command flakes'
+    nix flake lock --update-input nvim-config
+    nix flake lock --update-input zsh-config
+    nix flake lock --update-input ranger-config
+    nix flake lock --update-input dev-shell
     echo "preinstall done"
     echo "now run: nixos-rebuild switch --flake .#[config-name]"
 }

@@ -91,6 +91,7 @@ with pkgs; {
     packages = [
       jdk8
       maven
+      gradle
     ];
   };
   go = mkShell {
