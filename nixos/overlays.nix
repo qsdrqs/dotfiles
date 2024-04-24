@@ -49,7 +49,12 @@ in
         super.makeModulesClosure (x // { allowMissing = true; });
 
       # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
-      yazi = inputs.yazi.packages.${super.system}.yazi;
+      yazi = inputs.yazi.packages.${super.system}.yazi.overrideAttrs (oldAttrs: {
+        prePatch = oldAttrs.prePatch or "" + ''
+          substituteInPlace Cargo.toml \
+          --replace "[ \"yazi-fm\" ]" "[ \"yazi-fm\", \"yazi-cli\" ]"
+        '';
+      });
       # End Temporary self updated packages
 
       # Begin Temporary fixed version packages

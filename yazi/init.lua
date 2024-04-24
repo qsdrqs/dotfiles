@@ -142,3 +142,7 @@ function Folder:linemode(area, files)
 	end
 	return ui.Paragraph(area, lines):align(ui.Paragraph.RIGHT)
 end
+
+require("session"):setup {
+	sync_yanked = true,
+}

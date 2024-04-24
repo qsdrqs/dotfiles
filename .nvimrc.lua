@@ -1471,10 +1471,8 @@ local plugins = {
       "<C-`>",
       {"<C-Space>", mode = 'n'},
       "<localleader>T",
-      "<leader>ya",
     },
     cmd = {
-      "YaziToggle",
       "ZjumpToggle"
     },
     config = function()
@@ -1582,11 +1580,12 @@ local plugins = {
         zjump:toggle()
       end
 
-      vim.api.nvim_create_user_command("YaziToggle", yazi_toggle, {nargs = 0})
       vim.api.nvim_create_user_command("ZjumpToggle", zjump_toggle, {nargs = 0})
 
       vim.keymap.set("n", "<c-g>", lazygit_toggle, {noremap = true, silent = true})
-      vim.keymap.set("n", "<leader>ya", yazi_toggle, {noremap = true, silent = true})
+
+      -- vim.api.nvim_create_user_command("YaziToggle", yazi_toggle, {nargs = 0})
+      -- vim.keymap.set("n", "<leader>ya", yazi_toggle, {noremap = true, silent = true})
 
       -- repl
       vim.keymap.set("n", "<c-c><c-c>", "<cmd>ToggleTermSendCurrentLine<cr>")
@@ -2544,6 +2543,46 @@ local plugins = {
     config = function()
       vim.keymap.set('n', '<leader>ra', '<cmd>RnvimrToggle<CR>', {silent = true})
       vim.g.rnvimr_enable_picker = 1
+    end
+  },
+
+  {
+    "mikavilpas/yazi.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    keys = {
+      {
+        "<leader>ya",
+        function()
+          require("yazi").yazi()
+        end,
+        { desc = "Open the yazi file manager" },
+      }
+    },
+    cmd = {
+      "YaziToggle"
+    },
+    config = function()
+      if vim.fn.hlexists("FloatBorderClear") == 0 then
+        vim.api.nvim_set_hl(0, "FloatBorderClear", { link = "FloatBorder" })
+      end
+      require("yazi").setup {
+        floating_window_scaling_factor = 0.7,
+        yazi_floating_window_border = {
+          {"╭", "FloatBorderClear"},
+          {"─", "FloatBorderClear"},
+          {"╮", "FloatBorderClear"},
+          {"│", "FloatBorderClear"},
+          {"╯", "FloatBorderClear"},
+          {"─", "FloatBorderClear"},
+          {"╰", "FloatBorderClear"},
+          {"│", "FloatBorderClear"},
+        },
+      }
+      vim.api.nvim_create_user_command("YaziToggle", function()
+        require("yazi").yazi()
+      end, {nargs = 0})
     end
   },
 

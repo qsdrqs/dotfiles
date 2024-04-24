@@ -16,7 +16,7 @@ return {
 				return
 			end
 			if args[2] == "zoxide" or args[2] == "fzf" then
-				ya.manager_emit("jump", {tostring(args[2])})
+				ya.manager_emit("plugin", {tostring(args[2])})
 				return
 			end
 

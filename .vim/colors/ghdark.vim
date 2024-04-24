@@ -714,6 +714,7 @@ endif
 hi! Context guibg=#0D2341
 hi! FileName guifg=#C4CBD7
 highlight FloatBorder guifg=#525869 guibg=#1F2335
+hi! link FloatBorderClear GhBase4
 hi! TextSuccess guifg=#7ce38b
 hi! BoldSuccess guifg=#7ce38b gui=bold
 hi! link TextInfo GhBlue

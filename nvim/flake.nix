@@ -267,6 +267,10 @@
       url = "github:kevinhwang91/rnvimr";
       flake = false;
     };
+    yaziDOTnvim = {
+      url = "github:mikavilpas/yazi.nvim";
+      flake = false;
+    };
     vim-illuminate = {
       url = "github:RRethy/vim-illuminate";
       flake = false;
@@ -556,6 +560,7 @@
         { name = "inc-rename.nvim"; dotname = "inc-renameDOTnvim"; source = inputs.inc-renameDOTnvim; build = false; }
         { name = "lualine.nvim"; dotname = "lualineDOTnvim"; source = inputs.lualineDOTnvim; build = false; }
         { name = "rnvimr"; dotname = "rnvimr"; source = inputs.rnvimr; build = false; }
+        { name = "yazi.nvim"; dotname = "yaziDOTnvim"; source = inputs.yaziDOTnvim; build = false; }
         { name = "vim-illuminate"; dotname = "vim-illuminate"; source = inputs.vim-illuminate; build = false; }
         { name = "nvim-tree.lua"; dotname = "nvim-treeDOTlua"; source = inputs.nvim-treeDOTlua; build = false; }
         { name = "bufdelete.nvim"; dotname = "bufdeleteDOTnvim"; source = inputs.bufdeleteDOTnvim; build = false; }
