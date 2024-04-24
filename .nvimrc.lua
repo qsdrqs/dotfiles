@@ -1510,13 +1510,9 @@ local plugins = {
         local cmd = "yazi $CURR_FILE"
         local tmp_file = nil
         if vim.g.remote_ui == 1 then
-          if vim.fn.executable("echoerr") == 0 then
-            vim.notify("echoerr is not available", vim.log.levels.ERROR)
-            return
-          end
-          vim.fn.setenv("EDITOR", "echoerr")
+          vim.fn.setenv("EDITOR", "echo")
           tmp_file = vim.fn.tempname()
-          cmd = "QUIT_ON_OPEN=1 yazi $CURR_FILE 2>" .. tmp_file
+          cmd = "QUIT_ON_OPEN=1 yazi $CURR_FILE 1>" .. tmp_file
         end
         local yazi = Terminal:new({
           cmd = cmd,
@@ -1584,7 +1580,7 @@ local plugins = {
 
       vim.keymap.set("n", "<c-g>", lazygit_toggle, {noremap = true, silent = true})
 
-      -- vim.api.nvim_create_user_command("YaziToggle", yazi_toggle, {nargs = 0})
+      vim.api.nvim_create_user_command("YaziToggleOrig", yazi_toggle, {nargs = 0})
       -- vim.keymap.set("n", "<leader>ya", yazi_toggle, {noremap = true, silent = true})
 
       -- repl

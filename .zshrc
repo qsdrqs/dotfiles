@@ -219,7 +219,7 @@ alias c="clear"
 alias f="fastfetch"
 alias n="neofetch"
 alias ra="ranger"
-alias ya-cli="/usr/bin/env ya"
+alias ya-cli="env ya"
 alias ya="yazi"
 alias zshrc="$EDITOR ~/dotfiles/.zshrc"
 alias vimrc="$EDITOR ~/dotfiles/.vimrc"
@@ -310,7 +310,7 @@ alias prox="export http_proxy=http://$PROX:1081\
 "
 alias tra="~/translate-shell/build/trans :zh+en"
 # alias vim="$EDITOR"
-alias vimm="/usr/bin/env vim"
+alias vimm="env vim"
 # if [[ -x `command -v code-insiders` ]]; then
 #     alias code="code-insiders"
 # fi

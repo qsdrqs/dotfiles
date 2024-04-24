@@ -4,6 +4,13 @@
 
 # vim:fileencoding=utf-8:foldmethod=marker
 
+# : Flavor {{{
+
+[flavor]
+use = ""
+
+# : }}}
+
 # : Manager {{{
 
 [manager]
@@ -74,7 +81,7 @@ permissions_s = { fg = "darkgray" }
 
 [select]
 border   = { fg = "blue" }
-active   = { fg = "magenta" }
+active   = { fg = "magenta", bold = true }
 inactive = {}
 
 # : }}}
@@ -95,7 +102,7 @@ selected = { reversed = true }
 
 [completion]
 border   = { fg = "blue" }
-active   = { bg = "darkgray" }
+active   = { reversed = true }
 inactive = {}
 
 # Icons
@@ -111,7 +118,7 @@ icon_command = ""
 [tasks]
 border  = { fg = "blue" }
 title   = {}
-hovered = { underline = true }
+hovered = { fg = "magenta", underline = true }
 
 # : }}}
 
@@ -155,14 +162,8 @@ rules = [
 	{ mime = "audio/*", fg = "lightmagenta" },
 
 	# Archives
-	{ mime = "application/zip",             fg = "magenta" },
-	{ mime = "application/gzip",            fg = "magenta" },
-	{ mime = "application/x-tar",           fg = "magenta" },
-	{ mime = "application/x-bzip",          fg = "magenta" },
-	{ mime = "application/x-bzip2",         fg = "magenta" },
-	{ mime = "application/x-7z-compressed", fg = "magenta" },
-	{ mime = "application/x-rar",           fg = "magenta" },
-	{ mime = "application/xz",              fg = "magenta" },
+	{ mime = "application/*zip", fg = "magenta" },
+	{ mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "magenta" },
 
 	# Documents
 	{ mime = "application/doc",   fg = "blue" },
