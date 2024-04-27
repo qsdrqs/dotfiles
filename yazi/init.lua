@@ -8,17 +8,6 @@ local gitstatus_git = { fg = "yellow" }
 local gitstatus_question = { fg = "cyan" }
 local gitstatus_conflict = { fg = "magenta" }
 
-local function executable(file)
-	local permission = file.cha:permissions()
-	for i = 1, #permission do
-		local c = permission:sub(i, i)
-		if c == "x" or c == "s" or c == "S" or c == "t" or c == "T" then
-			return true
-		end
-	end
-	return false
-end
-
 function Status:name()
 	local h = cx.active.current.hovered
 	if h == nil then
@@ -66,7 +55,7 @@ function File:style(file)
 		style:fg(link_style.fg)
 		white_style = false
 	end
-	if executable(file) then
+	if file.cha.is_exec then
 		if white_style then
 			style:fg("green")
 		end
