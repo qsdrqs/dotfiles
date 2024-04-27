@@ -144,6 +144,7 @@ in
     home-manager
     nix-tree
     duf
+    ncdu
     lsb-release
     valgrind
     sqlite
