@@ -1,20 +1,8 @@
 local M = {}
 
-local function executable(file)
-	local permission = file.cha:permissions()
-	for i = 1, #permission do
-		local c = permission:sub(i, i)
-		if c == "x" or c == "s" or c == "S" or c == "t" or c == "T" then
-			return true
-		end
-	end
-	return false
-end
-
 function M:peek()
-	local executable = executable(self.file)
-	local output, code
-	if executable then
+	local output, code, readelf_succ = nil, nil, false
+	if self.file.cha.is_exec then
 		-- use `readelf -WCa`
 		output, code = Command("readelf")
 				:args({
@@ -23,7 +11,11 @@ function M:peek()
 				})
 				:stdout(Command.PIPED)
 				:output()
-	else
+		if output.stderr == "" then
+			readelf_succ = true
+		end
+	end
+	if not readelf_succ then
 		output, code = Command("file")
 				:args({
 					"-bL",
@@ -35,7 +27,7 @@ function M:peek()
 
 	local p
 	if output then
-		if executable then
+		if readelf_succ then
 			p = ui.Paragraph.parse(self.area, output.stdout)
 		else
 			p = ui.Paragraph.parse(self.area, "----- File Type Classification -----\n" .. output.stdout)
