@@ -7,6 +7,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     nixpkgs-fix.url = "github:NixOS/nixpkgs/1042fd8b148a9105f3c0aca3a6177fd1d9360ba5";
+    # 5c24cf2f0a12ad855f444c30b2421d044120c66f
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -59,8 +60,8 @@
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    xdph = {
-      url = "github:hyprwm/xdg-desktop-portal-hyprland";
+    waybar = {
+      url = "github:Alexays/Waybar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hyprland-contrib = {
@@ -168,7 +169,7 @@
           vscode-server.nixosModules.default
           ({ config, pkgs, ... }: {
             services.vscode-server.enable = true;
-            services.vscode-server.installPath = "~/.vscode-server";
+            services.vscode-server.installPath = "$HOME/.vscode-server";
           })
 
           # NUR

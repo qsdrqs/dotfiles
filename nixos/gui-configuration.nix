@@ -14,6 +14,7 @@ let
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
     ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
   '';
+  homeDir = config.users.users.qsdrqs.home;
 in
 {
   nix.settings = {
@@ -104,13 +105,26 @@ in
   services.displayManager.sddm = {
     enable = true;
     autoNumlock = true;
+    wayland = {
+      enable = true;
+      compositor = "kwin";
+    };
   };
+  # Workaround for kwin to work with numlock on
+  system.activationScripts.sddm_kde_display.text = ''
+    cp -f ${homeDir}/.config/kwinoutputconfig.json /var/lib/sddm/.config/
+    cp -f ${homeDir}/.config/kcminputrc /var/lib/sddm/.config/
+    chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json /var/lib/sddm/.config/kcminputrc
+  '';
 
   programs.hyprland = {
     enable = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+    portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
   programs.waybar = {
     enable = true;
+    package = inputs.waybar.packages.${pkgs.system}.waybar;
   };
   hardware = {
     opengl = {

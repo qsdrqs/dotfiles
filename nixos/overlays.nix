@@ -53,7 +53,13 @@ in
       # End Temporary self updated packages
 
       # Begin Temporary fixed version packages
-      google-chrome = pkgs-fix.google-chrome;
+      google-chrome = super.google-chrome.overrideAttrs (oldAttrs: {
+        # fallback to old chrome version
+        src = pkgs.fetchurl {
+          url = "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_123.0.6312.105-1_amd64.deb";
+          sha256 = "sha256-zmnBi4UBx52fQKHHJuUaCMuDJl7ntQzhG6h/yH7YPNU=";
+        };
+      });
       # End Temporary fixed version packages
 
       neovim-unwrapped =

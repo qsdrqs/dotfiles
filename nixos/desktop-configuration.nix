@@ -141,6 +141,7 @@ in
     linux-wifi-hotspot
     hotspot
     neovide
+    termshark
 
     obs-studio
     openconnect_openssl
