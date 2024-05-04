@@ -168,6 +168,7 @@ in
         pkgs.iproute
         pkgs.gnugrep
         pkgs.bash
+        pkgs.git
         pkgs.nixos-rebuild
         pkgs.nix
       ];
