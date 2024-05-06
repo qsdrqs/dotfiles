@@ -275,6 +275,7 @@ function M:preload()
 	if git_root == 3 then
 		-- not in git repository
 		-- check if subdirectory is in git repository
+		local children = {}
 		for _, file in ipairs(self.files) do
 			if file.cha.is_dir then
 				local sub_url = tostring(file.url)
@@ -290,14 +291,16 @@ function M:preload()
 					ya.err("cwd: " .. sub_url)
 					return 2
 				end
-
-				local sub_next, sub_event = child:read_line_with { timeout = 300 }
-				if sub_event == 0 then
-					-- subdirectory is in git repository
-					update_git_roots(sub_url, true)
-					git_roots_curr[sub_url] = true
-				end
+				children[sub_url] = child
 				::continue::
+			end
+		end
+		for sub_url, child in pairs(children) do
+			local sub_next, sub_event = child:read_line_with { timeout = 300 }
+			if sub_event == 0 then
+				-- subdirectory is in git repository
+				update_git_roots(sub_url, true)
+				git_roots_curr[sub_url] = true
 			end
 		end
 

@@ -2,24 +2,21 @@ local M = {}
 
 
 local update_dircount = ya.sync(function(st, st_dircount)
+	if not st.dircount_lock then
+		st.dircount_lock = {}
+	end
 	if not st.dircount then
 		st.dircount = {}
 	end
 	for k, v in pairs(st_dircount) do
 		st.dircount[k] = v
 	end
-	if not st.ratecount then
-		st.ratecount = 0
-	end
 	File.count = function(self, file)
 		if file:is_hovered() then
-			if st.ratecount % 2 == 0 then
+			if st.dircount_lock[tostring(file.url)] then
+				st.dircount_lock[tostring(file.url)] = false
+			else
 				ya.manager_emit("plugin", { "dircount", args = tostring(file.url)})
-			end
-			st.ratecount = st.ratecount + 1
-			ya.err("ratecount: " .. tostring(st.ratecount))
-			if st.ratecount % 100 == 0 then
-				st.ratecount = 0
 			end
 		end
 		return st.dircount[tostring(file.url)]
@@ -31,8 +28,12 @@ local update_dircount_table = ya.sync(function(st, st_dircount)
 	if not st.dircount then
 		st.dircount = {}
 	end
+	if not st.dircount_lock then
+		st.dircount_lock = {}
+	end
 	for k, v in pairs(st_dircount) do
 		st.dircount[k] = v
+		st.dircount_lock[k] = true
 	end
 	ya.render()
 end)
@@ -50,6 +51,7 @@ function M:preload()
 	local dircount = get_dircount() or {}
 	local hovered_url = get_hovered()
 
+	local children = {}
 	for _, file in ipairs(self.files) do
 		if file.cha.is_dir then
 			local url = tostring(file.url)
@@ -61,24 +63,27 @@ function M:preload()
 				ya.err("spawn `ls` command returns " .. tostring(code))
 				return 2
 			end
-
-			local i, j = 1, 0
-			repeat
-				local next, event = child:read_line_with { timeout = 300 }
-				if event == 3 then
-					goto continue
-				elseif event ~= 0 then
-					break
-				end
-
-				j = j + 1
-				i = i + 1
-				::continue::
-			until not next
-
-			dircount[url] = j
+			children[url] = child
 		end
 		::continue::
+	end
+
+	for url, child in pairs(children) do
+		local i, j = 1, 0
+		repeat
+			local next, event = child:read_line_with { timeout = 300 }
+			if event == 3 then
+				goto continue
+			elseif event ~= 0 then
+				break
+			end
+
+			j = j + 1
+			i = i + 1
+			::continue::
+		until not next
+
+		dircount[url] = j
 	end
 
 	update_dircount(dircount)
