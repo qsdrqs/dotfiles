@@ -8,8 +8,31 @@ local update_dircount = ya.sync(function(st, st_dircount)
 	for k, v in pairs(st_dircount) do
 		st.dircount[k] = v
 	end
+	if not st.ratecount then
+		st.ratecount = 0
+	end
 	File.count = function(self, file)
+		if file:is_hovered() then
+			if st.ratecount % 2 == 0 then
+				ya.manager_emit("plugin", { "dircount", args = tostring(file.url)})
+			end
+			st.ratecount = st.ratecount + 1
+			ya.err("ratecount: " .. tostring(st.ratecount))
+			if st.ratecount % 100 == 0 then
+				st.ratecount = 0
+			end
+		end
 		return st.dircount[tostring(file.url)]
+	end
+	ya.render()
+end)
+
+local update_dircount_table = ya.sync(function(st, st_dircount)
+	if not st.dircount then
+		st.dircount = {}
+	end
+	for k, v in pairs(st_dircount) do
+		st.dircount[k] = v
 	end
 	ya.render()
 end)
@@ -66,6 +89,38 @@ function M:preload()
 	-- end
 
 	return 3
+end
+
+function M.entry(self, args)
+	local file_url = args[1]
+	if not file_url then
+		return
+	end
+	-- update dircount
+	local child, code = Command("ls"):args({ "-A" }):args({ file_url }):stdout(Command.PIPED):spawn()
+	if not child then
+		ya.err("spawn `ls` command returns " .. tostring(code))
+		return 2
+	end
+
+	local i, j = 1, 0
+	repeat
+		local next, event = child:read_line_with { timeout = 300 }
+		if event == 3 then
+			goto continue
+		elseif event ~= 0 then
+			break
+		end
+
+		j = j + 1
+		i = i + 1
+		::continue::
+	until not next
+
+	local dircount = {
+		[tostring(file_url)] = j
+	}
+	update_dircount_table(dircount)
 end
 
 return M
