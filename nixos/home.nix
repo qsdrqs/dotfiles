@@ -52,10 +52,10 @@
     completionInit = ""; # define in my own zshrc
   };
   programs.ssh.enable = true;
-  programs.ssh.includes = [ "extra_config" ];
+  programs.ssh.includes = [ "ssh-config" ];
   home.file."extra_config" = {
     source = ./private/ssh-config;
-    target = ".ssh/extra_config";
+    target = ".ssh/ssh-config";
   };
 
   # enable fzf

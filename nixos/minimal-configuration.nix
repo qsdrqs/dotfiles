@@ -85,7 +85,7 @@ in
       experimental-features = [ "nix-command" "flakes" ];
       trusted-users = [ "root" "qsdrqs" "@wheel" "nix-serve" ];
     };
-    package = pkgs.nixVersions.unstable;
+    package = pkgs.nixVersions.latest;
   };
 
   # List packages installed in system profile. To search, run:
