@@ -225,7 +225,7 @@ in
   hardware = {
     nvidia = {
       modesetting.enable = true;
-      powerManagement.enable = false;
+      powerManagement.enable = true;
       nvidiaSettings = true;
       open = false;
       package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {

@@ -135,8 +135,13 @@ in
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
-  i18n.inputMethod.enabled = "fcitx5";
-  i18n.inputMethod.fcitx5.addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
+  i18n.inputMethod = {
+    enabled = "fcitx5";
+    fcitx5 = {
+      addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
+      waylandFrontend = true;
+    };
+  };
 
   # Enable sound.
   sound.enable = true;
