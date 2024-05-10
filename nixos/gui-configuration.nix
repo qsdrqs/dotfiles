@@ -14,7 +14,7 @@ let
     inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
   ];
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
-    ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
+    GTK_IM_MODULE=fcitx ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
   '';
   homeDir = config.users.users.qsdrqs.home;
 in
