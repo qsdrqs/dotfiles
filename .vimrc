@@ -501,17 +501,21 @@ set nofixeol
 
 " 自动删除trailing spaces
 function! s:deleteTrailing()
-  let l:match_line = search('^\s\+$', 'n')
+  let l:match_line = search('\s\+$', 'n')
   if l:match_line > 0
-    echo "delete trailing spaces"
+    " echo "delete trailing spaces"
     let l:curr_line = line('.')
     let l:curr_col = col('.')
-    exec '%s/^\s\+$//e'
+    exec '%s/\s\+$//e'
     call cursor(l:curr_line, l:curr_col)
   endif
 endfunction
 " use editorconfig instead
-" autocmd InsertLeave * call s:deleteTrailing()
+if !exists('g:vscode')
+  autocmd BufWritePre * call s:deleteTrailing()
+else
+  autocmd InsertLeave * call s:deleteTrailing()
+endif
 
 function s:is_xxd_layout()
   " check if the first line is starting with 00000000

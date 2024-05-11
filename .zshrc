@@ -219,7 +219,7 @@ alias c="clear"
 alias f="fastfetch"
 alias n="neofetch"
 alias ra="ranger"
-alias ya-cli="env ya"
+alias ya-cli="\ya"
 alias ya="yazi"
 alias zshrc="$EDITOR ~/dotfiles/.zshrc"
 alias vimrc="$EDITOR ~/dotfiles/.vimrc"
@@ -309,8 +309,8 @@ alias prox="export http_proxy=http://$PROX:1081\
 && export ftp_proxy=http://$PROX:1081
 "
 alias tra="~/translate-shell/build/trans :zh+en"
-# alias vim="$EDITOR"
-alias vimm="env vim"
+alias vim="nvim"
+alias vimm="\vim"
 # if [[ -x `command -v code-insiders` ]]; then
 #     alias code="code-insiders"
 # fi
@@ -462,15 +462,15 @@ fi
 # fi
 
 # wrapper for vim to support restart
-vim() {
-    while true; do
-        $EDITOR "$@"
-        RET=$?
-        if [[ $RET != 100 ]]; then
-            return $RET
-        fi
-    done
-}
+# vim() {
+#     while true; do
+#         $EDITOR "$@"
+#         RET=$?
+#         if [[ $RET != 100 ]]; then
+#             return $RET
+#         fi
+#     done
+# }
 
 # Change Yazi's CWD to PWD on subshell exit
 if [[ -n $YAZI_ID ]]; then
