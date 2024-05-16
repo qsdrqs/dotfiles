@@ -27,6 +27,7 @@ in
     nix-serve
 
     poppler_utils # pdf2txt
+    jless
 
     w3m
     inferno # flamegraph

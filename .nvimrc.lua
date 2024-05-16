@@ -4380,6 +4380,7 @@ function LazyLoadPlugins()
       'copilot.vim',
       'direnv.vim',
       'nvim-dap',
+      'auto-session',
       -- end misc
 
       -- begin cmp

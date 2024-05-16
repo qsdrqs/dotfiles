@@ -96,6 +96,14 @@ in
 
   environment.localBinInPath = true;
 
+  nix.settings = {
+    substituters = [ "https://yazi.cachix.org" "https://nix-community.cachix.org" ];
+    trusted-public-keys = [
+      "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+  };
+
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     (if config.boot.loader.grub.enable then grub2 else dummy)
