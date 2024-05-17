@@ -65,6 +65,10 @@ in
   # enable normal users to use reboot or shutdown
   security.polkit.enable = true;
 
+  system.activationScripts.link_bin_bash.text = ''
+    ln -s ${pkgs.bash}/bin/bash /bin/bash
+  '';
+
   security.wrappers.direnv = {
     source = "${pkgs.direnv}/bin/direnv";
     owner = "root";
