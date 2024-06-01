@@ -66,7 +66,7 @@ in
   security.polkit.enable = true;
 
   system.activationScripts.link_bin_bash.text = ''
-    ln -s ${pkgs.bash}/bin/bash /bin/bash
+    ln -sf ${pkgs.bash}/bin/bash /bin/bash
   '';
 
   security.wrappers.direnv = {

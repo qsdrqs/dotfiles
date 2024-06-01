@@ -4,7 +4,8 @@
   # Inputs
   # https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-inputs
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-updated.url = "github:NixOS/nixpkgs/2057814051972fa1453ddfb0d98badbea9b83c06";
+    nixpkgs.url = "github:NixOS/nixpkgs/2057814051972fa1453ddfb0d98badbea9b83c06";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     nixpkgs-fix.url = "github:NixOS/nixpkgs/1042fd8b148a9105f3c0aca3a6177fd1d9360ba5";
     home-manager = {
@@ -106,7 +107,7 @@
             config.allowUnfree = true;
             overlays = (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
           });
-        }) [ "pkgs-master" "pkgs-fix" "pkgs" ]
+        }) [ "pkgs-master" "pkgs-fix" "pkgs" "pkgs-updated" ]
       );
       minimalHomeModules = [
         ./nixos/home.nix

@@ -107,17 +107,17 @@ in
   services.displayManager.sddm = {
     enable = true;
     autoNumlock = true;
-    wayland = {
-      enable = true;
-      compositor = "kwin";
-    };
+    # wayland = {
+    #   enable = true;
+    #   compositor = "kwin";
+    # };
   };
   # Workaround for kwin to work with numlock on
-  system.activationScripts.sddm_kde_display.text = ''
-    cp -f ${homeDir}/.config/kwinoutputconfig.json /var/lib/sddm/.config/
-    cp -f ${homeDir}/.config/kcminputrc /var/lib/sddm/.config/
-    chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json /var/lib/sddm/.config/kcminputrc
-  '';
+  # system.activationScripts.sddm_kde_display.text = ''
+  #   cp -f ${homeDir}/.config/kwinoutputconfig.json /var/lib/sddm/.config/
+  #   cp -f ${homeDir}/.config/kcminputrc /var/lib/sddm/.config/
+  #   chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json /var/lib/sddm/.config/kcminputrc
+  # '';
 
   programs.hyprland = {
     enable = true;

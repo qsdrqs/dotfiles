@@ -1239,8 +1239,8 @@
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-unstable",
         "repo": "nixpkgs",
+        "rev": "2057814051972fa1453ddfb0d98badbea9b83c06",
         "type": "github"
       }
     },
@@ -1273,6 +1273,22 @@
         "owner": "NixOS",
         "ref": "master",
         "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-updated": {
+      "locked": {
+        "lastModified": 1715534503,
+        "narHash": "sha256-5ZSVkFadZbFP1THataCaSf0JH2cAH3S29hU9rrxTEqk=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "2057814051972fa1453ddfb0d98badbea9b83c06",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "2057814051972fa1453ddfb0d98badbea9b83c06",
         "type": "github"
       }
     },
@@ -2133,6 +2149,7 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-fix": "nixpkgs-fix",
         "nixpkgs-master": "nixpkgs-master",
+        "nixpkgs-updated": "nixpkgs-updated",
         "nur": "nur",
         "nvim-config": "nvim-config",
         "ranger-config": "ranger-config",
