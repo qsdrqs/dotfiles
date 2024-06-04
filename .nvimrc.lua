@@ -187,7 +187,7 @@ local plugins = {
         return vim.api.nvim_feedkeys(t "7l", "n", true)
       end
 
-      local status_ok, trouble_telscope = pcall(require, "trouble.providers.telescope")
+      local status_ok, trouble_telscope = pcall(require, "trouble.sources.telescope")
       local opts = {
         defaults = {
           mappings = {
@@ -206,8 +206,8 @@ local plugins = {
         }
       }
       if status_ok then
-        opts.defaults.mappings.i["<C-t>"] = trouble_telscope.open_with_trouble
-        opts.defaults.mappings.n["<C-t>"] = trouble_telscope.open_with_trouble
+        opts.defaults.mappings.i["<C-t>"] = trouble_telscope.open
+        opts.defaults.mappings.n["<C-t>"] = trouble_telscope.open
       end
       require('telescope').setup(opts)
 
@@ -779,10 +779,10 @@ local plugins = {
 
       vim.keymap.set('n', '<space>e', changeDiagnostic, opts)
       -- vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-      vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
-      vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
-      vim.keymap.set('n', '<space>Q', '<cmd>TroubleToggle document_diagnostics<CR>', opts)
-      vim.keymap.set('n', '<space>q', '<cmd>TroubleToggle workspace_diagnostics<CR>', opts)
+      vim.keymap.set('n', '[d', function() vim.diagnostic.jump(1) end, opts)
+      vim.keymap.set('n', ']d', function() vim.diagnostic.jump(-1) end, opts)
+      vim.keymap.set('n', '<space>Q', '<cmd>Trouble diagnostics toggle filter.buf=0<CR>', opts)
+      vim.keymap.set('n', '<space>q', '<cmd>Trouble diagnostics toggle<CR>', opts)
       vim.keymap.set('n', '<leader>d', showDocument, opts)
 
       -- vim.cmd [[au CursorHold <buffer> lua vim.diagnostic.open_float()]]
@@ -907,7 +907,7 @@ local plugins = {
 
   {
     -- for code actions
-    'kosayoda/nvim-lightbulb',
+    'gh-liu/nvim-lightbulb',
     config = function()
       local lightbulb = require('nvim-lightbulb')
       lightbulb.setup {
@@ -1890,7 +1890,8 @@ local plugins = {
 
   -- cd to project root
   {
-    "ahmedkhalf/project.nvim",
+    "LennyPhoenix/project.nvim",
+    branch = "fix-get_clients",
     config = function()
       require("project_nvim").setup {
         silent_chdir = true,
@@ -4659,15 +4660,22 @@ if vim.fn.executable(im_switch) ~= 0 then
 end
 -- end im switch
 
--- workaround for https://github.com/neovim/neovim/issues/21856
-vim.api.nvim_create_autocmd({ "VimLeave" }, {
-  callback = function()
-    vim.cmd('sleep 10m')
-  end,
-})
-
 -- improve performance
 vim.keymap.set('n', '<leader>pf', "<cmd>IBLToggleScope<cr><cmd>TSToggle highlight<cr>", { silent = true })
+
+-- mask some deprecate messages
+local original_deprecate = vim.deprecate
+vim.deprecate = function(name, alt, plugin, backtrace)
+  local tbl = {
+    -- "vim.lsp.get_active_clients()"
+  }
+  for _, v in ipairs(tbl) do
+    if name:find(v) then
+      return
+    end
+  end
+  original_deprecate(name, alt, plugin, backtrace)
+end
 
 ---------------------------vscode neovim----------------------------------------------
 function VscodeNeovimHandler()

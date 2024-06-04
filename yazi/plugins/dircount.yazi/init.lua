@@ -47,7 +47,7 @@ local get_hovered = ya.sync(function(st)
 	return tostring(h.url)
 end)
 
-function M:preload()
+function M:fetch()
 	local dircount = get_dircount() or {}
 	local hovered_url = get_hovered()
 

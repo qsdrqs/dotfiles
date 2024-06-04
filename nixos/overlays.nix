@@ -50,24 +50,41 @@ in
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         yazi = inputs.yazi.packages.${super.system}.yazi;
+        # tree-sitter = super.tree-sitter.overrideAttrs (drv: rec {
+        #   version = "0.22.6";
+        #   name = "tree-sitter-${version}";
+        #   src = pkgs.fetchFromGitHub {
+        #     owner = "tree-sitter";
+        #     repo = "tree-sitter";
+        #     rev = "v${version}";
+        #     hash = "sha256-jBCKgDlvXwA7Z4GDBJ+aZc52zC+om30DtsZJuHado1s=";
+        #     fetchSubmodules = true;
+        #   };
+        #   cargoDeps = drv.cargoDeps.overrideAttrs (lib.const {
+        #     name = "${name}-vendor.tar.gz";
+        #     inherit src;
+        #     outputHash = "sha256-44FIO0kPso6NxjLwmggsheILba3r9GEhDld2ddt601g=";
+        #   });
+        # });
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
         # End Temporary fixed version packages
 
-        neovim-unwrapped =
-          (super.neovim-unwrapped.override {
-            treesitter-parsers = treesitter-parsers self;
-          }).overrideAttrs
-            (oldAttrs: {
-              src = inputs.nvim-config.neovim;
-              version = "0.10.0-dev";
-              postInstall = (oldAttrs.postInstall or "") + ''
-                # disable treesitter by default for ftplugins
-                ${pkgs.gnugrep}/bin/grep -rl 'vim.treesitter.start()' $out/share/nvim/runtime/ftplugin |\
-                ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
-              '';
-            });
+        # neovim-unwrapped =
+        #   (super.neovim-unwrapped.override {
+        #     treesitter-parsers = treesitter-parsers self;
+        #   }).overrideAttrs
+        #     (oldAttrs: {
+        #       src = inputs.nvim-config.neovim;
+        #       version = "0.10.0-dev";
+        #       postInstall = (oldAttrs.postInstall or "") + ''
+        #         # disable treesitter by default for ftplugins
+        #         ${pkgs.gnugrep}/bin/grep -rl 'vim.treesitter.start()' $out/share/nvim/runtime/ftplugin |\
+        #         ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
+        #       '';
+        #     });
+        neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
 
         editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
           if [[ $QUIT_ON_OPEN == "1" ]]; then

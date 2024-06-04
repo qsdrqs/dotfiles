@@ -76,7 +76,7 @@
       flake = false;
     };
     nvim-lightbulb = {
-      url = "github:kosayoda/nvim-lightbulb";
+      url = "github:gh-liu/nvim-lightbulb";
       flake = false;
     };
     fidgetDOTnvim = {
@@ -212,7 +212,7 @@
       flake = false;
     };
     projectDOTnvim = {
-      url = "github:ahmedkhalf/project.nvim";
+      url = "github:LennyPhoenix/project.nvim?ref=fix-get_clients";
       flake = false;
     };
     aerialDOTnvim = {

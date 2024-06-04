@@ -4,7 +4,7 @@
   # Inputs
   # https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-inputs
   inputs = {
-    nixpkgs-updated.url = "github:NixOS/nixpkgs/2057814051972fa1453ddfb0d98badbea9b83c06";
+    nixpkgs-updated.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/2057814051972fa1453ddfb0d98badbea9b83c06";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     nixpkgs-fix.url = "github:NixOS/nixpkgs/1042fd8b148a9105f3c0aca3a6177fd1d9360ba5";
@@ -25,6 +25,7 @@
     zsh-config.url = "path:zsh";
     nvim-config.url = "path:nvim";
     dev-shell.url = "path:nixos/dev-shell";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     # wsl
     nixos-wsl = {
@@ -92,6 +93,13 @@
       url = "github:tmux-plugins/tmux-continuum";
       flake = false;
     };
+
+    # yazi
+    yazi-searchjump = {
+      url = "github:DreamMaoMao/searchjump.yazi";
+      flake = false;
+    };
+
   };
 
   # Work-in-progress: refer to parent/sibling flakes in the same repository

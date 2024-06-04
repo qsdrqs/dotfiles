@@ -94,7 +94,6 @@ in
     { name = ".vimrc"; target = ".config/nvim/init.vim"; }
   ] //
   symbfileTargetNoRecursive [
-    { name = "yazi"; target = ".config/yazi"; }
     { name = "nvim/lua"; target = ".config/nvim/lua"; }
   ] //
   genZshPlugins inputs.zsh-config.plugins //
@@ -144,6 +143,26 @@ in
       };
       target = ".config/ranger";
       recursive = true;
+    };
+
+    yazi = {
+      source = pkgs.stdenv.mkDerivation {
+        name = "yazi-config";
+        src = ../yazi;
+        installPhase = commonInstallPhase;
+        postInstall =
+          let
+            plugins = [
+              "searchjump"
+            ];
+          in
+          lib.strings.concatStrings (map
+            (plugin: ''
+              ln -s ${inputs."yazi-${plugin}"} $out/plugins/${plugin}.yazi
+            '')
+            plugins);
+      };
+      target = ".config/yazi";
     };
   };
 

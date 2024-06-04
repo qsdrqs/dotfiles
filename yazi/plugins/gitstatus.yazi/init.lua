@@ -242,7 +242,7 @@ local get_git_root = function(url)
 	return git_root
 end
 
-function M:preload()
+function M:fetch()
 	-- get subdirectory of git repository
 	if #self.files == 0 then
 		return 3
