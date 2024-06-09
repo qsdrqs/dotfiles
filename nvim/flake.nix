@@ -2,10 +2,7 @@
 {
   description = "Neovim with plugins";
   inputs = {
-    neovim = {
-      url = "github:neovim/neovim";
-      flake = false;
-    };
+    neovim.url = "github:nix-community/neovim-nightly-overlay";
 
     lazyDOTnvim = {
       url = "github:folke/lazy.nvim";
@@ -371,6 +368,14 @@
       url = "github:levouh/tint.nvim";
       flake = false;
     };
+    lazydevDOTnvim = {
+      url = "github:folke/lazydev.nvim";
+      flake = false;
+    };
+    luvit-meta = {
+      url = "github:Bilal2453/luvit-meta";
+      flake = false;
+    };
     direnvDOTvim = {
       url = "github:direnv/direnv.vim";
       flake = false;
@@ -586,6 +591,8 @@
         { name = "litee.nvim"; dotname = "liteeDOTnvim"; source = inputs.liteeDOTnvim; build = false; }
         { name = "litee-calltree.nvim"; dotname = "litee-calltreeDOTnvim"; source = inputs.litee-calltreeDOTnvim; build = false; }
         { name = "tint.nvim"; dotname = "tintDOTnvim"; source = inputs.tintDOTnvim; build = false; }
+        { name = "lazydev.nvim"; dotname = "lazydevDOTnvim"; source = inputs.lazydevDOTnvim; build = false; }
+        { name = "luvit-meta"; dotname = "luvit-meta"; source = inputs.luvit-meta; build = false; }
         { name = "direnv.vim"; dotname = "direnvDOTvim"; source = inputs.direnvDOTvim; build = false; }
         { name = "vim-matchup"; dotname = "vim-matchup"; source = inputs.vim-matchup; build = false; }
         { name = "vim-sleuth"; dotname = "vim-sleuth"; source = inputs.vim-sleuth; build = false; }

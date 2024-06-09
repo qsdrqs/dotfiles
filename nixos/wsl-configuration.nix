@@ -31,6 +31,8 @@ in
     # Enable integration with Docker Desktop (needs to be installed)
     # docker-desktop.enable = config.virtualisation.docker.enable;
     interop.register = true;
+
+    usbip.enable = true;
   };
 
   environment.systemPackages = with pkgs; [

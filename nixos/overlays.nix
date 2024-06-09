@@ -48,8 +48,9 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
+        yazi = inputs.yazi.packages.${super.system}.default;
+
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
-        yazi = inputs.yazi.packages.${super.system}.yazi;
         # tree-sitter = super.tree-sitter.overrideAttrs (drv: rec {
         #   version = "0.22.6";
         #   name = "tree-sitter-${version}";
@@ -84,7 +85,7 @@ in
         #         ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
         #       '';
         #     });
-        neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
+        neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
           if [[ $QUIT_ON_OPEN == "1" ]]; then
@@ -107,9 +108,9 @@ in
           ];
         }));
 
-        nvim-final = pkgs.symlinkJoin (
+        neovim-reloadable-unwrapped = pkgs.symlinkJoin (
           let
-            neovim-reloadable = pkgs.writeShellScriptBin "nvim" ''
+            reloadable-script = pkgs.writeShellScriptBin "nvim" ''
               while true; do
                 ${self.neovim-unwrapped}/bin/nvim "$@"
                 RET=$?
@@ -119,12 +120,14 @@ in
               done
             '';
           in
-          {
-            name = "neovim-${lib.getVersion self.neovim-unwrapped}";
+          rec {
+            pname = "neovim-reloadable-unwrapped";
+            version = lib.getVersion self.neovim-unwrapped;
+            name = "${pname}-${version}";
             paths = [ self.neovim-unwrapped ];
             postBuild = ''
               rm $out/bin/nvim
-              cp ${neovim-reloadable}/bin/nvim $out/bin/nvim
+              cp ${reloadable-script}/bin/nvim $out/bin/nvim
             '';
           }
         );

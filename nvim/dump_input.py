@@ -105,10 +105,7 @@ def main():
 {{
   description = "Neovim with plugins";
   inputs = {{
-    neovim = {{
-      url = "github:neovim/neovim";
-      flake = false;
-    }};
+    neovim.url = "github:nix-community/neovim-nightly-overlay";
 {plugin_lines};
   }};
   outputs = {{ self, ... }}@inputs:

@@ -1124,7 +1124,7 @@ local plugins = {
       local cmp = require('cmp')
       local ls = require('luasnip')
 
-      cmp.setup{
+      local config = {
         window = {
           completion = cmp.config.window.bordered(),
           documentation = cmp.config.window.bordered(),
@@ -1270,6 +1270,18 @@ local plugins = {
         },
 
       }
+
+      if vim.o.ft == 'lua' then
+        require('lazy').load{
+          plugins = {"lazydev.nvim"}
+        }
+        table.insert(config.sources, {
+          name = "lazydev",
+          group_index = 0, -- set group index to 0 to skip loading LuaLS completions
+        })
+      end
+
+      cmp.setup(config)
 
       -- vim.keymap.set('i', '<C-x><C-o>', '<Cmd>lua require("cmp").complete()<CR>', { silent = true })
 
@@ -3147,26 +3159,7 @@ local plugins = {
     dependencies = {"kyazdani42/nvim-web-devicons"},
     config = function()
       require("trouble").setup {
-        action_keys = {
-          -- key mappings for actions in the trouble list
-          -- map to {} to remove a mapping, for example:
-          -- close = {},
-          close = "q", -- close the list
-          cancel = "<esc>", -- cancel the preview and get back to your last window / buffer / cursor
-          refresh = "r", -- manually refresh
-          jump = {"<cr>", "<tab>"}, -- jump to the diagnostic or open / close folds
-          open_split = { "<c-x>" }, -- open buffer in new split
-          open_vsplit = { "<c-v>" }, -- open buffer in new vsplit
-          open_tab = { "<c-t>" }, -- open buffer in new tab
-          jump_close = {"o"}, -- jump to the diagnostic and close the list
-          toggle_mode = "m", -- toggle between "workspace" and "document" diagnostics mode
-          toggle_preview = "P", -- toggle auto_preview
-          preview = "p", -- preview the diagnostic location
-          hover = {},
-          close_folds = {"zC"}, -- close all folds
-          open_folds = {"zO"}, -- open all folds
-          toggle_fold = {"zc", "zo"}, -- toggle fold of current file
-        },
+        focus = true,
       }
     end
   },
@@ -3411,6 +3404,19 @@ local plugins = {
       }
     end
   },
+
+  {
+    "folke/lazydev.nvim",
+    lazy = true,
+    opts = {
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        { path = "luvit-meta/library", words = { "vim%.uv" } },
+      },
+    },
+  },
+  { "Bilal2453/luvit-meta", lazy = true }, -- optional `vim.uv` typings
 
   -- vim plugins
   {

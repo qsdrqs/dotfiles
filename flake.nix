@@ -18,14 +18,12 @@
     };
     yazi = {
       url = "github:sxyazi/yazi";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     ranger-config.url = "path:ranger";
     zsh-config.url = "path:zsh";
     nvim-config.url = "path:nvim";
     dev-shell.url = "path:nixos/dev-shell";
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     # wsl
     nixos-wsl = {

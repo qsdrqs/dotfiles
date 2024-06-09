@@ -248,6 +248,7 @@ function M:fetch()
 		return 3
 	end
 	local git_roots_curr = {}
+	local ls_flag = false
 	for _, file in ipairs(self.files) do
 		if file.cha.is_dir then
 			local sub_url = tostring(file.url)
@@ -260,25 +261,34 @@ function M:fetch()
 		::continue::
 	end
 	if next(git_roots_curr) ~= nil then
-		update_git_roots_curr(git_roots_curr)
-		return 3
+		-- current directory is not in git repository
+		ls_flag = true
 	end
 
 	local any_url = tostring(self.files[1].url)
 	local base_url = any_url:match("^(.*/)[^/]*$")
 
-	local git_root = get_git_root(base_url)
-	if git_root == 2 then
-		return git_root
+	local git_root
+	if not ls_flag then
+		git_root = get_git_root(base_url)
+		if git_root == 2 then
+			return git_root
+		elseif git_root == 3 then
+			-- not in git repository
+			ls_flag = true
+		end
 	end
 
-	if git_root == 3 then
+	if ls_flag then
 		-- not in git repository
 		-- check if subdirectory is in git repository
 		local children = {}
 		for _, file in ipairs(self.files) do
 			if file.cha.is_dir then
 				local sub_url = tostring(file.url)
+				if git_roots_curr[sub_url] then
+					goto continue
+				end
 				local git_roots = get_git_roots(false)
 				if git_roots[sub_url] then
 					git_roots_curr[sub_url] = true

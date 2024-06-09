@@ -185,7 +185,7 @@ in
     neovim = {
       enable = true;
       defaultEditor = true;
-      package = pkgs.nvim-final;
+      package = pkgs.neovim-reloadable-unwrapped;
     };
     nix-ld.enable = true;
     gnupg.agent.enable = true;
