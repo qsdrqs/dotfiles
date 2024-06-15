@@ -34,6 +34,7 @@ in
     wireguard-tools
     ffmpeg
     scc
+    sshping
   ];
 
   environment.variables = {
@@ -51,6 +52,7 @@ in
       };
       quietMode = true;
     };
+    mosh.enable = true;
   };
 
   services = {

@@ -223,10 +223,6 @@ in
       ];
     };
   };
-  # TODO: https://github.com/NixOS/nixpkgs/issues/281271
-  environment.extraInit = ''
-    unset LOCATE_PATH
-  '';
 
   # interception tools
   systemd.services =
