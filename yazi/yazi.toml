@@ -80,9 +80,9 @@ suppress_preload = true
 
 fetchers = [
 	# Mimetype
-	{ name = "*", cond = "!mime", run = "mime", prio = "high" },
-	{ name = "*/", run = "dircount" },
-	{ mime = "*", run = "gitstatus" },
+	{ id = "mime", name = "*", cond = "!mime", run = "mime", prio = "high" },
+	{ id = "dircount", name = "*/", run = "dircount" },
+	{ id = "gitstatus", mime = "*", run = "gitstatus" },
 ]
 preloaders = [
 	# Image
