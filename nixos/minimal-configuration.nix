@@ -67,6 +67,7 @@ in
 
   system.activationScripts.link_bin_bash.text = ''
     ln -sf ${pkgs.bash}/bin/bash /bin/bash
+    ln -sf ${pkgs.bash}/bin/bash /usr/bin/bash
   '';
 
   security.wrappers.direnv = {
@@ -124,6 +125,7 @@ in
     neofetch
     grc
     git
+    git-lfs
     fzf
     fd
     ripgrep

@@ -5,11 +5,26 @@
 #       / /_ ___) |  _  |  _ <| |___
 #      /____|____/|_| |_|_| \_\\____|
 #
-call_tmux(){
-    if [[ $2 != "" ]];then
+tmux_new_or_attach() {
+    if tmux has-session -t $1 2>/dev/null; then
+        vared -p "session $1 exist, want to attach? [Enter/session_name/n]" -c attach
+        # delete all '\n' in the string
+        attach=${attach//$'\n'/}
+        if [[ $attach == "" ]]; then
+            tmux attach-session -t $1
+        elif [[ $attach != "n" ]]; then
+            tmux attach-session -t $attach || tmux new-session -s $attach
+        fi
+    else
+        tmux new-session -s $1
+    fi
+}
+
+call_tmux() {
+    if [[ $2 != "" ]]; then
         (tmux new-window -c $2 && tmux attach-session -t $1) || tmux new-session -s $1
     else
-        tmux attach-session -t $1 || tmux new-session -s $1
+        tmux_new_or_attach $1
     fi
 }
 
@@ -21,7 +36,7 @@ if [[ $NOTMUX != 1 ]]; then
         elif [[ "$SSH_CONNECTION" != ""  ]]; then
             session_name="ssh"
             if [[ -x `command -v notify-send` ]]; then
-                timeout 3 notify-send "ssh connected"
+                (timeout 3 notify-send "ssh connected" &)
             fi
             call_tmux $session_name
             #elif [[ "$XDG_SESSION_DESKTOP" == "KDE" ]]; then

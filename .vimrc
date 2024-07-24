@@ -5,12 +5,12 @@
 "                 \_/  |___|_|  |_|_| \_\\____|
 "
 "-------------------无头模式下等待GUI-----------------------"{{{
-if has('nvim') && !exists('g:no_wait_headless')
-  while nvim_list_uis() == []
-    let g:remote_ui = 1
-    sleep 100m
-  endwhile
-endif
+" if has('nvim') && !exists('g:no_wait_headless')
+"   while nvim_list_uis() == []
+"     let g:remote_ui = 1
+"     sleep 100m
+"   endwhile
+" endif
 "-------------------无头模式下等待GUI-----------------------"}}}
 
 "-------------------键位映射-----------------------"{{{
