@@ -54,7 +54,7 @@ local update_tracked = ya.sync(function(st, git_root, tracked)
 			st.tracked[tostring(url)] = type
 		end
 	end
-	File.gitstatus = function(self, file)
+	Linemode.file_gitstatus = function(self, file)
 		local file_tracked = st.tracked[tostring(file.url)]
 		if file_tracked == nil then
 			return " "
@@ -71,7 +71,7 @@ local update_git_roots_curr = ya.sync(function(st, git_roots_curr)
 	for git_root, _ in pairs(git_roots_curr) do
 		st.git_roots_curr[git_root] = true
 	end
-	File.gitstatus = function(self, file)
+	Linemode.file_gitstatus = function(self, file)
 		if st.git_roots_curr[tostring(file.url)] then
 			return "󰊢"
 		end

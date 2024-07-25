@@ -8,10 +8,12 @@ local gitstatus_git = { fg = "yellow" }
 local gitstatus_question = { fg = "cyan" }
 local gitstatus_conflict = { fg = "magenta" }
 
-function Status:name()
+-- custom status bar
+Status:children_remove(3, Status.LEFT) -- remove "name"
+Status:children_add(function()
 	local h = cx.active.current.hovered
-	if h == nil then
-		return ui.Span("")
+	if not h then
+		return ui.Line {}
 	end
 
 	local linked = ""
@@ -42,95 +44,81 @@ function Status:name()
 	spans[#spans + 1] = ui.Span(linked):style(link_style)
 
 	return ui.Line(spans)
-end
+end, 3000, Status.LEFT)
 
-function File:style(file)
-	local style = file:style()
+function Entity:style()
+	local file = self._file
+	local s = file:style()
 	local white_style = false
-	if style == nil then
-		style = ui.Style()
+	if s == nil then
+		s = ui.Style()
 		white_style = true
 	end
 	if file.cha.is_link then
-		style:fg(link_style.fg)
+		s:fg(link_style.fg)
 		white_style = false
 	end
 	if file.cha.is_exec then
 		if white_style then
-			style:fg("green")
+			s:fg("green")
 		end
-		style:bold()
+		s:bold()
 	end
 	if not file:is_hovered() then
-		return style
+		return s
 	elseif file:in_preview() then
-		return style and style:patch(THEME.manager.preview_hovered) or THEME.manager.preview_hovered
+		return s and s:patch(THEME.manager.preview_hovered) or THEME.manager.preview_hovered
 	else
-		return style and style:patch(THEME.manager.hovered) or THEME.manager.hovered
+		return s and s:patch(THEME.manager.hovered) or THEME.manager.hovered
 	end
 end
 
-function File:count(file)
+function Linemode:file_count(file)
 	return nil
 end
 
-function File:gitstatus(file)
+function Linemode:size()
+	local f = self._file
+	if not f.cha.is_dir then
+		local size = f:size()
+		return ui.Line(size and ya.readable_size(size) or "")
+	else
+		local count = Linemode:file_count(f)
+		return ui.Line(count and tostring(count) or "")
+	end
+end
+
+function Linemode:file_gitstatus(file)
 	return " "
 end
 
-function Folder:linemode(area, files)
-	local mode = cx.active.conf.linemode
-	if mode == "none" then
-		return {}
-	end
+function Linemode:gitstatus()
+	local f = self._file
+	local gitstatus = Linemode:file_gitstatus(f)
 
-	local lines = {}
-	for _, f in ipairs(files) do
-		local spans = { ui.Span(" ") }
-		if mode == "size" then
-			if not f.cha.is_dir then
-				local size = f:size()
-				spans[#spans + 1] = ui.Span(size and ya.readable_size(size) or "")
-			else
-				local count = File:count(f)
-				spans[#spans + 1] = ui.Span(count and tostring(count) or "")
-			end
-		elseif mode == "mtime" then
-			local time = f.cha.modified
-			spans[#spans + 1] = ui.Span(time and os.date("%y-%m-%d %H:%M", time // 1) or "")
-		elseif mode == "permissions" then
-			spans[#spans + 1] = ui.Span(f.cha:permissions() or "")
+	local status_color_tbl = {
+		['·'] = gitstatus_dot,
+		['*'] = gitstatus_star,
+		['+'] = gitstatus_plus,
+		['!'] = gitstatus_plus,
+		['-'] = gitstatus_minus,
+		['?'] = gitstatus_question,
+		['✓'] = gitstatus_check,
+		['X'] = gitstatus_conflict,
+		['󰊢'] = gitstatus_git,
+	}
+	if gitstatus then
+		if f:is_hovered() then
+			return ui.Line(gitstatus)
+		elseif status_color_tbl[gitstatus] then
+			return ui.Line(gitstatus):style(status_color_tbl[gitstatus])
+		else
+			return ui.Line(gitstatus)
 		end
-
-		spans[#spans + 1] = ui.Span(" ")
-
-		local gitstatus = File:gitstatus(f)
-
-		local status_color_tbl = {
-			['·'] = gitstatus_dot,
-			['*'] = gitstatus_star,
-			['+'] = gitstatus_plus,
-			['!'] = gitstatus_plus,
-			['-'] = gitstatus_minus,
-			['?'] = gitstatus_question,
-			['✓'] = gitstatus_check,
-			['X'] = gitstatus_conflict,
-			['󰊢'] = gitstatus_git,
-		}
-		if gitstatus then
-			if f:is_hovered() then
-				spans[#spans + 1] = ui.Span(gitstatus)
-			elseif status_color_tbl[gitstatus] then
-				spans[#spans + 1] = ui.Span(gitstatus):style(status_color_tbl[gitstatus])
-			else
-				spans[#spans + 1] = ui.Span(gitstatus)
-			end
-		end
-
-		lines[#lines + 1] = ui.Line(spans)
 	end
-	return ui.Paragraph(area, lines):align(ui.Paragraph.RIGHT)
 end
+
+Linemode:children_add(Linemode.gitstatus, 2000)
 
 require("session"):setup {
 	sync_yanked = true,

@@ -11,7 +11,7 @@ local update_dircount = ya.sync(function(st, st_dircount)
 	for k, v in pairs(st_dircount) do
 		st.dircount[k] = v
 	end
-	File.count = function(self, file)
+	Linemode.file_count = function(self, file)
 		if file:is_hovered() then
 			if st.dircount_lock[tostring(file.url)] then
 				st.dircount_lock[tostring(file.url)] = false

@@ -3233,13 +3233,9 @@ local plugins = {
         plugins = {
           registers = false,
         },
-        window = {
+        win = {
           border = "single"
         },
-        triggers_blacklist = {
-          -- compatible with vim-oscyank
-          n = { "y" }
-        }
       }
     end
   },
