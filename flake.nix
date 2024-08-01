@@ -94,7 +94,7 @@
 
     # yazi
     yazi-searchjump = {
-      url = "github:qsdrqs/searchjump.yazi";
+      url = "git+https://gitee.com/DreamMaoMao/searchjump.yazi";
       flake = false;
     };
 

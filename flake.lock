@@ -3219,17 +3219,17 @@
     "yazi-searchjump": {
       "flake": false,
       "locked": {
-        "lastModified": 1721820581,
-        "narHash": "sha256-dDfdQIk8/Ctf2kDpggqwuWmITr4YJffwuhMRebXCTxA=",
-        "owner": "qsdrqs",
-        "repo": "searchjump.yazi",
-        "rev": "d5111d6c453045877676c18ac4d6f99075c941c1",
-        "type": "github"
+        "lastModified": 1721881610,
+        "narHash": "sha256-dBmPoy47p8E4OXP7/sNhAruJcEQpnQ455HaZ0ZC7QCI=",
+        "ref": "refs/heads/main",
+        "rev": "1019f256458de896883eae199dbadf6e351a4557",
+        "revCount": 59,
+        "type": "git",
+        "url": "https://gitee.com/DreamMaoMao/searchjump.yazi"
       },
       "original": {
-        "owner": "qsdrqs",
-        "repo": "searchjump.yazi",
-        "type": "github"
+        "type": "git",
+        "url": "https://gitee.com/DreamMaoMao/searchjump.yazi"
       }
     },
     "yaziDOTnvim": {

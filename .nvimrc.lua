@@ -779,8 +779,8 @@ local plugins = {
 
       vim.keymap.set('n', '<space>e', changeDiagnostic, opts)
       -- vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-      vim.keymap.set('n', '[d', function() vim.diagnostic.jump(1) end, opts)
-      vim.keymap.set('n', ']d', function() vim.diagnostic.jump(-1) end, opts)
+      vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
+      vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1, float = true }) end, opts)
       vim.keymap.set('n', '<space>Q', '<cmd>Trouble diagnostics toggle filter.buf=0<CR>', opts)
       vim.keymap.set('n', '<space>q', '<cmd>Trouble diagnostics toggle<CR>', opts)
       vim.keymap.set('n', '<leader>d', showDocument, opts)
