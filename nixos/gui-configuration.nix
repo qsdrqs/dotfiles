@@ -14,7 +14,7 @@ let
     inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
   ];
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
-    GTK_IM_MODULE=fcitx ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
+    ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
   '';
   homeDir = config.users.users.qsdrqs.home;
 in
@@ -124,27 +124,19 @@ in
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
-  hardware = {
-    opengl = {
-      enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
-    };
-  };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
   i18n.inputMethod = {
-    enabled = "fcitx5";
+    enable = true;
+    type = "fcitx5";
     fcitx5 = {
       addons = with pkgs; [ fcitx5-rime fcitx5-gtk ];
       waylandFrontend = true;
     };
   };
 
-  # Enable sound.
-  sound.enable = true;
   # hardware.pulseaudio.enable = true;
   users.extraUsers.qsdrqs.extraGroups = [ "audio" ];
   # hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";

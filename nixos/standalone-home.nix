@@ -12,7 +12,7 @@
   ];
 
   home.packages = with pkgs; [
-    (wrapNeovim nvim-final {
+    (wrapNeovim neovim-reloadable-unwrapped {
       withPython3 = true;
     })
     yazi

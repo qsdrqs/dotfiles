@@ -52,21 +52,33 @@ let
         wrapProgram $out/bin/$bin \
           --set QT_FONT_DPI 144
       done
+      for desktop in $(ls $out/share/applications); do
+        sed -i "s|Exec=.*/bin/\(.*\)|Exec=$out/bin/\1|" $out/share/applications/$desktop
+      done
     '';
   };
   qq-hidpi = pkgs.symlinkJoin {
     name = "qq";
-    paths = [ config.nur.repos.xddxdd.qq ];
+    paths = [ pkgs.qq ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-      wrapProgram $out/bin/qq \
-        --set GDK_DPI_SCALE 1.5
-      sed -i "s|Exec=.*|Exec=$out/bin/qq|" $out/share/applications/qq.desktop
+      sed -i "s|Exec=.*/bin/qq \(.*\)|Exec=$out/bin/qq --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime \1|" $out/share/applications/qq.desktop
     '';
   };
   wechat-uos-hidpi = pkgs.symlinkJoin {
-    name = "qq";
-    paths = [ config.nur.repos.xddxdd.wechat-uos ];
+    name = "wechat";
+    paths = [ (config.nur.repos.xddxdd.wechat-uos.override {
+      sources = {
+        wechat-uos = {
+          pname = "wechat-uos";
+          version = "1.0.0.241";
+          src = builtins.fetchurl {
+            url = "https://pro-store-packages.uniontech.com/appstore/pool/appstore/c/com.tencent.wechat/com.tencent.wechat_1.0.0.241_amd64.deb";
+            sha256 = "18wq6fqcjzyi5rx1g90idkx6h1mjlx7xd0gg2pakn1zjfrrsjs17";
+          };
+        };
+      };
+    })];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/wechat-uos \
@@ -132,7 +144,7 @@ in
     wineWowPackages.unstableFull
     wpsoffice-hidpi
     libreoffice
-    gnome.seahorse # keyring manager
+    seahorse # keyring manager
 
     # (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
     # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
@@ -228,14 +240,15 @@ in
       powerManagement.enable = true;
       nvidiaSettings = true;
       open = false;
-      package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {
-        version = "535.154.05";
-        pkgSuffix = oldAttrs.pkgSuffix or "";
-        src = builtins.fetchurl {
-          url = "https://download.nvidia.com/XFree86/Linux-x86_64/${version}/NVIDIA-Linux-x86_64-${version}${pkgSuffix}.run";
-          sha256 = "sha256-fpUGXKprgt6SYRDxSCemGXLrEsIA6GOinp+0eGbqqJg=";
-        };
-      }));
+      package = config.boot.kernelPackages.nvidiaPackages.production;
+      # package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {
+      #   version = "535.154.05";
+      #   pkgSuffix = oldAttrs.pkgSuffix or "";
+      #   src = builtins.fetchurl {
+      #     url = "https://download.nvidia.com/XFree86/Linux-x86_64/${version}/NVIDIA-Linux-x86_64-${version}${pkgSuffix}.run";
+      #     sha256 = "sha256-fpUGXKprgt6SYRDxSCemGXLrEsIA6GOinp+0eGbqqJg=";
+      #   };
+      # }));
     };
   };
   # https://wiki.hyprland.org/Nvidia/#fixing-random-flickering-nuclear-method

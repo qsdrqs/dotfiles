@@ -907,7 +907,7 @@ local plugins = {
 
   {
     -- for code actions
-    'gh-liu/nvim-lightbulb',
+    'kosayoda/nvim-lightbulb',
     config = function()
       local lightbulb = require('nvim-lightbulb')
       lightbulb.setup {
@@ -2810,9 +2810,9 @@ local plugins = {
       if #vim.fn.argv() == 1 and vim.fn.isdirectory(vim.fn.argv()[1]) == 1 then
         vim.cmd.cd(vim.fn.argv()[1])
         local res = require('auto-session').RestoreSession()
-        if res then
-          vim.cmd("bdelete " .. vim.fn.getcwd())
-        end
+        -- if res then
+        --   vim.cmd("bdelete " .. vim.fn.getcwd())
+        -- end
       end
     end,
     config = function()

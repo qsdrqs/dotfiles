@@ -119,7 +119,6 @@ in
 
   networking.wg-quick.interfaces = {
     wg0 = {
-      listenPort = 51820;
       privateKeyFile = "${homeDir}/.wireguard/private";
       peers = lib.mkDefault (pkgs.callPackage ./private/wireguard-server.nix { inputs = inputs; });
     };

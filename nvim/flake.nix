@@ -73,7 +73,7 @@
       flake = false;
     };
     nvim-lightbulb = {
-      url = "github:gh-liu/nvim-lightbulb";
+      url = "github:kosayoda/nvim-lightbulb";
       flake = false;
     };
     fidgetDOTnvim = {

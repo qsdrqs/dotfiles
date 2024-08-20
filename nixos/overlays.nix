@@ -48,25 +48,11 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
-        yazi = inputs.yazi.packages.${super.system}.default;
+        # yazi = inputs.yazi.packages.${super.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
-        # tree-sitter = super.tree-sitter.overrideAttrs (drv: rec {
-        #   version = "0.22.6";
-        #   name = "tree-sitter-${version}";
-        #   src = pkgs.fetchFromGitHub {
-        #     owner = "tree-sitter";
-        #     repo = "tree-sitter";
-        #     rev = "v${version}";
-        #     hash = "sha256-jBCKgDlvXwA7Z4GDBJ+aZc52zC+om30DtsZJuHado1s=";
-        #     fetchSubmodules = true;
-        #   };
-        #   cargoDeps = drv.cargoDeps.overrideAttrs (lib.const {
-        #     name = "${name}-vendor.tar.gz";
-        #     inherit src;
-        #     outputHash = "sha256-44FIO0kPso6NxjLwmggsheILba3r9GEhDld2ddt601g=";
-        #   });
-        # });
+        rathole = pkgs-fix.rathole;
+        zerotierone = pkgs-fix.zerotierone;
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
@@ -121,6 +107,7 @@ in
             '';
           in
           rec {
+            inherit (self.neovim-unwrapped) meta lua;
             pname = "neovim-reloadable-unwrapped";
             version = lib.getVersion self.neovim-unwrapped;
             name = "${pname}-${version}";
