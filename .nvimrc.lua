@@ -4668,6 +4668,7 @@ local original_deprecate = vim.deprecate
 vim.deprecate = function(name, alt, plugin, backtrace)
   local tbl = {
     -- "vim.lsp.get_active_clients()"
+    "vim.lsp.diagnostic.get_line_diagnostics()"
   }
   for _, v in ipairs(tbl) do
     if name:find(v) then
