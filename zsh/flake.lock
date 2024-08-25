@@ -19,11 +19,11 @@
     "fzf-tab": {
       "flake": false,
       "locked": {
-        "lastModified": 1718171563,
-        "narHash": "sha256-o8hgnTl84nI7jMVfA5jEcDXkMFFlnxKbRva+l/Fx4jI=",
+        "lastModified": 1722560707,
+        "narHash": "sha256-By6Bgc8Fu79eNTSfCusT57RP7P3XHeekjp4YhsKZS1Y=",
         "owner": "Aloxaf",
         "repo": "fzf-tab",
-        "rev": "14e16f0d36ae9938e28b2f6efdb7344cd527a1a6",
+        "rev": "7fed01afba9392b6392408b9a0cf888522ed7a10",
         "type": "github"
       },
       "original": {
@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1718905911,
-        "narHash": "sha256-5eE3tBYBw8nkmmSR32SM8z0I01MSQAtIP2pEkE3bgRs=",
+        "lastModified": 1724598923,
+        "narHash": "sha256-BO3cqUWmFAJa0wFALJ/77MQ3sxlUM+yqr5dYTvj5q34=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "a87e9c715b2d3249681f9cc8f8d9718030674d50",
+        "rev": "f622e6a6367b5142c868f554fda968982226e5df",
         "type": "github"
       },
       "original": {
@@ -51,11 +51,11 @@
     "powerlevel10k": {
       "flake": false,
       "locked": {
-        "lastModified": 1716315999,
-        "narHash": "sha256-IA2pPW8WT/9/jz/+5zDwedkYz+rzyCy0DRnIvDh9zac=",
+        "lastModified": 1724223745,
+        "narHash": "sha256-H7DYDLNANFnws3pCANnMJAQIMDXCf9S+ggUOGUy1oO0=",
         "owner": "romkatv",
         "repo": "powerlevel10k",
-        "rev": "bde5ca4c2aa6e0c52dd7f15cf216dffdb1ec788c",
+        "rev": "a42e374e25226d2032a38b38fc544ec1d65b0d01",
         "type": "github"
       },
       "original": {
@@ -81,11 +81,11 @@
     "spaceship": {
       "flake": false,
       "locked": {
-        "lastModified": 1718798838,
-        "narHash": "sha256-WjeUF8yD3il9DAava/SYv7ID6iM9AbR1ppazJnypgnk=",
+        "lastModified": 1723474565,
+        "narHash": "sha256-yY5mGa1lB1TzCeBh5HmZzzngWe7XEgUnZhPfU+CH3i8=",
         "owner": "denysdovhan",
         "repo": "spaceship-prompt",
-        "rev": "35e36d3b8ab1b046be4337c53f844349ce1ec562",
+        "rev": "9da6fc774146132015462868fd6cf8d2f5021fab",
         "type": "github"
       },
       "original": {
@@ -161,11 +161,11 @@
     "zsh-vi-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1713663769,
-        "narHash": "sha256-HMfC4s7KW4bO7H6RYzLnSARoFr1Ez89Z2VGONKMpGbw=",
+        "lastModified": 1719915553,
+        "narHash": "sha256-UQo9shimLaLp68U3EcsjcxokJHOTGhOjDw4XDx6ggF4=",
         "owner": "jeffreytse",
         "repo": "zsh-vi-mode",
-        "rev": "287efa19ec492b2f24bb93d1f4eaac3049743a63",
+        "rev": "cd730cd347dcc0d8ce1697f67714a90f07da26ed",
         "type": "github"
       },
       "original": {

@@ -168,7 +168,6 @@ in
     zotero_7
     xournalpp
     thunderbird
-    betterbird
     birdtray
 
     # NUR

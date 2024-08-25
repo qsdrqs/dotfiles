@@ -52,7 +52,6 @@ in
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         rathole = pkgs-fix.rathole;
-        zerotierone = pkgs-fix.zerotierone;
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
