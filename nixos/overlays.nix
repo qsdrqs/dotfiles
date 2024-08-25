@@ -48,7 +48,7 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
-        # yazi = inputs.yazi.packages.${super.system}.default;
+        yazi = inputs.yazi.packages.${super.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         rathole = pkgs-fix.rathole;
