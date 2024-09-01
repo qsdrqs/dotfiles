@@ -11,8 +11,6 @@ in
     appimage-run
     nil # nix language server
     nixpkgs-fmt
-    python3Packages.ipython
-    python3Packages.pip
     cscope
     global
     ctags

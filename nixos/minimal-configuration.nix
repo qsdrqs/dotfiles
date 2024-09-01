@@ -145,7 +145,10 @@ in
     config.boot.kernelPackages.cpupower
     memtester
     patchelf
-    python3
+    (python3.withPackages (ps: with ps; [
+      ipython
+      pip
+    ]))
     lsof
     bat
     file

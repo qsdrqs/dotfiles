@@ -48,7 +48,9 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
-        yazi = inputs.yazi.packages.${super.system}.default;
+        yazi =
+          if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
+          else super.yazi;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         rathole = pkgs-fix.rathole;
