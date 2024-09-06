@@ -136,14 +136,14 @@ in
           commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" "-g" ];
         });
 
-        vscode-insiders = (super.vscode.override (prev: {
-          commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" "-g" ];
-          isInsiders = true;
-        })).overrideAttrs (prev: {
-          src = inputs.vscode-insiders;
-          version = "latest";
-          buildInputs = prev.buildInputs ++ [ pkgs.krb5 ];
-        });
+        # vscode-insiders = (super.vscode.override (prev: {
+        #   commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" "-g" ];
+        #   isInsiders = true;
+        # })).overrideAttrs (prev: {
+        #   src = inputs.vscode-insiders;
+        #   version = "latest";
+        #   buildInputs = prev.buildInputs ++ [ pkgs.krb5 ];
+        # });
 
         vscodium = super.vscodium.overrideAttrs (oldAttrs: {
           postInstall = (oldAttrs.postInstall or "") + ''

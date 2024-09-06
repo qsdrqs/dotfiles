@@ -2444,7 +2444,6 @@
         "rtl88x2bu-dkms": "rtl88x2bu-dkms",
         "tmux-continuum": "tmux-continuum",
         "tmux-resurrect": "tmux-resurrect",
-        "vscode-insiders": "vscode-insiders",
         "vscode-server": "vscode-server",
         "waybar": "waybar",
         "yazi": "yazi",
@@ -3137,19 +3136,6 @@
         "owner": "hrsh7th",
         "repo": "vim-vsnip",
         "type": "github"
-      }
-    },
-    "vscode-insiders": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1725046617,
-        "narHash": "sha256-4IEVOqKOjklCGgyneCkEvoDEQhvFx2dPlub7XPBnwXY=",
-        "type": "tarball",
-        "url": "https://update.code.visualstudio.com/latest/linux-x64/insider"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://update.code.visualstudio.com/latest/linux-x64/insider"
       }
     },
     "vscode-server": {

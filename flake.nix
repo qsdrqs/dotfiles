@@ -76,10 +76,10 @@
       flake = false;
     };
 
-    vscode-insiders = {
-      url = "tarball+https://update.code.visualstudio.com/latest/linux-x64/insider";
-      flake = false;
-    };
+    # vscode-insiders = {
+    #   url = "tarball+https://update.code.visualstudio.com/latest/linux-x64/insider";
+    #   flake = false;
+    # };
 
     # tmux
     tmux-resurrect = {

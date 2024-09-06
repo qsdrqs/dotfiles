@@ -107,10 +107,6 @@ in
   services.displayManager.sddm = {
     enable = true;
     autoNumlock = true;
-    # wayland = {
-    #   enable = true;
-    #   compositor = "kwin";
-    # };
   };
   # Workaround for kwin to work with numlock on
   # system.activationScripts.sddm_kde_display.text = ''
