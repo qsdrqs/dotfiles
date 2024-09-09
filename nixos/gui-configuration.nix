@@ -42,6 +42,7 @@ in
     ark
     deadd-notification-center
     pulseaudio
+    alsa-utils
     rofi-wayland
     networkmanagerapplet
     xdotool
@@ -57,7 +58,7 @@ in
       enable = true;
       support32Bit = true;
     };
-    # jack.enable = true;
+    jack.enable = true;
     # wireplumber.package = pkgs-fix.wireplumber;
   };
 

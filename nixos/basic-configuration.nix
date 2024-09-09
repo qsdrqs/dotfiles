@@ -33,6 +33,7 @@ in
     ffmpeg
     scc
     sshping
+    nasm
   ];
 
   environment.variables = {
