@@ -67,18 +67,20 @@ let
   };
   wechat-uos-hidpi = pkgs.symlinkJoin {
     name = "wechat";
-    paths = [ (config.nur.repos.xddxdd.wechat-uos.override {
-      sources = {
-        wechat-uos = {
-          pname = "wechat-uos";
-          version = "1.0.0.241";
-          src = builtins.fetchurl {
-            url = "https://pro-store-packages.uniontech.com/appstore/pool/appstore/c/com.tencent.wechat/com.tencent.wechat_1.0.0.241_amd64.deb";
-            sha256 = "18wq6fqcjzyi5rx1g90idkx6h1mjlx7xd0gg2pakn1zjfrrsjs17";
+    paths = [
+      (config.nur.repos.xddxdd.wechat-uos.override {
+        sources = {
+          wechat-uos = {
+            pname = "wechat-uos";
+            version = "1.0.0.241";
+            src = builtins.fetchurl {
+              url = "https://pro-store-packages.uniontech.com/appstore/pool/appstore/c/com.tencent.wechat/com.tencent.wechat_1.0.0.241_amd64.deb";
+              sha256 = "18wq6fqcjzyi5rx1g90idkx6h1mjlx7xd0gg2pakn1zjfrrsjs17";
+            };
           };
         };
-      };
-    })];
+      })
+    ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/wechat-uos \
@@ -88,7 +90,21 @@ let
   };
   qqmusic-hidpi = pkgs.symlinkJoin {
     name = "qqmusic";
-    paths = [ config.nur.repos.xddxdd.qqmusic ];
+    paths = [
+      (config.nur.repos.xddxdd.qqmusic.override {
+        sources = {
+          qqmusic = {
+            pname = "qqmusic";
+            version = "1.1.7";
+            src = pkgs.requireFile {
+              name = "qqmusic_1.1.7_amd64.deb";
+              url = "https://y.qq.com/download/download.html";
+              sha256 = "149k6c83ilzm4f30fcqip57y78qrphfidqyfcd6kfkvhnlglgwil";
+            };
+          };
+        };
+      })
+    ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/qqmusic \
