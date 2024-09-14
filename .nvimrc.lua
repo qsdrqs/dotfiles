@@ -616,7 +616,7 @@ local plugins = {
 
       -- 'rust_analyzer' are handled by rust-tools.
       local servers = {
-        'texlab', 'lua_ls', 'vimls', 'hls', 'tsserver',
+        'texlab', 'lua_ls', 'vimls', 'hls', 'ts_ls',
         "cmake", "gopls", "bashls", "bufls", "grammarly", "nil_ls",
         'clangd',
       }
@@ -631,7 +631,7 @@ local plugins = {
       end
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
-        if lsp == 'tsserver' then
+        if lsp == 'ts_ls' then
           -- lsp_common_config.root_dir = require('lspconfig.util').root_pattern("*")
         elseif lsp == "pyright" or lsp == pycfg.name then
           lsp_common_config.settings = {
