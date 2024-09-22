@@ -346,10 +346,16 @@ local plugins = {
     config = function()
       -- java
       local jdt_config = get_lsp_common_config()
+      local java_exec
+      if vim.fn.filereadable('/run/current-system/sw/bin/java') then
+        java_exec = '/run/current-system/sw/bin/java'
+      else
+        java_exec = 'java'
+      end
       jdt_config.cmd = {
 
         -- 💀
-        'java', -- or '/path/to/java11_or_newer/bin/java'
+        java_exec, -- or '/path/to/java17_or_newer/bin/java'
         -- depends on if `java` is in your $PATH env variable and if it points to the right version.
 
         '-Declipse.application=org.eclipse.jdt.ls.core.id1',
@@ -363,7 +369,7 @@ local plugins = {
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
 
         -- 💀
-        '-jar', vim.fn.stdpath('data') .. "/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
+        '-jar', vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar"),
         -- '-jar', os.getenv("HOME") .. "/.config/coc/extensions/coc-java-data/server/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
         -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
         -- Must point to the                                                     Change this to

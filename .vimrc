@@ -587,13 +587,13 @@ endfunction
 if get(g:, 'vim_startup', 0) == 1
   " do nothing
 elseif exists('g:vscode')
-  if file_readable(expand("~/.nvimrc.lua"))
+  if filereadable(expand("~/.nvimrc.lua"))
     source ~/.nvimrc.lua
     lua VscodeNeovimHandler()
   endif
 else
   if has('nvim')
-    if file_readable(expand("~/.nvimrc.lua"))
+    if filereadable(expand("~/.nvimrc.lua"))
       source ~/.nvimrc.lua
       nnoremap <leader><leader> <CMD>call TriggerPlugins()<CR><CMD>doautocmd BufRead<CR>
 
