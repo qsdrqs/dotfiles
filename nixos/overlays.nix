@@ -48,9 +48,10 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
-        yazi =
-          if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
-          else super.yazi;
+        # yazi =
+        #   if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
+        #   else super.yazi;
+        # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         # End Temporary self updated packages
@@ -71,7 +72,6 @@ in
         #         ${pkgs.findutils}/bin/xargs ${pkgs.gnused}/bin/sed -i 's/vim.treesitter.start()/-- vim.treesitter.start()/g'
         #       '';
         #     });
-        neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
           if [[ $QUIT_ON_OPEN == "1" ]]; then

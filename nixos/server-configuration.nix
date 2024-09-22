@@ -57,6 +57,7 @@ in
             KillSignal = "SIGINT";
             ExecStart = "${pkgs.bash}/bin/sh ${./private/keepass_backup.sh} ${homeDir}";
           };
+          path = [ pkgs.gawk ];
         };
       };
       timers = {

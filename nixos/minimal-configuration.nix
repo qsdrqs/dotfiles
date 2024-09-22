@@ -7,7 +7,8 @@ let
   dummy = pkgs.callPackage (import ./packages.nix).dummy { };
 in
 {
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_10;
   boot.tmp.useTmpfs = true;
 
   # networking.hostName = "nixos"; # Define your hostname.
