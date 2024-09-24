@@ -152,15 +152,23 @@ in
         installPhase = commonInstallPhase;
         postInstall =
           let
-            plugins = [
+            plugins-3rdpty = [
               "searchjump"
             ];
+            plugins-offical = [
+              "max-preview"
+            ];
           in
-          lib.strings.concatStrings (map
+          lib.strings.concatStrings
+            (map
+              (plugin: ''
+                ln -s ${inputs."yazi-${plugin}"} $out/plugins/${plugin}.yazi
+              '')
+              plugins-3rdpty) + lib.strings.concatStrings (map
             (plugin: ''
-              ln -s ${inputs."yazi-${plugin}"} $out/plugins/${plugin}.yazi
+              ln -s ${inputs.yazi-plugins}/${plugin}.yazi $out/plugins/${plugin}.yazi
             '')
-            plugins);
+            plugins-offical);
       };
       target = ".config/yazi";
     };

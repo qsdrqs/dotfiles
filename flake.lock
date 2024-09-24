@@ -2447,6 +2447,7 @@
         "vscode-server": "vscode-server",
         "waybar": "waybar",
         "yazi": "yazi",
+        "yazi-plugins": "yazi-plugins",
         "yazi-searchjump": "yazi-searchjump",
         "zsh-config": "zsh-config"
       }
@@ -3251,6 +3252,22 @@
       "original": {
         "owner": "sxyazi",
         "repo": "yazi",
+        "type": "github"
+      }
+    },
+    "yazi-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1727183870,
+        "narHash": "sha256-wlSBtabIsEUJhuHmXwgpSnwZp9WaVQFBg6s1XXjubrE=",
+        "owner": "yazi-rs",
+        "repo": "plugins",
+        "rev": "c5785059611624e20a37ba573620f30acc28a26a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yazi-rs",
+        "repo": "plugins",
         "type": "github"
       }
     },

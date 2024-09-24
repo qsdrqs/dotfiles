@@ -96,6 +96,10 @@
       url = "git+https://gitee.com/DreamMaoMao/searchjump.yazi";
       flake = false;
     };
+    yazi-plugins = {
+      url = "github:yazi-rs/plugins";
+      flake = false;
+    };
 
   };
 
