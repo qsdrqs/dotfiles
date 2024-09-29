@@ -352,48 +352,12 @@ local plugins = {
       else
         java_exec = 'java'
       end
-      jdt_config.cmd = {
-
-        -- 💀
-        java_exec, -- or '/path/to/java17_or_newer/bin/java'
-        -- depends on if `java` is in your $PATH env variable and if it points to the right version.
-
-        '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-        '-Dosgi.bundles.defaultStartLevel=4',
-        '-Declipse.product=org.eclipse.jdt.ls.core.product',
-        '-Dlog.protocol=true',
-        '-Dlog.level=ALL',
-        '-Xms1g',
-        '--add-modules=ALL-SYSTEM',
-        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-
-        -- 💀
-        '-jar', vim.fn.glob(vim.fn.stdpath('data') .. "/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar"),
-        -- '-jar', os.getenv("HOME") .. "/.config/coc/extensions/coc-java-data/server/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
-        -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
-        -- Must point to the                                                     Change this to
-        -- eclipse.jdt.ls installation                                           the actual version
-
-
-        -- 💀
-        '-configuration', vim.fn.stdpath('data') .. "/mason/packages/jdtls/config_linux",
-        -- '-configuration', os.getenv("HOME") .. "/.config/coc/extensions/coc-java-data/server/config_linux",
-        -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^
-        -- Must point to the                      Change to one of `linux`, `win` or `mac`
-        -- eclipse.jdt.ls installation            Depending on your system.
-
-
-        -- 💀
-        -- See `data directory configuration` section in the README
-        '-data', os.getenv("HOME") .. '/.cache/jdtls/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-
-      }
+      jdt_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/jdtls"}
 
       -- 💀
       -- This is the default if not provided, you can remove it. Or adjust as needed.
       -- One dedicated LSP server & client will be started per unique root_dir
-      jdt_config.root_dir = require('jdtls.setup').find_root({'.git', 'mvnw', 'gradlew'})
+      jdt_config.root_dir = vim.fs.root(0, {".git", "mvnw", "gradlew"})
 
       -- Here you can configure eclipse.jdt.ls specific settings
       -- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
@@ -453,8 +417,7 @@ local plugins = {
         require('jdtls.dap').setup_dap_main_class_configs()
       end
       -- vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
-        require('jdtls.setup').add_commands()
-        require('jdtls').start_or_attach(jdt_config)
+      require('jdtls').start_or_attach(jdt_config)
     end
   },
 
@@ -3278,12 +3241,13 @@ local plugins = {
 
   {
     "rcarriga/nvim-notify",
-    config = function()
+    init = function()
       local banned_messages = {
         "method textDocument/codeLens is not supported by any of the servers registered for the current buffer",
         "method textDocument/inlayHint is not supported by any of the servers registered for the current buffer",
         "[inlay_hints] LSP error:Invalid offset",
         "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml",
+        "WARNING: vim.treesitter.get_parser will return nil instead of raising an error in Neovim 0.12"
       }
 
       vim.notify = function (msg, ...)
@@ -4327,6 +4291,15 @@ local function load_by_filetype(ft_plugins)
     ::continue::
   end
 end
+-- FIXME: jdtls need to be loaded by FileType
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  callback = function()
+    empty_config = { cmd = {} }
+    require('jdtls').start_or_attach(empty_config)
+  end,
+})
+
 function LazyLoadPlugins()
   load_by_filetype {
     {
