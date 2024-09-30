@@ -168,7 +168,7 @@ in
     virt-manager
     linux-wifi-hotspot
     hotspot
-    # neovide
+    neovide
     termshark
 
     obs-studio
