@@ -123,7 +123,15 @@ in
     #   };
     # };
     radios.wlp1s0u1u2 = {
+      channel = 7;
       countryCode = "US";
+      wifi6.enable = true;
+      wifi4.capabilities = [
+        "HT40"
+        "HT40+"
+        "SHORT-GI-20"
+        "SHORT-GI-40"
+      ];
       networks = {
         wlp1s0u1u2 = {
           ssid = "RaspNix";

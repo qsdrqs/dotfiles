@@ -31,12 +31,13 @@ ueberzug_offset = [ 0, 0, 0, 0 ]
 
 [opener]
 edit = [
-	{ run = 'editor-wrapped "$@"', block = true,  for = "unix" },
+	{ run = 'editor-wrapped "$@"', desc = "Edit", block = true,  for = "unix" },
 	# { run = '$EDITOR "$@"', block = true,  for = "unix" },
 	{ run = 'code "%*"',    orphan = true, for = "windows" },
 ]
 open = [
 	{ run = 'xdg-open "$1"',                desc = "Open", for = "linux" },
+	{ run = 'xdg-open "$1"',                desc = "Open(Detached)", for = "linux", orphan = true },
 	{ run = 'open "$@"',                    desc = "Open", for = "macos" },
 	{ run = 'start "" "%1"', orphan = true, desc = "Open", for = "windows" },
 ]

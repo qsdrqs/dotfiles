@@ -486,6 +486,11 @@ fi
 #     done
 # }
 
+# ssh agent
+if [[ $SSH_AUTH_SOCK == "" || ! -S $SSH_AUTH_SOCK ]]; then
+    eval $(ssh-agent -s)
+fi
+
 # Change Yazi's CWD to PWD on subshell exit
 if [[ -n $YAZI_ID ]]; then
     function _yazi_cd() {
@@ -499,4 +504,5 @@ ghcs() {
     eval "$(gh copilot alias -- zsh)"
     ghcs $@
 }
+
 

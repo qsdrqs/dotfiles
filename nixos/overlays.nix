@@ -50,7 +50,44 @@ in
 
         yazi =
           if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
-          else super.yazi;
+          else
+            let
+              inherit (pkgs.stdenv.hostPlatform) system;
+              throwSystem = throw "Unsupported system: ${system}";
+            in
+            pkgs.stdenv.mkDerivation rec {
+              pname = "yazi";
+              version = "nightly";
+              platform = {
+                x86_64-linux = "x86_64-unknown-linux-gnu";
+                aarch64-linux = "aarch64-unknown-linux-gnu";
+              }.${system} or throwSystem;
+              sha256 = {
+                x86_64-linux = "0gvzzpfjlsv1gmdn6pc701arx5vnfwxcsgqd37rlpf02a5qkhagy";
+                aarch64-linux = "02a6bpyknlj8q6ywxbjd6nn5dh7n68b9rwj5cs9qvnv927xb5dwp";
+              }.${system} or throwSystem;
+              src = builtins.fetchurl {
+                url = "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-${platform}.zip";
+                inherit sha256;
+              };
+              nativeBuildInputs = [ pkgs.installShellFiles ];
+              phases = [ "installPhase" ]; # Removes all phases except installPhase
+              installPhase = ''
+                mkdir -p $out/bin
+                ${pkgs.unzip}/bin/unzip $src -d tmp
+                cp tmp/yazi-${platform}/ya $out/bin/ya
+                cp tmp/yazi-${platform}/yazi $out/bin/yazi
+
+                installShellCompletion --cmd yazi \
+                  --bash ./tmp/yazi-${platform}/completions/yazi.bash \
+                  --fish ./tmp/yazi-${platform}/completions/yazi.fish \
+                  --zsh  ./tmp/yazi-${platform}/completions/_yazi
+                installShellCompletion --cmd ya \
+                  --bash ./tmp/yazi-${platform}/completions/ya.bash \
+                  --fish ./tmp/yazi-${platform}/completions/ya.fish \
+                  --zsh  ./tmp/yazi-${platform}/completions/_ya
+              '';
+            };
         neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
@@ -198,7 +235,7 @@ in
         interception-tools-plugins.caps2esc = super.interception-tools-plugins.caps2esc;
 
         neovide = super.neovide.overrideAttrs (oldAttrs: {
-          nativeCheckInputs = [];
+          nativeCheckInputs = [ ];
           doCheck = false;
         });
       })
