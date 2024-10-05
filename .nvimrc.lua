@@ -3358,6 +3358,18 @@ local plugins = {
   },
 
   {
+    'levouh/tint.nvim',
+    lazy = false,
+    cond = vim.g.vscode == nil,
+    config = function()
+      require("tint").setup {
+        tint = -45,  -- Darken colors, use a positive value to brighten
+        saturation = 0.6,  -- Saturation to preserve
+      }
+    end
+  },
+
+  {
     "folke/lazydev.nvim",
     lazy = true,
     opts = {
