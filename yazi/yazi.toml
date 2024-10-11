@@ -75,6 +75,8 @@ rules = [
 	{ mime = "*/javascript", use = [ "edit", "reveal" ] },
 	# Empty file
 	{ mime = "inode/x-empty", use = [ "edit", "reveal" ] },
+	# Octet stream
+	{ mime = "application/octet-stream", use = [ "edit", "reveal" ] },
 	# Fallback
 	{ name = "*", use = [ "open", "reveal", "edit" ] },
 ]

@@ -1,8 +1,8 @@
 { config, pkgs, lib, pkgs-master, pkgs-fix, inputs, options, ... }:
 let
   hyprlandPackages = with pkgs; [
-    waybar
-    # inputs.waybar.packages.${pkgs.system}.waybar
+    # waybar
+    inputs.waybar.packages.${pkgs.system}.waybar
     qt6.qtwayland
     libsForQt5.qt5.qtwayland
     hyprpaper
@@ -118,8 +118,8 @@ in
 
   programs.hyprland = {
     enable = true;
-    # package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-    # portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+    portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   xdg.portal.enable = true;

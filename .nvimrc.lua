@@ -630,9 +630,9 @@ local plugins = {
               auxDirectory = "latex.out",
               build = {
                 onSave = true, -- Automatically build latex on save
-                -- args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+                args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
                 -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
-                args = { "-pdflua", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+                -- args = { "-pdflua", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
               },
               forwardSearch = {
                 executable = "zathura",
@@ -1783,6 +1783,7 @@ local plugins = {
         strategy = {
           [''] = rainbow_delimiters.strategy['global'],
           vim = rainbow_delimiters.strategy['local'],
+          latex = rainbow_delimiters.strategy['local'],
         },
         query = {
           [''] = 'rainbow-delimiters',
