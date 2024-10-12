@@ -37,9 +37,9 @@ Status:children_add(function()
 		spans[#spans + 1] = ui.Span(user .. " " .. group .. " "):style(THEME.status.permissions_r)
 	end
 
-	if h.cha.modified ~= nil then
-		local modified = os.date("%Y-%m-%d %H:%M:%S", math.floor(h.cha.modified))
-		spans[#spans + 1] = ui.Span(modified)
+	if h.cha.mtime ~= nil then
+		local mtime = os.date("%Y-%m-%d %H:%M:%S", math.floor(h.cha.mtime))
+		spans[#spans + 1] = ui.Span(mtime)
 	end
 	spans[#spans + 1] = ui.Span(linked):style(link_style)
 

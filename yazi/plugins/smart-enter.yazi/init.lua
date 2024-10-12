@@ -6,7 +6,7 @@ local function enterable(dir)
 		print("not exec")
 		return false
 	end
-	local perms = dir.cha:permissions()
+	local perms = dir.cha:perm()
 	local username = ya.user_name(ya.uid())
 	local groupname = ya.group_name(ya.gid())
 	if username == "root" then

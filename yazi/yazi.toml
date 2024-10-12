@@ -37,7 +37,13 @@ edit = [
 ]
 open = [
 	{ run = 'xdg-open "$1"',                desc = "Open", for = "linux" },
-	{ run = 'xdg-open "$1"',                desc = "Open(Detached)", for = "linux", orphan = true },
+	{ run = 'xdg-open "$1"',                desc = "Open (Detached)", for = "linux", orphan = true },
+	{ run = 'open "$@"',                    desc = "Open", for = "macos" },
+	{ run = 'start "" "%1"', orphan = true, desc = "Open", for = "windows" },
+]
+open_detach = [
+	{ run = 'xdg-open "$1"',                desc = "Open (Detached)", for = "linux", orphan = true },
+	{ run = 'xdg-open "$1"',                desc = "Open", for = "linux" },
 	{ run = 'open "$@"',                    desc = "Open", for = "macos" },
 	{ run = 'start "" "%1"', orphan = true, desc = "Open", for = "windows" },
 ]
@@ -77,6 +83,8 @@ rules = [
 	{ mime = "inode/x-empty", use = [ "edit", "reveal" ] },
 	# Octet stream
 	{ mime = "application/octet-stream", use = [ "edit", "reveal" ] },
+	# pdf
+	{ mime = "application/pdf", use = [ "open_detach", "reveal", "edit" ] },
 	# Fallback
 	{ name = "*", use = [ "open", "reveal", "edit" ] },
 ]
