@@ -137,6 +137,13 @@ local function vscode_prev_hunk()
   require("vscode-neovim").action("workbench.action.editor.previousChange")
 end
 
+local function lsp_merge_project_config(config)
+  if vim.g.project_config then
+    return vim.tbl_deep_extend('keep', config, vim.g.project_config)
+  end
+  return config
+end
+
 local plugins = {
   {'folke/lazy.nvim', lazy = false},
   {
@@ -417,7 +424,7 @@ local plugins = {
         require('jdtls.dap').setup_dap_main_class_configs()
       end
       -- vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
-      require('jdtls').start_or_attach(jdt_config)
+      require('jdtls').start_or_attach(lsp_merge_project_config(jdt_config))
     end
   },
 
@@ -435,7 +442,7 @@ local plugins = {
 
         local cfg = require('rustaceanvim.config')
         return {
-          server = lsp_config,
+          server = lsp_merge_project_config(lsp_config),
           dap = {
             adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
           },
@@ -742,7 +749,7 @@ local plugins = {
             }
           }
         end
-        lspconfig[lsp].setup(lsp_common_config)
+        lspconfig[lsp].setup(lsp_merge_project_config(lsp_common_config))
       end
 
 
@@ -4293,13 +4300,15 @@ local function load_by_filetype(ft_plugins)
   end
 end
 -- FIXME: jdtls need to be loaded by FileType
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    empty_config = { cmd = {} }
-    require('jdtls').start_or_attach(empty_config)
-  end,
-})
+if vim.g.vscode == nil then
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "java",
+    callback = function()
+      empty_config = { cmd = {} }
+      require('jdtls').start_or_attach(empty_config)
+    end,
+  })
+end
 
 function LazyLoadPlugins()
   load_by_filetype {
