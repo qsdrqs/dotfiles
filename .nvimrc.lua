@@ -359,7 +359,10 @@ local plugins = {
       else
         java_exec = 'java'
       end
-      jdt_config.cmd = {vim.fn.stdpath('data') .. "/mason/bin/jdtls"}
+      jdt_config.cmd = {
+        vim.fn.stdpath('data') .. "/mason/bin/jdtls",
+        "--java-executable=" .. java_exec,
+      }
 
       -- 💀
       -- This is the default if not provided, you can remove it. Or adjust as needed.
