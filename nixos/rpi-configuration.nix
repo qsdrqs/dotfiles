@@ -50,6 +50,8 @@ in
 
   boot.kernelModules = [ "88x2bu" ];
   boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu ];
+  # boot.extraModulePackages = [ rtl88x2bu_module ];
+
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
@@ -125,22 +127,11 @@ in
     radios.wlp1s0u1u2 = {
       channel = 7;
       countryCode = "US";
-      wifi6.enable = true;
-      wifi4.capabilities = [
-        "HT40"
-        "HT40+"
-        "SHORT-GI-20"
-        "SHORT-GI-40"
-      ];
       networks = {
         wlp1s0u1u2 = {
           ssid = "RaspNix";
           authentication = {
-            mode = "wpa2-sha256";
-            wpaPasswordFile = ./private/wpa-password;
-          };
-          settings = {
-            wpa_key_mgmt = lib.mkForce "WPA-PSK";
+            saePasswordsFile = ./private/wpa-password;
           };
         };
       };

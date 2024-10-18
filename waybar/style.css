@@ -83,6 +83,7 @@ button:hover {
 #pulseaudio,
 #wireplumber,
 #custom-media,
+#custom-notification,
 #tray,
 #mode,
 #idle_inhibitor,
@@ -198,6 +199,10 @@ label:focus {
 
 #custom-media.custom-vlc {
     background-color: #ffa000;
+}
+
+#custom-notification {
+    background-color: #64727D;
 }
 
 #temperature {

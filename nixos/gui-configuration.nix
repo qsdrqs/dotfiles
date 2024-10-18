@@ -5,6 +5,7 @@ let
     inputs.waybar.packages.${pkgs.system}.waybar
     qt6.qtwayland
     libsForQt5.qt5.qtwayland
+    kdePackages.qtwayland
     hyprpaper
     hyprpicker
     grim
@@ -12,6 +13,7 @@ let
     jq
     swayidle
     inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
+    wayvnc
   ];
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
     ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
@@ -35,17 +37,18 @@ in
     libnotify
     baobab # disk usage
     mpv
-    libsForQt5.gwenview
+    kdePackages.gwenview
     graphviz
 
     zathura
     ark
-    deadd-notification-center
+    swaynotificationcenter
     pulseaudio
     alsa-utils
     rofi-wayland
     networkmanagerapplet
     xdotool
+    zenity # color picker
   ] ++ hyprlandPackages;
 
   qt.platformTheme = "kde";
@@ -63,17 +66,25 @@ in
   };
 
   systemd = {
+    user.targets = {
+      hyprland-session = {
+        description = "Hyprland session";
+        wants = [ "graphical-session-pre.target" ];
+        after = [ "graphical-session-pre.target" ];
+        bindsTo = [ "graphical-session.target" ];
+      };
+    };
     user.services = {
-      deadd-notification-center = {
+      sway-notification-center = {
         wantedBy = [ "graphical-session.target" ];
         unitConfig = {
-          Description = "Deadd Notification Center";
+          Description = "Sway Notification Center";
           PartOf = [ "graphical-session.target" ];
         };
         serviceConfig = {
           Type = "dbus";
           BusName = "org.freedesktop.Notifications";
-          ExecStart = "${pkgs.deadd-notification-center}/bin/deadd-notification-center";
+          ExecStart = "${pkgs.swaynotificationcenter}/bin/swaync";
         };
       };
       plasma-dolphin = {
@@ -88,13 +99,28 @@ in
         serviceConfig = {
           Type = "dbus";
           BusName = "org.freedesktop.FileManager1";
-          ExecStart = "${pkgs.dolphin}/bin/dolphin";
+          ExecStart = "${pkgs.kdePackages.dolphin}/bin/dolphin";
+        };
+      };
+      kdeconnectd = {
+        wantedBy = [ "graphical-session.target" ];
+        unitConfig = {
+          Description = "KDE Connect Daemon";
+          PartOf = [ "graphical-session.target" ];
+        };
+        path = [ pkgs.kdePackages.kdeconnect-kde ];
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnectd";
         };
       };
     };
   };
 
-  programs.dconf.enable = true;
+  programs = {
+    dconf.enable = true;
+    kdeconnect.enable = true;
+  };
 
   # provide org.freedesktop.secrets
   services.gnome.gnome-keyring.enable = true;
