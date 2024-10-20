@@ -341,7 +341,7 @@ alias rm="rm -i"
 alias cp="cp -i"
 alias mv="mv -i"
 mkcd() {
-    mkdir -p $1 && cd $1
+    mkdir -p "$1" && cd "$1"
 }
 
 # global replacement

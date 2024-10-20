@@ -417,7 +417,7 @@
       flake = false;
     };
     CopilotChatDOTnvim = {
-      url = "github:CopilotC-Nvim/CopilotChat.nvim?ref=canary";
+      url = "github:CopilotC-Nvim/CopilotChat.nvim";
       flake = false;
     };
     sudaDOTvim = {

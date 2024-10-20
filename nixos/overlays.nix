@@ -110,15 +110,6 @@ in
         #       '';
         #     });
 
-        editor-wrapped = pkgs.writeShellScriptBin "editor-wrapped" ''
-          if [[ $QUIT_ON_OPEN == "1" ]]; then
-            $EDITOR "$@"
-            kill -9 $(ps -o ppid= -p $$)
-          else
-            $EDITOR "$@"
-          fi
-        '';
-
         # for config.programs.neovim
         wrapNeovim = (nvim: args: super.wrapNeovim nvim (args // {
           withPython3 = true;
@@ -130,31 +121,6 @@ in
             tiktoken
           ];
         }));
-
-        neovim-reloadable-unwrapped = pkgs.symlinkJoin (
-          let
-            reloadable-script = pkgs.writeShellScriptBin "nvim" ''
-              while true; do
-                ${self.neovim-unwrapped}/bin/nvim "$@"
-                RET=$?
-                if [[ $RET != 100 ]]; then
-                  exit $RET
-                fi
-              done
-            '';
-          in
-          rec {
-            inherit (self.neovim-unwrapped) meta lua;
-            pname = "neovim-reloadable-unwrapped";
-            version = lib.getVersion self.neovim-unwrapped;
-            name = "${pname}-${version}";
-            paths = [ self.neovim-unwrapped ];
-            postBuild = ''
-              rm $out/bin/nvim
-              cp ${reloadable-script}/bin/nvim $out/bin/nvim
-            '';
-          }
-        );
 
         ranger = super.ranger.overrideAttrs (oldAttrs: {
           src = inputs.ranger-config.ranger;

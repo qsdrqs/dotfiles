@@ -4,7 +4,7 @@
 
 { config, pkgs, lib, inputs, options, ... }:
 let
-  dummy = pkgs.callPackage (import ./packages.nix).dummy { };
+  packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
 in
 {
   # boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -112,9 +112,10 @@ in
 
   environment.systemPackages = with pkgs; [
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    (if config.boot.loader.grub.enable then grub2 else dummy)
+    (if config.boot.loader.grub.enable then grub2 else packages.dummy)
     zoxide
-    editor-wrapped
+    packages.editor-wrapped
+    packages.mkcd
     lsd
     wget
     curl
@@ -191,7 +192,7 @@ in
     neovim = {
       enable = true;
       defaultEditor = true;
-      package = pkgs.neovim-reloadable-unwrapped;
+      package = packages.neovim-reloadable-unwrapped;
     };
     nix-ld.enable = true;
     gnupg.agent.enable = true;

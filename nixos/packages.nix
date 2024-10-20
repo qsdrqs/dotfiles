@@ -52,4 +52,42 @@
     echo "Dummy package as a placeholder for some other package"
   '';
 
+  editor-wrapped = { pkgs }: pkgs.writeShellScriptBin "editor-wrapped" ''
+    if [[ $QUIT_ON_OPEN == "1" ]]; then
+      $EDITOR "$@"
+      kill -9 $(ps -o ppid= -p $$)
+    else
+      $EDITOR "$@"
+    fi
+  '';
+
+  neovim-reloadable-unwrapped = { pkgs, lib }: pkgs.symlinkJoin (
+    let
+      reloadable-script = pkgs.writeShellScriptBin "nvim" ''
+        while true; do
+          ${pkgs.neovim-unwrapped}/bin/nvim "$@"
+          RET=$?
+          if [[ $RET != 100 ]]; then
+            exit $RET
+          fi
+        done
+      '';
+    in
+    rec {
+      inherit (pkgs.neovim-unwrapped) meta lua;
+      pname = "neovim-reloadable-unwrapped";
+      version = lib.getVersion pkgs.neovim-unwrapped;
+      name = "${pname}-${version}";
+      paths = [ pkgs.neovim-unwrapped ];
+      postBuild = ''
+        rm $out/bin/nvim
+        cp ${reloadable-script}/bin/nvim $out/bin/nvim
+      '';
+    }
+  );
+
+  mkcd = { pkgs }: pkgs.writeShellScriptBin "mkcd" ''
+    mkdir -p "$1" && cd "$1"
+  '';
+
 }

@@ -131,7 +131,12 @@ in
         wlp1s0u1u2 = {
           ssid = "RaspNix";
           authentication = {
-            saePasswordsFile = ./private/wpa-password;
+            mode = "wpa2-sha256";
+            wpaPasswordFile = ./private/wpa-password;
+            # saePasswordsFile = ./private/wpa-password;
+          };
+          settings = {
+            wpa_key_mgmt = lib.mkForce "WPA-PSK";
           };
         };
       };

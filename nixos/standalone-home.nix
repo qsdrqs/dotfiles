@@ -1,5 +1,7 @@
 { config, pkgs, inputs, lib, ... }:
-
+let
+  packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
+in
 {
   imports = [
     (if builtins.pathExists ./home-custom.nix then
@@ -12,7 +14,7 @@
   ];
 
   home.packages = with pkgs; [
-    (wrapNeovim neovim-reloadable-unwrapped {
+    (wrapNeovim packages.neovim-reloadable-unwrapped {
       withPython3 = true;
     })
     yazi
