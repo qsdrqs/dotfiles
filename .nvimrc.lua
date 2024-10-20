@@ -1176,21 +1176,18 @@ local plugins = {
               end
             end,
             i = function(fallback)
-              local ok, copilot_keys = pcall(vim.fn["copilot#Accept"], "empty")
-              if not ok then
-                copilot_keys = "empty"
-              end
               local luasnip_jump_forward = ls.expand_or_jumpable()
+              local copilot_suggestion = require("copilot.suggestion")
               if cmp.visible() then
                 -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
                 cmp.confirm()
-              elseif copilot_keys ~= "empty" then
-                vim.api.nvim_feedkeys(copilot_keys, "i", true)
+              elseif copilot_suggestion.is_visible() then
+                copilot_suggestion.accept()
               elseif luasnip_jump_forward == true then
                 ls.expand_or_jump()
               else
-                vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
-                -- fallback()
+                -- vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
+                fallback()
               end
             end,
             s = function(fallback)
@@ -2435,7 +2432,7 @@ local plugins = {
 
       local copilot = function()
         if vim.g.copilot_initialized == 1 then
-          if vim.api.nvim_eval("copilot#Enabled()") == 1 then
+          if vim.b.copilot_suggestion_hidden == false then
             return ' '
           else
             return '󱃓 '
@@ -3298,7 +3295,7 @@ local plugins = {
     -- Lazy load firenvim
     -- Explanation: https://github.com/folke/lazy.nvim/discussions/463#discussioncomment-4819297
     lazy = not vim.g.started_by_firenvim,
-    dependencies = { 'github/copilot.vim', 'neovim/nvim-lspconfig' },
+    dependencies = { 'zbirenbaum/copilot.lua', 'neovim/nvim-lspconfig' },
     build = function()
       require("lazy").load({ plugins = "firenvim", wait = true })
       vim.fn["firenvim#install"](0)
@@ -3574,7 +3571,7 @@ local plugins = {
   },
 
   {
-    'github/copilot.vim',
+    'zbirenbaum/copilot.lua',
     lazy = true,
     init = function()
       vim.g.copilot_filetypes = {
@@ -3584,32 +3581,47 @@ local plugins = {
       }
     end,
     config = function()
+      require('copilot').setup {
+        panel = {
+          keymap = {
+            open = "<M-\\>"
+          },
+          layout = {
+            position = "top", -- | top | left | right
+            ratio = 0.4
+          },
+        },
+        suggestion = {
+          auto_trigger = true,
+          debounce = 75,
+          keymap = {
+            accept = nil,
+            accept_word = false,
+            accept_line = false,
+            next = "<M-]>",
+            prev = "<M-[>",
+            dismiss = "<C-]>",
+          },
+        },
+        filetypes = {
+          ["dap-repl"] = false,
+          dapui_watches = false,
+          markdown = true
+        },
+      }
       vim.g.copilot_echo_num_completions = 1
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
 
-      function copilot_dismiss()
-        local copilot_keys = vim.fn["copilot#Dismiss"]()
-        local t = function(str)
-          return vim.api.nvim_replace_termcodes(str, true, true, true)
-        end
-
-        if copilot_keys ~= "" then
-          vim.api.nvim_feedkeys(copilot_keys, "i", true)
-        else
-          vim.api.nvim_feedkeys(t("<End>"), "i", true)
-        end
-      end
-      vim.keymap.set('i', '<C-e>', "<Cmd>lua copilot_dismiss()<CR>", { silent = true})
-      vim.keymap.set('i', '<M-\\>', "<Cmd>Copilot panel<CR>", { silent = true})
+      vim.keymap.set('i', '<C-e>', require("copilot.suggestion").dismiss, { silent = true})
     end
   },
 
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = {
-      "github/copilot.vim",
+      "zbirenbaum/copilot.lua",
       'nvim-lua/plenary.nvim',
     },
     opts = {
@@ -4366,7 +4378,6 @@ function LazyLoadPlugins()
       'project.nvim',
       'nvim-ufo',
       'toggleterm.nvim',
-      'copilot.vim',
       'direnv.vim',
       'nvim-dap',
       'auto-session',
@@ -4409,8 +4420,10 @@ function LazyLoadPlugins()
           'cmp-nvim-lsp-signature-help',
           'cmp-dictionary',
           -- end cmp
+          'copilot.lua',
         }
       }
+      vim.b.copilot_suggestion_hidden = false
     end,
     once = true
   })

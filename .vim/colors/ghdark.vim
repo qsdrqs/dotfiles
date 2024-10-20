@@ -767,3 +767,7 @@ highlight! Color6 guifg=#D2A8FF
 
 " hlargs
 highlight Hlargs guifg=#ef9062
+
+" copilot
+hi! CopilotSuggestion guifg=#808080
+hi! link CopilotAnnotation MoreMsg

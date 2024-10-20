@@ -384,19 +384,19 @@
         "type": "github"
       }
     },
-    "copilotDOTvim": {
+    "copilotDOTlua": {
       "flake": false,
       "locked": {
-        "lastModified": 1728401940,
-        "narHash": "sha256-9264TNocFvtC2znvgfjpwLWBTGfg1U5Fr0dZkkyCYpQ=",
-        "owner": "github",
-        "repo": "copilot.vim",
-        "rev": "87038123804796ca7af20d1b71c3428d858a9124",
+        "lastModified": 1729295476,
+        "narHash": "sha256-UY6N2Q+egh+Cn4REZXrSGH9ElWQBedl0n8tWJvGe7vs=",
+        "owner": "zbirenbaum",
+        "repo": "copilot.lua",
+        "rev": "f8d8d872bb319f640d5177dad5fbf01f7a16d7d0",
         "type": "github"
       },
       "original": {
-        "owner": "github",
-        "repo": "copilot.vim",
+        "owner": "zbirenbaum",
+        "repo": "copilot.lua",
         "type": "github"
       }
     },
@@ -1620,7 +1620,7 @@
         "cmp-omni": "cmp-omni",
         "cmp-path": "cmp-path",
         "cmp_luasnip": "cmp_luasnip",
-        "copilotDOTvim": "copilotDOTvim",
+        "copilotDOTlua": "copilotDOTlua",
         "cscope_mapsDOTnvim": "cscope_mapsDOTnvim",
         "dialDOTnvim": "dialDOTnvim",
         "diffviewDOTnvim": "diffviewDOTnvim",
