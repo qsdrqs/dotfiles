@@ -367,7 +367,7 @@ local plugins = {
       -- 💀
       -- This is the default if not provided, you can remove it. Or adjust as needed.
       -- One dedicated LSP server & client will be started per unique root_dir
-      jdt_config.root_dir = vim.fs.root(0, {".git", "mvnw", "gradlew"})
+      jdt_config.root_dir = vim.fs.root(0, {".git", "mvnw", "gradlew", ".classpath", ".exrc"})
 
       -- Here you can configure eclipse.jdt.ls specific settings
       -- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
@@ -426,8 +426,16 @@ local plugins = {
         common_on_attach(client, bufnr)
         require('jdtls.dap').setup_dap_main_class_configs()
       end
-      -- vim.cmd[[ autocmd FileType java lua require('jdtls').start_or_attach(jdt_config)]]
-      require('jdtls').start_or_attach(lsp_merge_project_config(jdt_config))
+
+      local jdt_config = lsp_merge_project_config(jdt_config)
+
+      -- jdtls needs to be started by FileType, and executed every time for each java file
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "java",
+        callback = function()
+          require('jdtls').start_or_attach(jdt_config)
+        end,
+      })
     end
   },
 
@@ -4283,6 +4291,8 @@ end
 --------------------------------------------------------------------------------------
 ----------------------------Lazy Load-------------------------------------------------
 local function load_by_filetype(ft_plugins)
+  vim.api.nvim_create_augroup("LazyLoadFiletype", {})
+
   for _, ft_plugin in pairs(ft_plugins) do
     for _, ft in pairs(ft_plugin.ft) do
       if vim.bo.filetype == ft then
@@ -4291,7 +4301,6 @@ local function load_by_filetype(ft_plugins)
       end
     end
 
-    vim.api.nvim_create_augroup("LazyLoadFiletype", {})
     vim.api.nvim_create_autocmd("FileType", {
       pattern = ft_plugin.ft,
       group = "LazyLoadFiletype",
@@ -4309,16 +4318,6 @@ local function load_by_filetype(ft_plugins)
     })
     ::continue::
   end
-end
--- FIXME: jdtls need to be loaded by FileType
-if vim.g.vscode == nil then
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = "java",
-    callback = function()
-      empty_config = { cmd = {} }
-      require('jdtls').start_or_attach(empty_config)
-    end,
-  })
 end
 
 function LazyLoadPlugins()
@@ -4340,7 +4339,7 @@ function LazyLoadPlugins()
   require('lazy').load {
     plugins = {
       -- begin lsp
-      'clangd_extensions.nvim',
+      'nvim-lspconfig',
       'nvim-lightbulb',
       'fidget.nvim',
       'none-ls.nvim',
