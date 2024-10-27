@@ -52,16 +52,16 @@ in
 
   # WSL2 does not support modprobe for wireguard
   systemd.services.wg-quick-wg0.serviceConfig.ExecStart = lib.mkForce (
-    utils.systemdUtils.lib.makeJobScript
-      "wg-quick-wg0-start"
-      (
+    utils.systemdUtils.lib.makeJobScript {
+      name = "wg-quick-wg0-start";
+      text =
         let
           str2list = lib.strings.splitString "\n" config.systemd.services.wg-quick-wg0.script;
           listRemove = lib.lists.remove "${pkgs.kmod}/bin/modprobe wireguard" str2list;
         in
-        lib.strings.concatStrings listRemove
-      )
-  );
+        lib.strings.concatStrings listRemove;
+      enableStrictShellChecks = false;
+  });
 
   # use vcxsrv instead of wslg
   # environment.variables.DISPLAY =
