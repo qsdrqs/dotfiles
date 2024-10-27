@@ -240,6 +240,7 @@ alias zshrc="$EDITOR ~/dotfiles/.zshrc"
 alias vimrc="$EDITOR ~/dotfiles/.vimrc"
 alias vimplug="$EDITOR ~/dotfiles/.vimrc.plugs"
 alias nvimplug="$EDITOR ~/dotfiles/.nvimrc.lua"
+alias ls='lsd'
 alias ll="ls -l"
 alias la="ls -la"
 
@@ -423,7 +424,6 @@ paste-finish() {
 zstyle :bracketed-paste-magic paste-init pasteinit
 zstyle :bracketed-paste-magic paste-finish pastefinish
 
-alias ls='lsd'
 #Make alacritty show colors
 unset LSCOLORS
 unset LS_COLORS

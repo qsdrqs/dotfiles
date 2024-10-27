@@ -3591,6 +3591,7 @@ local plugins = {
     config = function()
       require('copilot').setup {
         panel = {
+          auto_refresh = true,
           keymap = {
             open = "<M-\\>"
           },
@@ -3617,12 +3618,8 @@ local plugins = {
           markdown = true
         },
       }
-      vim.g.copilot_echo_num_completions = 1
-      vim.g.copilot_no_tab_map = true
-      vim.g.copilot_assume_mapped = true
-      vim.g.copilot_tab_fallback = ""
 
-      vim.keymap.set('i', '<C-e>', require("copilot.suggestion").dismiss, { silent = true})
+      vim.keymap.set('i', '<C-e>', require("copilot.suggestion").dismiss, { silent = true })
     end
   },
 
