@@ -8,7 +8,7 @@ let
 in
 {
   # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_10;
+  boot.kernelPackages = pkgs.linuxPackages;
   boot.tmp.useTmpfs = true;
 
   # networking.hostName = "nixos"; # Define your hostname.

@@ -169,7 +169,7 @@ in
       wantedBy = [ "multi-user.target" ];
       description = "Auto detect wifi down and rebuild nixos";
       path = [
-        pkgs.iproute
+        pkgs.iproute2
         pkgs.gnugrep
         pkgs.bash
         pkgs.git

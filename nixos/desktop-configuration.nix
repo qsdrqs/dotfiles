@@ -185,6 +185,7 @@ in
     xournalpp
     thunderbird
     birdtray
+    apktool
 
     # NUR
     qq-hidpi
