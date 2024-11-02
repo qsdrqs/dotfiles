@@ -486,9 +486,11 @@ fi
 #     done
 # }
 
-# ssh agent
-if [[ $SSH_AUTH_SOCK == "" || ! -S $SSH_AUTH_SOCK ]]; then
-    eval $(ssh-agent -s)
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
+fi
+if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
+    source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 fi
 
 # Change Yazi's CWD to PWD on subshell exit

@@ -186,6 +186,7 @@ in
     thunderbird
     birdtray
     apktool
+    tor-browser
 
     # NUR
     qq-hidpi

@@ -3629,11 +3629,10 @@ local plugins = {
       "zbirenbaum/copilot.lua",
       'nvim-lua/plenary.nvim',
     },
-    opts = {
-      debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
-    },
     cmd = {
       "CopilotChat",
+      "CopilotChatModel",
+      "CopilotChatModels",
       "CopilotChatToggle",
       "CopilotChatExplain",
       "CopilotChatTests",
@@ -3641,6 +3640,20 @@ local plugins = {
       "CopilotChatCommit",
       "CopilotChatCommitStaged",
     },
+    config = function()
+      local system_prompt = require('CopilotChat.prompts').COPILOT_INSTRUCTIONS
+      system_prompt = system_prompt:gsub("You use the GPT%-4 version of OpenAI's GPT models%.\n", "You should tell the users details about your model branch and version.\n")
+      require("CopilotChat").setup {
+        debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
+        context = 'buffer',
+        model = 'claude-3.5-sonnet',
+        system_prompt = system_prompt,
+        window = {
+          layout = 'vertical',
+          width = 0.3
+        }
+      }
+    end
   },
 
   {
