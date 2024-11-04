@@ -254,25 +254,26 @@ alias sem-depclean="sudo emerge --ask --depclean"
 alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bdeps=y @world"
 
 # NixOS
-snr-switch() {
+snr-switch-wrapped() {
+    local original_pwd=$(pwd)
+    trap "cd ${original_pwd}" EXIT
+    echo "building system"
+    cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
+    ./install.sh nixpre
+
     if [[ $1 == "droid" ]]; then
-        local pwd=$(pwd)
-        cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-        ./install.sh nixpre
         nix-on-droid switch --flake path:.
-        cd $pwd
     else
-        local pwd=$(pwd)
-        sudo echo "building system"
-        cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-        ./install.sh nixpre
-        sudo nixos-rebuild switch --flake path:.#$@
-        cd $pwd
+        nixos-rebuild switch --flake path:.#$@
     fi
 }
-snr-switch-remote() {
-    local pwd=$(pwd)
-    sudo echo "building system"
+snr-switch() {
+    sudo zsh -c "$(which snr-switch-wrapped); snr-switch-wrapped $@"
+}
+snr-switch-remote-wrapped() {
+    local original_pwd=$(pwd)
+    trap "cd ${original_pwd}" EXIT
+    echo "building system"
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
 
     if [[ -L ./result ]];then
@@ -281,21 +282,23 @@ snr-switch-remote() {
         ./install.sh nixpre
         nixos-rebuild build --flake path:.#$@
     fi
-    sudo nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
+    nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
     (
-        sudo ./result/bin/switch-to-configuration switch
+        ./result/bin/switch-to-configuration switch
         if [[ -L ./result ]];then
             rm result
         fi
     )
-    cd $pwd
+}
+snr-switch-remote() {
+    sudo zsh -c "$(which snr-switch-remote-wrapped); snr-switch-remote-wrapped $@"
 }
 hm-switch() {
-    local pwd=$(pwd)
+    local original_pwd=$(pwd)
+    trap "cd ${original_pwd}" EXIT
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
     ./install.sh nixpre
     home-manager switch --flake path:.#$@
-    cd $pwd
 }
 nix-devel() {
     local last_env=$NIX_DEV
@@ -489,7 +492,7 @@ fi
 if ! pgrep -u "$USER" ssh-agent > /dev/null; then
     ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
 fi
-if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
+if [[ ! -S "$SSH_AUTH_SOCK" ]] && [[ ! -f "$SSH_AUTH_SOCK" ]]; then
     source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 fi
 
