@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-fix, lib, inputs, ... }:
+{ config, pkgs, pkgs-stable, lib, inputs, ... }:
 
 let
   symbfile = filenames: lib.genAttrs filenames (filename: {

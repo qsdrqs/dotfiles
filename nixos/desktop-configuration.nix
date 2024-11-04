@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-fix, inputs, ... }:
+{ config, pkgs, lib, pkgs-stable, inputs, ... }:
 let
   ida64-fhs = pkgs.buildFHSUserEnv {
     name = "ida64";
@@ -68,24 +68,26 @@ let
   wechat-uos-hidpi = pkgs.symlinkJoin {
     name = "wechat";
     paths = [
-      (config.nur.repos.xddxdd.wechat-uos.override {
-        sources = {
-          wechat-uos = {
-            pname = "wechat-uos";
-            version = "1.0.0.241";
-            src = builtins.fetchurl {
-              url = "https://pro-store-packages.uniontech.com/appstore/pool/appstore/c/com.tencent.wechat/com.tencent.wechat_1.0.0.241_amd64.deb";
-              sha256 = "18wq6fqcjzyi5rx1g90idkx6h1mjlx7xd0gg2pakn1zjfrrsjs17";
-            };
-          };
-        };
-      })
+      pkgs.wechat-uos
+      # (config.nur.repos.xddxdd.wechat-uos.override {
+      #   sources = {
+      #     wechat-uos = {
+      #       pname = "wechat-uos";
+      #       version = "1.0.0.241";
+      #       src = builtins.fetchurl {
+      #         url = "https://pro-store-packages.uniontech.com/appstore/pool/appstore/c/com.tencent.wechat/com.tencent.wechat_1.0.0.241_amd64.deb";
+      #         sha256 = "18wq6fqcjzyi5rx1g90idkx6h1mjlx7xd0gg2pakn1zjfrrsjs17";
+      #       };
+      #     };
+      #   };
+      # })
     ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/wechat-uos \
         --set QT_FONT_DPI 144
-      sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/wechat-uos.desktop
+      # sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/wechat-uos.desktop
+      sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/com.tencent.wechat.desktop
     '';
   };
   qqmusic-hidpi = pkgs.symlinkJoin {
@@ -168,7 +170,7 @@ in
     virt-manager
     linux-wifi-hotspot
     hotspot
-    neovide
+    # neovide
     termshark
 
     obs-studio

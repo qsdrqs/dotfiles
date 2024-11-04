@@ -36,7 +36,7 @@ let
     system = pkgs.system;
     config.allowUnfree = true;
   };
-  pkgs-fix = import inputs.nixpkgs-fix {
+  pkgs-stable = import inputs.nixpkgs-stable {
     system = pkgs.system;
     config.allowUnfree = true;
   };

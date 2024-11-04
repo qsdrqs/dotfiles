@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-master, pkgs-fix, inputs, options, ... }:
+{ config, pkgs, lib, pkgs-master, pkgs-stable, pkgs-last, inputs, options, ... }:
 let
   hyprlandPackages = with pkgs; [
     waybar
@@ -13,10 +13,10 @@ let
     jq
     swayidle
     inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
-    wayvnc
+    pkgs-stable.wayvnc
   ];
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
-    ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
+    ${pkgs-last.firefox-devedition}/bin/firefox-devedition "$@"
   '';
   homeDir = config.users.users.qsdrqs.home;
 in
@@ -28,7 +28,7 @@ in
 
   environment.systemPackages = with pkgs; [
     vscode
-    firefox-devedition
+    pkgs-last.firefox-devedition
     firefox-alias
     kitty
     xclip
@@ -62,7 +62,7 @@ in
       support32Bit = true;
     };
     jack.enable = true;
-    # wireplumber.package = pkgs-fix.wireplumber;
+    # wireplumber.package = pkgs-stable.wireplumber;
   };
 
   systemd = {

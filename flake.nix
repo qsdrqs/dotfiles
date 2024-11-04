@@ -6,7 +6,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-fix.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/18536bf04cd71abd345f9579158841376fdd0c5a";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.05";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -116,7 +117,7 @@
             config.allowUnfree = true;
             overlays = (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
           });
-        }) [ "pkgs-master" "pkgs-fix" "pkgs" ]
+        }) [ "pkgs-master" "pkgs-stable" "pkgs-last" "pkgs" ]
       );
       minimalHomeModules = [
         ./nixos/home.nix
@@ -138,7 +139,8 @@
       special-args = system: {
         inherit inputs;
         pkgs-master = pkgs-collect.pkgs-master system;
-        pkgs-fix = pkgs-collect.pkgs-fix system;
+        pkgs-stable = pkgs-collect.pkgs-stable system;
+        pkgs-last = pkgs-collect.pkgs-last system;
       };
 
       minimalConfig = rec {
