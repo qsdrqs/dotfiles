@@ -104,13 +104,13 @@ in
   services.hostapd = {
     enable = true;
     # radios.wlan0 = {
+    #   channel = 7;
+    #   countryCode = "US";
     #   wifi4.capabilities = [
     #     "HT40"
     #     "HT40-"
     #     "SHORT-GI-20"
-    #     # "SHORT-GI-40"
     #   ];
-    #   countryCode = "US";
     #   networks = {
     #     wlan0 = {
     #       ssid = "RaspNix";
@@ -131,12 +131,12 @@ in
         wlp1s0u1u2 = {
           ssid = "RaspNix";
           authentication = {
-            mode = "wpa2-sha256";
-            wpaPasswordFile = ./private/wpa-password;
-            # saePasswordsFile = ./private/wpa-password;
+            # mode = "wpa2-sha256";
+            # wpaPasswordFile = ./private/wpa-password;
+            saePasswordsFile = ./private/wpa-password;
           };
           settings = {
-            wpa_key_mgmt = lib.mkForce "WPA-PSK";
+            # wpa_key_mgmt = lib.mkForce "WPA-PSK";
           };
         };
       };
