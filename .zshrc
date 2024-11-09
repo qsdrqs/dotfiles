@@ -268,7 +268,7 @@ snr-switch-wrapped() {
     fi
 }
 snr-switch() {
-    sudo zsh -c "$(which snr-switch-wrapped); snr-switch-wrapped $@"
+    sudo -E zsh -c "$(which snr-switch-wrapped); snr-switch-wrapped $@"
 }
 snr-switch-remote-wrapped() {
     local original_pwd=$(pwd)
@@ -291,7 +291,7 @@ snr-switch-remote-wrapped() {
     )
 }
 snr-switch-remote() {
-    sudo zsh -c "$(which snr-switch-remote-wrapped); snr-switch-remote-wrapped $@"
+    sudo -E zsh -c "$(which snr-switch-remote-wrapped); snr-switch-remote-wrapped $@"
 }
 hm-switch() {
     local original_pwd=$(pwd)

@@ -1887,7 +1887,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-W1ofm6D0MxW5OwFyDHro573aVolK5X5R6BRcHQTxR9U=",
+        "narHash": "sha256-aaIYHAGrrB7fZAjVh7RXIU3Ro1Cd6OmXtuBBJEf5Mhs=",
         "path": "nvim",
         "type": "path"
       },
@@ -2835,11 +2835,11 @@
     "tintDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1714574002,
-        "narHash": "sha256-b0qDgML4i/xvQ5o594YoX8U5zgQHvS23SAZ2dG6ocCE=",
+        "lastModified": 1730996066,
+        "narHash": "sha256-gmtFb/FirvTtWeTpalabWmt5kQiH83rE7gph3VcKcss=",
         "owner": "levouh",
         "repo": "tint.nvim",
-        "rev": "02bd0527a315a80e4e25bb2dd7b6994fb0daae01",
+        "rev": "586e87f00c8b0f5e857cefe10839e41f3e8c6d01",
         "type": "github"
       },
       "original": {

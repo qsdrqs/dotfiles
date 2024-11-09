@@ -18,10 +18,10 @@ def check_and_rebuild(wifi_interface, nixos_config):
     # check if wifi is down
     # ip addr | grep <interface> | grep "DOWN"
     cmd = f"ip addr | grep {wifi_interface} | grep 'DOWN'"
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     down_out, down_err = p.communicate()
     cmd = f"ip addr | grep {wifi_interface} | grep 'UP'"
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     up_out, up_err = p.communicate()
     if down_err:
         print(down_err)

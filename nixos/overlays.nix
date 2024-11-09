@@ -63,8 +63,8 @@ in
                 aarch64-linux = "aarch64-unknown-linux-gnu";
               }.${system} or throwSystem;
               sha256 = {
-                x86_64-linux = "0gvzzpfjlsv1gmdn6pc701arx5vnfwxcsgqd37rlpf02a5qkhagy";
-                aarch64-linux = "02a6bpyknlj8q6ywxbjd6nn5dh7n68b9rwj5cs9qvnv927xb5dwp";
+                x86_64-linux = "";
+                aarch64-linux = "sha256:1q8ypfavhhp0v1rv7a0hl9hsrrz04hwn8bwhwggrz8r3rpvbs3bi";
               }.${system} or throwSystem;
               src = builtins.fetchurl {
                 url = "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-${platform}.zip";

@@ -436,7 +436,6 @@ hi! link jsDomNodeConsts LibraryIdent
 hi! link jsDot Normal
 hi! link jsExceptions LibraryType
 hi! link jsFuncArgCommas jsFuncParens
-hi! link jsFuncBraces jsFuncBraces
 hi! link jsFuncName Function
 hi! link jsFuncParens Normal
 hi! link jsFunction jsStatement

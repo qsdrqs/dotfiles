@@ -131,18 +131,21 @@ in
         wlp1s0u1u2 = {
           ssid = "RaspNix";
           authentication = {
-            # mode = "wpa2-sha256";
-            # wpaPasswordFile = ./private/wpa-password;
-            saePasswordsFile = ./private/wpa-password;
+            mode = "wpa2-sha256";
+            wpaPasswordFile = ./private/wpa-password;
+            # saePasswordsFile = ./private/wpa-password;
           };
           settings = {
-            # wpa_key_mgmt = lib.mkForce "WPA-PSK";
+            wpa_key_mgmt = lib.mkForce "WPA-PSK";
           };
         };
       };
     };
   };
 
+  # environment.etc."modprobe.d/brcmfmac.conf".text = ''
+  #   options brcmfmac feature_disable=0x82000
+  # '';
 
   # auto fan on/off
   systemd.services.autofan =
@@ -160,28 +163,65 @@ in
       };
     };
 
-  systemd.services.wifi-rebuild =
-    let
-      wifi-interface = "wlp1s0u1u2";
-      rpi-config = "rpi";
-    in
-    {
-      wantedBy = [ "multi-user.target" ];
-      description = "Auto detect wifi down and rebuild nixos";
-      path = [
-        pkgs.iproute2
-        pkgs.gnugrep
-        pkgs.bash
-        pkgs.git
-        pkgs.nixos-rebuild
-        pkgs.nix
-      ];
-      serviceConfig = {
-        ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-wifi-rebuild.py} ${wifi-interface} ${rpi-config}'';
-        Restart = "on-failure";
-        RestartSec = 5;
+  systemd.services = {
+    wifi-rebuild =
+      let
+        wifi-interface = "wlp1s0u1u2";
+        rpi-config = "rpi";
+      in
+      {
+        wantedBy = [ "multi-user.target" ];
+        description = "Auto detect wifi down and rebuild nixos";
+        path = [
+          pkgs.iproute2
+          pkgs.gnugrep
+          pkgs.bash
+          pkgs.git
+          pkgs.nixos-rebuild
+          pkgs.nix
+        ];
+        serviceConfig = {
+          ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-wifi-rebuild.py} ${wifi-interface} ${rpi-config}'';
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
       };
-    };
+    wifi-disable-powersave =
+      let
+        wifi-interface = "wlp1s0u1u2";
+      in
+      {
+        wantedBy = [ "multi-user.target" ];
+        description = "Disable wifi power save";
+        path = [
+          pkgs.iw
+        ];
+        serviceConfig = {
+          ExecStart = ''${./scripts/rpi-wifi-disable-powersave.sh} ${wifi-interface}'';
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+      };
+    eth-rebuild =
+      let
+        eth-interface = "enp1s0u1u3c2";
+        ip-addr-prefix = "192.168.100";
+      in
+      {
+        wantedBy = [ "multi-user.target" ];
+        description = "Auto detect ethernet down and rebuild nixos";
+        path = [
+          pkgs.iproute2
+          pkgs.gnugrep
+          pkgs.bash
+        ];
+        serviceConfig = {
+          ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-eth-rebuild.py} ${eth-interface} ${ip-addr-prefix}'';
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+      };
+  };
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
   services.syncthing.guiAddress = "0.0.0.0:8384";

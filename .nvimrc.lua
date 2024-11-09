@@ -2043,6 +2043,7 @@ local plugins = {
       vim.api.nvim_set_hl(0, "DropBarKindFolder", { bold = true })
 
       vim.api.nvim_set_hl(0, "DropBarIconUIPickPivot", { link = "Visual" })
+      vim.api.nvim_set_hl(0, "DropBarIconKindEnumMember", { link = "Normal" })
       vim.keymap.set("n", "<leader>V", require('dropbar.api').pick, { noremap = true, silent = true })
 
       local api = require('dropbar.api')
@@ -3279,7 +3280,10 @@ local plugins = {
           require('auto-session').SaveSession()
           return
         end
-        require("notify")(msg, ...)
+        local ok, notify = pcall(require, 'notify')
+        if ok then
+          notify(msg, ...)
+        end
       end
     end
   },
@@ -3379,6 +3383,7 @@ local plugins = {
         tint = -45,  -- Darken colors, use a positive value to brighten
         saturation = 0.6,  -- Saturation to preserve
       }
+      vim.api.nvim_create_user_command("TintToggle", require("tint").toggle, { nargs = 0 })
     end
   },
 

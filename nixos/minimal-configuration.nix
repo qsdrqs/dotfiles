@@ -169,6 +169,7 @@ in
     sqlite
     sshfs
     (lib.hiPrio inetutils)
+    iw
 
     # perfing
     config.boot.kernelPackages.perf
