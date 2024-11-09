@@ -1,3 +1,4 @@
+--- @sync entry
 local function enterable(dir)
 	if ya.target_family() == "windows" then
 		return true

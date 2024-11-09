@@ -1,3 +1,4 @@
+--- @sync entry
 local curr_pos_stack = {}
 local cursor_pos = 1
 local top_pos = 1

@@ -19,11 +19,11 @@
     "fzf-tab": {
       "flake": false,
       "locked": {
-        "lastModified": 1728610694,
-        "narHash": "sha256-4A7zpaO1rNPvS0rrmmxg56rJGpZHnw/g+x5FJd0EshI=",
+        "lastModified": 1730889031,
+        "narHash": "sha256-EWMeslDgs/DWVaDdI9oAS46hfZtp4LHTRY8TclKTNK8=",
         "owner": "Aloxaf",
         "repo": "fzf-tab",
-        "rev": "b6e1b22458a131f835c6fe65bdb88eb45093d2d2",
+        "rev": "6aced3f35def61c5edf9d790e945e8bb4fe7b305",
         "type": "github"
       },
       "original": {
@@ -129,11 +129,11 @@
     "zinit": {
       "flake": false,
       "locked": {
-        "lastModified": 1729075782,
-        "narHash": "sha256-14LO/GVpJaiM7Ba6ZZoPFjgL3QCo9nc3owWUe7T2Ql0=",
+        "lastModified": 1731107416,
+        "narHash": "sha256-ck+ifrf8wSIIzBEnbWrw52X1CY5Y0L1GIizsnr1+/w8=",
         "owner": "zdharma-continuum",
         "repo": "zinit",
-        "rev": "0c471af3fe6aa80a5ddc0fddfb741bc5b3f96cde",
+        "rev": "c3469496455ea8b8ba184426c558e54817825bef",
         "type": "github"
       },
       "original": {

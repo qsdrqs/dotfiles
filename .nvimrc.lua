@@ -604,7 +604,7 @@ local plugins = {
       -- 'rust_analyzer' are handled by rust-tools.
       local servers = {
         'texlab', 'lua_ls', 'vimls', 'hls', 'ts_ls',
-        "cmake", "gopls", "bashls", "bufls", "grammarly", "nil_ls",
+        "cmake", "gopls", "bashls", "buf_ls", "grammarly", "nil_ls",
         'clangd',
       }
 
