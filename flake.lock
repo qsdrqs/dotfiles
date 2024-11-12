@@ -2541,6 +2541,7 @@
         "vscode-server": "vscode-server",
         "waybar": "waybar",
         "yazi": "yazi",
+        "yazi-aarch64-nightly": "yazi-aarch64-nightly",
         "yazi-plugins": "yazi-plugins",
         "yazi-searchjump": "yazi-searchjump",
         "zsh-config": "zsh-config"
@@ -3349,6 +3350,19 @@
         "owner": "sxyazi",
         "repo": "yazi",
         "type": "github"
+      }
+    },
+    "yazi-aarch64-nightly": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1731284508,
+        "narHash": "sha256-Xul4Vc4EKONJa4XsTDV2chcq7OlXNHWcHSEAim0i6Bg=",
+        "type": "tarball",
+        "url": "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-aarch64-unknown-linux-gnu.zip"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-aarch64-unknown-linux-gnu.zip"
       }
     },
     "yazi-plugins": {

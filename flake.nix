@@ -19,6 +19,10 @@
     yazi = {
       url = "github:sxyazi/yazi";
     };
+    yazi-aarch64-nightly = {
+      url = "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-aarch64-unknown-linux-gnu.zip";
+      flake = false;
+    };
 
     ranger-config.url = "path:ranger";
     zsh-config.url = "path:zsh";

@@ -254,26 +254,23 @@ alias sem-depclean="sudo emerge --ask --depclean"
 alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bdeps=y @world"
 
 # NixOS
-snr-switch-wrapped() {
+snr-switch() {
     local original_pwd=$(pwd)
     trap "cd ${original_pwd}" EXIT
-    echo "building system"
+    sudo echo "building system"
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
     ./install.sh nixpre
 
     if [[ $1 == "droid" ]]; then
         nix-on-droid switch --flake path:.
     else
-        nixos-rebuild switch --flake path:.#$@
+        sudo nixos-rebuild switch --flake path:.#$@
     fi
 }
-snr-switch() {
-    sudo -E zsh -c "$(which snr-switch-wrapped); snr-switch-wrapped $@"
-}
-snr-switch-remote-wrapped() {
+snr-switch-remote() {
     local original_pwd=$(pwd)
     trap "cd ${original_pwd}" EXIT
-    echo "building system"
+    sudo echo "building system"
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
 
     if [[ -L ./result ]];then
@@ -282,16 +279,13 @@ snr-switch-remote-wrapped() {
         ./install.sh nixpre
         nixos-rebuild build --flake path:.#$@
     fi
-    nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
+    sudo nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
     (
-        ./result/bin/switch-to-configuration switch
+        sudo ./result/bin/switch-to-configuration switch
         if [[ -L ./result ]];then
             rm result
         fi
     )
-}
-snr-switch-remote() {
-    sudo -E zsh -c "$(which snr-switch-remote-wrapped); snr-switch-remote-wrapped $@"
 }
 hm-switch() {
     local original_pwd=$(pwd)
