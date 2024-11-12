@@ -61,7 +61,7 @@ with pkgs; {
       common_shell = rec {
         packages = [
           python3Packages.virtualenv
-          nodePackages.pyright
+          pyright
           python3Packages.autopep8
           python3Packages.isort
           python3Packages.debugpy
