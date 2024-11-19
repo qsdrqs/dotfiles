@@ -40,6 +40,10 @@ let
     system = pkgs.system;
     config.allowUnfree = true;
   };
+  pkgs-last = import inputs.nixpkgs-last {
+    system = pkgs.system;
+    config.allowUnfree = true;
+  };
 in
 {
   nixpkgs.overlays = [
@@ -163,7 +167,7 @@ in
           version = "2.1.1";
         });
 
-        firefox-devedition = super.firefox-devedition.overrideAttrs (oldAttrs: {
+        firefox-devedition = pkgs-last.firefox-devedition.overrideAttrs (oldAttrs: {
           buildCommand = (oldAttrs.buildCommand or "") + ''
             mkdir -p $out/tmp/firefox-omni
             cd $out/tmp/firefox-omni

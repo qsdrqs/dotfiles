@@ -5,6 +5,7 @@ let
     rpi-gpio
     gpiozero
   ];
+  wifi-interface-external = "wlp1s0u1u3";
 in
 {
   imports = [
@@ -82,7 +83,7 @@ in
       ap = {
         matchConfig = {
           # Name = "wlan0";
-          Name = "wlp1s0u1u2";
+          Name = wifi-interface-external;
           WLANInterfaceType = "ap";
         };
         networkConfig = {
@@ -99,7 +100,7 @@ in
       };
     };
   };
-  networking.networkmanager.unmanaged = [ "wlp1s0u1u2" ];
+  networking.networkmanager.unmanaged = [ wifi-interface-external ];
 
   services.hostapd = {
     enable = true;
@@ -124,11 +125,11 @@ in
     #     };
     #   };
     # };
-    radios.wlp1s0u1u2 = {
+    radios."${wifi-interface-external}" = {
       channel = 7;
       countryCode = "US";
       networks = {
-        wlp1s0u1u2 = {
+        "${wifi-interface-external}" = {
           ssid = "RaspNix";
           authentication = {
             mode = "wpa2-sha256";
@@ -166,7 +167,7 @@ in
   systemd.services = {
     wifi-rebuild =
       let
-        wifi-interface = "wlp1s0u1u2";
+        wifi-interface = wifi-interface-external;
         rpi-config = "rpi";
       in
       {
@@ -188,7 +189,7 @@ in
       };
     wifi-disable-powersave =
       let
-        wifi-interface = "wlp1s0u1u2";
+        wifi-interface = wifi-interface-external;
       in
       {
         wantedBy = [ "multi-user.target" ];

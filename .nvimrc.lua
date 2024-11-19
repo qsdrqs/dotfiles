@@ -3656,6 +3656,12 @@ local plugins = {
         window = {
           layout = 'vertical',
           width = 0.3
+        },
+        mappings = {
+          reset = {
+            normal ='<C-S-L>',
+            insert = '<C-S-L>'
+          },
         }
       }
     end

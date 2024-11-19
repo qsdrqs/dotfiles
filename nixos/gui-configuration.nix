@@ -16,7 +16,7 @@ let
     pkgs-stable.wayvnc
   ];
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
-    ${pkgs-last.firefox-devedition}/bin/firefox-devedition "$@"
+    ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
   '';
   homeDir = config.users.users.qsdrqs.home;
 in
@@ -28,7 +28,7 @@ in
 
   environment.systemPackages = with pkgs; [
     vscode
-    pkgs-last.firefox-devedition
+    pkgs.firefox-devedition
     firefox-alias
     kitty
     xclip

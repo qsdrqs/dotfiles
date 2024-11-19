@@ -185,8 +185,6 @@ in
     pandoc
     zotero_7
     xournalpp
-    thunderbird
-    birdtray
     apktool
     tor-browser
 
