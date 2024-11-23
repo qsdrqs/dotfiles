@@ -127,6 +127,10 @@ in
 {
   boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+  boot.kernelParams = [
+    "nvidia_drm.fbdev=1"
+    "initcall_blacklist=simpledrm_platform_driver_init"
+  ];
 
   boot.loader = {
     grub = {
@@ -183,7 +187,7 @@ in
     android-tools
 
     pandoc
-    zotero_7
+    zotero
     xournalpp
     apktool
     tor-browser

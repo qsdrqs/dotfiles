@@ -27,7 +27,7 @@ in
     wiringpi
     (python3.withPackages python-packages)
   ];
-  boot.kernelPackages = lib.mkForce pkgs.linuxKernel.packages.linux_rpi4;
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_rpi4;
 
   # Create gpio group
   users.groups.gpio = { };
@@ -126,7 +126,7 @@ in
     #   };
     # };
     radios."${wifi-interface-external}" = {
-      channel = 7;
+      channel = 6;
       countryCode = "US";
       networks = {
         "${wifi-interface-external}" = {
