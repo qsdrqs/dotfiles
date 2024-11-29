@@ -3261,7 +3261,7 @@ local plugins = {
         "method textDocument/inlayHint is not supported by any of the servers registered for the current buffer",
         "[inlay_hints] LSP error:Invalid offset",
         "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml",
-        "WARNING: vim.treesitter.get_parser will return nil instead of raising an error in Neovim 0.12"
+        "warning: offset_encoding is required, using the offset_encoding from the first client"
       }
 
       vim.notify = function (msg, ...)
@@ -3282,6 +3282,8 @@ local plugins = {
         end
         local ok, notify = pcall(require, 'notify')
         if ok then
+          -- local stack_trace = debug.traceback()
+          -- notify(msg .. "\n\n" .. stack_trace, ...)
           notify(msg, ...)
         end
       end
@@ -3660,7 +3662,7 @@ local plugins = {
         mappings = {
           reset = {
             normal ='<C-S-L>',
-            insert = '<C-S-L>'
+            insert = '<C-l>'
           },
         }
       }

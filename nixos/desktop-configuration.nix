@@ -127,10 +127,10 @@ in
 {
   boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
-  boot.kernelParams = [
-    "nvidia_drm.fbdev=1"
-    "initcall_blacklist=simpledrm_platform_driver_init"
-  ];
+  # boot.kernelParams = [
+  #   "nvidia_drm.fbdev=1"
+  #   "initcall_blacklist=simpledrm_platform_driver_init"
+  # ];
 
   boot.loader = {
     grub = {
@@ -263,7 +263,7 @@ in
       modesetting.enable = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      open = false;
+      open = true;
       # package = config.boot.kernelPackages.nvidiaPackages.production;
       # package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {
       #   version = "535.154.05";
