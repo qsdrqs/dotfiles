@@ -83,11 +83,11 @@
     "ranger_devicons": {
       "flake": false,
       "locked": {
-        "lastModified": 1713564482,
-        "narHash": "sha256-sijO9leDXgnjgcVlh5fKYalhjOupwFMRyH0xh2g/rEQ=",
+        "lastModified": 1732436707,
+        "narHash": "sha256-sqqsWU5/zBwIpyJKEBiCfosqKNvISWCw8cFgzLcNjUY=",
         "owner": "alexanderjeurissen",
         "repo": "ranger_devicons",
-        "rev": "a8d626485ca83719e1d8d5e32289cd96a097c861",
+        "rev": "84db73d0a50a8c6085b3ec63f834c781b603e83e",
         "type": "github"
       },
       "original": {

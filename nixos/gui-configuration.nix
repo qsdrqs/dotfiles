@@ -13,7 +13,7 @@ let
     jq
     swayidle
     inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
-    pkgs-stable.wayvnc
+    wayvnc
   ];
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
     ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"

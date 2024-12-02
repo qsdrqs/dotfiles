@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1732176108,
-        "narHash": "sha256-blVlP/ja022t9DvTe9QJvLVaADuK/9A87dpvdKgbPa8=",
+        "lastModified": 1732784241,
+        "narHash": "sha256-31wI3wFGQ9YhEo7XguLSTNY0rvOFa+/MoFwDAZIo7ZY=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "ccbe504f224a0aae688aaa729d4258e3392a9fc8",
+        "rev": "69a6359f7cf8978d464573fb7b023ee3cd00181a",
         "type": "github"
       },
       "original": {
@@ -145,11 +145,11 @@
     "zsh-autosuggestions": {
       "flake": false,
       "locked": {
-        "lastModified": 1731700071,
-        "narHash": "sha256-vpTyYq9ZgfgdDsWzjxVAE7FZH4MALMNZIFyEOBLm5Qo=",
+        "lastModified": 1732590459,
+        "narHash": "sha256-85aw9OM2pQPsWklXjuNOzp9El1MsNb+cIiZQVHUzBnk=",
         "owner": "zsh-users",
         "repo": "zsh-autosuggestions",
-        "rev": "e52ee8ca55bcc56a17c828767a3f98f22a68d4eb",
+        "rev": "0e810e5afa27acbd074398eefbe28d13005dbc15",
         "type": "github"
       },
       "original": {

@@ -2441,6 +2441,9 @@ local plugins = {
 
       local copilot = function()
         if vim.g.copilot_initialized == 1 then
+          if vim.b.copilot_suggestion_hidden == nil then
+            vim.b.copilot_suggestion_hidden = false -- default to show
+          end
           if vim.b.copilot_suggestion_hidden == false then
             return ' '
           else
@@ -3261,7 +3264,7 @@ local plugins = {
         "method textDocument/inlayHint is not supported by any of the servers registered for the current buffer",
         "[inlay_hints] LSP error:Invalid offset",
         "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml",
-        "warning: offset_encoding is required, using the offset_encoding from the first client"
+        "position_encoding param is required"
       }
 
       vim.notify = function (msg, ...)
@@ -3626,7 +3629,27 @@ local plugins = {
         },
       }
 
-      vim.keymap.set('i', '<C-e>', require("copilot.suggestion").dismiss, { silent = true })
+      local imap = vim.api.nvim_get_keymap('i')
+      local c_e_rhs = nil
+      for _, map in ipairs(imap) do
+        if map.lhs == "<C-E>" then
+          c_e_rhs = map.rhs
+          return
+        end
+      end
+      local t = function(str)
+        return vim.api.nvim_replace_termcodes(str, true, true, true)
+      end
+      local copilot_suggestion = require("copilot.suggestion")
+      vim.keymap.set('i', '<C-e>', function()
+        if copilot_suggestion.is_visible() then
+          copilot_suggestion.dismiss()
+        elseif c_e_rhs then
+          vim.api.nvim_feedkeys(t(c_e_rhs), "n", true)
+        else
+          vim.api.nvim_feedkeys(t("<C-e>"), "n", true)
+        end
+      end, { silent = true })
     end
   },
 
@@ -3653,7 +3676,6 @@ local plugins = {
       require("CopilotChat").setup {
         debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
         context = 'buffer',
-        model = 'claude-3.5-sonnet',
         system_prompt = system_prompt,
         window = {
           layout = 'vertical',

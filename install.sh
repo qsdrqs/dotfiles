@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 function zsh_install {
     # oh-my-zsh
     git clone https://github.com/ohmyzsh/ohmyzsh $HOME/.oh-my-zsh

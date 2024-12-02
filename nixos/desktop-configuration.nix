@@ -93,19 +93,20 @@ let
   qqmusic-hidpi = pkgs.symlinkJoin {
     name = "qqmusic";
     paths = [
-      (config.nur.repos.xddxdd.qqmusic.override {
-        sources = {
-          qqmusic = {
-            pname = "qqmusic";
-            version = "1.1.7";
-            src = pkgs.requireFile {
-              name = "qqmusic_1.1.7_amd64.deb";
-              url = "https://y.qq.com/download/download.html";
-              sha256 = "149k6c83ilzm4f30fcqip57y78qrphfidqyfcd6kfkvhnlglgwil";
-            };
-          };
-        };
-      })
+    config.nur.repos.xddxdd.qqmusic
+      # (config.nur.repos.xddxdd.qqmusic.override {
+      #   sources = {
+      #     qqmusic = {
+      #       pname = "qqmusic";
+      #       version = "1.1.7";
+      #       src = pkgs.requireFile {
+      #         name = "qqmusic_1.1.7_amd64.deb";
+      #         url = "https://y.qq.com/download/download.html";
+      #         sha256 = "149k6c83ilzm4f30fcqip57y78qrphfidqyfcd6kfkvhnlglgwil";
+      #       };
+      #     };
+      #   };
+      # })
     ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
@@ -264,7 +265,7 @@ in
       powerManagement.enable = true;
       nvidiaSettings = true;
       open = true;
-      # package = config.boot.kernelPackages.nvidiaPackages.production;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
       # package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {
       #   version = "535.154.05";
       #   pkgSuffix = oldAttrs.pkgSuffix or "";
