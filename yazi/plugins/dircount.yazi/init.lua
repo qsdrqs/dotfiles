@@ -47,12 +47,13 @@ local get_hovered = ya.sync(function(st)
 	return tostring(h.url)
 end)
 
-function M:fetch()
+function M:fetch(job)
+	ya.err("tests")
 	local dircount = get_dircount() or {}
 	local hovered_url = get_hovered()
 
 	local children = {}
-	for _, file in ipairs(self.files) do
+	for _, file in ipairs(job.files) do
 		if file.cha.is_dir then
 			local url = tostring(file.url)
 			if dircount[url] and hovered_url ~= url then
@@ -96,7 +97,8 @@ function M:fetch()
 	return 3
 end
 
-function M.entry(self, args)
+function M.entry(self, job)
+	local args = job.args
 	local file_url = args[1]
 	if not file_url then
 		return

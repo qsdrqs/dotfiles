@@ -243,14 +243,14 @@ local get_git_root = function(url)
 	return git_root
 end
 
-function M:fetch()
+function M:fetch(job)
 	-- get subdirectory of git repository
-	if #self.files == 0 then
+	if #job.files == 0 then
 		return 3
 	end
 	local git_roots_curr = {}
 	local ls_flag = false
-	for _, file in ipairs(self.files) do
+	for _, file in ipairs(job.files) do
 		if file.cha.is_dir then
 			local sub_url = tostring(file.url)
 			local git_roots = get_git_roots(true)
@@ -266,7 +266,7 @@ function M:fetch()
 		ls_flag = true
 	end
 
-	local any_url = tostring(self.files[1].url)
+	local any_url = tostring(job.files[1].url)
 	local base_url = any_url:match("^(.*/)[^/]*$")
 
 	local git_root
@@ -284,7 +284,7 @@ function M:fetch()
 		-- not in git repository
 		-- check if subdirectory is in git repository
 		local children = {}
-		for _, file in ipairs(self.files) do
+		for _, file in ipairs(job.files) do
 			if file.cha.is_dir then
 				local sub_url = tostring(file.url)
 				if git_roots_curr[sub_url] then
@@ -332,7 +332,7 @@ function M:fetch()
 	end
 
 	local update_track = {}
-	for _, file in ipairs(self.files) do
+	for _, file in ipairs(job.files) do
 		local url = tostring(file.url)
 		if url ~= nil and url:match(".git$") then
 			update_track[url] = " "

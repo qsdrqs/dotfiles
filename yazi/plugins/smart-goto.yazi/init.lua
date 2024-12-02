@@ -4,7 +4,8 @@ local cursor_pos = 1
 local top_pos = 1
 
 return {
-	entry = function(self, args)
+	entry = function(self, job)
+		local args = job.args
 		-- follow the link or goto ~/Downloads
 		if args[1] == 'jump' then
 			local h = cx.active.current.hovered

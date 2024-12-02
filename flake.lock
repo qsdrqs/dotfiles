@@ -3372,8 +3372,8 @@
     "yazi-aarch64-nightly": {
       "flake": false,
       "locked": {
-        "lastModified": 1732895135,
-        "narHash": "sha256-g8+cnL3OlJGVcx5coeSv3MAFczp1r0H3Cev2KvupaJ8=",
+        "lastModified": 1733163035,
+        "narHash": "sha256-UTQe4g7YovE7LkqGRh/TATzERwVA7vugV6+q+VlUuws=",
         "type": "tarball",
         "url": "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-aarch64-unknown-linux-gnu.zip"
       },
