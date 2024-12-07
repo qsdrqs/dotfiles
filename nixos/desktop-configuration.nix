@@ -296,4 +296,10 @@ in
     };
   };
   services.btrfs.autoScrub.enable = true;
+
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda";
+  };
+
 }

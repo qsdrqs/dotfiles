@@ -48,7 +48,6 @@ local get_hovered = ya.sync(function(st)
 end)
 
 function M:fetch(job)
-	ya.err("tests")
 	local dircount = get_dircount() or {}
 	local hovered_url = get_hovered()
 
