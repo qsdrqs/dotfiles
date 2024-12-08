@@ -127,8 +127,12 @@ in
   security.pam.services.login.enableGnomeKeyring = true;
 
   fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })
+    nerd-fonts.hack
+    nerd-fonts.fira-code
   ];
+
+  # This fixes the unpopulated MIME menus
+  environment.etc."/xdg/menus/applications.menu".text = builtins.readFile "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
 
   services.xserver.enable = true;
   services.displayManager.sddm = {

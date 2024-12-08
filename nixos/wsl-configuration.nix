@@ -43,7 +43,8 @@ in
     (python3.withPackages python-packages)
   ];
   fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" "Hack" ]; })
+    nerd-fonts.hack
+    nerd-fonts.fira-code
   ];
 
   # Set syncthing GUI address to 0.0.0.0

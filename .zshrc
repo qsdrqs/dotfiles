@@ -259,7 +259,7 @@ snr-switch() {
     trap "cd ${original_pwd}" EXIT
     sudo echo "building system"
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-    ./install.sh nixpre
+    sh ./install.sh nixpre || return 1
 
     if [[ $1 == "droid" ]]; then
         nix-on-droid switch --flake path:.
@@ -276,7 +276,7 @@ snr-switch-remote() {
     if [[ -L ./result ]];then
         echo "find result link, directly use it"
     else
-        ./install.sh nixpre
+        sh ./install.sh nixpre || return 1
         nixos-rebuild build --flake path:.#$@
     fi
     sudo nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
@@ -291,7 +291,7 @@ hm-switch() {
     local original_pwd=$(pwd)
     trap "cd ${original_pwd}" EXIT
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-    ./install.sh nixpre
+    sh ./install.sh nixpre || return 1
     home-manager switch --flake path:.#$@
 }
 nix-devel() {

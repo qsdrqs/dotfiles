@@ -122,6 +122,7 @@ in
     ranger
     yazi
     tmux
+    zellij
     perl # for tmux to work
     fastfetch
     neofetch
