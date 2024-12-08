@@ -493,7 +493,7 @@ fi
 # Change Yazi's CWD to PWD on subshell exit
 if [[ -n $YAZI_ID ]]; then
     function _yazi_cd() {
-        ya-cli pub dds-cd --str "$PWD"
+        ya-cli emit cd "$PWD"
         # ya-cli pub-to "$YAZI_ID" dds-cd --str "$PWD"
     }
     add-zsh-hook zshexit _yazi_cd
