@@ -93,7 +93,7 @@ let
   qqmusic-hidpi = pkgs.symlinkJoin {
     name = "qqmusic";
     paths = [
-    config.nur.repos.xddxdd.qqmusic
+      pkgs.nur.repos.xddxdd.qqmusic
       # (config.nur.repos.xddxdd.qqmusic.override {
       #   sources = {
       #     qqmusic = {
@@ -197,7 +197,7 @@ in
     # NUR
     qq-hidpi
     qqmusic-hidpi
-    config.nur.repos.linyinfeng.wemeet
+    nur.repos.linyinfeng.wemeet
     wechat-uos-hidpi
   ];
 
