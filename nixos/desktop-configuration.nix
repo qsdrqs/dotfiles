@@ -192,6 +192,7 @@ in
     xournalpp
     apktool
     tor-browser
+    nvitop
 
     # NUR
     qq-hidpi

@@ -293,6 +293,7 @@ set -s set-clipboard on
 set -ga terminal-overrides ',*:Tc'
 # set -g default-terminal "screen-256color"
 set -g default-terminal "xterm-256color"
+if-shell "[[ $TERM == xterm-kitty ]]" "set -g default-terminal 'xterm-kitty'"
 set -g prefix C-g
 bind C-g send-prefix
 setw -g mode-keys vi
