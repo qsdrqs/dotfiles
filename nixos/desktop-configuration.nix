@@ -1,6 +1,6 @@
 { config, pkgs, lib, pkgs-stable, inputs, ... }:
 let
-  ida64-fhs = pkgs.buildFHSUserEnv {
+  ida64-fhs = pkgs.buildFHSEnv {
     name = "ida64";
     runScript = "env QT_FONT_DPI=144 ${config.users.users.qsdrqs.home}/ida/ida64";
     targetPkgs = pkgs: with pkgs; [
@@ -193,6 +193,7 @@ in
     apktool
     tor-browser
     nvitop
+    realvnc-vnc-viewer
 
     # NUR
     qq-hidpi

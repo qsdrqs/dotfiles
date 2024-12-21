@@ -139,7 +139,7 @@ in
     gcc
     gnumake
     killall
-    (pkgs.buildFHSUserEnv {
+    (pkgs.buildFHSEnv {
       name = "fhs";
       runScript = "zsh";
       targetPkgs = pkgs: with pkgs; [

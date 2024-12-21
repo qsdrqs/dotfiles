@@ -45,6 +45,7 @@ in
   fonts.packages = with pkgs; [
     nerd-fonts.hack
     nerd-fonts.fira-code
+    wqy_zenhei
   ];
 
   # Set syncthing GUI address to 0.0.0.0
