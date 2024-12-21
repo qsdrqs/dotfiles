@@ -970,6 +970,8 @@ local plugins = {
       local eslint =  require('none-ls.diagnostics.eslint')
       local autopep8 = require('none-ls.formatting.autopep8')
 
+      local isort_always_enabled = true
+
       null_ls.setup({
         sources = {
           eslint,
@@ -989,6 +991,9 @@ local plugins = {
           }),
           null_ls.builtins.formatting.isort.with({
             runtime_condition = function(params)
+              if isort_always_enabled == true then
+                return true
+              end
               if params.options.isort == true then
                 return true
               else
@@ -1003,6 +1008,9 @@ local plugins = {
         callback = function(args)
           vim.api.nvim_buf_create_user_command(args.buf, "PythonOrganizeImports", function()
             vim.lsp.buf.format({formatting_options = {isort = true}})
+          end, {})
+          vim.api.nvim_buf_create_user_command(args.buf, "PythonEnableIsortOnFormat", function()
+            isort_always_enabled = true
           end, {})
         end
       })
