@@ -601,7 +601,7 @@ local plugins = {
         return config
       end
 
-      -- 'rust_analyzer' are handled by rust-tools.
+      -- 'rust_analyzer' are handled by rustaceanvim.
       local servers = {
         'texlab', 'lua_ls', 'vimls', 'hls', 'ts_ls',
         "cmake", "gopls", "bashls", "buf_ls", "grammarly", "nil_ls",
@@ -3272,7 +3272,8 @@ local plugins = {
         "method textDocument/inlayHint is not supported by any of the servers registered for the current buffer",
         "[inlay_hints] LSP error:Invalid offset",
         "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml",
-        "position_encoding param is required"
+        "position_encoding param is required",
+        "warning: multiple different client offset_encodings detected for buffer"
       }
 
       vim.notify = function (msg, ...)
@@ -4790,10 +4791,9 @@ function VscodeNeovimHandler()
   end, { silent = true })
 
   vim.keymap.set('n', '<leader>ya',function()
-    vscode.call('multiCommand.createShTerminal')
+    vscode.call('multiCommand.openFileManager')
     vscode.call('workbench.action.terminal.moveToEditor')
     vim.defer_fn(function()
-      vscode.call('multiCommand.openFileManager')
       vscode.call('workbench.action.moveEditorToNewWindow')
     end, 200)
   end, { silent = true })

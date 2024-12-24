@@ -92,6 +92,7 @@ in
     { name = ".vim"; target = ".config/nvim"; }
     { name = "after"; target = ".config/nvim/after"; }
     { name = ".vimrc"; target = ".config/nvim/init.vim"; }
+    { name = "starship/starship-yazi.toml"; target = ".config/starship-yazi.toml"; }
   ] //
   symbfileTargetNoRecursive [
     { name = "nvim/lua"; target = ".config/nvim/lua"; }
@@ -154,6 +155,7 @@ in
           let
             plugins-3rdpty = [
               "searchjump"
+              "starship"
             ];
             plugins-offical = [
               "max-preview"

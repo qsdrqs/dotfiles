@@ -123,3 +123,7 @@ Linemode:children_add(Linemode.gitstatus, 2000)
 require("session"):setup {
 	sync_yanked = true,
 }
+
+require("starship"):setup {
+	config_file = "~/.config/starship-yazi.toml"
+}

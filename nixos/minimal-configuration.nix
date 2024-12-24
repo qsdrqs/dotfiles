@@ -121,8 +121,8 @@ in
     curl
     ranger
     yazi
+    starship
     tmux
-    zellij
     perl # for tmux to work
     fastfetch
     neofetch

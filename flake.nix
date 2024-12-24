@@ -107,6 +107,10 @@
       url = "github:yazi-rs/plugins";
       flake = false;
     };
+    yazi-starship = {
+      url = "github:Rolv-Apneseth/starship.yazi";
+      flake = false;
+    };
 
   };
 

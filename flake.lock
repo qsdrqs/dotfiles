@@ -2664,6 +2664,7 @@
         "yazi-aarch64-nightly": "yazi-aarch64-nightly",
         "yazi-plugins": "yazi-plugins",
         "yazi-searchjump": "yazi-searchjump",
+        "yazi-starship": "yazi-starship",
         "zsh-config": "zsh-config"
       }
     },
@@ -3558,6 +3559,22 @@
       "original": {
         "type": "git",
         "url": "https://gitee.com/DreamMaoMao/searchjump.yazi"
+      }
+    },
+    "yazi-starship": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1734875568,
+        "narHash": "sha256-wESy7lFWan/jTYgtKGQ3lfK69SnDZ+kDx4K1NfY4xf4=",
+        "owner": "Rolv-Apneseth",
+        "repo": "starship.yazi",
+        "rev": "9c37d37099455a44343f4b491d56debf97435a0e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Rolv-Apneseth",
+        "repo": "starship.yazi",
+        "type": "github"
       }
     },
     "yaziDOTnvim": {
