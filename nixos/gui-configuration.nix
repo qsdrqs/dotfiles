@@ -129,6 +129,7 @@ in
   fonts.packages = with pkgs; [
     nerd-fonts.hack
     nerd-fonts.fira-code
+    wqy_zenhei
   ];
 
   # This fixes the unpopulated MIME menus

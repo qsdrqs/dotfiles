@@ -243,8 +243,14 @@
         ];
       };
 
-      wslConfig = basicConfig // {
+      developConfig = basicConfig // {
         modules = basicConfig.modules ++ [
+          ./nixos/develop-configuration.nix
+        ];
+      };
+
+      wslConfig = developConfig // {
+        modules = developConfig.modules ++ [
           ./nixos/wsl-configuration.nix
 
           home-manager.nixosModules.home-manager
@@ -257,8 +263,8 @@
         ];
       };
 
-      desktopConfig = basicConfig // guiConfig // {
-        modules = basicConfig.modules ++ guiConfig.modules ++ [
+      desktopConfig = developConfig // guiConfig // {
+        modules = developConfig.modules ++ guiConfig.modules ++ [
           ./nixos/desktop-configuration.nix
         ];
       };
@@ -334,6 +340,7 @@
 
       nixosConfigurations.minimal = nixpkgs.lib.nixosSystem minimalConfig;
       nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
+      nixosConfigurations.develop = nixpkgs.lib.nixosSystem developConfig;
       nixosConfigurations.server = nixpkgs.lib.nixosSystem serverConfig;
       nixosConfigurations.rpi = nixpkgs.lib.nixosSystem rpiConfig;
       nixosConfigurations.gui = nixpkgs.lib.nixosSystem guiConfig;

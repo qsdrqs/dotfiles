@@ -1,10 +1,4 @@
 { pkgs, config, modulesPath, inputs, lib, options, utils, ... }:
-let
-  python-packages = ps: with ps; [
-    rpi-gpio
-    gpiozero
-  ];
-in
 {
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
@@ -40,7 +34,6 @@ in
     texlive.combined.scheme-full
     zathura
     xdg-utils
-    (python3.withPackages python-packages)
   ];
   fonts.packages = with pkgs; [
     nerd-fonts.hack

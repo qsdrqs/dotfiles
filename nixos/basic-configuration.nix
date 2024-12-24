@@ -9,12 +9,10 @@ in
 
   environment.systemPackages = with pkgs; [
     appimage-run
-    nil # nix language server
     nixpkgs-fmt
     cscope
     global
     ctags
-    nodejs
     firejail
     # (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else dummy)
     openssl
@@ -28,7 +26,6 @@ in
     jless
 
     w3m
-    inferno # flamegraph
     wireguard-tools
     ffmpeg
     scc
