@@ -604,7 +604,7 @@ local plugins = {
       -- 'rust_analyzer' are handled by rustaceanvim.
       local servers = {
         'texlab', 'lua_ls', 'vimls', 'hls', 'ts_ls',
-        "cmake", "gopls", "bashls", "buf_ls", "grammarly", "nil_ls",
+        "cmake", "gopls", "bashls", "buf_ls", "ltex", "nil_ls",
         'clangd',
       }
 
@@ -741,6 +741,12 @@ local plugins = {
                   MissingSpaces = false
                 }
               }
+            }
+          }
+        elseif lsp == "ltex" then
+          lsp_common_config.settings = {
+            ltex = {
+              language = "en-US",
             }
           }
         elseif lsp == "nil_ls" then

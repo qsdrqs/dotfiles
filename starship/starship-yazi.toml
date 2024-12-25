@@ -14,3 +14,4 @@ truncate_to_repo = false
 modified = '!${count}'
 untracked = '?${count}'
 staged = '+${count}'
+deleted = '✘${count}'
