@@ -88,6 +88,8 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
+        dmraid = pkgs-stable.dmraid;
+        gpick = pkgs-stable.gpick;
         # End Temporary fixed version packages
 
         # neovim-unwrapped =
@@ -185,12 +187,7 @@ in
 
         interception-tools-plugins.ctrl2esc = super.interception-tools-plugins.caps2esc.overrideAttrs (oldAttrs: {
           pname = "ctrl2esc";
-          src = pkgs.fetchFromGitLab {
-            owner = "qsdrqs";
-            repo = "ctrl2esc";
-            rev = "master";
-            hash = "sha256-rpob9VLKt1aL0Jys9OkhwDZb0dCoch/A0SkHIBDhRSU=";
-          };
+          src = inputs.ctrl2esc;
         });
         interception-tools-plugins.caps2esc = super.interception-tools-plugins.caps2esc;
 

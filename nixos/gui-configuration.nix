@@ -8,6 +8,7 @@ let
     kdePackages.qtwayland
     hyprpaper
     hyprpicker
+    hyprland-qtutils
     grim
     slurp
     jq

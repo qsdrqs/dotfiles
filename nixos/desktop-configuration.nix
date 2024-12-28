@@ -68,7 +68,7 @@ let
   wechat-uos-hidpi = pkgs.symlinkJoin {
     name = "wechat";
     paths = [
-      pkgs.wechat-uos
+      pkgs.wechat-uos # need to build glibc
       # (config.nur.repos.xddxdd.wechat-uos.override {
       #   sources = {
       #     wechat-uos = {
