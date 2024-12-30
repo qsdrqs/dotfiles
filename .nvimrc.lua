@@ -1455,7 +1455,7 @@ local plugins = {
         window = {
           open = "alternate",
         },
-        callbacks = {
+        hooks = {
           pre_open = function()
             local term = require("toggleterm.terminal")
             local termid = term.get_focused_id()

@@ -622,11 +622,11 @@
     "flattenDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1735116223,
-        "narHash": "sha256-y97ZhH3bJ9cceC+9CT40Z72TxW/tjwD7n5/KMg6Ua7Q=",
+        "lastModified": 1735554620,
+        "narHash": "sha256-VXJ6s47lXNCba7DX4MozSNXm7lHE9bjENgrNKTTEsDA=",
         "owner": "willothy",
         "repo": "flatten.nvim",
-        "rev": "ab2e1085c731dd296a56e9670218083726337df6",
+        "rev": "b17a3e65c2e4e2ecd1345a2d08435e80f982c4a6",
         "type": "github"
       },
       "original": {
