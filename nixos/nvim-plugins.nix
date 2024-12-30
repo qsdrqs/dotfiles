@@ -48,8 +48,8 @@ let
       buildPhase = dummyBuildPhase;
       installPhase = commonInstallPhase;
       postInstall = ''
-        substituteInPlace $out/lua/luasnip/util/util.lua \
-          --replace "o<C-G><C-r>_" \
+        substituteInPlace $out/lua/luasnip/util/feedkeys.lua \
+          --replace-fail "o<C-G><C-r>_" \
           "<C-G><C-r>_"
       '';
     };

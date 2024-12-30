@@ -38,7 +38,7 @@ let
       installPhase = commonInstallPhase;
       postInstall = ''
         substituteInPlace $out/fzf-tab.zsh \
-        --replace "COLUMNS=500 _ftb__main_complete" "_ftb__main_complete"
+        --replace-fail "COLUMNS=500 _ftb__main_complete" "_ftb__main_complete"
       '';
     };
     powerlevel10k = pkgs.stdenv.mkDerivation {
@@ -48,7 +48,7 @@ let
       # ignore version in the script
       postInstall = ''
         substituteInPlace $out/gitstatus/install \
-        --replace '[ $# = 0 ] || "$@" "$daemon" "$version" "$installed"' \
+        --replace-fail '[ $# = 0 ] || "$@" "$daemon" "$version" "$installed"' \
         '[ $# = 0 ] || "$@" "$daemon" "*" "$installed"'
       '';
     };
