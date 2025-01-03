@@ -161,7 +161,7 @@ in
     (google-chrome.override (prev: {
       commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
     }))
-    zoom-us
+    pkgs-stable.zoom-us
     kate
     scrcpy
     wineWowPackages.unstableFull
