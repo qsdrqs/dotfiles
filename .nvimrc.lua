@@ -2238,7 +2238,7 @@ local plugins = {
   {
     'akinsho/bufferline.nvim',
     config = function()
-      require("bufferline").setup {
+      local opts = {
         options = {
           -- separator_style = "slant",
           diagnostics = "nvim_lsp",
@@ -2262,11 +2262,23 @@ local plugins = {
           end,
         },
         highlights = {
+          buffer_selected = {
+            fg = {
+              attribute = "fg",
+              highlight = "Pmenu"
+            },
+          },
+          hint_selected = {
+            fg = {
+              attribute = "fg",
+              highlight = "Pmenu"
+            }
+          },
           indicator_selected = {
-              fg = {
-                attribute = "fg",
-                highlight = "Keyword"
-              }
+            fg = {
+              attribute = "fg",
+              highlight = "Keyword"
+            }
           },
           separator = {
             fg = {
@@ -2277,8 +2289,40 @@ local plugins = {
         }
       }
 
-      vim.api.nvim_set_hl(0, "BufferLineIndicatorSelected", {link = "Keyword"})
-      vim.api.nvim_set_hl(0, "BufferLineSeparator", {link = "SpecialKey"})
+      local statusline_bg_list = {
+        "close_button",
+        "buffer",
+        "diagnostic",
+        "hint",
+        "hint_diagnostic",
+        "info",
+        "info_diagnostic",
+        "warning",
+        "warning_diagnostic",
+        "error",
+        "error_diagnostic",
+        "modified",
+        "indicator",
+        "duplicate",
+      }
+      for _, hl in ipairs(statusline_bg_list) do
+        local hl_name = hl .. "_selected"
+        if opts.highlights[hl_name] then
+          opts.highlights[hl_name].bg = {
+            attribute = "bg",
+            highlight = "StatusLine"
+          }
+        else
+          opts.highlights[hl_name] = {
+            bg = {
+              attribute = "bg",
+              highlight = "StatusLine"
+            }
+          }
+        end
+      end
+
+      require("bufferline").setup(opts)
 
       -- use alt + number to go to buffer
       for i = 1, 9 do
@@ -2369,10 +2413,11 @@ local plugins = {
     dependencies = { 'kyazdani42/nvim-web-devicons' },
     config = function()
       local custom_auto = require'lualine.themes.auto'
+      local statusline_hl = vim.api.nvim_get_hl(0, { name = "StatusLine" })
       if vim.g.colors_name == 'ghdark' then
         custom_auto.normal.a.fg = "#C4CBD7"
         custom_auto.normal.b.fg = "#9CA5B3"
-        custom_auto.normal.c.bg = "#21262D"
+        custom_auto.normal.c.bg = string.format("#%06X", statusline_hl.bg)
         custom_auto.inactive = {
           a = { fg = '#c6c6c6', bg = '#080808' },
           b = { fg = '#c6c6c6', bg = '#080808' },

@@ -171,6 +171,7 @@ in
     sshfs
     (lib.hiPrio inetutils)
     iw
+    cntr # container debug tool
 
     # perfing
     config.boot.kernelPackages.perf

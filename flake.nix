@@ -394,9 +394,15 @@
 
       # dev shells
       devShells = archSpecConfigAll (system: (pkgs-collect.pkgs system).callPackage dev-shell.shells { inputs = inputs; });
-      packages = {
-        x86_64-linux.hack-pylsp = (pkgs-collect.pkgs "x86_64-linux").callPackage ./nixos/hack-pylsp.nix { };
-      };
+      packages =
+        let
+          orig = archSpecConfigAll (system: pkgs-collect.pkgs system);
+        in
+        orig // {
+          x86_64-linux = orig.x86_64-linux // {
+            hack-pylsp = (pkgs-collect.pkgs "x86_64-linux").callPackage ./nixos/hack-pylsp.nix { };
+          };
+        };
       # direct nix run
       legacyPackages = nixpkgs.legacyPackages;
       inputs_ = inputs;

@@ -36,7 +36,7 @@ in
     wl-clipboard
     pavucontrol
     libnotify
-    baobab # disk usage
+    filelight # disk usage
     mpv
     kdePackages.gwenview
     graphviz

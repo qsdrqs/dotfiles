@@ -45,11 +45,10 @@ let
       name = "powerlevel10k";
       src = inputs.zsh-config.inputs.powerlevel10k;
       installPhase = commonInstallPhase;
-      # ignore version in the script
       postInstall = ''
-        substituteInPlace $out/gitstatus/install \
-        --replace-fail '[ $# = 0 ] || "$@" "$daemon" "$version" "$installed"' \
-        '[ $# = 0 ] || "$@" "$daemon" "*" "$installed"'
+        sed -E -i 's/version="v[0-9]+(.[0-9]+)+"/version="v${pkgs.gitstatus.version}"/' \
+          $out/gitstatus/install.info && \
+          grep -q 'version="v${pkgs.gitstatus.version}"' $out/gitstatus/install.info
       '';
     };
   };
