@@ -259,7 +259,7 @@ snr-switch() {
     trap "cd ${original_pwd}" EXIT
     sudo echo "building system"
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-    sh ./install.sh nixpre || return 1
+    bash ./install.sh nixpre || return 1
     trap "cd ${original_pwd}" INT
 
     if [[ $1 == "droid" ]]; then
@@ -277,7 +277,7 @@ snr-switch-remote() {
     if [[ -L ./result ]];then
         echo "find result link, directly use it"
     else
-        sh ./install.sh nixpre || return 1
+        bash ./install.sh nixpre || return 1
         trap "cd ${original_pwd}" INT
         nixos-rebuild build --flake path:.#$@
     fi
@@ -293,7 +293,7 @@ hm-switch() {
     local original_pwd=$(pwd)
     trap "cd ${original_pwd}" EXIT
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-    sh ./install.sh nixpre || return 1
+    bash ./install.sh nixpre || return 1
     trap "cd ${original_pwd}" INT
     home-manager switch --flake path:.#$@
 }
@@ -490,7 +490,9 @@ if ! pgrep -u "$USER" ssh-agent > /dev/null; then
     ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
 fi
 if [[ ! -S "$SSH_AUTH_SOCK" ]] && [[ ! -f "$SSH_AUTH_SOCK" ]]; then
-    source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+    if [[ -f "$XDG_RUNTIME_DIR/ssh-agent.env" ]]; then
+        source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+    fi
 fi
 
 # Change Yazi's CWD to PWD on subshell exit

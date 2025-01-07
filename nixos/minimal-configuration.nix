@@ -114,7 +114,6 @@ in
     vim-full # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     (if config.boot.loader.grub.enable then grub2 else packages.dummy)
     zoxide
-    packages.editor-wrapped
     packages.mkcd
     lsd
     wget

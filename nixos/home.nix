@@ -1,5 +1,7 @@
 { config, pkgs, inputs, lib, ... }:
-
+let
+  packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
+in
 {
   imports = [
     ./dotfiles.nix
@@ -16,6 +18,12 @@
       echo "$@" 1>&2
     '')
   ];
+
+  # add some bin to ~/.local/bin
+  home.file."editor-wrapped" = {
+    source = "${packages.editor-wrapped}/bin/editor-wrapped";
+    target = ".local/bin/editor-wrapped";
+  };
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage

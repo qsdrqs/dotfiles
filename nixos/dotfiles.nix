@@ -46,6 +46,9 @@ let
       src = inputs.zsh-config.inputs.powerlevel10k;
       installPhase = commonInstallPhase;
       postInstall = ''
+        substituteInPlace $out/gitstatus/install \
+          --replace-fail "local no_check= no_install=" "local no_check= no_install=1"
+
         sed -E -i 's/version="v[0-9]+(.[0-9]+)+"/version="v${pkgs.gitstatus.version}"/' \
           $out/gitstatus/install.info && \
           grep -q 'version="v${pkgs.gitstatus.version}"' $out/gitstatus/install.info

@@ -19,7 +19,6 @@ in
     })
     yazi
     zoxide
-    editor-wrapped
     lsd
     fd
     ripgrep

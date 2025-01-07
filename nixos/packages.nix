@@ -53,6 +53,9 @@
   '';
 
   editor-wrapped = { pkgs }: pkgs.writeShellScriptBin "editor-wrapped" ''
+    if [[ -z $EDITOR ]]; then
+      export EDITOR=nvim
+    fi
     if [[ $QUIT_ON_OPEN == "1" ]]; then
       $EDITOR "$@"
       kill -9 $(ps -o ppid= -p $$)
