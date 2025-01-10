@@ -5,6 +5,7 @@
 --           |_| \_|\___|\___/ \_/  |___|_|  |_| (_) |_____\___/_/   \_\
 --------------------------------------------------------------------------------------
 
+
 local use_nix = true
 local lazypath
 if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/nix") and use_nix then
@@ -769,6 +770,20 @@ local plugins = {
         lspconfig[lsp].setup(lsp_merge_project_config(lsp_common_config))
       end
 
+      local vim_version = vim.version()
+      if vim_version.minor <= 10 then
+        vim.diagnostic.jump = function(opts)
+          if opts.count > 0 then
+            for _ = 1, opts.count do
+              vim.diagnostic.goto_next(opts)
+            end
+          else
+            for _ = 1, math.abs(opts.count) do
+              vim.diagnostic.goto_prev(opts)
+            end
+          end
+        end
+      end
 
       vim.keymap.set('n', '<space>e', changeDiagnostic, opts)
       -- vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
@@ -3369,12 +3384,6 @@ local plugins = {
   },
 
   {
-    -- enable yank through ssh
-    'ojroques/nvim-osc52',
-    lazy = true,
-  },
-
-  {
     'glacambre/firenvim',
     -- Lazy load firenvim
     -- Explanation: https://github.com/folke/lazy.nvim/discussions/463#discussioncomment-4819297
@@ -4657,33 +4666,18 @@ if vim.g.neovide == nil then
     -- disable the xclip under SSH due to high lantency
     -- use osc52
     local nvim_ver_minor = vim.version().minor
-    if nvim_ver_minor >= 10 then
-      -- TODO: paste from ssh
-      vim.g.clipboard = {
-        name = 'OSC 52',
-        copy = {
-          ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-          ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
-        },
-        paste = {
-          ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-          ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
-        },
-      }
-    else
-      vim.api.nvim_create_autocmd("TextYankPost", {
-        callback = function()
-          if have_load_osc52 == nil then
-            have_load_osc52 = 1
-            require("lazy").load{ plugins = {"nvim-osc52"} }
-          end
-          if vim.v.event.operator == 'y' and vim.v.event.regname == '' then
-            local osc52_copy_register = require('osc52').copy_register
-            pcall(osc52_copy_register, '"')
-          end
-        end
-      })
-    end
+    -- TODO: paste from ssh
+    vim.g.clipboard = {
+      name = 'OSC 52',
+      copy = {
+        ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+        ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+      },
+      paste = {
+        ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+        ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+      },
+    }
   elseif vim.fn.has('wsl') == 1 then
     -- wsl without ssh connection
     if vim.fn.executable("win32yank.exe") == 1 then

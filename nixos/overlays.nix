@@ -56,33 +56,33 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
-        yazi =
-          if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
-          else if pkgs.system == "aarch64-linux" then
-            pkgs.stdenv.mkDerivation
-              {
-                pname = "yazi";
-                version = "nightly";
-                src = inputs.yazi-aarch64-nightly;
-                nativeBuildInputs = [ pkgs.installShellFiles ];
-                phases = [ "installPhase" ]; # Removes all phases except installPhase
-                installPhase = ''
-                  mkdir -p $out/bin
-                  cp $src/ya $out/bin/ya
-                  cp $src/yazi $out/bin/yazi
-
-                  installShellCompletion --cmd yazi \
-                    --bash $src/completions/yazi.bash \
-                    --fish $src/completions/yazi.fish \
-                    --zsh  $src/completions/_yazi
-                  installShellCompletion --cmd ya \
-                    --bash $src/completions/ya.bash \
-                    --fish $src/completions/ya.fish \
-                    --zsh  $src/completions/_ya
-                '';
-              }
-          else throw "Unsupported system: ${pkgs.system}";
-        neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
+        # yazi =
+        #   if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
+        #   else if pkgs.system == "aarch64-linux" then
+        #     pkgs.stdenv.mkDerivation
+        #       {
+        #         pname = "yazi";
+        #         version = "nightly";
+        #         src = inputs.yazi-aarch64-nightly;
+        #         nativeBuildInputs = [ pkgs.installShellFiles ];
+        #         phases = [ "installPhase" ]; # Removes all phases except installPhase
+        #         installPhase = ''
+        #           mkdir -p $out/bin
+        #           cp $src/ya $out/bin/ya
+        #           cp $src/yazi $out/bin/yazi
+        #
+        #           installShellCompletion --cmd yazi \
+        #             --bash $src/completions/yazi.bash \
+        #             --fish $src/completions/yazi.fish \
+        #             --zsh  $src/completions/_yazi
+        #           installShellCompletion --cmd ya \
+        #             --bash $src/completions/ya.bash \
+        #             --fish $src/completions/ya.fish \
+        #             --zsh  $src/completions/_ya
+        #         '';
+        #       }
+        #   else throw "Unsupported system: ${pkgs.system}";
+        # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         # End Temporary self updated packages
