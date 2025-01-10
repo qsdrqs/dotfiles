@@ -124,6 +124,16 @@ require("session"):setup {
 	sync_yanked = true,
 }
 
-require("starship"):setup {
-	config_file = "~/.config/starship-yazi.toml"
-}
+local ok, starship = pcall(require, "starship")
+if ok then
+	require("starship"):setup {
+		config_file = "~/.config/starship-yazi.toml"
+	}
+end
+
+local ok, starship = pcall(require, "copy-relative-path")
+if ok then
+	require("copy-relative-path"):setup {
+		root_files = {".git", ".root"}
+	}
+end

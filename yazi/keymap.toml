@@ -93,6 +93,7 @@ keymap = [
 
 	# Copy
 	{ on = [ "y", "p" ], run = "copy path",             desc = "Copy the absolute path" },
+	{ on = [ "y", "r" ], run = "plugin copy-relative-path",            desc = "Copy the relative path" },
 	{ on = [ "y", "d" ], run = "copy dirname",          desc = "Copy the path of the parent directory" },
 	{ on = [ "y", "f" ], run = "copy filename",         desc = "Copy the name of the file" },
 	{ on = [ "y", "n" ], run = "copy name_without_ext", desc = "Copy the name of the file without the extension" },

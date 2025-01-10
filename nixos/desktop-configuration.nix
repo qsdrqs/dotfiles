@@ -194,6 +194,7 @@ in
     tor-browser
     nvitop
     realvnc-vnc-viewer
+    drawio
 
     # NUR
     qq-hidpi

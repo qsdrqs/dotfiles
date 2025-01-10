@@ -2262,6 +2262,12 @@ local plugins = {
           end,
         },
         highlights = {
+          tab_selected = {
+            fg = {
+              attribute = "fg",
+              highlight = "Pmenu"
+            },
+          },
           buffer_selected = {
             fg = {
               attribute = "fg",
@@ -2291,6 +2297,7 @@ local plugins = {
 
       local statusline_bg_list = {
         "close_button",
+        "tab",
         "buffer",
         "diagnostic",
         "hint",
@@ -4186,7 +4193,11 @@ local plugins = {
   {
     'mfussenegger/nvim-dap-python',
     config = function()
-      require('dap-python').setup()
+      local dap_python = require('dap-python')
+      dap_python.setup()
+      vim.api.nvim_create_user_command("DebugpyTestMethod", function() dap_python.test_method() end, { nargs = 0 })
+      vim.api.nvim_create_user_command("DebugpyTestClass", function() dap_python.test_class() end, { nargs = 0 })
+      vim.api.nvim_create_user_command("DebugpyDebugSelection", function() dap_python.debug_selection() end, { nargs = 0 })
     end
   },
   {
