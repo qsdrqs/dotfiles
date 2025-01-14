@@ -1302,22 +1302,6 @@
         "type": "github"
       }
     },
-    "nvim-osc52": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1716560654,
-        "narHash": "sha256-cVivuGzsG2bKfUBklyK7in0C8Xis0aO0pfyOuTol1mU=",
-        "owner": "ojroques",
-        "repo": "nvim-osc52",
-        "rev": "04cfaba1865ae5c53b6f887c3ca7304973824fb2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ojroques",
-        "repo": "nvim-osc52",
-        "type": "github"
-      }
-    },
     "nvim-treeDOTlua": {
       "flake": false,
       "locked": {
@@ -1663,7 +1647,6 @@
         "nvim-lspconfig": "nvim-lspconfig",
         "nvim-nio": "nvim-nio",
         "nvim-notify": "nvim-notify",
-        "nvim-osc52": "nvim-osc52",
         "nvim-treeDOTlua": "nvim-treeDOTlua",
         "nvim-treesitter": "nvim-treesitter",
         "nvim-treesitter-context": "nvim-treesitter-context",

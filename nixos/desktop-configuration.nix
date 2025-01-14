@@ -147,9 +147,9 @@ in
     };
   };
 
-  # For wechat-uos
   nixpkgs.config.permittedInsecurePackages = [
-    "openssl-1.1.1w"
+    "openssl-1.1.1w" # For wechat-uos
+    "electron-11.5.0" # For baidunetdisk
   ];
 
   environment.systemPackages = with pkgs; [
@@ -200,6 +200,7 @@ in
     qq-hidpi
     qqmusic-hidpi
     nur.repos.linyinfeng.wemeet
+    nur.repos.xddxdd.baidunetdisk
     wechat-uos-hidpi
   ];
 

@@ -1829,6 +1829,7 @@ local plugins = {
         query = {
           [''] = 'rainbow-delimiters',
           lua = 'rainbow-blocks',
+          latex = 'rainbow-blocks',
         },
         highlight = {
           "Color1",

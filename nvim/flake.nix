@@ -332,10 +332,6 @@
       url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim";
       flake = false;
     };
-    nvim-osc52 = {
-      url = "github:ojroques/nvim-osc52";
-      flake = false;
-    };
     copilotDOTlua = {
       url = "github:zbirenbaum/copilot.lua";
       flake = false;
@@ -582,7 +578,6 @@
         { name = "todo-comments.nvim"; dotname = "todo-commentsDOTnvim"; source = inputs.todo-commentsDOTnvim; build = false; }
         { name = "nvim-notify"; dotname = "nvim-notify"; source = inputs.nvim-notify; build = false; }
         { name = "lsp_lines.nvim"; dotname = "lsp_linesDOTnvim"; source = inputs.lsp_linesDOTnvim; build = false; }
-        { name = "nvim-osc52"; dotname = "nvim-osc52"; source = inputs.nvim-osc52; build = false; }
         { name = "copilot.lua"; dotname = "copilotDOTlua"; source = inputs.copilotDOTlua; build = false; }
         { name = "firenvim"; dotname = "firenvim"; source = inputs.firenvim; build = true; }
         { name = "nvim-dap-python"; dotname = "nvim-dap-python"; source = inputs.nvim-dap-python; build = false; }

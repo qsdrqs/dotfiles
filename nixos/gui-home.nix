@@ -16,6 +16,7 @@
       "inode/directory" = [ "org.kde.dolphin.desktop" ];
       "x-scheme-handler/tg" = [ "userapp-Telegram Desktop-FKA2H2.desktop" ];
       "x-scheme-handler/tonsite" = [ "userapp-Telegram Desktop-0VB4X2.desktop" ];
+      "x-scheme-handler/baiduyunguanjia" = [ "baidunetdisk.desktop" ];
     };
   };
 
