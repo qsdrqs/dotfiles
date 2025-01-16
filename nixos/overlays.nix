@@ -174,7 +174,7 @@ in
           version = "2.1.1";
         });
 
-        firefox-devedition = pkgs-firefox-dev.firefox-devedition.overrideAttrs (oldAttrs: {
+        firefox-devedition = super.firefox-devedition.overrideAttrs (oldAttrs: {
           buildCommand = (oldAttrs.buildCommand or "") + ''
             mkdir -p $out/tmp/firefox-omni
             cd $out/tmp/firefox-omni
