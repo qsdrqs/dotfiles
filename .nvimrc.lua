@@ -605,7 +605,7 @@ local plugins = {
       -- 'rust_analyzer' are handled by rustaceanvim.
       local servers = {
         'texlab', 'lua_ls', 'vimls', 'hls', 'ts_ls',
-        "cmake", "gopls", "bashls", "buf_ls", "ltex", "nil_ls",
+        "cmake", "gopls", "bashls", "buf_ls", "nil_ls",
         'clangd',
       }
 
