@@ -332,8 +332,8 @@
       url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim";
       flake = false;
     };
-    copilotDOTlua = {
-      url = "github:zbirenbaum/copilot.lua";
+    copilotDOTvim = {
+      url = "github:github/copilot.vim";
       flake = false;
     };
     firenvim = {
@@ -578,7 +578,7 @@
         { name = "todo-comments.nvim"; dotname = "todo-commentsDOTnvim"; source = inputs.todo-commentsDOTnvim; build = false; }
         { name = "nvim-notify"; dotname = "nvim-notify"; source = inputs.nvim-notify; build = false; }
         { name = "lsp_lines.nvim"; dotname = "lsp_linesDOTnvim"; source = inputs.lsp_linesDOTnvim; build = false; }
-        { name = "copilot.lua"; dotname = "copilotDOTlua"; source = inputs.copilotDOTlua; build = false; }
+        { name = "copilot.vim"; dotname = "copilotDOTvim"; source = inputs.copilotDOTvim; build = false; }
         { name = "firenvim"; dotname = "firenvim"; source = inputs.firenvim; build = true; }
         { name = "nvim-dap-python"; dotname = "nvim-dap-python"; source = inputs.nvim-dap-python; build = false; }
         { name = "venv-selector.nvim"; dotname = "venv-selectorDOTnvim"; source = inputs.venv-selectorDOTnvim; build = false; }
