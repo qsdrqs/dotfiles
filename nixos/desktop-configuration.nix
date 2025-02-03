@@ -268,8 +268,8 @@ in
       modesetting.enable = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      # package = config.boot.kernelPackages.nvidiaPackages.beta;
-      # open = true;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      open = true;
       # package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {
       #   version = "535.154.05";
       #   pkgSuffix = oldAttrs.pkgSuffix or "";

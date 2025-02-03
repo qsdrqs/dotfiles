@@ -213,37 +213,40 @@ syntax on                               " 开启文件类型侦测
 "set paste                              "允许粘贴模式（避免粘贴时自动缩进影响格式）
 set smarttab
 
-let b:tab2=0
+" set shiftwidth=4
+" " " 让 vim 把连续数量的空格视为一个制表符
+" set softtabstop=4
+" " " 设置编辑时制表符占用空格数
+" set tabstop=4
+" " 设置格式化时制表符占用空格数
+"
+" " 自定义缩进空格个数
+" let s:tablist = {
+"   \'javascript': 2,
+"   \'vue': 2,
+"   \'vim': 2,
+"   \'lua': 2,
+"   \'nix': 2,
+" \}
+" autocmd BufWinEnter * call Tab_len()
+" function! Tab_len()
+"   for key in keys(s:tablist)
+"     if &filetype == key
+"       call SetTab_len(s:tablist[key])
+"     endif
+"   endfor
+" endfunction
 
-set shiftwidth=4
-" " 让 vim 把连续数量的空格视为一个制表符
-set softtabstop=4
-" " 设置编辑时制表符占用空格数
-set tabstop=4
-" 设置格式化时制表符占用空格数
-
-" 自定义缩进空格个数
-let s:tablist = {
-  \'javascript': 2,
-  \'vue': 2,
-  \'vim': 2,
-  \'lua': 2,
-  \'nix': 2,
-\}
-autocmd BufWinEnter * call Tab_len()
-function! Tab_len()
-  for key in keys(s:tablist)
-    if &filetype == key
-      let b:tab_len = s:tablist[key]
-      exec "setlocal shiftwidth=".b:tab_len
-      " 让 vim 把连续数量的空格视为一个制表符
-      exec "setlocal softtabstop=".b:tab_len
-      " " 设置编辑时制表符占用空格数
-      exec "setlocal tabstop=".b:tab_len
-      " 设置格式化时制表符占用空格数
-    endif
-  endfor
+function! SetTab_len(tab_len)
+  let b:tab_len = a:tab_len
+  exec "setlocal shiftwidth=".b:tab_len
+  " 让 vim 把连续数量的空格视为一个制表符
+  exec "setlocal softtabstop=".b:tab_len
+  " " 设置编辑时制表符占用空格数
+  exec "setlocal tabstop=".b:tab_len
 endfunction
+
+command! -nargs=1 TabLen call SetTab_len(<f-args>)
 
 function! Delete8half()
   exec "normal 8dd"

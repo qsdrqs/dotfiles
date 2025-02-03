@@ -223,7 +223,7 @@ in
       enable = true;
       package = pkgs.plocate;
       interval = "hourly";
-      localuser = null;
+      # localuser = null;
       pruneBindMounts = false; # btrfs can't be pruned
       prunePaths = options.services.locate.prunePaths.default ++ [
         "/mnt"
