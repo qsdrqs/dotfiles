@@ -16,7 +16,7 @@ local update_dircount = ya.sync(function(st, st_dircount)
 			if st.dircount_lock[tostring(file.url)] then
 				st.dircount_lock[tostring(file.url)] = false
 			else
-				ya.manager_emit("plugin", { "dircount", args = tostring(file.url)})
+				ya.manager_emit("plugin", { "dircount", tostring(file.url)})
 			end
 		end
 		return st.dircount[tostring(file.url)]

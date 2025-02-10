@@ -49,8 +49,8 @@ keymap = [
 	{ on = [ "<Left>" ],  run = "leave",    desc = "Go back to the parent directory" },
 	{ on = [ "<Right>" ], run = "plugin smart-enter",    desc = "Enter the child directory" },
 
-	{ on = [ "g", "g" ], run = "arrow -99999999", desc = "Move cursor to the top" },
-	{ on = [ "G" ],      run = "arrow 99999999",  desc = "Move cursor to the bottom" },
+	{ on = [ "g", "g" ], run = "arrow top", desc = "Move cursor to the top" },
+	{ on = [ "G" ],      run = "arrow bot",  desc = "Move cursor to the bottom" },
 
 	# Selection
 	{ on = "<Space>",     run = [ "toggle", "arrow 1" ],              desc = "Toggle the current selection state" },
@@ -82,8 +82,8 @@ keymap = [
 	{ on = [ "\\", "s" ],         run = "search fd",                                            desc = "Search files by name using fd" },
 	{ on = [ "\\", "S" ],         run = "search rg",                                            desc = "Search files by content using ripgrep" },
 	{ on = [ "<C-s>" ],     run = "search none",                                          desc = "Cancel the ongoing search" },
-	{ on = [ "z" ],         run = "plugin smart-goto --args='jump zoxide'",        desc = "Jump to a directory using zoxide" },
-	{ on = [ "Z" ],         run = "plugin smart-goto --args='jump fzf'",           desc = "Jump to a directory, or reveal a file using fzf" },
+	{ on = [ "z" ],         run = "plugin smart-goto 'jump zoxide'",        desc = "Jump to a directory using zoxide" },
+	{ on = [ "Z" ],         run = "plugin smart-goto 'jump fzf'",           desc = "Jump to a directory, or reveal a file using fzf" },
 
 	# Linemode
 	{ on = [ "m", "s" ], run = "linemode size",        desc = "Set linemode to size" },
@@ -144,16 +144,16 @@ keymap = [
 	{ on = [ "w" ], run = "tasks_show", desc = "Show the tasks manager" },
 
 	# Goto
-	{ on = [ "g", "h" ],       run = "plugin smart-goto --args='jump ~'",             desc = "Go to the home directory" },
-	{ on = [ "g", "H" ],       run = "plugin smart-goto --args='jump /mnt/c/Users/qsdrqs'",     desc = "Go to the Windows home directory" },
-	{ on = [ "g", "w" ], run = "plugin smart-goto --args='jump /home/qsdrqs/Documents/WeChat\\ Files/wxid_ap6bpq3h92zg22/FileStorage/File'", desc = "Go to the WeChat directory" },
-	{ on = [ "g", "q" ], run = "plugin smart-goto --args='jump /home/qsdrqs/Documents/Tencent\\ Files/1143661020/FileRecv'", desc = "Go to the QQ directory" },
-	{ on = [ "g", "c" ],       run = "plugin smart-goto --args='jump ~/.config'",     desc = "Go to the config directory" },
-	{ on = [ "g", "d" ], run = "plugin smart-goto --args='jump follow ~/Downloads/'", desc = "Follow the link, or go to the downloads directory" },
-	{ on = [ "g", "t" ],       run = "plugin smart-goto --args='jump /tmp'",        desc = "Go to the temporary directory" },
-	{ on = [ "g", "<Space>" ], run = "plugin smart-goto --args='jump interactive'", desc = "Go to a directory interactively" },
-	{ on = [ "<C-o>" ],        run = "plugin smart-goto --args='back'",             desc = "Jump back" },
-	{ on = [ "<Tab>" ],        run = "plugin smart-goto --args='forward'",          desc = "Jump forward" },
+	{ on = [ "g", "h" ],       run = "plugin smart-goto 'jump ~'",             desc = "Go to the home directory" },
+	{ on = [ "g", "H" ],       run = "plugin smart-goto 'jump /mnt/c/Users/qsdrqs'",     desc = "Go to the Windows home directory" },
+	{ on = [ "g", "w" ], run = "plugin smart-goto 'jump /home/qsdrqs/Documents/WeChat\\ Files/wxid_ap6bpq3h92zg22/FileStorage/File'", desc = "Go to the WeChat directory" },
+	{ on = [ "g", "q" ], run = "plugin smart-goto 'jump /home/qsdrqs/Documents/Tencent\\ Files/1143661020/FileRecv'", desc = "Go to the QQ directory" },
+	{ on = [ "g", "c" ],       run = "plugin smart-goto 'jump ~/.config'",     desc = "Go to the config directory" },
+	{ on = [ "g", "d" ], run = "plugin smart-goto 'jump follow ~/Downloads/'", desc = "Follow the link, or go to the downloads directory" },
+	{ on = [ "g", "t" ],       run = "plugin smart-goto 'jump /tmp'",        desc = "Go to the temporary directory" },
+	{ on = [ "g", "<Space>" ], run = "plugin smart-goto 'jump interactive'", desc = "Go to a directory interactively" },
+	{ on = [ "<C-o>" ],        run = "plugin smart-goto 'back'",             desc = "Jump back" },
+	{ on = [ "<Tab>" ],        run = "plugin smart-goto 'forward'",          desc = "Jump forward" },
 
 	# Help
 	{ on = [ "~" ], run = "help", desc = "Open help" },

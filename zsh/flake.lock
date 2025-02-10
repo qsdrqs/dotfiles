@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1738250044,
-        "narHash": "sha256-+y8fN1A+wb24H4s/KJ8VpuauCvwoItoruDwXlIw8ed4=",
+        "lastModified": 1738672622,
+        "narHash": "sha256-Q81SUuc2U9PHXCKDxtD9ZT2hX/YXHzKI04YqOwE0CAI=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "1c34b0e67d4f1dff36a079f31d7dafe8bcf92f6e",
+        "rev": "db32c6ccce91e0b36873c8bfccd1e40f452a2060",
         "type": "github"
       },
       "original": {
