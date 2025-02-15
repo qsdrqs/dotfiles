@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/9d3ae807ebd2981d593cddd0080856873139aa40";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/a79cfe0ebd24952b580b1cf08cd906354996d547";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
     nixpkgs-firefox-dev.url = "github:NixOS/nixpkgs/18536bf04cd71abd345f9579158841376fdd0c5a";
