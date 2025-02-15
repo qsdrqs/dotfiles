@@ -517,15 +517,14 @@
     },
     "dev-shell": {
       "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-uE6kZ7dqiLm8z+DJsefmutcsPSDwzm9/nOjmmDirdaU=",
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/nixos/dev-shell",
+        "path": "nixos/dev-shell",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/nixos/dev-shell",
+        "path": "nixos/dev-shell",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "dialDOTnvim": {
       "flake": false,
@@ -2019,15 +2018,14 @@
         "yaziDOTnvim": "yaziDOTnvim"
       },
       "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-ZViA3hNdulNgvCpPCFROBv9/jQKOyXK7V9II7D9d3U4=",
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/nvim",
+        "path": "nvim",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/nvim",
+        "path": "nvim",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "nvim-dap": {
       "flake": false,
@@ -2543,15 +2541,14 @@
         "ranger_devicons": "ranger_devicons"
       },
       "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-rG1fzBIbR4ul/8oxbi/r4Lqsq521f6kpSlOACktKsVc=",
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/ranger",
+        "path": "ranger",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/ranger",
+        "path": "ranger",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "ranger-fzf-marks": {
       "flake": false,
@@ -3654,15 +3651,14 @@
         "zsh-vi-mode": "zsh-vi-mode"
       },
       "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-cj00lIiiwIjGpoK1/PeRyB2bKSSiT+B7YDmDFcAJ81E=",
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/zsh",
+        "path": "zsh",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/mnhg9hr44jxayjra18smsg4z36hb848i-source/zsh",
+        "path": "zsh",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "zsh-vi-mode": {
       "flake": false,

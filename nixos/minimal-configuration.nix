@@ -91,7 +91,7 @@ in
       experimental-features = [ "nix-command" "flakes" ];
       trusted-users = [ "root" "qsdrqs" "@wheel" "nix-serve" ];
     };
-    package = pkgs.nixVersions.latest;
+    package = pkgs.nixVersions.nix_2_26;
   };
 
   # List packages installed in system profile. To search, run:
