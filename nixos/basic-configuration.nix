@@ -9,7 +9,8 @@ in
 
   environment.systemPackages = with pkgs; [
     appimage-run
-    nixpkgs-fmt
+    nixfmt
+    nixd # nix language server
     cscope
     global
     ctags

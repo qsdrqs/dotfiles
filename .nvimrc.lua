@@ -605,7 +605,7 @@ local plugins = {
       -- 'rust_analyzer' are handled by rustaceanvim.
       local servers = {
         'texlab', 'lua_ls', 'vimls', 'hls', 'ts_ls',
-        "cmake", "gopls", "bashls", "buf_ls", "nil_ls",
+        "cmake", "gopls", "bashls", "buf_ls", "nixd",
         'clangd',
       }
 
@@ -750,19 +750,23 @@ local plugins = {
               language = "en-US",
             }
           }
-        elseif lsp == "nil_ls" then
+        elseif lsp == "nixd" then
+          local dotfiles_dir = os.getenv("HOME") .. "/dotfiles"
           lsp_common_config.settings = {
-            ['nil'] = {
-              formatting = {
-                command = { "nixpkgs-fmt" }
+            nixd = {
+              nixpkgs = {
+                expr = "import (builtins.getFlake '" .. dotfiles_dir .. "').inputs.nixpkgs { }   "
               },
-              nix = {
-                maxMemoryMB = math.floor((vim.uv.get_free_memory() * 0.9) / math.pow(2, 20)),
-                flake = {
-                  autoArchive = false,
-                  autoEvalInputs = true,
-                  nixpkgsInputName = "nixpkgs",
-                }
+              formatting = {
+                command = { "nixfmt" }
+              },
+              options = {
+                nixos = {
+                  expr = "(builtins.getFlake '" .. dotfiles_dir .. "').nixosConfigurations.basic.options",
+                },
+                home_manager = {
+                  expr = "(builtins.getFlake '" .. dotfiles_dir .. "').homeConfigurations.basic.options",
+                },
               }
             }
           }
