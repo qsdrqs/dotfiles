@@ -416,6 +416,18 @@
       url = "github:CopilotC-Nvim/CopilotChat.nvim";
       flake = false;
     };
+    render-markdownDOTnvim = {
+      url = "github:MeanderingProgrammer/render-markdown.nvim";
+      flake = false;
+    };
+    nuiDOTnvim = {
+      url = "github:MunifTanjim/nui.nvim";
+      flake = false;
+    };
+    avanteDOTnvim = {
+      url = "github:yetone/avante.nvim";
+      flake = false;
+    };
     sudaDOTvim = {
       url = "github:lambdalisue/suda.vim";
       flake = false;
@@ -599,6 +611,9 @@
         { name = "vim-interestingwords"; dotname = "vim-interestingwords"; source = inputs.vim-interestingwords; build = false; }
         { name = "vim-snippets"; dotname = "vim-snippets"; source = inputs.vim-snippets; build = false; }
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
+        { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
+        { name = "nui.nvim"; dotname = "nuiDOTnvim"; source = inputs.nuiDOTnvim; build = false; }
+        { name = "avante.nvim"; dotname = "avanteDOTnvim"; source = inputs.avanteDOTnvim; build = true; }
         { name = "suda.vim"; dotname = "sudaDOTvim"; source = inputs.sudaDOTvim; build = false; }
         { name = "undotree"; dotname = "undotree"; source = inputs.undotree; build = false; }
         { name = "vim-sandwich"; dotname = "vim-sandwich"; source = inputs.vim-sandwich; build = false; }

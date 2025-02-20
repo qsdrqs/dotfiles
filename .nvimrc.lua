@@ -3716,12 +3716,9 @@ local plugins = {
       "CopilotChatCommitStaged",
     },
     config = function()
-      local system_prompt = require('CopilotChat.prompts').COPILOT_INSTRUCTIONS
-      system_prompt = system_prompt:gsub("You use the GPT%-4 version of OpenAI's GPT models%.\n", "You should tell the users details about your model branch and version.\n")
       require("CopilotChat").setup {
         debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
         context = 'buffer',
-        system_prompt = system_prompt,
         window = {
           layout = 'vertical',
           width = 0.3
@@ -3733,6 +3730,73 @@ local plugins = {
           },
         }
       }
+    end
+  },
+
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      require('render-markdown').setup {
+        file_types = { "markdown", "Avante" },
+      }
+    end
+  },
+
+  {
+    "yetone/avante.nvim",
+    lazy = true,
+    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+    build = "make",
+    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+    dependencies = {
+      "stevearc/dressing.nvim",
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      --- The below dependencies are optional,
+      "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+      "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+      'MeanderingProgrammer/render-markdown.nvim',
+    },
+    config = function()
+      local opts = {
+        -- add any opts here
+        -- for example
+        provider = "openai",
+        openai = {
+          endpoint = "https://api.openai.com/v1",
+          model = "gpt-4o", -- your desired model (or use gpt-4o, etc.)
+          timeout = 30000, -- timeout in milliseconds
+          -- temperature = 0, -- adjust if needed
+          max_tokens = 4096,
+          disable_tools = true, -- disable tools!
+          api_key_name = {"cat", os.getenv("HOME") .. "/.config/openai_api_key"}
+        },
+        hints = {
+          enabled = false,
+        },
+        behaviour = {
+          auto_set_keymaps = true,
+        },
+        mappings = {
+          ask = "<localleader>aa",
+          edit = "<localleader>ae",
+          refresh = "<localleader>ar",
+          focus = "<localleader>af",
+          toggle = {
+            default = "<localleader>at",
+            debug = "<localleader>ad",
+            hint = "<localleader>ah",
+            suggestion = "<localleader>as",
+            repomap = "<localleader>aR",
+          },
+          files = {
+            add_current = "<localleader>ac", -- Add current buffer to selected files
+          },
+        }
+      }
+      require("avante").setup(opts)
     end
   },
 
@@ -4474,11 +4538,8 @@ function LazyLoadPlugins()
       'direnv.vim',
       'nvim-dap',
       'auto-session',
+      'avante.nvim',
       -- end misc
-
-      -- begin cmp
-      'nvim-cmp',
-      -- end cmp
     }
   }
 

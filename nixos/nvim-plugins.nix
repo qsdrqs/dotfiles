@@ -53,6 +53,19 @@ let
           "<C-G><C-r>_"
       '';
     };
+    avanteDOTnvim = pkgs.rustPlatform.buildRustPackage {
+      name = "avante.nvim";
+      src = inputs.nvim-config.inputs.avanteDOTnvim;
+      buildInputs = with pkgs; [ openssl.dev ];
+      nativeBuildInputs = with pkgs; [ pkg-config ];
+      cargoHash = "sha256-XDxWeEbsDf4r346OkQkZPmYLANgtydspPk1uLrnvrnY=";
+      doCheck = false;
+      useFetchCargoVendor = true;
+      buildPhase = ''
+        make BUILD_FROM_SOURCE=true
+      '';
+      installPhase = commonInstallPhase;
+    };
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
     (entry: {

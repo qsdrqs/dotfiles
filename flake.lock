@@ -193,6 +193,22 @@
         "type": "github"
       }
     },
+    "avanteDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1739802463,
+        "narHash": "sha256-vMshwx5wGWiSHzmYb7yL0Uv9Qnr5l2CuONUBSWHvGcg=",
+        "owner": "yetone",
+        "repo": "avante.nvim",
+        "rev": "b20b2caf220cd988b026d5981475bf8928afa27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yetone",
+        "repo": "avante.nvim",
+        "type": "github"
+      }
+    },
     "bufdeleteDOTnvim": {
       "flake": false,
       "locked": {
@@ -1807,6 +1823,22 @@
         "type": "github"
       }
     },
+    "nuiDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1733856815,
+        "narHash": "sha256-6U7E/i5FuNXQy+sF4C5DVxuTPqNKD5wxUgFohpOjm9Q=",
+        "owner": "MunifTanjim",
+        "repo": "nui.nvim",
+        "rev": "53e907ffe5eedebdca1cd503b00aa8692068ca46",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MunifTanjim",
+        "repo": "nui.nvim",
+        "type": "github"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1903,6 +1935,7 @@
         "asynctasksDOTvim": "asynctasksDOTvim",
         "auto-saveDOTnvim": "auto-saveDOTnvim",
         "auto-session": "auto-session",
+        "avanteDOTnvim": "avanteDOTnvim",
         "bufdeleteDOTnvim": "bufdeleteDOTnvim",
         "bufferlineDOTnvim": "bufferlineDOTnvim",
         "cellular-automatonDOTnvim": "cellular-automatonDOTnvim",
@@ -1948,6 +1981,7 @@
         "neovim": "neovim",
         "none-ls-extrasDOTnvim": "none-ls-extrasDOTnvim",
         "none-lsDOTnvim": "none-lsDOTnvim",
+        "nuiDOTnvim": "nuiDOTnvim",
         "nvim-autopairs": "nvim-autopairs",
         "nvim-bqf": "nvim-bqf",
         "nvim-cmp": "nvim-cmp",
@@ -1979,6 +2013,7 @@
         "rainbow": "rainbow",
         "rainbow-delimitersDOTnvim": "rainbow-delimitersDOTnvim",
         "registersDOTnvim": "registersDOTnvim",
+        "render-markdownDOTnvim": "render-markdownDOTnvim",
         "rnvimr": "rnvimr",
         "rustaceanvim": "rustaceanvim",
         "satelliteDOTnvim": "satelliteDOTnvim",
@@ -2611,6 +2646,22 @@
       "original": {
         "owner": "tversteeg",
         "repo": "registers.nvim",
+        "type": "github"
+      }
+    },
+    "render-markdownDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1739836730,
+        "narHash": "sha256-0KrOh25D8sIGerSn72Sx4xFtPhKqkNA6aQwSNsxWBkk=",
+        "owner": "MeanderingProgrammer",
+        "repo": "render-markdown.nvim",
+        "rev": "4a28c135bc3548e398ba38178fec3f705cb26fe6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MeanderingProgrammer",
+        "repo": "render-markdown.nvim",
         "type": "github"
       }
     },

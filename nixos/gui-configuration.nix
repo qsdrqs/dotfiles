@@ -50,6 +50,8 @@ in
     networkmanagerapplet
     xdotool
     zenity # color picker
+
+    keepassxc
   ] ++ hyprlandPackages;
 
   qt.platformTheme = "kde";
@@ -121,6 +123,7 @@ in
   programs = {
     dconf.enable = true;
     kdeconnect.enable = true;
+    ssh.startAgent = true;
   };
 
   # provide org.freedesktop.secrets

@@ -101,7 +101,7 @@ in
     components = [ "pkcs11" "secrets" "ssh" ];
   };
 
-  services.ssh-agent.enable = true;
+  # services.ssh-agent.enable = true;
 
   home.sessionVariables = {
     CREDENTIALS_FILE = "${config.home.homeDirectory}/.git-credentials";

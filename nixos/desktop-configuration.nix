@@ -153,7 +153,6 @@ in
   ];
 
   environment.systemPackages = with pkgs; [
-    keepassxc
     telegram-desktop
     slack
     snapper-gui
