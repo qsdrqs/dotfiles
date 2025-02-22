@@ -20,6 +20,15 @@ let
     ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
   '';
   homeDir = config.users.users.qsdrqs.home;
+  vscode-wrapped = pkgs.symlinkJoin {
+    name = "vscode";
+    paths = [ pkgs.vscode ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/code \
+        --prefix LD_LIBRARY_PATH : "${pkgs.stdenv.cc.cc.lib}/lib"
+    '';
+  };
 in
 {
   nix.settings = {
@@ -28,7 +37,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    vscode
+    vscode-wrapped
     pkgs.firefox-devedition
     firefox-alias
     kitty

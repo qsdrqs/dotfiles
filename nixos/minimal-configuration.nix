@@ -196,7 +196,12 @@ in
       defaultEditor = true;
       package = packages.neovim-reloadable-unwrapped;
     };
-    nix-ld.enable = true;
+    nix-ld = {
+      enable = true;
+      libraries = with pkgs; [
+        stdenv.cc.cc.lib
+      ];
+    };
     gnupg.agent.enable = true;
     command-not-found.enable = false;
     nix-index.enable = true;

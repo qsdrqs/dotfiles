@@ -4,8 +4,10 @@
     nodejs
     inferno # flamegraph
     cmake
+    extra-cmake-modules
     gnumake
     gcc
+    libgcc
     gdb
     ninja
     clang
