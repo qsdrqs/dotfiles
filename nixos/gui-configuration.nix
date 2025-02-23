@@ -20,15 +20,6 @@ let
     ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
   '';
   homeDir = config.users.users.qsdrqs.home;
-  vscode-wrapped = pkgs.symlinkJoin {
-    name = "vscode";
-    paths = [ pkgs.vscode ];
-    buildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/code \
-        --prefix LD_LIBRARY_PATH : "${pkgs.stdenv.cc.cc.lib}/lib"
-    '';
-  };
 in
 {
   nix.settings = {
@@ -37,7 +28,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    vscode-wrapped
+    vscode
     pkgs.firefox-devedition
     firefox-alias
     kitty
@@ -60,6 +51,7 @@ in
     xdotool
     zenity # color picker
 
+    libsecret
     keepassxc
   ] ++ hyprlandPackages;
 
@@ -136,8 +128,8 @@ in
   };
 
   # provide org.freedesktop.secrets
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.login.enableGnomeKeyring = true;
+  # services.gnome.gnome-keyring.enable = true;
+  # security.pam.services.login.enableGnomeKeyring = true;
 
   fonts.packages = with pkgs; [
     nerd-fonts.hack
@@ -166,8 +158,15 @@ in
     # portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
-  xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  xdg.portal = {
+    extraPortals = [
+      pkgs.kdePackages.xdg-desktop-portal-kde
+      pkgs.xdg-desktop-portal-hyprland
+    ];
+    config.hyprland = {
+      "org.freedesktop.impl.portal.ScreenCast" = "hyprland";
+    };
+  };
 
   i18n.inputMethod = {
     enable = true;

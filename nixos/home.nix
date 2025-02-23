@@ -96,10 +96,6 @@ in
   };
 
   # provide org.freedesktop.secrets
-  services.gnome-keyring = {
-    enable = true;
-    components = [ "pkcs11" "secrets" "ssh" ];
-  };
 
   # services.ssh-agent.enable = true;
 

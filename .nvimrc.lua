@@ -3749,6 +3749,20 @@ local plugins = {
 
   {
     "yetone/avante.nvim",
+    cond = vim.g.vscode == nil,
+    cmd = {
+      "AvanteAsk",
+      "AvanteEdit",
+      "AvanteRefresh",
+      "AvanteFocus",
+      "AvanteToggle",
+      "AvanteFilesAddCurrent",
+    },
+    keys = {
+      {"<localleader>aa", mode = {'n', 'v'}},
+      {"<localleader>ae", mode = {'n', 'v'}},
+      {"<localleader>af", mode = {'n', 'v'}},
+    },
     lazy = true,
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = "make",
@@ -3766,22 +3780,25 @@ local plugins = {
     config = function()
       local opts = {
         -- add any opts here
-        -- for example
-        provider = "openai",
+        provider = "ollama",
+        vendors = {
+          ollama = {
+            api_key_name = "",
+            endpoint = "http://127.0.0.1:11434",
+            model = "deepseek-r1:70b", -- Specify your model here
+            disable_tools = true,
+            options = {
+              num_ctx = 32768,
+            },
+          },
+        },
         openai = {
-          endpoint = "https://api.openai.com/v1",
           model = "gpt-4o", -- your desired model (or use gpt-4o, etc.)
           timeout = 30000, -- timeout in milliseconds
-          -- temperature = 0, -- adjust if needed
           max_tokens = 4096,
-          disable_tools = true, -- disable tools!
-          api_key_name = {"cat", os.getenv("HOME") .. "/.config/openai_api_key"}
         },
         hints = {
           enabled = false,
-        },
-        behaviour = {
-          auto_set_keymaps = true,
         },
         mappings = {
           ask = "<localleader>aa",
@@ -3800,7 +3817,32 @@ local plugins = {
           },
         }
       }
+
+      -- ollama support
+      local ollama = require("dotfiles.avante.providers.ollama")
+      opts.vendors.ollama = vim.tbl_extend("error", opts.vendors.ollama, ollama)
+
+      local provider = opts.provider
+      if opts[provider] == nil and opts.vendors[provider] == nil then
+        opts[provider] = {}
+      end
+
+      if opts.vendors[provider] ~= nil
+        and opts.vendors[provider].api_key_name == nil
+        and vim.fn.executable("secret-tool") == 1 then
+        opts.vendors[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
+      elseif opts[provider] ~= nil
+        and opts[provider].api_key_name == nil
+        and vim.fn.executable("secret-tool") == 1 then
+        opts[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
+      end
       require("avante").setup(opts)
+
+      -- set keymaps
+      local avante_api = require("avante.api")
+      vim.keymap.set({'n', 'v'}, '<localleader>aa', function() avante_api.ask() end, { silent = true })
+      vim.keymap.set({'n', 'v'}, '<localleader>ae', function() avante_api.edit() end, { silent = true })
+      vim.keymap.set({'n', 'v'}, '<localleader>af', function() avante_api.focus() end, { silent = true })
     end
   },
 
@@ -3897,9 +3939,6 @@ local plugins = {
   {
     'mg979/vim-visual-multi',
     lazy = true,
-    init = function()
-      vim.g.VM_leader = '\\'
-    end,
     keys = {{"<C-n>", mode = {'n', 'v', 'x'}}},
     config = function()
       vim.g.VM_theme = 'neon'
@@ -4542,7 +4581,6 @@ function LazyLoadPlugins()
       'direnv.vim',
       'nvim-dap',
       'auto-session',
-      'avante.nvim',
       -- end misc
     }
   }
