@@ -149,6 +149,7 @@ in
     patchelf
     (python3.withPackages (ps: with ps; [
       ipython
+      tkinter
       pip
     ]))
     lsof
@@ -205,6 +206,7 @@ in
     gnupg.agent.enable = true;
     command-not-found.enable = false;
     nix-index.enable = true;
+    ssh.startAgent = true;
   };
   # List services that you want to enable:
 

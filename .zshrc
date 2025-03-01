@@ -486,12 +486,16 @@ fi
 #     done
 # }
 
-if ! pgrep -u "$USER" ssh-agent > /dev/null; then
-    ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
-fi
-if [[ ! -S "$SSH_AUTH_SOCK" ]] && [[ ! -f "$SSH_AUTH_SOCK" ]]; then
-    if [[ -f "$XDG_RUNTIME_DIR/ssh-agent.env" ]]; then
-        source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+if [[ -S /tmp/ssh-agent.sock ]]; then
+    export SSH_AUTH_SOCK=/tmp/ssh-agent.sock
+else
+    if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+        ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
+    fi
+    if [[ ! -S "$SSH_AUTH_SOCK" ]] && [[ ! -f "$SSH_AUTH_SOCK" ]]; then
+        if [[ -f "$XDG_RUNTIME_DIR/ssh-agent.env" ]]; then
+            source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+        fi
     fi
 fi
 

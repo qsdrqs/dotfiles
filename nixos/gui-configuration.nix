@@ -124,7 +124,6 @@ in
   programs = {
     dconf.enable = true;
     kdeconnect.enable = true;
-    ssh.startAgent = true;
   };
 
   # provide org.freedesktop.secrets

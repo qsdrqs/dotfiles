@@ -22,6 +22,7 @@ in
     gh
     exiftool
     nix-serve
+    socat
 
     poppler_utils # pdf2txt
     jless

@@ -3780,16 +3780,21 @@ local plugins = {
     config = function()
       local opts = {
         -- add any opts here
-        provider = "ollama",
+        provider = "openai",
         vendors = {
           ollama = {
             api_key_name = "",
             endpoint = "http://127.0.0.1:11434",
-            model = "deepseek-r1:70b", -- Specify your model here
+            model = "deepseek-r1:32b", -- Specify your model here
             disable_tools = true,
             options = {
               num_ctx = 32768,
             },
+          },
+          deepseek = {
+            __inherited_from = "openai",
+            endpoint = "https://api.deepseek.com",
+            model = "deepseek-chat",
           },
         },
         openai = {
@@ -3827,14 +3832,25 @@ local plugins = {
         opts[provider] = {}
       end
 
+      if provider == 'ollama' then
+        opts.vendors.ollama.model = vim.fn.input("Enter Ollama model: ", opts.vendors.ollama.model)
+      end
+
+      local key_env_loaded = os.getenv("KEY_ENV_LOADED")
       if opts.vendors[provider] ~= nil
-        and opts.vendors[provider].api_key_name == nil
-        and vim.fn.executable("secret-tool") == 1 then
-        opts.vendors[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
+        and opts.vendors[provider].api_key_name == nil then
+        if key_env_loaded ~= nil then
+          opts.vendors[provider].api_key_name = provider:upper() .. "_API_KEY"
+        elseif vim.fn.executable("secret-tool") == 1 then
+          opts.vendors[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
+        end
       elseif opts[provider] ~= nil
-        and opts[provider].api_key_name == nil
-        and vim.fn.executable("secret-tool") == 1 then
-        opts[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
+        and opts[provider].api_key_name == nil then
+        if key_env_loaded ~= nil then
+          opts[provider].api_key_name = provider:upper() .. "_API_KEY"
+        elseif vim.fn.executable("secret-tool") == 1 then
+          opts[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
+        end
       end
       require("avante").setup(opts)
 
@@ -4807,6 +4823,9 @@ if vim.fn.executable(im_switch) ~= 0 then
     im_switch_job = require'plenary.job':new({
       command = im_switch,
       on_stdout = vim.schedule_wrap(function(_, data)
+        if data == nil then
+          return
+        end
         restored_im = all_trim(data)
         if restored_im ~= default_im then
           -- TODO: may change to async here

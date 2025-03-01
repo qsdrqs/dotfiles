@@ -178,8 +178,8 @@ in
           pkgs.gnugrep
           pkgs.bash
           pkgs.git
-          pkgs.nixos-rebuild
-          pkgs.nix
+          (pkgs.nixos-rebuild.override { nix = pkgs.nixVersions.nix_2_26; })
+          pkgs.nixVersions.nix_2_26
         ];
         serviceConfig = {
           ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-wifi-rebuild.py} ${wifi-interface} ${rpi-config}'';
