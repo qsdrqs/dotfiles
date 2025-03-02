@@ -160,7 +160,7 @@ in
               "starship"
             ];
             plugins-offical = [
-              "max-preview"
+              "toggle-pane"
             ];
           in
           lib.strings.concatStrings

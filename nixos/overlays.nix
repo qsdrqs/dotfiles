@@ -44,10 +44,6 @@ let
     system = pkgs.system;
     config.allowUnfree = true;
   };
-  pkgs-firefox-dev = import inputs.nixpkgs-firefox-dev {
-    system = pkgs.system;
-    config.allowUnfree = true;
-  };
 in
 {
   nixpkgs.overlays = [
@@ -56,7 +52,7 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
-        # yazi = inputs.yazi.packages.${super.system}.default;
+        yazi = inputs.yazi.packages.${super.system}.default;
         #   if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
         #   else if pkgs.system == "aarch64-linux" then
         #     pkgs.stdenv.mkDerivation
@@ -177,10 +173,10 @@ in
           buildCommand = (oldAttrs.buildCommand or "") + ''
             mkdir -p $out/tmp/firefox-omni
             cd $out/tmp/firefox-omni
-            echo $(${pkgs.unzip}/bin/unzip $out/lib/firefox/browser/omni.ja) # TODO: workaround for omni.ja breaking
+            echo $(${pkgs.unzip}/bin/unzip $out/lib/firefox-devedition/browser/omni.ja) # TODO: workaround for omni.ja breaking
             patch chrome/browser/content/browser/browser.xhtml < ${patches/browser.xhtml.patch}
             ${pkgs.zip}/bin/zip -0DXqr $out/tmp/omni.ja *
-            cp -f $out/tmp/omni.ja $out/lib/firefox/browser/omni.ja
+            cp -f $out/tmp/omni.ja $out/lib/firefox-devedition/browser/omni.ja
             rm -rf $out/tmp
           '';
         });

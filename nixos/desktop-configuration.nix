@@ -161,7 +161,7 @@ in
       commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
     }))
     pkgs-stable.zoom-us
-    kate
+    kdePackages.kate
     scrcpy
     wineWowPackages.unstableFull
     wpsoffice-hidpi

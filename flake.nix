@@ -6,10 +6,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/2ff53fe64443980e139eaa286017f53f88336dd0";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/73cf49b8ad837ade2de76f87eb53fc85ed5d4680";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
-    nixpkgs-firefox-dev.url = "github:NixOS/nixpkgs/18536bf04cd71abd345f9579158841376fdd0c5a";
+    naersk = {
+      url = "github:nix-community/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

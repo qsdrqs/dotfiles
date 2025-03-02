@@ -36,13 +36,10 @@ in
     wl-clipboard
     pavucontrol
     libnotify
-    filelight # disk usage
     mpv
-    kdePackages.gwenview
     graphviz
 
     zathura
-    ark
     swaynotificationcenter
     pulseaudio
     alsa-utils
@@ -53,7 +50,13 @@ in
 
     libsecret
     keepassxc
-  ] ++ hyprlandPackages;
+  ] ++ hyprlandPackages ++ (with pkgs.kdePackages; [
+    dolphin
+    kdeconnect-kde
+    filelight  # disk usage
+    gwenview
+    ark
+  ]);
 
   qt.platformTheme = "kde";
 

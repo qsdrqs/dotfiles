@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-master, lib, inputs, options, ... }:
+{ config, pkgs, pkgs-stable, lib, inputs, options, ... }:
 let
   # dummy = pkgs.callPackage (import ./packages.nix).dummy { };
   homeDir = config.users.users.qsdrqs.home;
@@ -91,7 +91,7 @@ in
       description = "Start the rathole client";
       serviceConfig = {
         User = "root";
-        ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/client.toml'';
+        ExecStart = ''${pkgs-stable.rathole}/bin/rathole /etc/rathole/client.toml'';
         Restart = "on-failure";
         RestartSec = 5;
       };

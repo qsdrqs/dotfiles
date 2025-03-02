@@ -92,6 +92,7 @@ in
       trusted-users = [ "root" "qsdrqs" "@wheel" "nix-serve" ];
     };
     package = pkgs.nixVersions.nix_2_26;
+    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
   };
 
   # List packages installed in system profile. To search, run:

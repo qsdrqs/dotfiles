@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, options, ... }:
+{ config, pkgs, pkgs-stable, lib, inputs, options, ... }:
 let
   homeDir = config.users.users.qsdrqs.home;
 in
@@ -23,7 +23,7 @@ in
       after = [ "network.target" ];
       description = "Start the rathole server";
       serviceConfig = {
-        ExecStart = ''${pkgs.rathole}/bin/rathole /etc/rathole/server.toml'';
+        ExecStart = ''${pkgs-stable.rathole}/bin/rathole /etc/rathole/server.toml'';
         Restart = "on-failure";
         RestartSec = 5;
       };
