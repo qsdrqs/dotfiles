@@ -161,6 +161,7 @@ in
             ];
             plugins-offical = [
               "toggle-pane"
+              "mime-ext"
             ];
           in
           lib.strings.concatStrings

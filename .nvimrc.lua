@@ -760,14 +760,6 @@ local plugins = {
               formatting = {
                 command = { "nixfmt" }
               },
-              options = {
-                nixos = {
-                  expr = "(builtins.getFlake '" .. dotfiles_dir .. "').nixosConfigurations.basic.options",
-                },
-                home_manager = {
-                  expr = "(builtins.getFlake '" .. dotfiles_dir .. "').homeConfigurations.basic.options",
-                },
-              }
             }
           }
         end
@@ -3780,7 +3772,7 @@ local plugins = {
     config = function()
       local opts = {
         -- add any opts here
-        provider = "openai",
+        provider = "deepseek",
         vendors = {
           ollama = {
             api_key_name = "",
@@ -3794,7 +3786,8 @@ local plugins = {
           deepseek = {
             __inherited_from = "openai",
             endpoint = "https://api.deepseek.com",
-            model = "deepseek-chat",
+            model = "deepseek-reasoner",
+            disable_tools = true,
           },
         },
         openai = {

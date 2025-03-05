@@ -131,9 +131,16 @@ if ok then
 	}
 end
 
-local ok, starship = pcall(require, "copy-relative-path")
+require("copy-relative-path"):setup {
+	root_files = {".git", ".root"}
+}
+
+local ok, mime_ext = pcall(require, "mime-ext")
 if ok then
-	require("copy-relative-path"):setup {
-		root_files = {".git", ".root"}
+	mime_ext:setup {
+		with_exts = {
+			tex = "text/x-tex",
+		},
+		fallback_file1 = true,
 	}
 end

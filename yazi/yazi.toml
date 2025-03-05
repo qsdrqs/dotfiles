@@ -143,6 +143,12 @@ previewers = [
 	{ name = "*", run = "file" },
 ]
 
+[[plugin.prepend_fetchers]]
+id   = "mime"
+name = "*"
+run  = "mime-ext"
+prio = "high"
+
 [input]
 cursor_blink = false
 
