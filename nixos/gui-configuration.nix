@@ -146,6 +146,12 @@ in
   services.displayManager.sddm = {
     enable = true;
     autoNumlock = true;
+    settings = {
+      Autologin = {
+        Session = "hyprland.desktop";
+        User = "qsdrqs";
+      };
+    };
   };
   # Workaround for kwin to work with numlock on
   # system.activationScripts.sddm_kde_display.text = ''
@@ -158,6 +164,9 @@ in
     enable = true;
     # package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
+  };
+  programs.hyprlock = {
+    enable = true;
   };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   xdg.portal = {

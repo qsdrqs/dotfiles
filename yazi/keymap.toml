@@ -87,10 +87,12 @@ keymap = [
 	{ on = [ "<C-g>"],      run = "shell --confirm --block lazygit",        desc = "Open lazygit" },
 
 	# Linemode
-	{ on = [ "m", "s" ], run = "linemode size",        desc = "Set linemode to size" },
-	{ on = [ "m", "p" ], run = "linemode permissions", desc = "Set linemode to permissions" },
-	{ on = [ "m", "m" ], run = "linemode mtime",       desc = "Set linemode to mtime" },
-	{ on = [ "m", "n" ], run = "linemode none",        desc = "Set linemode to none" },
+	{ on = [ "m", "s" ], run = "linemode size",        desc = "Linemode: size" },
+	{ on = [ "m", "p" ], run = "linemode permissions", desc = "Linemode: permissions" },
+	{ on = [ "m", "b" ], run = "linemode btime",       desc = "Linemode: btime" },
+	{ on = [ "m", "m" ], run = "linemode mtime",       desc = "Linemode: mtime" },
+	{ on = [ "m", "o" ], run = "linemode owner",       desc = "Linemode: owner" },
+	{ on = [ "m", "n" ], run = "linemode none",        desc = "Linemode: none" },
 
 	# Copy
 	{ on = [ "y", "p" ], run = "copy path",             desc = "Copy the absolute path" },
@@ -109,18 +111,19 @@ keymap = [
 	{ on = [ "N" ], run = "find_arrow --previous",   desc = "Go to previous found file" },
 
 	# Sorting
-	{ on = [ ",", "m" ], run = "sort modified --dir-first",               desc = "Sort by modified time" },
-	{ on = [ ",", "M" ], run = "sort modified --reverse --dir-first",     desc = "Sort by modified time (reverse)" },
-	{ on = [ ",", "c" ], run = "sort created --dir-first",                desc = "Sort by created time" },
-	{ on = [ ",", "C" ], run = "sort created --reverse --dir-first",      desc = "Sort by created time (reverse)" },
-	{ on = [ ",", "e" ], run = "sort extension --dir-first",         	   desc = "Sort by extension" },
-	{ on = [ ",", "E" ], run = "sort extension --reverse --dir-first",    desc = "Sort by extension (reverse)" },
-	{ on = [ ",", "a" ], run = "sort alphabetical --dir-first",           desc = "Sort alphabetically" },
-	{ on = [ ",", "A" ], run = "sort alphabetical --reverse --dir-first", desc = "Sort alphabetically (reverse)" },
-	{ on = [ ",", "n" ], run = "sort natural --dir-first",                desc = "Sort naturally" },
-	{ on = [ ",", "N" ], run = "sort natural --reverse --dir-first",      desc = "Sort naturally (reverse)" },
-	{ on = [ ",", "s" ], run = "sort size --dir-first",                   desc = "Sort by size" },
-	{ on = [ ",", "S" ], run = "sort size --reverse --dir-first",         desc = "Sort by size (reverse)" },
+	{ on = [ ",", "m" ], run = [ "sort mtime --reverse=no", "linemode mtime" ], desc = "Sort by modified time" },
+	{ on = [ ",", "M" ], run = [ "sort mtime --reverse", "linemode mtime" ],    desc = "Sort by modified time (reverse)" },
+	{ on = [ ",", "b" ], run = [ "sort btime --reverse=no", "linemode btime" ], desc = "Sort by birth time" },
+	{ on = [ ",", "B" ], run = [ "sort btime --reverse", "linemode btime" ],    desc = "Sort by birth time (reverse)" },
+	{ on = [ ",", "e" ], run = "sort extension --reverse=no",                   desc = "Sort by extension" },
+	{ on = [ ",", "E" ], run = "sort extension --reverse",                      desc = "Sort by extension (reverse)" },
+	{ on = [ ",", "a" ], run = "sort alphabetical --reverse=no",                desc = "Sort alphabetically" },
+	{ on = [ ",", "A" ], run = "sort alphabetical --reverse",                   desc = "Sort alphabetically (reverse)" },
+	{ on = [ ",", "n" ], run = "sort natural --reverse=no",                     desc = "Sort naturally" },
+	{ on = [ ",", "N" ], run = "sort natural --reverse",                        desc = "Sort naturally (reverse)" },
+	{ on = [ ",", "s" ], run = [ "sort size --reverse=no", "linemode size" ],   desc = "Sort by size" },
+	{ on = [ ",", "S" ], run = [ "sort size --reverse", "linemode size" ],      desc = "Sort by size (reverse)" },
+	{ on = [ ",", "r" ], run = "sort random --reverse=no",                      desc = "Sort randomly" },
 
 	# Tabs
 	{ on = [ "t" ], run = "tab_create --current", desc = "Create a new tab using the current path" },
@@ -286,23 +289,47 @@ keymap = [
 	{ on = [ "~" ], run = "help", desc = "Open help" }
 ]
 
-[completion]
+[confirm]
 
 keymap = [
-	{ on = [ "<C-q>" ],   run = "close",                                      desc = "Cancel completion" },
-	{ on = [ "<Tab>" ],   run = "close --submit",                             desc = "Submit the completion" },
-	{ on = [ "<Enter>" ], run = [ "close --submit", "close_input --submit" ], desc = "Submit the completion and input" },
+	{ on = "<Esc>",   run = "close",          desc = "Cancel the confirm" },
+	{ on = "<C-[>",   run = "close",          desc = "Cancel the confirm" },
+	{ on = "<C-c>",   run = "close",          desc = "Cancel the confirm" },
+	{ on = "<Enter>", run = "close --submit", desc = "Submit the confirm" },
 
-	{ on = [ "<A-k>" ], run = "arrow -1", desc = "Move cursor up" },
-	{ on = [ "<A-j>" ], run = "arrow 1",  desc = "Move cursor down" },
+	{ on = "n", run = "close",          desc = "Cancel the confirm" },
+	{ on = "y", run = "close --submit", desc = "Submit the confirm" },
 
-	{ on = [ "<Up>" ],   run = "arrow -1", desc = "Move cursor up" },
-	{ on = [ "<Down>" ], run = "arrow 1",  desc = "Move cursor down" },
+	{ on = "k", run = "arrow -1", desc = "Move cursor up" },
+	{ on = "j", run = "arrow 1",  desc = "Move cursor down" },
 
-	{ on = [ "<C-p>" ], run = "arrow -1", desc = "Move cursor up" },
-	{ on = [ "<C-n>" ], run = "arrow 1",  desc = "Move cursor down" },
+	{ on = "<Up>",   run = "arrow -1", desc = "Move cursor up" },
+	{ on = "<Down>", run = "arrow 1",  desc = "Move cursor down" },
 
-	{ on = [ "~" ], run = "help", desc = "Open help" }
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
+]
+
+[cmp]
+
+keymap = [
+	{ on = "<C-c>",   run = "close",                                      desc = "Cancel completion" },
+	{ on = "<Tab>",   run = "close --submit",                             desc = "Submit the completion" },
+	{ on = "<Enter>", run = [ "close --submit", "close_input --submit" ], desc = "Submit the completion and input" },
+
+	{ on = "<A-k>", run = "arrow -1", desc = "Move cursor up" },
+	{ on = "<A-j>", run = "arrow 1",  desc = "Move cursor down" },
+
+	{ on = "<Up>",   run = "arrow -1", desc = "Move cursor up" },
+	{ on = "<Down>", run = "arrow 1",  desc = "Move cursor down" },
+
+	{ on = "<C-p>", run = "arrow -1", desc = "Move cursor up" },
+	{ on = "<C-n>", run = "arrow 1",  desc = "Move cursor down" },
+
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
 ]
 
 [help]

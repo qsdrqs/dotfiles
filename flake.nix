@@ -222,8 +222,9 @@
           ./nixos/server-configuration.nix
         ];
       };
-      rpiConfig = basicConfig // {
+      rpiConfig = basicConfig // rec {
         system = "aarch64-linux";
+        specialArgs = special-args system;
         modules = basicConfig.modules ++ [
           ./nixos/rpi-configuration.nix
 
@@ -233,7 +234,7 @@
             home-manager.users.qsdrqs = {
               imports = basicHomeModules;
             };
-            home-manager.extraSpecialArgs = special-args "aarch64-linux";
+            home-manager.extraSpecialArgs = special-args system;
           }
         ];
       };

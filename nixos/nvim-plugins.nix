@@ -53,19 +53,28 @@ let
           "<C-G><C-r>_"
       '';
     };
-    avanteDOTnvim = let
-      naersk = pkgs.callPackage inputs.naersk {};
-    in naersk.buildPackage rec {
+    # avanteDOTnvim = let
+    #   naersk = pkgs.callPackage inputs.naersk {};
+    # in naersk.buildPackage rec {
+    #   name = "avante.nvim";
+    #   src = inputs.nvim-config.inputs.avanteDOTnvim;
+    #   buildInputs = with pkgs; [ openssl.dev ];
+    #   nativeBuildInputs = with pkgs; [ pkg-config perl ];
+    #   buildPhase = ''
+    #     rm -rf *
+    #     cp -rf ${src}/* .
+    #     make BUILD_FROM_SOURCE=true
+    #   '';
+    #   installPhase = commonInstallPhase;
+    # };
+    avanteDOTnvim = pkgs.stdenv.mkDerivation {
       name = "avante.nvim";
       src = inputs.nvim-config.inputs.avanteDOTnvim;
-      buildInputs = with pkgs; [ openssl.dev ];
-      nativeBuildInputs = with pkgs; [ pkg-config perl ];
-      buildPhase = ''
-        rm -rf *
-        cp -rf ${src}/* .
-        make BUILD_FROM_SOURCE=true
-      '';
+      buildPhase = dummyBuildPhase;
       installPhase = commonInstallPhase;
+      postInstall = ''
+        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/avante.nvim/build $out/build
+      '';
     };
   };
   genNvimPlugins = entries: builtins.listToAttrs (map

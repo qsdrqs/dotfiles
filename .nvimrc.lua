@@ -3769,6 +3769,18 @@ local plugins = {
       "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
       'MeanderingProgrammer/render-markdown.nvim',
     },
+    init = function(plugin)
+      vim.api.nvim_create_user_command("AvanteBuild", function()
+        -- run `make` under plugin directory
+        vim.system(
+          {"make"},
+          { cwd = plugin.dir },
+          vim.schedule_wrap(function()
+            vim.notify("Avante built successfully", "info", { title = "Avante" })
+          end)
+        )
+      end, { nargs = 0 })
+    end,
     config = function()
       local opts = {
         -- add any opts here
@@ -3777,7 +3789,7 @@ local plugins = {
           ollama = {
             api_key_name = "",
             endpoint = "http://127.0.0.1:11434",
-            model = "deepseek-r1:32b", -- Specify your model here
+            model = "qwq", -- Specify your model here
             disable_tools = true,
             options = {
               num_ctx = 32768,
@@ -4864,7 +4876,7 @@ local original_deprecate = vim.deprecate
 vim.deprecate = function(name, alt, plugin, backtrace)
   local tbl = {
     -- "vim.lsp.get_active_clients()"
-    "vim.lsp.diagnostic.get_line_diagnostics()"
+    -- "vim.lsp.diagnostic.get_line_diagnostics()"
   }
   for _, v in ipairs(tbl) do
     if name:find(v) then

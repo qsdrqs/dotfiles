@@ -5,7 +5,7 @@ let
     rpi-gpio
     gpiozero
   ];
-  wifi-interface-external = "wlp1s0u1u3";
+  wifi-interface-external = "wlp1s0u1u2";
 in
 {
   imports = [
@@ -51,6 +51,7 @@ in
 
   boot.kernelModules = [ "88x2bu" ];
   boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu ];
+  boot.kernelParams = [ "iomem=relaxed" ];
   # boot.extraModulePackages = [ rtl88x2bu_module ];
 
 
