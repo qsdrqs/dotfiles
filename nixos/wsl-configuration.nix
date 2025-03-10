@@ -1,5 +1,4 @@
-{ pkgs, config, modulesPath, inputs, lib, options, utils, ... }:
-{
+{ pkgs, config, modulesPath, inputs, lib, options, utils, ... }: {
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
     inputs.home-manager.nixosModules.home-manager
@@ -41,18 +40,19 @@
   ];
 
   systemd.user = {
-    services.ssh-agent-share =let
-      user_local = "${config.users.users.qsdrqs.home}/.local";
-    in {
-      description = "Share SSH agent socket between WSL and Windows";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
-      serviceConfig = {
-        ExecStart = ''${pkgs.socat}/bin/socat UNIX-LISTEN:/tmp/ssh-agent.sock,fork EXEC:"${user_local}/bin/winsocat.exe STDIO NPIPE\\:openssh-ssh-agent"'';
-        Restart = "on-failure";
-        RestartSec = 5;
+    services.ssh-agent-share =
+      let user_local = "${config.users.users.qsdrqs.home}/.local";
+      in {
+        description = "Share SSH agent socket between WSL and Windows";
+        wantedBy = [ "default.target" ];
+        after = [ "network.target" ];
+        serviceConfig = {
+          ExecStart = ''
+            ${pkgs.socat}/bin/socat UNIX-LISTEN:/tmp/ssh-agent.sock,fork EXEC:"${user_local}/bin/winsocat.exe STDIO NPIPE\\:openssh-ssh-agent"'';
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
       };
-    };
   };
   services.xserver.enable = true;
 
@@ -61,17 +61,17 @@
   services.syncthing.guiAddress = "0.0.0.0:8384";
 
   # WSL2 does not support modprobe for wireguard
-  systemd.services.wg-quick-wg0.serviceConfig.ExecStart = lib.mkForce (
-    utils.systemdUtils.lib.makeJobScript {
+  systemd.services.wg-quick-wg0.serviceConfig.ExecStart = lib.mkForce
+    (utils.systemdUtils.lib.makeJobScript {
       name = "wg-quick-wg0-start";
-      text =
-        let
-          str2list = lib.strings.splitString "\n" config.systemd.services.wg-quick-wg0.script;
-          listRemove = lib.lists.remove "${pkgs.kmod}/bin/modprobe wireguard" str2list;
-        in
-        lib.strings.concatStrings listRemove;
+      text = let
+        str2list = lib.strings.splitString "\n"
+          config.systemd.services.wg-quick-wg0.script;
+        listRemove =
+          lib.lists.remove "${pkgs.kmod}/bin/modprobe wireguard" str2list;
+      in lib.strings.concatStrings listRemove;
       enableStrictShellChecks = false;
-  });
+    });
 
   # use vcxsrv instead of wslg
   # environment.variables.DISPLAY =

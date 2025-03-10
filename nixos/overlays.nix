@@ -52,7 +52,7 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
-        # yazi = inputs.yazi.packages.${super.system}.default;
+        yazi = inputs.yazi.packages.${super.system}.default;
         #   if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
         #   else if pkgs.system == "aarch64-linux" then
         #     pkgs.stdenv.mkDerivation
