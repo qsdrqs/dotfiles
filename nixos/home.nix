@@ -1,6 +1,12 @@
 { config, pkgs, inputs, lib, ... }:
 let
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
+  echoerr = pkgs.writeShellScriptBin "echoerr" ''
+    echo "$@" 1>&2
+  '';
+  vpn_connect = pkgs.writeShellScriptBin "vpn_connect" ''
+    sudo sh ${./scripts/vpn_connect.sh}
+  '';
 in
 {
   imports = [
@@ -14,9 +20,8 @@ in
     htop
     iotop
     lazygit
-    (pkgs.writeShellScriptBin "echoerr" ''
-      echo "$@" 1>&2
-    '')
+    echoerr
+    vpn_connect
   ];
 
   # add some bin to ~/.local/bin

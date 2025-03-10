@@ -236,13 +236,14 @@ alias n="neofetch"
 alias ra="ranger"
 alias ya-cli="\ya"
 alias ya="yazi"
-alias zshrc="$EDITOR ~/dotfiles/.zshrc"
-alias vimrc="$EDITOR ~/dotfiles/.vimrc"
-alias vimplug="$EDITOR ~/dotfiles/.vimrc.plugs"
-alias nvimplug="$EDITOR ~/dotfiles/.nvimrc.lua"
+alias zshrc="$EDITOR $HOME/dotfiles/.zshrc"
+alias vimrc="$EDITOR $HOME/dotfiles/.vimrc"
+alias vimplug="$EDITOR $HOME/dotfiles/.vimrc.plugs"
+alias nvimplug="$EDITOR $HOME/dotfiles/.nvimrc.lua"
 alias ls='lsd'
 alias ll="ls -l"
 alias la="ls -la"
+alias load_key_env="source $HOME/dotfiles/nixos/scripts/load_key_env.sh"
 
 # Arch
 alias sp="sudo pacman"
