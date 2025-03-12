@@ -7,6 +7,9 @@ let
   vpn_connect = pkgs.writeShellScriptBin "vpn_connect" ''
     sudo sh ${./scripts/vpn_connect.sh}
   '';
+  load_gpg_key = pkgs.writeShellScriptBin "load_gpg_key" ''
+    sh ${./scripts/load_gpg_key.sh}
+  '';
 in
 {
   imports = [
@@ -22,6 +25,7 @@ in
     lazygit
     echoerr
     vpn_connect
+    load_gpg_key
   ];
 
   # add some bin to ~/.local/bin

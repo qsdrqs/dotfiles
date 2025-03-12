@@ -27,4 +27,19 @@ in
     neofetch
     tmux
   ];
+
+  nix = {
+    settings = {
+      auto-optimise-store = true;
+      experimental-features = [ "nix-command" "flakes" ];
+      trusted-users = [
+        "root"
+        config.home.username
+        "@wheel"
+        "nix-serve"
+      ];
+    };
+    package = pkgs.nixVersions.nix_2_26;
+    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+  };
 }

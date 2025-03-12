@@ -467,7 +467,7 @@ if has('nvim')
 endif
 
 " limit textwidth in markdown and latex
-autocmd FileType markdown,tex setlocal textwidth=80
+" autocmd FileType markdown,tex setlocal textwidth=80
 set formatoptions+=m
 
 function! s:wrapPara()
