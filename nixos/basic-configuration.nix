@@ -84,14 +84,14 @@ in
       [ "aarch64-linux" ];
 
   systemd = {
-    services.rathole-client = {
+    services.frpc = {
       enable = false;
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
-      description = "Start the rathole client";
+      description = "Start the frp client";
       serviceConfig = {
         User = "root";
-        ExecStart = ''${pkgs-stable.rathole}/bin/rathole /etc/rathole/client.toml'';
+        ExecStart = ''${pkgs.frp}/bin/frpc -c /etc/frp/frpc.toml'';
         Restart = "on-failure";
         RestartSec = 5;
       };

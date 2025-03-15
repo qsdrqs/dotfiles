@@ -227,5 +227,5 @@ in
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
   services.syncthing.guiAddress = "0.0.0.0:8384";
-  systemd.services.rathole-client.enable = lib.mkForce true;
+  systemd.services.frpc.enable = lib.mkForce true;
 }

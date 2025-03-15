@@ -17,13 +17,13 @@ in
   ];
 
   systemd = {
-    services.rathole-server = {
+    services.frps = {
       enable = lib.mkDefault false;
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
-      description = "Start the rathole server";
+      description = "Start the frp server";
       serviceConfig = {
-        ExecStart = ''${pkgs-stable.rathole}/bin/rathole /etc/rathole/server.toml'';
+        ExecStart = ''${pkgs.frp}/bin/frps -c /etc/frp/frps.toml'';
         Restart = "on-failure";
         RestartSec = 5;
       };

@@ -119,12 +119,12 @@ in
           propagatedBuildInputs = oldAttrs.propagatedBuildInputs ++ [ pkgs.python3Packages.pylint ];
         });
 
-        variety = super.variety.overrideAttrs (oldAttrs: {
-          prePatch = oldAttrs.prePatch + ''
-            substituteInPlace data/scripts/set_wallpaper --replace-fail "\"i3\"" "\"none+i3\""
-            substituteInPlace data/scripts/set_wallpaper --replace-fail "feh --bg-fill" "feh --bg-scale --no-xinerama"
-          '';
-        });
+        # variety = super.variety.overrideAttrs (oldAttrs: {
+        #   prePatch = oldAttrs.prePatch + ''
+        #     substituteInPlace data/scripts/set_wallpaper --replace-fail "\"i3\"" "\"none+i3\""
+        #     substituteInPlace data/scripts/set_wallpaper --replace-fail "feh --bg-fill" "feh --bg-scale --no-xinerama"
+        #   '';
+        # });
 
         vscode = super.vscode.override (old: {
           commandLineArgs = (old.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" "-g" ];

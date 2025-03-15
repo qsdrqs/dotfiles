@@ -15,9 +15,9 @@ in
 
   home.packages = with pkgs; [
     (wrapNeovim packages.neovim-reloadable-unwrapped {
-      withPython3 = true;
-    })
-    yazi
+     withPython3 = true;
+     })
+  yazi
     zoxide
     lsd
     fd
@@ -26,6 +26,7 @@ in
     fastfetch
     neofetch
     tmux
+    config.nix.package
   ];
 
   nix = {
@@ -34,9 +35,9 @@ in
       experimental-features = [ "nix-command" "flakes" ];
       trusted-users = [
         "root"
-        config.home.username
-        "@wheel"
-        "nix-serve"
+          config.home.username
+          "@wheel"
+          "nix-serve"
       ];
     };
     package = pkgs.nixVersions.nix_2_26;
