@@ -56,6 +56,8 @@ in
     filelight  # disk usage
     gwenview
     ark
+
+    xorg.xlsclients
   ]);
 
   qt.platformTheme = "kde";

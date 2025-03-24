@@ -5035,6 +5035,10 @@ function VscodeNeovimHandler()
   vim.keymap.set({'n', 'v'}, '<C-s-/>',function() vscode.action("editor.action.blockComment") end, { silent = true })
   vim.keymap.set('v', '<C-s-/>',function() vscode.action("editor.action.blockComment") end, { silent = true })
 
+  -- continue
+  vim.keymap.set('v', '<localleader>aa',function() vscode.action("continue.focusContinueInput") end, { silent = true })
+  vim.keymap.set('v', '<localleader>ae',function() vscode.action("continue.focusEdit") end, { silent = true })
+
   -- rewrap
   vim.api.nvim_create_autocmd("InsertLeave", {
     pattern = "*.tex",

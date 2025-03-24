@@ -54,7 +54,6 @@
         };
       };
   };
-  services.xserver.enable = true;
 
   # Set syncthing GUI address to 0.0.0.0
   # So that it's accessible from Windows
