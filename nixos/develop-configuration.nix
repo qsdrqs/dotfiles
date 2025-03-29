@@ -7,6 +7,7 @@
     extra-cmake-modules
     gnumake
     gcc
+    (gcc.cc // { meta.priority = 10; }) # set a lower priority for gcc.cc (higher number means lower priority)
     libgcc
     gdb
     ninja

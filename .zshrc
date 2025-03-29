@@ -142,7 +142,6 @@ source "${ZINIT_HOME}/zinit.zsh"
 
 # load zinit plugins
 # need compinit
-zinit light $HOME/.zsh/plugins/fzf-tab
 zicompinit
 zinit light $HOME/.zsh/plugins/fast-syntax-highlighting
 zinit light $HOME/.zsh/plugins/zsh-vi-mode
@@ -154,6 +153,7 @@ zinit light $HOME/.oh-my-zsh/plugins/systemd
 zinit light $HOME/.oh-my-zsh/plugins/fd
 
 zinit wait lucid for $HOME/.oh-my-zsh/plugins/fzf
+zinit wait lucid for $HOME/.zsh/plugins/fzf-tab
 
 # load zinit themes
 zinit light $HOME/.zsh/themes/$ZSH_THEME
