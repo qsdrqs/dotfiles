@@ -489,7 +489,7 @@ fi
 
 if [[ -S /tmp/ssh-agent.sock ]]; then
     export SSH_AUTH_SOCK=/tmp/ssh-agent.sock
-else
+elif [[ -n $XDG_RUNTIME_DIR ]]; then
     if ! pgrep -u "$USER" ssh-agent > /dev/null; then
         ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
     fi

@@ -26,7 +26,7 @@ def check_and_rebuild(eth_interface, ip_addr_prefix):
 
     if out.find(ip_addr_prefix.encode()) == -1:
         # if eth is down, try to restart eth
-        print("eth is down, try to restrt eth")
+        print("eth is down, try to restart eth")
         cmd = f'ip link set {eth_interface} down'
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()

@@ -5,7 +5,8 @@ let
     rpi-gpio
     gpiozero
   ];
-  wifi-interface-external = "wlp1s0u1u2";
+  wifi-interface-internal = "wlp1s0u1u2";
+  eth-interface-internal = "enp1s0u1u3c2";
 in
 {
   imports = [
@@ -84,7 +85,7 @@ in
       ap = {
         matchConfig = {
           # Name = "wlan0";
-          Name = wifi-interface-external;
+          Name = wifi-interface-internal;
           WLANInterfaceType = "ap";
         };
         networkConfig = {
@@ -101,7 +102,7 @@ in
       };
     };
   };
-  networking.networkmanager.unmanaged = [ wifi-interface-external ];
+  networking.networkmanager.unmanaged = [ wifi-interface-internal eth-interface-internal ];
 
   services.hostapd = {
     enable = true;
@@ -126,11 +127,11 @@ in
     #     };
     #   };
     # };
-    radios."${wifi-interface-external}" = {
+    radios."${wifi-interface-internal}" = {
       channel = 6;
       countryCode = "US";
       networks = {
-        "${wifi-interface-external}" = {
+        "${wifi-interface-internal}" = {
           ssid = "RaspNix";
           authentication = {
             mode = "wpa2-sha256";
@@ -168,7 +169,7 @@ in
   systemd.services = {
     wifi-rebuild =
       let
-        wifi-interface = wifi-interface-external;
+        wifi-interface = wifi-interface-internal;
         rpi-config = "rpi";
       in
       {
@@ -190,7 +191,7 @@ in
       };
     wifi-disable-powersave =
       let
-        wifi-interface = wifi-interface-external;
+        wifi-interface = wifi-interface-internal;
       in
       {
         wantedBy = [ "multi-user.target" ];
@@ -206,7 +207,6 @@ in
       };
     eth-rebuild =
       let
-        eth-interface = "enp1s0u1u3c2";
         ip-addr-prefix = "192.168.100";
       in
       {
@@ -218,7 +218,7 @@ in
           pkgs.bash
         ];
         serviceConfig = {
-          ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-eth-rebuild.py} ${eth-interface} ${ip-addr-prefix}'';
+          ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-eth-rebuild.py} ${eth-interface-internal} ${ip-addr-prefix}'';
           Restart = "on-failure";
           RestartSec = 5;
         };

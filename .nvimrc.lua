@@ -4875,8 +4875,9 @@ vim.keymap.set('n', '<leader>pf', "<cmd>IBLToggleScope<cr><cmd>TSToggle highligh
 local original_deprecate = vim.deprecate
 vim.deprecate = function(name, alt, plugin, backtrace)
   local tbl = {
-    -- "vim.lsp.get_active_clients()"
-    -- "vim.lsp.diagnostic.get_line_diagnostics()"
+    -- "vim.region",
+    -- "client.request",
+    -- "client.supports_method",
   }
   for _, v in ipairs(tbl) do
     if name:find(v) then

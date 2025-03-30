@@ -91,7 +91,7 @@ in
       experimental-features = [ "nix-command" "flakes" ];
       trusted-users = [ "root" "qsdrqs" "@wheel" "nix-serve" ];
     };
-    package = pkgs.nixVersions.nix_2_26;
+    package = pkgs.nixVersions.latest;
     nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
   };
 
