@@ -1,6 +1,6 @@
 --- @sync entry
 local function enterable(dir)
-	if ya.target_family() == "windows" then
+	if ya.target_family() == "windows" or ya.target_os() == "android" then
 		return true
 	end
 	if not dir.cha.is_exec then
@@ -11,6 +11,9 @@ local function enterable(dir)
 	local username = ya.user_name(ya.uid())
 	local groupname = ya.group_name(ya.gid())
 	if username == "root" then
+		return true
+	end
+	if username == nil or groupname == nil then
 		return true
 	end
 	if dir.cha.uid == ya.uid() then
