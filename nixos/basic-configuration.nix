@@ -9,7 +9,7 @@ in
 
   environment.systemPackages = with pkgs; [
     appimage-run
-    nixfmt
+    nixfmt-rfc-style
     nixd # nix language server
     cscope
     global

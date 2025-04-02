@@ -54,12 +54,18 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.qsdrqs = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "input" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "input"
+    ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     openssh.authorizedKeys.keyFiles = [
-      (if builtins.pathExists ./private/authorized_keys then ./private/authorized_keys else
-      lib.warn "No authorized_keys found, please create one in ./private/authorized_keys"
-        ./empty)
+      (
+        if builtins.pathExists ./private/authorized_keys then
+          ./private/authorized_keys
+        else
+          lib.warn "No authorized_keys found, please create one in ./private/authorized_keys" ./empty
+      )
     ];
   };
 
@@ -88,8 +94,16 @@ in
     };
     settings = {
       auto-optimise-store = true;
-      experimental-features = [ "nix-command" "flakes" ];
-      trusted-users = [ "root" "qsdrqs" "@wheel" "nix-serve" ];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      trusted-users = [
+        "root"
+        "qsdrqs"
+        "@wheel"
+        "nix-serve"
+      ];
     };
     package = pkgs.nixVersions.latest;
     nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
@@ -104,10 +118,16 @@ in
   environment.localBinInPath = true;
 
   nix.settings = {
-    substituters = [ "https://yazi.cachix.org" "https://nix-community.cachix.org" ];
+    # need to explicitly set this to use cachix
+    substituters = [
+      "https://yazi.cachix.org"
+      "https://nix-community.cachix.org"
+      "https://cache.nixos.org/"
+    ];
     trusted-public-keys = [
       "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
   };
 
@@ -142,17 +162,18 @@ in
     (pkgs.buildFHSEnv {
       name = "fhs";
       runScript = "zsh";
-      targetPkgs = pkgs: with pkgs; [
-      ];
+      targetPkgs = pkgs: with pkgs; [ ];
     })
     config.boot.kernelPackages.cpupower
     memtester
     patchelf
-    (python3.withPackages (ps: with ps; [
-      ipython
-      tkinter
-      pip
-    ]))
+    (python3.withPackages (
+      ps: with ps; [
+        ipython
+        tkinter
+        pip
+      ]
+    ))
     lsof
     bat
     file
@@ -200,9 +221,7 @@ in
     };
     nix-ld = {
       enable = true;
-      libraries = with pkgs; [
-        stdenv.cc.cc.lib
-      ];
+      libraries = with pkgs; [ stdenv.cc.cc.lib ];
     };
     gnupg.agent.enable = true;
     command-not-found.enable = false;
@@ -249,20 +268,28 @@ in
         pkgs.interception-tools-plugins.ctrl2esc
       ];
       udevmonConfig = plugin: ''
-        - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins."${plugin}"}/bin/${plugin} | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
+        - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${
+          pkgs.interception-tools-plugins."${plugin}"
+        }/bin/${plugin} | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
           DEVICE:
             EVENTS:
               EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
       '';
       interception-tools-service = plugin: {
         description = "Interception tools";
-        path = [ pkgs.bash pkgs.interception-tools ] ++ interception-tools-plugins;
+        path = [
+          pkgs.bash
+          pkgs.interception-tools
+        ] ++ interception-tools-plugins;
         serviceConfig = {
           ExecStart = ''
             ${pkgs.interception-tools}/bin/udevmon -c \
-            ${if builtins.typeOf (udevmonConfig plugin) == "path"
-            then (udevmonConfig plugin)
-            else pkgs.writeText "udevmon.yaml" (udevmonConfig plugin)}
+            ${
+              if builtins.typeOf (udevmonConfig plugin) == "path" then
+                (udevmonConfig plugin)
+              else
+                pkgs.writeText "udevmon.yaml" (udevmonConfig plugin)
+            }
           '';
           Nice = -20;
         };
@@ -270,7 +297,9 @@ in
       };
     in
     {
-      interception-tools-caps2esc = interception-tools-service "caps2esc" // { wantedBy = []; }; # disable by default
+      interception-tools-caps2esc = interception-tools-service "caps2esc" // {
+        wantedBy = [ ];
+      }; # disable by default
       interception-tools-ctrl2esc = interception-tools-service "ctrl2esc";
     };
 
