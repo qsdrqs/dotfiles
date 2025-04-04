@@ -19,7 +19,7 @@ in {
     lsd
     fd
     duf
-    ncdu
+    gdu
     ripgrep
     grc
     fastfetch

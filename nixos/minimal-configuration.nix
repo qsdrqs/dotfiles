@@ -186,7 +186,7 @@ in
     home-manager
     nix-tree
     duf
-    ncdu
+    gdu
     lsb-release
     valgrind
     sqlite
