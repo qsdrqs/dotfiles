@@ -34,7 +34,7 @@ Status:children_add(function()
 		if user == nil then
 			user = uid
 		end
-		spans[#spans + 1] = ui.Span(user .. " " .. group .. " "):style(THEME.status.permissions_r)
+		spans[#spans + 1] = ui.Span(user .. " " .. group .. " "):style(th.status.permissions_r)
 	end
 
 	if h.cha.mtime ~= nil then
@@ -67,9 +67,9 @@ function Entity:style()
 	if not file:is_hovered() then
 		return s
 	elseif file:in_preview() then
-		return s and s:patch(THEME.manager.preview_hovered) or THEME.manager.preview_hovered
+		return s and s:patch(th.mgr.preview_hovered) or th.mgr.preview_hovered
 	else
-		return s and s:patch(THEME.manager.hovered) or THEME.manager.hovered
+		return s and s:patch(th.mgr.hovered) or th.mgr.hovered
 	end
 end
 

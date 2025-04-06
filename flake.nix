@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/1e5b653dff12029333a6546c11e108ede13052eb";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/5e5402ecbcb27af32284d4a62553c019a3a49ea6";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
     naersk = {
@@ -29,10 +29,10 @@
     yazi = {
       url = "github:sxyazi/yazi";
     };
-    yazi-aarch64-nightly = {
-      url = "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-aarch64-unknown-linux-gnu.zip";
-      flake = false;
-    };
+    # yazi-aarch64-nightly = {
+    #   url = "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-aarch64-unknown-linux-gnu.zip";
+    #   flake = false;
+    # };
 
     ranger-config.url = "path:ranger";
     zsh-config.url = "path:zsh";
@@ -112,7 +112,7 @@
       flake = false;
     };
     yazi-plugins = {
-      url = "github:yazi-rs/plugins";
+      url = "github:yazi-rs/plugins/2730199";
       flake = false;
     };
     yazi-starship = {
