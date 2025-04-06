@@ -136,6 +136,7 @@ in
     (if config.boot.loader.grub.enable then grub2 else packages.dummy)
     zoxide
     packages.mkcd
+    packages.patchdir
     lsd
     wget
     curl

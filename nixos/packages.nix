@@ -93,4 +93,15 @@
     mkdir -p "$1" && cd "$1"
   '';
 
+patchdir = { pkgs }: pkgs.writeShellScriptBin "patchdir" ''
+  if [[ -z $1 ]]; then
+    echo "Usage: patchdir <directory>"
+    exit 1
+  fi
+  ${pkgs.findutils}/bin/find "$1" -type f -exec sh -c '
+    if ${pkgs.file}/bin/file "$1" | grep -q "ELF"; then
+      ${pkgs.patchelf}/bin/patchelf --add-rpath $NIX_LD_LIBRARY_PATH "$1"
+    fi
+  ' _ {} \;
+'';
 }
