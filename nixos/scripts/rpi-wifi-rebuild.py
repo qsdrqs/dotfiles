@@ -34,8 +34,6 @@ def check_and_rebuild(wifi_interface, nixos_config):
         # if wifi is down, try to rebuild nixos
         print("Wifi is down, try to rebuild nixos")
         cwd = "/etc/nix/current-profile-source"
-        cmd_pre = ["./install.sh", "nixpre"]
-        subprocess.run(cmd_pre, cwd=cwd)
         # sudo nixos-rebuild switch --flake path:.#$@
         cmd_rebuild = ["nixos-rebuild", "switch", "--flake", f"path:.#{nixos_config}"]
         subprocess.run(cmd_rebuild, cwd=cwd)

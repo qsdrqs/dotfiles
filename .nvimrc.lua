@@ -3784,7 +3784,7 @@ local plugins = {
     config = function()
       local opts = {
         -- add any opts here
-        provider = "deepseek",
+        provider = "openai",
         vendors = {
           ollama = {
             api_key_name = "",
@@ -3798,7 +3798,7 @@ local plugins = {
           deepseek = {
             __inherited_from = "openai",
             endpoint = "https://api.deepseek.com",
-            model = "deepseek-reasoner",
+            model = "deepseek-chat",
             disable_tools = true,
           },
         },

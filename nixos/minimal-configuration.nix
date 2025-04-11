@@ -222,7 +222,10 @@ in
     };
     nix-ld = {
       enable = true;
-      libraries = with pkgs; [ stdenv.cc.cc.lib ];
+      libraries = with pkgs; [
+        stdenv.cc.cc.lib
+        glib
+      ];
     };
     gnupg.agent.enable = true;
     command-not-found.enable = false;

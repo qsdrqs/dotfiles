@@ -120,6 +120,8 @@ in
         path = [ pkgs.kdePackages.kdeconnect-kde ];
         serviceConfig = {
           Type = "simple";
+          Restart = "on-failure";
+          RestartSec = 5;
           ExecStart = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnectd";
         };
       };
