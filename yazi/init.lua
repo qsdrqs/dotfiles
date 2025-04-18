@@ -64,9 +64,9 @@ function Entity:style()
 		end
 		s:bold()
 	end
-	if not file:is_hovered() then
+	if not file.is_hovered then
 		return s
-	elseif file:in_preview() then
+	elseif file.in_preview then
 		return s and s:patch(th.mgr.preview_hovered) or th.mgr.preview_hovered
 	else
 		return s and s:patch(th.mgr.hovered) or th.mgr.hovered
@@ -108,7 +108,7 @@ function Linemode:gitstatus()
 		['󰊢'] = gitstatus_git,
 	}
 	if gitstatus then
-		if f:is_hovered() then
+		if f.is_hovered then
 			return ui.Line(gitstatus)
 		elseif status_color_tbl[gitstatus] then
 			return ui.Line(gitstatus):style(status_color_tbl[gitstatus])

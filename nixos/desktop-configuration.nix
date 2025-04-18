@@ -178,7 +178,6 @@ in
     termshark
 
     obs-studio
-    openconnect_openssl
 
     texlive.combined.scheme-full
 

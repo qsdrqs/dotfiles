@@ -57,10 +57,10 @@ return {
 		local h = cx.active.current.hovered
 		if h.cha.is_dir then
 			if enterable(h) then
-				ya.manager_emit("enter", {})
+				ya.mgr_emit("enter", {})
 			end
 		else
-			ya.manager_emit("open", {})
+			ya.mgr_emit("open", {})
 		end
 	end,
 }

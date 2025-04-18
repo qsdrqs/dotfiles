@@ -15,6 +15,7 @@ in
     global
     ctags
     firejail
+    openconnect_openssl
     # (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else dummy)
     openssl
     openssl.out # openssl lib

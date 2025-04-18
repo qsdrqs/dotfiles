@@ -380,12 +380,12 @@ function M.entry()
 		return
 	end
 	if base_url == "/" then
-		ya.manager_emit("enter", {})
-		ya.manager_emit("leave", {})
+		ya.mgr_emit("enter", {})
+		ya.mgr_emit("leave", {})
 		return
 	end
-	ya.manager_emit("leave", {})
-	ya.manager_emit("enter", {})
+	ya.mgr_emit("leave", {})
+	ya.mgr_emit("enter", {})
 end
 
 return M

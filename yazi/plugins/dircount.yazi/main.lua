@@ -12,11 +12,11 @@ local update_dircount = ya.sync(function(st, st_dircount)
 		st.dircount[k] = v
 	end
 	Linemode.file_count = function(self, file)
-		if file:is_hovered() then
+		if file.is_hovered then
 			if st.dircount_lock[tostring(file.url)] then
 				st.dircount_lock[tostring(file.url)] = false
 			else
-				ya.manager_emit("plugin", { "dircount", tostring(file.url)})
+				ya.mgr_emit("plugin", { "dircount", tostring(file.url)})
 			end
 		end
 		return st.dircount[tostring(file.url)]

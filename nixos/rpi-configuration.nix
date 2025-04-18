@@ -57,6 +57,7 @@ in
 
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+  boot.kernel.sysctl."net.ipv6.ip_forward" = 1;
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
@@ -71,9 +72,10 @@ in
     networks = {
       enp1s0 = {
         matchConfig.Name = "enp1s0*";
+        address = [ "192.168.100.1/24" "fdc1:7bb0:a600:1::1/64" ];
         networkConfig = {
-          Address = "192.168.100.1/24";
           DHCPServer = true;
+          IPv6SendRA = true;
           IPMasquerade = "both";
         };
         dhcpServerConfig = {
@@ -88,9 +90,10 @@ in
           Name = wifi-interface-internal;
           WLANInterfaceType = "ap";
         };
+        address = [ "192.168.12.1/24" "fdc1:7bb0:a600:2::1/64" ];
         networkConfig = {
-          Address = "192.168.12.1/24";
           DHCPServer = true;
+          IPv6AcceptRA = true;
           IPMasquerade = "both";
           IgnoreCarrierLoss = true;
         };

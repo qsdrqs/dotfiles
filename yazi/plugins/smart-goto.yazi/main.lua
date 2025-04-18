@@ -14,11 +14,11 @@ return {
 			top_pos = cursor_pos
 
 			if args[2] == "interactive" then
-				ya.manager_emit("cd", {interactive = true})
+				ya.mgr_emit("cd", {interactive = true})
 				return
 			end
 			if args[2] == "zoxide" or args[2] == "fzf" then
-				ya.manager_emit("plugin", {tostring(args[2])})
+				ya.mgr_emit("plugin", {tostring(args[2])})
 				return
 			end
 
@@ -41,9 +41,9 @@ return {
 			end
 
 			if not reveal then
-				ya.manager_emit("cd", {tostring(jump_target)})
+				ya.mgr_emit("cd", {tostring(jump_target)})
 			else
-				ya.manager_emit("reveal", {tostring(jump_target)})
+				ya.mgr_emit("reveal", {tostring(jump_target)})
 			end
 		elseif args[1] == 'back' then
 			local h = cx.active.current.hovered
@@ -54,7 +54,7 @@ return {
 			end
 
 			if cursor_pos > 1 then
-				ya.manager_emit("reveal", {tostring(curr_pos_stack[cursor_pos - 1])})
+				ya.mgr_emit("reveal", {tostring(curr_pos_stack[cursor_pos - 1])})
 				cursor_pos = cursor_pos - 1
 			end
 		elseif args[1] == 'forward' then
@@ -66,7 +66,7 @@ return {
 			end
 
 			if cursor_pos < top_pos then
-				ya.manager_emit("reveal", {tostring(curr_pos_stack[cursor_pos + 1])})
+				ya.mgr_emit("reveal", {tostring(curr_pos_stack[cursor_pos + 1])})
 				cursor_pos = cursor_pos + 1
 			end
 		end

@@ -81,15 +81,6 @@ in
         # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
-        kitty = super.kitty.overrideAttrs (oldAttrs: rec {
-          version = "0.41.0";
-          src = pkgs.fetchFromGitHub {
-            owner = "kovidgoyal";
-            repo = "kitty";
-            tag = "v${version}";
-            hash = "sha256-5Yq4/zRqi5gK2obFTzGKR13FfyD7/G21C6WsA9QxFIg=";
-          };
-        });
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages

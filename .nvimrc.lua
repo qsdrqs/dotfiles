@@ -1622,11 +1622,14 @@ local plugins = {
       end
       require 'nvim-treesitter.configs'.setup {
         -- One of "all", or a list of languages
-        ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust", "markdown"},
+        -- ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust", "markdown"},
 
         -- Install languages synchronously (only applied to `ensure_installed`)
         sync_install = false,
 
+        -- Automatically install missing parsers when entering buffer
+        -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+        auto_install = true,
 
         -- List of parsers to ignore installing
         -- ignore_install = { "javascript" },

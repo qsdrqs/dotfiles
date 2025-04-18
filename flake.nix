@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/5e5402ecbcb27af32284d4a62553c019a3a49ea6";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/2c8d3f48d33929642c1c12cd243df4cc7d2ce434";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
     naersk = {
@@ -112,7 +112,7 @@
       flake = false;
     };
     yazi-plugins = {
-      url = "github:yazi-rs/plugins/2730199";
+      url = "github:yazi-rs/plugins";
       flake = false;
     };
     yazi-starship = {
