@@ -314,7 +314,6 @@ nix-devel() {
 }
 
 # direnv for nix flakes
-export DIRENV_LOG_FORMAT=
 if [[ -x `command -v direnv` ]]; then
     eval "$(direnv hook zsh)"
 fi

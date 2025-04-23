@@ -25,4 +25,9 @@
     target = ".local/bin/rofi-hyprwindow";
     executable = true;
   };
+
+  services.kdeconnect ={
+    enable = true;
+    indicator = true;
+  };
 }

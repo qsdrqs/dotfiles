@@ -6,8 +6,9 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/2c8d3f48d33929642c1c12cd243df4cc7d2ce434";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/f675531bc7e6657c10a18b565cfebd8aa9e24c14";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs-zoom.url = "github:Yarny0/nixpkgs/zoom-fhs";
     # Specific commits to fix the version of some packages.
     naersk = {
       url = "github:nix-community/naersk";
@@ -135,7 +136,7 @@
             config.allowUnfree = true;
             overlays = (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
           });
-        }) [ "pkgs-master" "pkgs-stable" "pkgs-last" "pkgs" ]
+        }) [ "pkgs-master" "pkgs-stable" "pkgs-last" "pkgs" "pkgs-zoom" ]
       );
       minimalHomeModules = [
         ./nixos/home.nix
@@ -159,6 +160,7 @@
         pkgs-master = pkgs-collect.pkgs-master system;
         pkgs-stable = pkgs-collect.pkgs-stable system;
         pkgs-last = pkgs-collect.pkgs-last system;
+        pkgs-zoom = pkgs-collect.pkgs-zoom system;
       };
 
       minimalConfig = rec {

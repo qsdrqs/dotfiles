@@ -111,26 +111,11 @@ in
           ExecStart = "${pkgs.kdePackages.dolphin}/bin/dolphin";
         };
       };
-      kdeconnectd = {
-        wantedBy = [ "graphical-session.target" ];
-        unitConfig = {
-          Description = "KDE Connect Daemon";
-          PartOf = [ "graphical-session.target" ];
-        };
-        path = [ pkgs.kdePackages.kdeconnect-kde ];
-        serviceConfig = {
-          Type = "simple";
-          Restart = "on-failure";
-          RestartSec = 5;
-          ExecStart = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnectd";
-        };
-      };
     };
   };
 
   programs = {
     dconf.enable = true;
-    kdeconnect.enable = true;
   };
 
   # provide org.freedesktop.secrets
@@ -151,10 +136,10 @@ in
     enable = true;
     autoNumlock = true;
     settings = {
-      Autologin = {
-        Session = "hyprland.desktop";
-        User = "qsdrqs";
-      };
+      # Autologin = {
+      #   Session = "hyprland.desktop";
+      #   User = "qsdrqs";
+      # };
     };
   };
   # Workaround for kwin to work with numlock on
