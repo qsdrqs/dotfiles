@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1744901873,
-        "narHash": "sha256-5iG1Dh6gJk9xQTMC9f27/K8t7JDYGERp8bC8aM9dCBo=",
+        "lastModified": 1745502146,
+        "narHash": "sha256-s5lvs1FKIQbOf83U5tzJ4VSV0rfdtVq1XIwKGWKTe04=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "c1e5ff31693f391a0bbb30b12c8e7bc1cc976b7b",
+        "rev": "959b6cf5eed78f108dc6e0f46b53816f5168dd3a",
         "type": "github"
       },
       "original": {
@@ -81,11 +81,11 @@
     "spaceship": {
       "flake": false,
       "locked": {
-        "lastModified": 1744989448,
-        "narHash": "sha256-KGO0Sb20HNGZ/8WWWnzTm5UjHr6BPFZzXyt4TMORq4U=",
+        "lastModified": 1745412022,
+        "narHash": "sha256-MVN9XOhri64ecmPt9oE7jPmGmLuhYZ9eP3rIbgLz8zs=",
         "owner": "denysdovhan",
         "repo": "spaceship-prompt",
-        "rev": "66e3e0408eb0ca86ef8e4af5cb67b2ee5bb538a0",
+        "rev": "40ec1e7f94cf9987ed424fb58f7d7a66b10e4f38",
         "type": "github"
       },
       "original": {
@@ -161,11 +161,11 @@
     "zsh-vi-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1719915553,
-        "narHash": "sha256-UQo9shimLaLp68U3EcsjcxokJHOTGhOjDw4XDx6ggF4=",
+        "lastModified": 1745287036,
+        "narHash": "sha256-CkU0qd0ba9QsPaI3rYCgalbRR5kWYWIa0Kn7L07aNUI=",
         "owner": "jeffreytse",
         "repo": "zsh-vi-mode",
-        "rev": "cd730cd347dcc0d8ce1697f67714a90f07da26ed",
+        "rev": "f82c4c8f4b2bdd9c914653d8f21fbb32e7f2ea6c",
         "type": "github"
       },
       "original": {

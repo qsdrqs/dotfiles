@@ -111,6 +111,26 @@ in
           ExecStart = "${pkgs.kdePackages.dolphin}/bin/dolphin";
         };
       };
+      kdeconnect-cli-autorefresh =
+      let
+        kdeconnect-cli-path = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnect-cli";
+        interval_seconds = 10;
+      in
+      {
+        wantedBy = [ "graphical-session.target" ];
+        unitConfig = {
+          Description = "KDE Connect CLI Auto Refresh";
+          PartOf = [ "graphical-session.target" ];
+        };
+        path = [
+          pkgs.kdePackages.kdeconnect-kde
+          pkgs.python3
+          pkgs.procps
+        ];
+        serviceConfig = {
+          ExecStart = "${pkgs.python3}/bin/python ${./scripts/kdeconnect-cli-autorefresh.py} ${builtins.toString interval_seconds}";
+        };
+      };
     };
   };
 

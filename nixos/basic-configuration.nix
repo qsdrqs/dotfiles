@@ -73,7 +73,7 @@ in
     };
     xray = {
       enable = true;
-      settingsFile = "/etc/xray/config.json";
+      settingsFile = "/etc/xray/config.jsonc";
     };
   };
 
@@ -129,6 +129,7 @@ in
       };
     };
     timers."chown-home@${userName}" = {
+      enable = false;
       description = "Run chown-home@${userName}.service daily";
       timerConfig = {
         OnCalendar = "daily";

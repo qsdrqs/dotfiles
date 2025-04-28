@@ -2222,6 +2222,7 @@ local plugins = {
   },
 
   {
+    -- TODO: deprecated
     "akinsho/git-conflict.nvim",
     config = function()
       require('git-conflict').setup {

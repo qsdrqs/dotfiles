@@ -74,6 +74,7 @@ in
 
   system.activationScripts.link_bin_bash.text = ''
     ln -sf ${pkgs.bash}/bin/bash /bin/bash
+    mkdir -p /usr/bin
     ln -sf ${pkgs.bash}/bin/bash /usr/bin/bash
   '';
 

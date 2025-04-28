@@ -52,7 +52,7 @@ in
   programs.zsh = {
     enable = true;
     dotDir = ".config/zsh";
-    initExtraFirst = ''
+    initContent = lib.mkBefore ''
       if [ -e $HOME/.zshrc ]; then
         ZSH_CUSTOM="$HOME/.zsh"
         # source grc
@@ -141,6 +141,14 @@ in
         elif [ -d /mnt/Windows/Fonts ]; then
           ln -s /mnt/Windows/Fonts/ ~/.local/share/fonts/Windows
         fi
+      fi
+    '';
+
+    # chown of ~/.ssh directory
+    chownSsh = ''
+      if [ -d ~/.ssh ]; then
+        group=$(stat -c "%G" $HOME)
+        chown -R $USER:$group ~/.ssh
       fi
     '';
   };
