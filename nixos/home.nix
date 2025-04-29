@@ -143,13 +143,5 @@ in
         fi
       fi
     '';
-
-    # chown of ~/.ssh directory
-    chownSsh = ''
-      if [ -d ~/.ssh ]; then
-        group=$(stat -c "%G" $HOME)
-        chown -R $USER:$group ~/.ssh
-      fi
-    '';
   };
 }

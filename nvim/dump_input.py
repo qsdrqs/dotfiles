@@ -74,6 +74,11 @@ def main():
         if 'branch' in json_opts:
             branch = json_opts['branch']
 
+        # check tag
+        tag = None
+        if 'tag' in json_opts:
+            tag = json_opts['tag']
+
         # check commit
         commit = None
         if 'commit' in json_opts:
@@ -87,6 +92,8 @@ def main():
                 url += f'?rev={commit}'
             if branch != None:
                 url += f'?ref={branch}'
+            if tag != None:
+                url += f'/{tag}'
             plugins_dict[plugin_name] = {
                 'url': url,
                 'build': need_build,

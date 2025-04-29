@@ -2224,6 +2224,7 @@ local plugins = {
   {
     -- TODO: deprecated
     "akinsho/git-conflict.nvim",
+    tag = 'v2.1.0',
     config = function()
       require('git-conflict').setup {
         default_mappings = false
@@ -4455,6 +4456,9 @@ function DumpPluginsList()
     opt = {}
     if plugin.branch ~= nil then
       opt.branch = plugin.branch
+    end
+    if plugin.tag ~= nil then
+      opt.tag = plugin.tag
     end
     if plugin.build ~= nil then
       opt.build = true

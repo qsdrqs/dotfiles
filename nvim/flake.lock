@@ -654,15 +654,16 @@
     "git-conflictDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1735340003,
-        "narHash": "sha256-CmSgmpg5K3ySXYrDjg8yTAojeLWJdSHP8uNVFyrkNhc=",
+        "lastModified": 1731162896,
+        "narHash": "sha256-1t0kKxTGLuOvuRkoLgkoqMZpF+oKo8+gMsTdgPsSb+8=",
         "owner": "akinsho",
         "repo": "git-conflict.nvim",
-        "rev": "a1badcd070d176172940eb55d9d59029dad1c5a6",
+        "rev": "4bbfdd92d547d2862a75b4e80afaf30e73f7bbb4",
         "type": "github"
       },
       "original": {
         "owner": "akinsho",
+        "ref": "v2.1.0",
         "repo": "git-conflict.nvim",
         "type": "github"
       }

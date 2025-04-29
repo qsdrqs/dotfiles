@@ -225,7 +225,7 @@
       flake = false;
     };
     git-conflictDOTnvim = {
-      url = "github:akinsho/git-conflict.nvim";
+      url = "github:akinsho/git-conflict.nvim/v2.1.0";
       flake = false;
     };
     diffviewDOTnvim = {
