@@ -714,15 +714,6 @@ local plugins = {
               }
             }
           }
-          lsp_common_config.on_attach = function(client, bufnr)
-            common_on_attach(client,bufnr)
-            local semantic = client.config.capabilities.textDocument.semanticTokens
-            client.server_capabilities.semanticTokensProvider = {
-              full = true,
-              legend = {tokenModifiers = semantic.tokenModifiers, tokenTypes = semantic.tokenTypes},
-              range = true,
-            }
-          end
         elseif lsp == "grammarly" then
           lsp_common_config.filetypes = { "markdown", "tex" }
           lsp_common_config.cmd = (function()

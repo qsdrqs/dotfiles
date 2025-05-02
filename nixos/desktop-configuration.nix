@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-zoom, inputs, ... }:
+{ config, pkgs, pkgs-master, lib, pkgs-zoom, inputs, ... }:
 let
   ida64-fhs = pkgs.buildFHSEnv {
     name = "ida64";
@@ -302,6 +302,7 @@ in
   services.ollama = {
     enable = true;
     acceleration = "cuda";
+    package = pkgs-master.ollama;
   };
 
 }

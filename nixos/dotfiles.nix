@@ -95,6 +95,7 @@ in
     { name = "after"; target = ".config/nvim/after"; }
     { name = ".vimrc"; target = ".config/nvim/init.vim"; }
     { name = "starship/starship-yazi.toml"; target = ".config/starship-yazi.toml"; }
+    { name = "direnv/direnv.toml"; target = ".config/direnv/direnv.toml"; }
   ] //
   symbfileTargetNoRecursive [
     { name = "nvim/lua"; target = ".config/nvim/lua"; }
