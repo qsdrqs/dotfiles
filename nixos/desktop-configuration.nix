@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-master, lib, pkgs-zoom, inputs, ... }:
+{ config, pkgs, pkgs-master, lib, inputs, ... }:
 let
   ida64-fhs = pkgs.buildFHSEnv {
     name = "ida64";
@@ -160,7 +160,7 @@ in
     (google-chrome.override (prev: {
       commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
     }))
-    pkgs-zoom.zoom-us
+    zoom-us
     kdePackages.kate
     scrcpy
     wineWowPackages.unstableFull
