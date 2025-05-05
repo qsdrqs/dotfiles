@@ -130,6 +130,16 @@ local kind_icons = {
   Null           = "ﳠ ",
 }
 
+-- Highlight group for colorizers
+local highlight_group_list = {
+  "Color1",
+  "Color2",
+  "Color3",
+  "Color4",
+  "Color5",
+  "Color6",
+}
+
 -- git navigations by vscode-neovim
 local function vscode_next_hunk()
   require("vscode-neovim").action("workbench.action.editor.nextChange")
@@ -468,6 +478,30 @@ local plugins = {
     'p00f/clangd_extensions.nvim',
     dependencies = 'nvim-lspconfig',
   },
+  {
+    "aznhe21/actions-preview.nvim",
+    keys = {
+      {"<leader>ca", mode = {'v', 'n'}},
+    },
+    config = function()
+      require("actions-preview").setup {
+        telescope = {
+          sorting_strategy = "ascending",
+          layout_strategy = "vertical",
+          layout_config = {
+            width = 0.8,
+            height = 0.9,
+            prompt_position = "top",
+            preview_cutoff = 20,
+            preview_height = function(_, _, max_lines)
+              return max_lines - 15
+            end,
+          },
+        },
+      }
+      vim.keymap.set({ "v", "n" }, "<leader>ca", require("actions-preview").code_actions)
+    end,
+  },
 
   {
     'neovim/nvim-lspconfig',
@@ -531,7 +565,6 @@ local plugins = {
       vim.keymap.set('n', '<space>al', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
       vim.keymap.set('n', '<space>D', '<cmd>Trouble lsp_type_definitions<CR>', opts)
       -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
-      vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
       vim.api.nvim_create_autocmd("FileType", {
         pattern = {"c", "cpp"},
         callback = function(args)
@@ -1779,16 +1812,7 @@ local plugins = {
         vim.g.indent_blankline_show_current_context = true
         vim.g.indent_blankline_show_current_context_start = true
       end
-      local highlight = {
-        "Color1",
-        "Color2",
-        "Color3",
-        "Color4",
-        "Color5",
-        "Color6",
-      }
       local hooks = require "ibl.hooks"
-      vim.g.rainbow_delimiters = { highlight = highlight }
       require("ibl").setup {
         indent = {
           -- char = '▏',
@@ -1797,7 +1821,7 @@ local plugins = {
         debounce = 300,
         scope = {
           enabled = true,
-          highlight = highlight,
+          highlight = highlight_group_list,
           show_end = true,
         },
 
@@ -1812,26 +1836,17 @@ local plugins = {
       return vim.g.treesitter_disable ~= true
     end,
     config = function()
-      local rainbow_delimiters = require 'rainbow-delimiters'
       require 'rainbow-delimiters.setup' {
         strategy = {
-          [''] = rainbow_delimiters.strategy['global'],
-          vim = rainbow_delimiters.strategy['local'],
-          latex = rainbow_delimiters.strategy['local'],
+          [''] = 'rainbow-delimiters.strategy.global',
+          vim = 'rainbow-delimiters.strategy.local',
         },
         query = {
           [''] = 'rainbow-delimiters',
           lua = 'rainbow-blocks',
           latex = 'rainbow-blocks',
         },
-        highlight = {
-          "Color1",
-          "Color2",
-          "Color3",
-          "Color4",
-          "Color5",
-          "Color6",
-        },
+        highlight = highlight_group_list,
         blacklist = {  },
       }
     end
@@ -2213,7 +2228,7 @@ local plugins = {
   },
 
   {
-    -- TODO: deprecated
+    -- NOTE: prefer to use diffview.nvim instead
     "akinsho/git-conflict.nvim",
     tag = 'v2.1.0',
     config = function()
@@ -3597,16 +3612,17 @@ local plugins = {
       vim.keymap.set('n', '<leader>H', "<cmd>call UncolorAllWords()<cr>", { silent = true })
     end
   },
-  {'honza/vim-snippets', lazy = true },
+  { "rafamadriz/friendly-snippets", lazy = true },
   {
     'L3MON4D3/LuaSnip',
     lazy = true,
     dependencies = {
-      {'honza/vim-snippets', rtp = '.'},
+      {'rafamadriz/friendly-snippets', rtp = '.'},
     },
     config = function()
       vim.opt.rtp:prepend(os.getenv("HOME") .. '/dotfiles/.vim')
       require("luasnip.loaders.from_snipmate").lazy_load()
+      require("luasnip.loaders.from_vscode").lazy_load()
       require("dotfiles.luasnip")
       local ls = require("luasnip")
       ls.setup({
@@ -4566,6 +4582,7 @@ function LazyLoadPlugins()
       'none-ls.nvim',
       'lsp_signature.nvim',
       'dropbar.nvim',
+      'actions-preview.nvim',
       -- end lsp
 
       -- begin git

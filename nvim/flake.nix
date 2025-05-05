@@ -64,6 +64,10 @@
       url = "github:p00f/clangd_extensions.nvim";
       flake = false;
     };
+    actions-previewDOTnvim = {
+      url = "github:aznhe21/actions-preview.nvim";
+      flake = false;
+    };
     nvim-lspconfig = {
       url = "github:neovim/nvim-lspconfig";
       flake = false;
@@ -408,8 +412,8 @@
       url = "github:lfv89/vim-interestingwords";
       flake = false;
     };
-    vim-snippets = {
-      url = "github:honza/vim-snippets";
+    friendly-snippets = {
+      url = "github:rafamadriz/friendly-snippets";
       flake = false;
     };
     CopilotChatDOTnvim = {
@@ -523,6 +527,7 @@
         { name = "nvim-jdtls"; dotname = "nvim-jdtls"; source = inputs.nvim-jdtls; build = false; }
         { name = "rustaceanvim"; dotname = "rustaceanvim"; source = inputs.rustaceanvim; build = false; }
         { name = "clangd_extensions.nvim"; dotname = "clangd_extensionsDOTnvim"; source = inputs.clangd_extensionsDOTnvim; build = false; }
+        { name = "actions-preview.nvim"; dotname = "actions-previewDOTnvim"; source = inputs.actions-previewDOTnvim; build = false; }
         { name = "nvim-lspconfig"; dotname = "nvim-lspconfig"; source = inputs.nvim-lspconfig; build = false; }
         { name = "statuscol.nvim"; dotname = "statuscolDOTnvim"; source = inputs.statuscolDOTnvim; build = false; }
         { name = "nvim-lightbulb"; dotname = "nvim-lightbulb"; source = inputs.nvim-lightbulb; build = false; }
@@ -609,7 +614,7 @@
         { name = "vim-textobj-user"; dotname = "vim-textobj-user"; source = inputs.vim-textobj-user; build = false; }
         { name = "vim-textobj-entire"; dotname = "vim-textobj-entire"; source = inputs.vim-textobj-entire; build = false; }
         { name = "vim-interestingwords"; dotname = "vim-interestingwords"; source = inputs.vim-interestingwords; build = false; }
-        { name = "vim-snippets"; dotname = "vim-snippets"; source = inputs.vim-snippets; build = false; }
+        { name = "friendly-snippets"; dotname = "friendly-snippets"; source = inputs.friendly-snippets; build = false; }
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
         { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
         { name = "nui.nvim"; dotname = "nuiDOTnvim"; source = inputs.nuiDOTnvim; build = false; }

@@ -48,6 +48,22 @@
         "type": "github"
       }
     },
+    "actions-previewDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1745779150,
+        "narHash": "sha256-rQjwlu5gQcOvxF72lr9ugPRl0W78wCWGWPhpN1oOMbs=",
+        "owner": "aznhe21",
+        "repo": "actions-preview.nvim",
+        "rev": "36513ad213855d497b7dd3391a24d1d75d58e36f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "aznhe21",
+        "repo": "actions-preview.nvim",
+        "type": "github"
+      }
+    },
     "aerialDOTnvim": {
       "flake": false,
       "locked": {
@@ -648,6 +664,22 @@
       "original": {
         "owner": "willothy",
         "repo": "flatten.nvim",
+        "type": "github"
+      }
+    },
+    "friendly-snippets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1745949052,
+        "narHash": "sha256-FzApcTbWfFkBD9WsYMhaCyn6ky8UmpUC2io/co/eByM=",
+        "owner": "rafamadriz",
+        "repo": "friendly-snippets",
+        "rev": "572f5660cf05f8cd8834e096d7b4c921ba18e175",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rafamadriz",
+        "repo": "friendly-snippets",
         "type": "github"
       }
     },
@@ -1629,6 +1661,7 @@
         "CommentDOTnvim": "CommentDOTnvim",
         "CopilotChatDOTnvim": "CopilotChatDOTnvim",
         "LuaSnip": "LuaSnip",
+        "actions-previewDOTnvim": "actions-previewDOTnvim",
         "aerialDOTnvim": "aerialDOTnvim",
         "alignDOTnvim": "alignDOTnvim",
         "alpha-nvim": "alpha-nvim",
@@ -1662,6 +1695,7 @@
         "firenvim": "firenvim",
         "flashDOTnvim": "flashDOTnvim",
         "flattenDOTnvim": "flattenDOTnvim",
+        "friendly-snippets": "friendly-snippets",
         "git-conflictDOTnvim": "git-conflictDOTnvim",
         "gitsignsDOTnvim": "gitsignsDOTnvim",
         "gutentags_plus": "gutentags_plus",
@@ -1745,7 +1779,6 @@
         "vim-matchup": "vim-matchup",
         "vim-sandwich": "vim-sandwich",
         "vim-sleuth": "vim-sleuth",
-        "vim-snippets": "vim-snippets",
         "vim-textobj-entire": "vim-textobj-entire",
         "vim-textobj-user": "vim-textobj-user",
         "vim-visual-multi": "vim-visual-multi",
@@ -2237,22 +2270,6 @@
       "original": {
         "owner": "tpope",
         "repo": "vim-sleuth",
-        "type": "github"
-      }
-    },
-    "vim-snippets": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1723568473,
-        "narHash": "sha256-jKeWrY2BPxtwrhrVNK1a5MK/0QXFuZcADWuD/l24yaY=",
-        "owner": "honza",
-        "repo": "vim-snippets",
-        "rev": "f0a3184d9f90b96b044d5914625a25c554d7f301",
-        "type": "github"
-      },
-      "original": {
-        "owner": "honza",
-        "repo": "vim-snippets",
         "type": "github"
       }
     },
