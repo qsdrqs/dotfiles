@@ -156,10 +156,10 @@ in
     enable = true;
     autoNumlock = true;
     settings = {
-      # Autologin = {
-      #   Session = "hyprland.desktop";
-      #   User = "qsdrqs";
-      # };
+      Autologin = {
+        Session = "hyprland.desktop";
+        User = "qsdrqs";
+      };
     };
   };
   # Workaround for kwin to work with numlock on

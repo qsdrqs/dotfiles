@@ -681,7 +681,7 @@ local plugins = {
               -- rootDirectory = vim.fn.getcwd(),
               auxDirectory = "latex.out",
               build = {
-                onSave = true, -- Automatically build latex on save
+                onSave = false, -- Automatically build latex on save
                 args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
                 -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
                 -- args = { "-pdflua", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
@@ -1646,7 +1646,7 @@ local plugins = {
       end
       require 'nvim-treesitter.configs'.setup {
         -- One of "all", or a list of languages
-        -- ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust", "markdown"},
+        ensure_installed = {"c", "cpp", "java", "python", "javascript", "rust", "markdown"},
 
         -- Install languages synchronously (only applied to `ensure_installed`)
         sync_install = false,
@@ -5045,6 +5045,7 @@ function VscodeNeovimHandler()
   vim.keymap.set('n', 'zR',function() vscode.action("editor.foldAll") end, { silent = true })
 
   vim.keymap.set('n', '<localleader>v',function() vscode.action("latex-workshop.synctex") end, { silent = true })
+  vim.keymap.set('n', '<localleader>b',function() vscode.action("latex-workshop.build") end, { silent = true })
   vim.keymap.set('n', '<C-g>',function() vscode.action("workbench.view.scm") end, { silent = true })
 
   -- comment, use vscode builtin comment

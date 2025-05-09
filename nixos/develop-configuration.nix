@@ -19,5 +19,6 @@
     go
     hoppscotch # http request tool
     bfg-repo-cleaner
+    tree-sitter
   ];
 }
