@@ -1363,7 +1363,7 @@ local plugins = {
       local function handler(virt_text, lnum, end_lnum, width, truncate, ctx)
         local result = {}
 
-        local counts = (" %d"):format(end_lnum - lnum)
+        local counts = ("󰁂 %d"):format(end_lnum - lnum)
         local prefix = "⋯⋯  "
         local suffix = "  ⋯⋯"
         local padding = ""
@@ -1469,6 +1469,19 @@ local plugins = {
           end):catch(function(err)
               return handleFallbackException(err, 'indent')
           end)
+      end
+
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      capabilities.textDocument.foldingRange = {
+        dynamicRegistration = false,
+        lineFoldingOnly = true
+      }
+      local language_servers = vim.lsp.get_clients() -- or list servers manually like {'gopls', 'clangd'}
+      for _, ls in ipairs(language_servers) do
+        require('lspconfig')[ls].setup({
+          capabilities = capabilities
+          -- you can add other fields for setting up lsp server in this table
+        })
       end
 
       require('ufo').setup{
