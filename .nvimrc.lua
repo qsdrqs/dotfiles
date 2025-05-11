@@ -5031,6 +5031,9 @@ function VscodeNeovimHandler()
   -- recover gf
   vim.keymap.del({'n', 'x'}, 'gf', { expr = true })
 
+  -- recover gq
+  vim.keymap.del({'n', 'x'}, 'gq', { expr = true })
+
   -- clear background highlight
   vim.cmd[[ hi Normal guibg=None ]]
   vim.cmd[[ hi Visual guibg=None ]]

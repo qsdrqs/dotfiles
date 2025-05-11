@@ -551,8 +551,8 @@ augroup custom_highlight
   au Syntax * syn match Todo  /\v\.<TODO:/ containedin=.*Comment.*
   au Syntax * syn match Fixme  /\v<FIXME:/ containedin=.*Comment.*
   au Syntax * syn match Note  /\v<NOTE:/ containedin=.*Comment.*
-  au Syntax * syn match searchme /\v<searchme:/ containedin=.*
-  au Syntax matlab syn match Operator /=/ containedin=.*
+  au Syntax * syn match searchme /\v<searchme:/ containedin=ALL
+  au Syntax matlab syn match Operator /=/ containedin=ALL
 augroup END
 hi! Todo guifg=#26302B guibg=#FFBD2A
 hi! Fixme guifg=#26302B guibg=#F06292
@@ -566,6 +566,19 @@ if has('nvim')
   au FileType vim hi link luaError Normal
   au FileType vim hi link luaParenError Normal
 endif
+
+" 显示特殊字符
+augroup highlight_special
+  autocmd!
+    au Syntax * syntax match UnicodeChar /\%u00a0/ display containedin=ALL
+    au Syntax * syntax match UnicodeChar /\%u202f/ display containedin=ALL
+    au Syntax * syntax match UnicodeChar /\%u2011/ display containedin=ALL
+    au Syntax * syntax match UnicodeChar /\%u2013/ display containedin=ALL
+    au Syntax * syntax match UnicodeChar /\%u2014/ display containedin=ALL
+    " au Syntax * syntax match UnicodeChar /\%#=2[\u0100-\u3000]/ display containedin=ALL
+augroup END
+highlight UnicodeChar ctermbg=red guibg=#ff5555
+
 "-------------------Syntax highlight-----------------------"}}}
 
 "-------------------加载插件-----------------------"{{{
