@@ -168,8 +168,10 @@ call s:ghhl("Folded", "blue", "base1")
 " call s:ghhl("MatchParen", "none", "base3")
 hi! MatchParen guibg=#1A3B25
 call s:ghhl("Normal", "base5", "base0")
-call s:ghhl("Pmenu", "base4", "base1")
-call s:ghhl("PmenuSel", "base4", "base2")
+call s:ghhl("NormalFloat", "base4", "base1")
+call s:ghhl("Pmenu", "base4", "base0")
+call s:ghhl("PmenuThumb", "base1", "base5")
+call s:ghhl("PmenuSel", "base4", "base2", "bold")
 "call s:ghhl("Search", "base0", "base5")
 call s:ghhl("SignColumn", "none", "base0")
 call s:ghhl("StatusLine", "base5", "base2")
@@ -712,7 +714,7 @@ hi! DiffText guifg=NONE guibg=#7A5614
 endif
 hi! Context guibg=#0D2341
 hi! FileName guifg=#C4CBD7
-highlight FloatBorder guifg=#525869 guibg=#1F2335
+" highlight FloatBorder guifg=#525869 guibg=#1F2335
 hi! link FloatBorderClear GhBase4
 hi! TextSuccess guifg=#7ce38b
 hi! BoldSuccess guifg=#7ce38b gui=bold
@@ -736,6 +738,10 @@ highlight! CmpItemMenuDefault guifg=#ecf2f8
 highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE
 highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE
 highlight! CmpItemKindEnum guibg=NONE guifg=#9CDCFE
+
+" cyan
+highlight! CmpItemKind guibg=NONE guifg=#8Cf8F7
+
 " pink
 highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0
 highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0
@@ -745,8 +751,34 @@ highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4
 highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4
 " yellow
 highlight! CmpItemKindClass guibg=NONE guifg=#FFC33E
+highlight! CmpItemKindStruct guibg=NONE guifg=#FFC33E
 highlight! CmpItemKindTabNine guibg=NONE guifg=#FFC33E
 highlight! CmpItemKindKeyword guibg=NONE guifg=#FF5252
+
+" blink.cmp
+highlight! link BlinkCmpLabelDeprecated CmpItemAbbrDeprecated
+highlight! link BlinkCmpLabelMatch CmpItemAbbrMatch
+highlight! link BlinkCmpLabel CmpItemMenuDefault
+
+highlight! link BlinkCmpKindVariable CmpItemKindVariable
+highlight! link BlinkCmpKindInterface CmpItemKindInterface
+highlight! link BlinkCmpKindEnum CmpItemKindEnum
+
+highlight! link BlinkCmpKind CmpItemKind
+
+highlight! link BlinkCmpKindFunction CmpItemKindFunction
+highlight! link BlinkCmpKindMethod CmpItemKindMethod
+
+highlight! link BlinkCmpKindText CmpItemKindText
+highlight! link BlinkCmpKindProperty CmpItemKindProperty
+highlight! link BlinkCmpKindUnit CmpItemKindUnit
+
+highlight! link BlinkCmpKindClass CmpItemKindClass
+highlight! link BlinkCmpKindStruct CmpItemKindStruct
+highlight! link BlinkCmpKindTabNine CmpItemKindTabNine
+highlight! link BlinkCmpKindKeyword CmpItemKindKeyword
+
+highlight! BlinkCmpDoc guifg=None guibg=NONE
 
 autocmd Filetype vim,lua highlight! link Type Class
 

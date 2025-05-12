@@ -13,7 +13,48 @@ This file is for getting the input for the flake
 import subprocess
 import json
 import os
+import urllib.request
+import urllib.parse
+import fnmatch
 
+
+def get_github_api_token():
+    cred_path = os.path.expanduser('~/.git-credentials')
+    try:
+        with open(cred_path, 'r') as file:
+            lines = file.readlines()
+        for line in lines:
+            obj = urllib.parse.urlparse(line.strip())
+            if obj.hostname == 'github.com':
+                token = obj.password
+                return token
+
+        return None
+    except FileNotFoundError:
+        return None
+
+def get_repo_versions(owner, repo):
+    url_template = f"https://api.github.com/repos/{owner}/{repo}/releases?page={{}}&per_page=100"
+
+    versions = []
+    page = 1
+    while True:
+        url = url_template.format(page)
+        token = get_github_api_token()
+        headers = {}
+        if token:
+            headers['Authorization'] = f'Bearer {token}'
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as response:
+            if response.status != 200:
+                print("HTTP error:", response.status)
+                break
+            data = json.load(response)
+        if not data:
+            break
+        versions.extend([release["tag_name"] for release in data])
+        page += 1
+    return versions
 
 def main():
     dotfiles_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -78,6 +119,26 @@ def main():
         tag = None
         if 'tag' in json_opts:
             tag = json_opts['tag']
+
+        version = None
+        if 'version' in json_opts:
+            version = json_opts['version']
+            if not version.startswith('v'):
+                version = 'v' + version
+            if '*' in version:
+                owner, repo = plugin.split('/')
+                versions = get_repo_versions(owner, repo)
+                if versions:
+                    # try to find the latest version that matches the pattern
+                    versions.sort(reverse=True)
+                    for v in versions:
+                        if fnmatch.fnmatch(v, version):
+                            tag = v
+                            break
+                else:
+                    raise Exception(f'plugin {plugin} has no releases')
+            else:
+                tag = version
 
         # check commit
         commit = None

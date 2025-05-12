@@ -27,69 +27,70 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local kind_icons_list = {
-  Array               = '󰅪 ',
-  Boolean             = ' ',
-  BreakStatement      = '󰙧 ',
-  Call                = '󰃷 ',
-  CaseStatement       = '󱃙 ',
-  Class               = ' ',
-  Color               = '󰏘 ',
-  Constant            = '󰏿 ',
-  Constructor         = ' ',
-  ContinueStatement   = '→ ',
-  Copilot             = ' ',
-  Declaration         = '󰙠 ',
-  Delete              = '󰩺 ',
-  DoStatement         = '󰑖 ',
-  Enum                = ' ',
-  EnumMember          = ' ',
-  Event               = ' ',
-  Field               = ' ',
-  File                = '󰈔 ',
-  Folder              = '󰉋 ',
-  ForStatement        = '󰑖 ',
-  Function            = '󰊕 ',
-  Identifier          = '󰀫 ',
-  IfStatement         = '󰇉 ',
-  Interface           = ' ',
-  Keyword             = '󰌋 ',
-  List                = '󰅪 ',
-  Log                 = '󰦪 ',
-  Lsp                 = ' ',
-  Macro               = '󰁌 ',
-  MarkdownH1          = '󰉫 ',
-  MarkdownH2          = '󰉬 ',
-  MarkdownH3          = '󰉭 ',
-  MarkdownH4          = '󰉮 ',
-  MarkdownH5          = '󰉯 ',
-  MarkdownH6          = '󰉰 ',
-  Method              = '󰆧 ',
-  Module              = '󰏗 ',
-  Namespace           = '󰅩 ',
-  Null                = '󰢤 ',
-  Number              = '󰎠 ',
-  Object              = '󰅩 ',
-  Operator            = '󰆕 ',
-  Package             = '󰆦 ',
-  Property            = ' ',
-  Reference           = '󰦾 ',
-  Regex               = ' ',
-  Repeat              = '󰑖 ',
-  Scope               = '󰅩 ',
-  Snippet             = '󰩫 ',
-  Specifier           = '󰦪 ',
-  Statement           = '󰅩 ',
-  String              = '󰉾 ',
-  Struct              = ' ',
-  SwitchStatement     = '󰺟 ',
-  Text                = ' ',
-  Type                = ' ',
-  TypeParameter       = '󰆩 ',
-  Unit                = ' ',
-  Value               = '󰎠 ',
-  Variable            = '󰀫 ',
-  WhileStatement      = '󰑖 ',
-  Key                 = " ",
+  Array               = '󰅪',
+  Boolean             = '',
+  BreakStatement      = '󰙧',
+  Call                = '󰃷',
+  CaseStatement       = '󱃙',
+  Class               = '',
+  Color               = '󰏘',
+  Constant            = '󰏿',
+  Constructor         = '',
+  ContinueStatement   = '→',
+  Copilot             = '',
+  Declaration         = '󰙠',
+  Delete              = '󰩺',
+  DoStatement         = '󰑖',
+  Enum                = '',
+  EnumMember          = '',
+  Event               = '',
+  Field               = '',
+  File                = '󰈔',
+  Folder              = '󰉋',
+  ForStatement        = '󰑖',
+  Function            = '󰊕',
+  Identifier          = '󰀫',
+  IfStatement         = '󰇉',
+  Interface           = '',
+  Keyword             = '󰌋',
+  List                = '󰅪',
+  Log                 = '󰦪',
+  Lsp                 = '',
+  Macro               = '󰁌',
+  MarkdownH1          = '󰉫',
+  MarkdownH2          = '󰉬',
+  MarkdownH3          = '󰉭',
+  MarkdownH4          = '󰉮',
+  MarkdownH5          = '󰉯',
+  MarkdownH6          = '󰉰',
+  Method              = '󰆧',
+  Module              = '󰏗',
+  Namespace           = '󰅩',
+  Null                = '󰢤',
+  Number              = '󰎠',
+  Object              = '󰅩',
+  Operator            = '󰆕',
+  Package             = '󰆦',
+  Property            = '',
+  Reference           = '󰦾',
+  Regex               = '',
+  Repeat              = '󰑖',
+  Scope               = '󰅩',
+  Snippet             = '󰩫',
+  Specifier           = '󰦪',
+  Statement           = '󰅩',
+  String              = '󰉾',
+  Struct              = '',
+  SwitchStatement     = '󰺟',
+  Text                = '',
+  Type                = '',
+  TypeParameter       = '󰆩',
+  Unit                = '',
+  Value               = '󰎠',
+  Variable            = '󰀫',
+  WhileStatement      = '󰑖',
+  Key                 = "",
+  Avante              = "󱙺",
 }
 
 local kind_icons = {
@@ -611,7 +612,7 @@ local plugins = {
       end
 
       function get_lsp_common_config()
-        local capabilities = require('cmp_nvim_lsp').default_capabilities()
+        local capabilities = require('blink.cmp').get_lsp_capabilities()
         capabilities.textDocument.foldingRange = {
           dynamicRegistration = false,
           lineFoldingOnly = true
@@ -1061,70 +1062,37 @@ local plugins = {
 
   -- complete
   {'hrsh7th/vim-vsnip'},
-  {
-    'hrsh7th/cmp-nvim-lsp',
-    depedencies = {"neovim/nvim-lspconfig"}
-  },
-  { 'hrsh7th/cmp-nvim-lua',  },
-  { 'hrsh7th/cmp-path', },
-  { 'hrsh7th/cmp-buffer',  },
-  { 'hrsh7th/cmp-omni',  },
-  { 'hrsh7th/cmp-nvim-lsp-signature-help', },
-  {
-    'uga-rosa/cmp-dictionary',
-    config = function()
-      require("cmp_dictionary").setup({ dic = { ["markdown,tex,text"] = { "/usr/share/dict/words" } }, })
-      require("cmp_dictionary").update()
-    end
-  },
-  {
-    'rcarriga/cmp-dap',
-    config = function()
-      require("cmp").setup({
-        enabled = function()
-          return vim.api.nvim_get_option_value("buftype", { scope = "local", buf = 0 }) ~= "prompt"
-          or require("cmp_dap").is_dap_buffer()
-        end
-      })
-
-      require("cmp").setup.filetype({ "dap-repl", "dapui_watches" }, {
-        sources = {
-          { name = "dap" },
-        },
-      })
-    end
-  },
-  {
-    'hrsh7th/cmp-cmdline',
-    lazy = true,
-    keys = {"/", {":", mode = {'v', 'n'}}},
-    cond = vim.g.vscode == nil
-          and vim.fn.getfsize(vim.fn.expand('%')) <= (1024 * 1024 * 100)
-          and vim.fn.line('$') <= 100000
-          and vim.g.started_by_firenvim == nil,
-    config = function()
-      local status_ok, cmp = pcall(require, "cmp")
-      if not status_ok then
-        return
-      end
-
-      -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-      cmp.setup.cmdline('/', {
-        sources = {
-          { name = 'buffer' }
-        },
-      })
-
-      -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-      cmp.setup.cmdline(':', {
-        sources = cmp.config.sources({
-          { name = 'path' },
-          { name = 'cmdline' }
-        }),
-
-      })
-    end
-  },
+  -- {
+  --   'hrsh7th/cmp-cmdline',
+  --   lazy = true,
+  --   keys = {"/", {":", mode = {'v', 'n'}}},
+  --   cond = vim.g.vscode == nil
+  --         and vim.fn.getfsize(vim.fn.expand('%')) <= (1024 * 1024 * 100)
+  --         and vim.fn.line('$') <= 100000
+  --         and vim.g.started_by_firenvim == nil,
+  --   config = function()
+  --     local status_ok, cmp = pcall(require, "cmp")
+  --     if not status_ok then
+  --       return
+  --     end
+  --
+  --     -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
+  --     cmp.setup.cmdline('/', {
+  --       sources = {
+  --         { name = 'buffer' }
+  --       },
+  --     })
+  --
+  --     -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+  --     cmp.setup.cmdline(':', {
+  --       sources = cmp.config.sources({
+  --         { name = 'path' },
+  --         { name = 'cmdline' }
+  --       }),
+  --
+  --     })
+  --   end
+  -- },
 
   {
     'ray-x/lsp_signature.nvim',
@@ -1148,184 +1116,217 @@ local plugins = {
   },
 
   {
-    'hrsh7th/nvim-cmp',
-    dependencies = {"L3MON4D3/LuaSnip", 'saadparwaiz1/cmp_luasnip'},
+    "xzbdmw/colorful-menu.nvim",
     config = function()
-      local t = function(str)
-        return vim.api.nvim_replace_termcodes(str, true, true, true)
-      end
-      local cmp = require('cmp')
-      local ls = require('luasnip')
+      -- local function_hl = vim.api.nvim_get_hl(0, { name = "Function", link = false })
+      -- function_hl.bold = false
+      -- vim.api.nvim_set_hl(0, "FunctionNoBold", function_hl)
+      require("colorful-menu").setup({
+        fallback_highlight = "@variable",
+        max_width = 60,
+      })
+    end
+  },
 
-      local config = {
-        window = {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
+  {
+    'saghen/blink.cmp',
+    -- optional: provides snippets for the snippet source
+    dependencies = {
+      'L3MON4D3/LuaSnip',
+      "Kaiser-Yang/blink-cmp-avante",
+      "xzbdmw/colorful-menu.nvim"
+    },
+    version = '1.*',
+    config = function()
+      local function copilot_key(key_name)
+        return function()
+          local ok, copilot_key = pcall(vim.fn[key_name])
+          if not ok or copilot_key == "" then
+            return
+          end
+          vim.api.nvim_feedkeys(copilot_key, "i", true)
+          return true
+        end
+      end
+      local nobold_cache = {}
+      local opts = {
+        snippets = { preset = 'luasnip' }, -- Use 'luasnip' as the snippet engine
+        cmdline = {
+          keymap = {
+            preset = 'inherit',
+            ['<CR>'] = {
+              'fallback'
+            },
+          },
+          completion = {
+            menu = {
+              auto_show = true,
+            },
+            list = {
+              selection = {
+                preselect = true,
+                auto_insert = false,
+              }
+            },
+          },
         },
-        formatting = {
-          format = function(entry, vim_item)
-            -- Kind icons
-            if entry.source.name == 'cmp_tabnine' then
-              vim_item.kind = "TabNine"
-            end
-            vim_item.kind = string.format('%s', kind_icons_list[vim_item.kind]) -- This concatonates the icons with the name of the item kind
-            -- tabnine
-            -- limit width to 50
-            local abbr_len = string.len(vim_item.abbr)
-            local width = 50
-            if abbr_len > width then
-              vim_item.abbr = string.sub(vim_item.abbr, 1, width)
-            elseif abbr_len > width / 2 then
-              vim_item.abbr = vim_item.abbr .. string.rep(" ", width - abbr_len)
-            end
-            -- Source
-            --[[ vim_item.menu = ({
-              buffer = "[Buffer]",
-              nvim_lsp = "[LSP]",
-              luasnip = "[Snip]",
-              ultisnips = "[Snip]",
-              nvim_lua = "[Lua]",
-              latex_symbols = "[LaTeX]",
-            })[entry.source.name] ]]
-            return vim_item
-          end,
-          fields=  {
-            'kind',
-            'abbr',
-            'menu',
+        keymap = {
+          preset = 'default',
+          ['<C-k>'] = { 'select_prev', 'fallback' },
+          ['<C-j>'] = { 'select_next', 'fallback' },
+          ['<Tab>'] = {
+            function(cmp)
+              if cmp.snippet_active() then return cmp.accept()
+              else return cmp.select_and_accept() end
+            end,
+            copilot_key("copilot#Accept"),
+            'snippet_forward',
+            'fallback'
+          },
+          ['<CR>'] = {
+            'select_and_accept',
+            'fallback'
+          },
+          ['<C-e>'] = {
+            'hide',
+            copilot_key("copilot#Dismiss"),
+            'fallback',
+          },
+        },
+
+        appearance = {
+          -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+          -- Adjusts spacing to ensure icons are aligned
+          nerd_font_variant = 'mono'
+        },
+
+        -- (Default) Only show the documentation popup when manually triggered
+        completion = {
+          trigger = {
+            show_on_keyword = true,
+            show_on_trigger_character = true,
+          },
+          documentation = {
+            auto_show = true,
+            auto_show_delay_ms = 100,
+            window = {
+              border = 'rounded',
+            }
+          },
+          list = {
+            selection = {
+              preselect = true,
+              auto_insert = false,
+            }
+          },
+          menu = {
+            border = 'rounded',
+            draw = {
+              -- We don't need label_description now because label and label_description are already
+              -- combined together in label by colorful-menu.nvim.
+              columns = { { "kind_icon" }, { "label", gap = 1 } },
+              components = {
+                kind_icon = {
+                  text = function(ctx)
+                    local kind = kind_icons_list[ctx.kind]
+                    if kind == nil then
+                      error("Unknown kind: " .. ctx.kind)
+                    end
+                    return kind
+                  end,
+                  highlight = function(ctx)
+                    local hl = ctx.kind_hl
+                    if vim.tbl_contains({ "Path" }, ctx.source_name) then
+                      local dev_icon, dev_hl = require("nvim-web-devicons").get_icon(ctx.label)
+                      if dev_icon then
+                        hl = dev_hl
+                      end
+                    end
+                    return hl
+                  end,
+                },
+                label = {
+                  text = function(ctx)
+                    return require("colorful-menu").blink_components_text(ctx)
+                  end,
+                  highlight = function(ctx)
+                    local highlights = {}
+                    local highlights_info = require("colorful-menu").blink_highlights(ctx)
+                    if highlights_info ~= nil then
+                      for _, v in ipairs(highlights_info.highlights) do
+                        local group = v.group
+                        if nobold_cache[group] == nil then
+                          local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+                          if hl.bold then
+                            hl.bold = false
+                            vim.api.nvim_set_hl(0, group .. "NoBold", hl)
+                            v.group = group .. "NoBold"
+                            nobold_cache[group] = true
+                          else
+                            nobold_cache[group] = false
+                          end
+                        elseif nobold_cache[group] == true then
+                          v.group = group .. "NoBold"
+                        end
+                      end
+                      highlights = highlights_info.highlights
+                    end
+                    for _, idx in ipairs(ctx.label_matched_indices) do
+                      table.insert(highlights, { idx, idx + 1, group = "BlinkCmpLabelMatch" })
+                    end
+                    return highlights
+                  end,
+                },
+              },
+            },
           }
         },
 
-        snippet = {
-          -- REQUIRED - you must specify a snippet engine
-          expand = function(args)
-            -- Use vsnip to handles snips provided by lsp. Ultisnips has problems.
-            -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-
-            ls.lsp_expand(args.body) -- For `luasnip` users.
-            -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+        -- Default list of enabled providers defined so that you can extend it
+        -- elsewhere in your config, without redefining it, due to `opts_extend`
+        sources = {
+          default = function(ctx)
+            default = { 'lsp', 'path', 'snippets', 'buffer' }
+            if vim.bo.filetype == 'lua' then
+              table.insert(default, 1, 'lazydev')
+            end
+            if vim.bo.filetype:find('^Avante') then
+              print(vim.bo.filetype)
+              table.insert(default, 1, 'avante')
+            end
+            return default
           end,
-        },
-        mapping = cmp.mapping.preset.insert({
-          ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
-          ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
-          ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-          ['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
-          ['<C-e>'] = cmp.mapping({
-            i = cmp.mapping.abort(),
-            c = cmp.mapping.close(),
-          }),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-          ['<C-j>'] = cmp.mapping(function(fallback)
-            cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
-          end, {"i","s","c"}),
-          ['<C-k>'] = cmp.mapping(function(fallback)
-            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
-          end, {"i","s","c"}),
-
-          ["<Tab>"] = cmp.mapping({
-            c = function()
-              if cmp.visible() then
-                cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
-              else
-                cmp.complete()
-              end
-            end,
-            i = function(fallback)
-              local ok, copilot_keys = pcall(vim.fn["copilot#Accept"], "empty")
-              if not ok then
-                copilot_keys = "empty"
-              end
-              local luasnip_jump_forward = ls.expand_or_jumpable()
-              if cmp.visible() then
-                -- cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
-                cmp.confirm()
-              elseif copilot_keys ~= "empty" then
-                vim.api.nvim_feedkeys(copilot_keys, "i", true)
-              elseif luasnip_jump_forward == true then
-                ls.expand_or_jump()
-              else
-                vim.api.nvim_feedkeys(t("<Tab>"), "n", true)
-                -- fallback()
-              end
-            end,
-            s = function(fallback)
-              if ls.jumpable(1) == true then
-                ls.jump(1)
-              else
-                fallback()
-              end
-            end
-          }),
-          ["<S-Tab>"] = cmp.mapping({
-            c = function()
-              if cmp.visible() then
-                cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
-              else
-                cmp.complete()
-              end
-            end,
-            i = function(fallback)
-              if cmp.visible() then
-                cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
-              elseif ls.jumpable(-1) == true then
-                ls.jump(-1)
-              else
-                fallback()
-              end
-            end,
-            s = function(fallback)
-              if ls.jumpable(-1) == true then
-                ls.jump(-1)
-              else
-                fallback()
-              end
-            end
-          }),
-        }),
-        sources = cmp.config.sources({
-          -- { name = 'ultisnips' }, -- For ultisnips users.
-          -- { name = 'nvim_lsp_signature_help' },
-          { name = 'nvim_lsp' },
-          -- { name = 'omni' },
-          { name = 'dictionary', keyword_length = 2 },
-          { name = 'path' },
-          { name = 'nvim_lua' },
-          { name = 'buffer' },
-          { name = 'luasnip' }, -- For luasnip users.
-          -- { name = 'snippy' }, -- For snippy users.
-        }),
-
-        completion = {
-          -- autocomplete = true,
-          completeopt = 'menu,menuone,noinsert'
+          providers = {
+            lazydev = {
+              name = "LazyDev",
+              module = "lazydev.integrations.blink",
+              -- make lazydev completions top priority (see `:h blink.cmp`)
+              score_offset = 100,
+            },
+            avante = {
+              module = 'blink-cmp-avante',
+              name = 'Avante',
+              opts = {
+                -- options for blink-cmp-avante
+              }
+            },
+          },
         },
 
-      }
-
-      if vim.o.ft == 'lua' then
-        require('lazy').load{
-          plugins = {"lazydev.nvim"}
+        -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
+        -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+        -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+        --
+        -- See the fuzzy documentation for more information
+        fuzzy = {
+          implementation = "prefer_rust",
         }
-        table.insert(config.sources, {
-          name = "lazydev",
-          group_index = 0, -- set group index to 0 to skip loading LuaLS completions
-        })
-      end
-
-      cmp.setup(config)
-
-      -- vim.keymap.set('i', '<C-x><C-o>', '<Cmd>lua require("cmp").complete()<CR>', { silent = true })
-
-      vim.api.nvim_create_user_command("CmpDisable", function()
-        cmp.setup{enabled=false}
-      end, {nargs = 0})
-      vim.api.nvim_create_user_command("CmpEnable", function()
-        cmp.setup{enabled=true}
-      end, {nargs = 0})
-    end
+      }
+      require('blink.cmp').setup(opts)
+    end,
   },
+  { "saghen/blink.compat" },
+  { "Kaiser-Yang/blink-cmp-avante" },
 
   {'kevinhwang91/promise-async'},
   {
@@ -1344,8 +1345,6 @@ local plugins = {
     'kevinhwang91/nvim-ufo',
     dependencies = {'kevinhwang91/promise-async'},
     config = function()
-      -- FIXME: may fix this
-      -- if treesitter is going to load, it need to be loaded before ufo
       if vim.b.treesitter_disable ~= 1 then
         require('lazy').load {
           plugins = {
@@ -3322,7 +3321,10 @@ local plugins = {
           registers = false,
         },
         win = {
-          border = "single"
+          border = "single",
+          wo = {
+            winblend = 10
+          }
         },
       }
     end
@@ -3702,19 +3704,7 @@ local plugins = {
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
 
-      local function copilot_dismiss()
-        local copilot_keys = vim.fn["copilot#Dismiss"]()
-        local t = function(str)
-          return vim.api.nvim_replace_termcodes(str, true, true, true)
-        end
-
-        if copilot_keys ~= "" then
-          vim.api.nvim_feedkeys(copilot_keys, "i", true)
-        else
-          vim.api.nvim_feedkeys(t("<End>"), "i", true)
-        end
-      end
-      vim.keymap.set('i', '<C-e>', copilot_dismiss, { silent = true})
+      -- vim.keymap.set('i', '<C-e>', copilot_dismiss, { silent = true})
       vim.keymap.set('i', '<M-\\>', "<Cmd>Copilot panel<CR>", { silent = true})
     end
   },
@@ -3790,7 +3780,7 @@ local plugins = {
       "MunifTanjim/nui.nvim",
       --- The below dependencies are optional,
       "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-      "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+      "saghen/blink.cmp", -- autocompletion for avante commands and mentions
       "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
       'MeanderingProgrammer/render-markdown.nvim',
     },
@@ -4085,7 +4075,6 @@ return {
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
       "mfussenegger/nvim-dap-python",
-      "rcarriga/cmp-dap",
       'Weissle/persistent-breakpoints.nvim',
     },
     keys = {
@@ -4460,8 +4449,6 @@ return {
       require('persistent-breakpoints').setup{
         load_breakpoints_event = { "BufReadPost" }
       }
-      -- load for once on plugin loaded
-      require("persistent-breakpoints.api").load_breakpoints()
     end
   },
 }
@@ -4494,6 +4481,9 @@ function DumpPluginsList()
     end
     if plugin.tag ~= nil then
       opt.tag = plugin.tag
+    end
+    if plugin.version ~= nil then
+      opt.version = plugin.version
     end
     if plugin.build ~= nil then
       opt.build = true
@@ -4673,13 +4663,7 @@ function LazyLoadPlugins()
       require('lazy').load{
         plugins = {
           -- begin cmp
-          'cmp-nvim-lsp',
-          'cmp-nvim-lua',
-          'cmp-path',
-          'cmp-buffer',
-          'cmp-omni',
-          'cmp-nvim-lsp-signature-help',
-          'cmp-dictionary',
+          'blink.cmp',
           -- end cmp
           'copilot.vim',
         }

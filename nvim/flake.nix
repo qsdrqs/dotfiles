@@ -108,56 +108,28 @@
       url = "github:hrsh7th/vim-vsnip";
       flake = false;
     };
-    cmp-nvim-lsp = {
-      url = "github:hrsh7th/cmp-nvim-lsp";
-      flake = false;
-    };
-    cmp-nvim-lua = {
-      url = "github:hrsh7th/cmp-nvim-lua";
-      flake = false;
-    };
-    cmp-path = {
-      url = "github:hrsh7th/cmp-path";
-      flake = false;
-    };
-    cmp-buffer = {
-      url = "github:hrsh7th/cmp-buffer";
-      flake = false;
-    };
-    cmp-omni = {
-      url = "github:hrsh7th/cmp-omni";
-      flake = false;
-    };
-    cmp-nvim-lsp-signature-help = {
-      url = "github:hrsh7th/cmp-nvim-lsp-signature-help";
-      flake = false;
-    };
-    cmp-dictionary = {
-      url = "github:uga-rosa/cmp-dictionary";
-      flake = false;
-    };
-    cmp-dap = {
-      url = "github:rcarriga/cmp-dap";
-      flake = false;
-    };
-    cmp-cmdline = {
-      url = "github:hrsh7th/cmp-cmdline";
-      flake = false;
-    };
     lsp_signatureDOTnvim = {
       url = "github:ray-x/lsp_signature.nvim";
+      flake = false;
+    };
+    colorful-menuDOTnvim = {
+      url = "github:xzbdmw/colorful-menu.nvim";
       flake = false;
     };
     LuaSnip = {
       url = "github:L3MON4D3/LuaSnip";
       flake = false;
     };
-    cmp_luasnip = {
-      url = "github:saadparwaiz1/cmp_luasnip";
+    blink-cmp-avante = {
+      url = "github:Kaiser-Yang/blink-cmp-avante";
       flake = false;
     };
-    nvim-cmp = {
-      url = "github:hrsh7th/nvim-cmp";
+    blinkDOTcmp = {
+      url = "github:saghen/blink.cmp/v1.3.1";
+      flake = false;
+    };
+    blinkDOTcompat = {
+      url = "github:saghen/blink.compat";
       flake = false;
     };
     promise-async = {
@@ -538,19 +510,12 @@
         { name = "none-ls.nvim"; dotname = "none-lsDOTnvim"; source = inputs.none-lsDOTnvim; build = false; }
         { name = "none-ls-extras.nvim"; dotname = "none-ls-extrasDOTnvim"; source = inputs.none-ls-extrasDOTnvim; build = false; }
         { name = "vim-vsnip"; dotname = "vim-vsnip"; source = inputs.vim-vsnip; build = false; }
-        { name = "cmp-nvim-lsp"; dotname = "cmp-nvim-lsp"; source = inputs.cmp-nvim-lsp; build = false; }
-        { name = "cmp-nvim-lua"; dotname = "cmp-nvim-lua"; source = inputs.cmp-nvim-lua; build = false; }
-        { name = "cmp-path"; dotname = "cmp-path"; source = inputs.cmp-path; build = false; }
-        { name = "cmp-buffer"; dotname = "cmp-buffer"; source = inputs.cmp-buffer; build = false; }
-        { name = "cmp-omni"; dotname = "cmp-omni"; source = inputs.cmp-omni; build = false; }
-        { name = "cmp-nvim-lsp-signature-help"; dotname = "cmp-nvim-lsp-signature-help"; source = inputs.cmp-nvim-lsp-signature-help; build = false; }
-        { name = "cmp-dictionary"; dotname = "cmp-dictionary"; source = inputs.cmp-dictionary; build = false; }
-        { name = "cmp-dap"; dotname = "cmp-dap"; source = inputs.cmp-dap; build = false; }
-        { name = "cmp-cmdline"; dotname = "cmp-cmdline"; source = inputs.cmp-cmdline; build = false; }
         { name = "lsp_signature.nvim"; dotname = "lsp_signatureDOTnvim"; source = inputs.lsp_signatureDOTnvim; build = false; }
+        { name = "colorful-menu.nvim"; dotname = "colorful-menuDOTnvim"; source = inputs.colorful-menuDOTnvim; build = false; }
         { name = "LuaSnip"; dotname = "LuaSnip"; source = inputs.LuaSnip; build = false; }
-        { name = "cmp_luasnip"; dotname = "cmp_luasnip"; source = inputs.cmp_luasnip; build = false; }
-        { name = "nvim-cmp"; dotname = "nvim-cmp"; source = inputs.nvim-cmp; build = false; }
+        { name = "blink-cmp-avante"; dotname = "blink-cmp-avante"; source = inputs.blink-cmp-avante; build = false; }
+        { name = "blink.cmp"; dotname = "blinkDOTcmp"; source = inputs.blinkDOTcmp; build = false; }
+        { name = "blink.compat"; dotname = "blinkDOTcompat"; source = inputs.blinkDOTcompat; build = false; }
         { name = "promise-async"; dotname = "promise-async"; source = inputs.promise-async; build = false; }
         { name = "nvim-fundo"; dotname = "nvim-fundo"; source = inputs.nvim-fundo; build = true; }
         { name = "nvim-ufo"; dotname = "nvim-ufo"; source = inputs.nvim-ufo; build = false; }

@@ -76,6 +76,16 @@ let
         ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/avante.nvim/build $out/build
       '';
     };
+    blinkDOTcmp = pkgs.stdenv.mkDerivation {
+      name = "blink.cmp";
+      src = inputs.nvim-config.inputs.blinkDOTcmp;
+      buildPhase = dummyBuildPhase;
+      installPhase = commonInstallPhase;
+      postInstall = ''
+        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/blink.cmp/target $out/target
+        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/blink.cmp/.git $out/.git
+      '';
+    };
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
     (entry: {
@@ -94,14 +104,14 @@ in
 {
   home.file = genNvimPlugins inputs.nvim-config.plugins_list;
 
-  home.activation.updateNvimFlake = ''
-    cd ${config.home.homeDirectory}/dotfiles/nvim
-    export PATH=${pkgs.neovim}/bin:${pkgs.git}/bin:$PATH
-    ${pkgs.python3}/bin/python3 dump_input.py
-    nix flake lock
-    cd ${config.home.homeDirectory}/dotfiles
-    nix flake lock --update-input nvim-config
-  '';
+  # home.activation.updateNvimFlake = ''
+  #   cd ${config.home.homeDirectory}/dotfiles/nvim
+  #   export PATH=${pkgs.neovim}/bin:${pkgs.git}/bin:$PATH
+  #   ${pkgs.python3}/bin/python3 dump_input.py
+  #   nix flake lock
+  #   cd ${config.home.homeDirectory}/dotfiles
+  #   nix flake lock --update-input nvim-config
+  # '';
 
   home.activation.createBuildDirs = ''
     if [ ! -d ${config.home.homeDirectory}/.local/share/nvim/lazy/markdown-preview.nvim/app/bin ]; then
