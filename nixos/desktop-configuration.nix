@@ -302,7 +302,6 @@ in
   services.ollama = {
     enable = true;
     acceleration = "cuda";
-    package = pkgs-master.ollama;
   };
 
 }

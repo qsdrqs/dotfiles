@@ -3807,51 +3807,66 @@ local plugins = {
       end, { nargs = 0 })
     end,
     config = function()
-      local opts = {
-        -- add any opts here
-        provider = "openai",
-        vendors = {
-          ollama = {
-            api_key_name = "",
-            endpoint = "http://127.0.0.1:11434",
-            model = "qwq", -- Specify your model here
-            disable_tools = true,
-            options = {
-              num_ctx = 32768,
-            },
-          },
-          deepseek = {
-            __inherited_from = "openai",
-            endpoint = "https://api.deepseek.com",
-            model = "deepseek-chat",
-            disable_tools = true,
-          },
-        },
-        openai = {
-          model = "gpt-4o", -- your desired model (or use gpt-4o, etc.)
-          timeout = 30000, -- timeout in milliseconds
-          max_tokens = 4096,
-        },
-        hints = {
-          enabled = false,
-        },
-        mappings = {
-          ask = "<localleader>aa",
-          edit = "<localleader>ae",
-          refresh = "<localleader>ar",
-          focus = "<localleader>af",
-          toggle = {
-            default = "<localleader>at",
-            debug = "<localleader>ad",
-            hint = "<localleader>ah",
-            suggestion = "<localleader>as",
-            repomap = "<localleader>aR",
-          },
-          files = {
-            add_current = "<localleader>ac", -- Add current buffer to selected files
-          },
-        }
-      }
+      local xdg_config_home = os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")
+      local avante_config_path = xdg_config_home .. "/avante.lua"
+      local default_config = [[
+return {
+  provider = "openai",
+  vendors = {
+    ollama = {
+      api_key_name = "",
+      endpoint = "http://127.0.0.1:11434",
+      model = "qwq",
+      disable_tools = true,
+      options = {
+        num_ctx = 32768,
+      },
+    },
+    deepseek = {
+      __inherited_from = "openai",
+      endpoint = "https://api.deepseek.com",
+      model = "deepseek-chat",
+      disable_tools = true,
+    },
+  },
+  openai = {
+    model = "gpt-4o",
+    timeout = 30000,
+    max_tokens = 4096,
+  },
+  hints = {
+    enabled = false,
+  },
+  mappings = {
+    ask = "<localleader>aa",
+    edit = "<localleader>ae",
+    refresh = "<localleader>ar",
+    focus = "<localleader>af",
+    toggle = {
+      default = "<localleader>at",
+      debug = "<localleader>ad",
+      hint = "<localleader>ah",
+      suggestion = "<localleader>as",
+      repomap = "<localleader>aR",
+    },
+    files = {
+      add_current = "<localleader>ac",
+    },
+  }
+}
+]]
+      -- Check if the configuration file exists
+      local file = io.open(avante_config_path, "r")
+      if not file then
+        -- If the file does not exist, create it with the default configuration
+        file = io.open(avante_config_path, "w")
+        file:write(default_config)
+        file:close()
+      else
+        -- If the file exists, read and execute it
+        file:close()
+      end
+      local opts = dofile(avante_config_path)
 
       -- ollama support
       local ollama = require("dotfiles.avante.providers.ollama")
