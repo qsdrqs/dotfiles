@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-master, lib, inputs, ... }:
+{ config, pkgs, pkgs-ghcup, pkgs-master, lib, inputs, ... }:
 let
   ida64-fhs = pkgs.buildFHSEnv {
     name = "ida64";
@@ -193,6 +193,7 @@ in
     nvitop
     realvnc-vnc-viewer
     drawio
+    (pkgs.callPackage (import "${inputs.nixpkgs-ghcup}/pkgs/development/tools/haskell/ghcup/default.nix") { })
 
     # NUR
     qq-hidpi
@@ -200,6 +201,10 @@ in
     nur.repos.linyinfeng.wemeet
     nur.repos.xddxdd.baidunetdisk
     wechat-uos-hidpi
+  ];
+
+  programs.nix-ld.libraries = with pkgs; [
+    gmp
   ];
 
   services.teamviewer.enable = true;

@@ -6,9 +6,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/dda3dcd3fe03e991015e9a74b22d35950f264a54";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/adaa24fbf46737f3f1b5497bf64bae750f82942e";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
+    nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -135,7 +136,13 @@
             config.allowUnfree = true;
             overlays = (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
           });
-        }) [ "pkgs-master" "pkgs-stable" "pkgs-last" "pkgs"]
+        }) [
+          "pkgs-master"
+          "pkgs-stable"
+          "pkgs-ghcup"
+          "pkgs-last"
+          "pkgs"
+        ]
       );
       minimalHomeModules = [
         ./nixos/home.nix
@@ -158,6 +165,7 @@
         inherit inputs;
         pkgs-master = pkgs-collect.pkgs-master system;
         pkgs-stable = pkgs-collect.pkgs-stable system;
+        pkgs-ghcup = pkgs-collect.pkgs-ghcup system;
         pkgs-last = pkgs-collect.pkgs-last system;
       };
 
