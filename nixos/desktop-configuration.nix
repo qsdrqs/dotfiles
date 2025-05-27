@@ -181,10 +181,6 @@ in
 
     texlive.combined.scheme-full
 
-    android-file-transfer
-    android-udev-rules
-    android-tools
-
     pandoc
     zotero
     xournalpp
