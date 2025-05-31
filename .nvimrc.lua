@@ -4799,41 +4799,19 @@ vim.o.qftf = '{info -> v:lua._G.qftf(info)}'
 -- vim.g.suda_smart_edit = 1
 
 -- neovide has its own clipboard system
-if vim.g.neovide == nil then
-  -- osc52 support on ssh
-  if os.getenv("SSH_CONNECTION") ~= nil then
-    -- disable the xclip under SSH due to high lantency
-    -- use osc52
-    local nvim_ver_minor = vim.version().minor
-    -- TODO: paste from ssh
-    vim.g.clipboard = {
-      name = 'OSC 52',
-      copy = {
-        ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-        ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
-      },
-      paste = {
-        ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-        ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
-      },
-    }
-  elseif vim.fn.has('wsl') == 1 then
-    -- wsl without ssh connection
-    if vim.fn.executable("win32yank.exe") == 1 then
-      vim.g.clipboard = {
-        name = 'win32yank',
-        -- TODO: may change to async here
-        copy = {
-          ['+'] = {"win32yank.exe", "-i", "--crlf"},
-          ['*'] = {"win32yank.exe", "-i", "--crlf"},
-        },
-        paste = {
-          ['+'] = {"win32yank.exe", "-o", "--lf"},
-          ['*'] = {"win32yank.exe", "-o", "--lf"},
-        },
-      }
-    end
-  end
+if vim.g.neovide == nil and vim.fn.has('wsl') == 1 and vim.fn.executable("win32yank.exe") == 1 then
+  vim.g.clipboard = {
+    name = 'win32yank',
+    -- TODO: may change to async here
+    copy = {
+      ['+'] = {"win32yank.exe", "-i", "--crlf"},
+      ['*'] = {"win32yank.exe", "-i", "--crlf"},
+    },
+    paste = {
+      ['+'] = {"win32yank.exe", "-o", "--lf"},
+      ['*'] = {"win32yank.exe", "-o", "--lf"},
+    },
+  }
 end
 
 if vim.g.vscode == nil then
