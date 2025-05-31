@@ -31,7 +31,7 @@ function M.entry()
 	local target_cwd = nil
 
 	repeat
-		local child, code = Command("ls"):args({ "-la" }):cwd(cwd):stdout(Command.PIPED):spawn()
+		local child, code = Command("ls"):arg({ "-la" }):cwd(cwd):stdout(Command.PIPED):spawn()
 		if not child then
 			ya.err("spawn `ls` command returns " .. tostring(code))
 			ya.err("cwd: " .. cwd)

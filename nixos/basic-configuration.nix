@@ -121,20 +121,20 @@ in
         else
           { };
     };
-    services."chown-home@" = {
-      description = "Recursively chown /home/%i back to %i";
+    services."chown-ssh@" = {
+      description = "Recursively chown /home/%i/.ssh back to %i";
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.coreutils}/bin/chown -R %i:users /home/%i";
+        ExecStart = "${pkgs.coreutils}/bin/chown -R %i:users /home/%i/.ssh";
       };
     };
-    timers."chown-home@${userName}" = {
-      enable = false;
-      description = "Run chown-home@${userName}.service daily";
+    timers."chown-ssh@${userName}" = {
+      enable = true;
+      description = "Run chown-ssh@${userName}.service periodically";
       timerConfig = {
-        OnCalendar = "daily";
+        OnCalendar = "hourly";
         Persistent = true; # if the system was off when the timer was supposed to run
-        Unit = "chown-home@${userName}.service";
+        Unit = "chown-ssh@${userName}.service";
       };
       wantedBy = [ "timers.target" ];
     };

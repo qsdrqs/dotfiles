@@ -5,7 +5,7 @@ function M:peek()
 	if self.file.cha.is_exec then
 		-- use `readelf -WCa`
 		output, code = Command("readelf")
-				:args({
+				:arg({
 					"-WCa",
 					tostring(self.file.url),
 				})

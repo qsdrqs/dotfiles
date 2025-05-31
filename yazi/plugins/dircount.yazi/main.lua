@@ -58,7 +58,7 @@ function M:fetch(job)
 			if dircount[url] and hovered_url ~= url then
 				goto continue
 			end
-			local child, code = Command("ls"):args({ "-A" }):args({ url }):stdout(Command.PIPED):spawn()
+			local child, code = Command("ls"):arg({ "-A" }):arg({ url }):stdout(Command.PIPED):spawn()
 			if not child then
 				ya.err("spawn `ls` command returns " .. tostring(code))
 				return 2
@@ -103,7 +103,7 @@ function M.entry(self, job)
 		return
 	end
 	-- update dircount
-	local child, code = Command("ls"):args({ "-A" }):args({ file_url }):stdout(Command.PIPED):spawn()
+	local child, code = Command("ls"):arg({ "-A" }):arg({ file_url }):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `ls` command returns " .. tostring(code))
 		return 2

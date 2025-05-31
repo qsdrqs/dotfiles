@@ -148,7 +148,7 @@ end
 local get_git_status = function(git_root)
 	local tracked = {}
 	-- check tracked files
-	local child, code = Command("git"):args({ "status", "--ignored", "--short" }):cwd(git_root):stdout(Command.PIPED)
+	local child, code = Command("git"):arg({ "status", "--ignored", "--short" }):cwd(git_root):stdout(Command.PIPED)
 			:spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
@@ -225,7 +225,7 @@ local get_git_root = function(url)
 	end
 
 	-- not found in cache, get git root by git command
-	local child, code = Command("git"):args({ "rev-parse", "--show-toplevel" }):cwd(url):stdout(Command.PIPED):spawn()
+	local child, code = Command("git"):arg({ "rev-parse", "--show-toplevel" }):cwd(url):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
 		ya.err("cwd: " .. url)
@@ -296,7 +296,7 @@ function M:fetch(job)
 					goto continue
 				end
 				-- use ls -d to check if it is a git repository
-				local child, code = Command("ls"):args({ "-d", ".git" }):cwd(sub_url):stdout(Command.PIPED):spawn()
+				local child, code = Command("ls"):arg({ "-d", ".git" }):cwd(sub_url):stdout(Command.PIPED):spawn()
 				if not child then
 					ya.err("spawn `ls` command returns " .. tostring(code))
 					ya.err("cwd: " .. sub_url)
