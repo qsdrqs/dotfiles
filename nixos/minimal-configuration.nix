@@ -7,8 +7,8 @@ let
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
 in
 {
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_14; # TODO: temperary fix
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_6_14; # TODO: temperary fix
   # boot.kernelPackages = pkgs.linuxPackages;
   boot.tmp.useTmpfs = true;
 
