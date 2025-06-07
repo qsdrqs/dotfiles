@@ -19,11 +19,11 @@
     "ranger": {
       "flake": false,
       "locked": {
-        "lastModified": 1748874158,
-        "narHash": "sha256-husMv1RxyvvU1X6C6BQn8Lly63Z40Gwr/k7NZX8DNIw=",
+        "lastModified": 1749048824,
+        "narHash": "sha256-O0DjecncpN+Bv8Ng+keuvU9iVtWAV4a50p959pMvkww=",
         "owner": "ranger",
         "repo": "ranger",
-        "rev": "5c6ed53fc473a142b6e39f665e23f3f3bad679f0",
+        "rev": "7e38143eaa91c82bed8f309aa167b1e6f2607576",
         "type": "github"
       },
       "original": {
@@ -83,11 +83,11 @@
     "ranger_devicons": {
       "flake": false,
       "locked": {
-        "lastModified": 1748696687,
-        "narHash": "sha256-VQZZV1Wxk5o6CpcYvhFuLQAPbJ58pPZxb/4eF9Dsa4g=",
+        "lastModified": 1749128401,
+        "narHash": "sha256-qvWqKVS4C5OO6bgETBlVDwcv4eamGlCUltjsBU3gAbA=",
         "owner": "alexanderjeurissen",
         "repo": "ranger_devicons",
-        "rev": "282d20cc23ffabec45bc087973ed53850e3874b5",
+        "rev": "1bcaff0366a9d345313dc5af14002cfdcddabb82",
         "type": "github"
       },
       "original": {

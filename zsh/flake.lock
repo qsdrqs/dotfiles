@@ -129,11 +129,11 @@
     "zinit": {
       "flake": false,
       "locked": {
-        "lastModified": 1748062531,
-        "narHash": "sha256-giiJSoXfWRlGAu3udGcV/kvqNbRktvmENo7VpyR03bg=",
+        "lastModified": 1749117378,
+        "narHash": "sha256-9dv2c7Nx0LeuDFoapmKflWhClsi9guedTckBSrcS4Ac=",
         "owner": "zdharma-continuum",
         "repo": "zinit",
-        "rev": "9a3e5c97975accfdde54e4a5810150212a41b898",
+        "rev": "610551726b028816c7f68170c917a6f7418a1abd",
         "type": "github"
       },
       "original": {
