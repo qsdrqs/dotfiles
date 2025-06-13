@@ -140,6 +140,10 @@ in
     };
   };
 
+  system.activationScripts.change-ssh-permissions = ''
+    chown -R ${userName}:users ${homeDir}/.ssh
+  '';
+
   # 3) Define a timer that triggers that service every hour
   # avoid v2ray service to create config file
   environment.etc."v2ray/config.json".enable = false;
