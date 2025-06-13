@@ -170,6 +170,17 @@ local plugins = {
     end
   },
   {
+    "ibhagwan/fzf-lua",
+    lazy = false,
+    -- optional for icon support
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    -- or if using mini.icons/mini.nvim
+    -- dependencies = { "echasnovski/mini.icons" },
+    config = function()
+
+    end
+  },
+  {
     'nvim-telescope/telescope.nvim',
     dependencies = {
       'nvim-lua/plenary.nvim',
@@ -1062,37 +1073,6 @@ local plugins = {
 
   -- complete
   {'hrsh7th/vim-vsnip'},
-  -- {
-  --   'hrsh7th/cmp-cmdline',
-  --   lazy = true,
-  --   keys = {"/", {":", mode = {'v', 'n'}}},
-  --   cond = vim.g.vscode == nil
-  --         and vim.fn.getfsize(vim.fn.expand('%')) <= (1024 * 1024 * 100)
-  --         and vim.fn.line('$') <= 100000
-  --         and vim.g.started_by_firenvim == nil,
-  --   config = function()
-  --     local status_ok, cmp = pcall(require, "cmp")
-  --     if not status_ok then
-  --       return
-  --     end
-  --
-  --     -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-  --     cmp.setup.cmdline('/', {
-  --       sources = {
-  --         { name = 'buffer' }
-  --       },
-  --     })
-  --
-  --     -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-  --     cmp.setup.cmdline(':', {
-  --       sources = cmp.config.sources({
-  --         { name = 'path' },
-  --         { name = 'cmdline' }
-  --       }),
-  --
-  --     })
-  --   end
-  -- },
 
   {
     'ray-x/lsp_signature.nvim',

@@ -821,6 +821,22 @@
         "type": "github"
       }
     },
+    "fzf-lua": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1749731490,
+        "narHash": "sha256-cnQH0ziFlSQLXk5ZA3DwWTnP+Stm8le1S9yJIn97vQI=",
+        "owner": "ibhagwan",
+        "repo": "fzf-lua",
+        "rev": "d155cc9648ba391f64876888ea0ae09a7aff469d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ibhagwan",
+        "repo": "fzf-lua",
+        "type": "github"
+      }
+    },
     "fzf-tab": {
       "flake": false,
       "locked": {
@@ -1899,6 +1915,7 @@
         "flashDOTnvim": "flashDOTnvim",
         "flattenDOTnvim": "flattenDOTnvim",
         "friendly-snippets": "friendly-snippets",
+        "fzf-lua": "fzf-lua",
         "git-conflictDOTnvim": "git-conflictDOTnvim",
         "gitsignsDOTnvim": "gitsignsDOTnvim",
         "gutentags_plus": "gutentags_plus",

@@ -12,6 +12,14 @@
       url = "github:nvim-lua/plenary.nvim";
       flake = false;
     };
+    nvim-web-devicons = {
+      url = "github:kyazdani42/nvim-web-devicons";
+      flake = false;
+    };
+    fzf-lua = {
+      url = "github:ibhagwan/fzf-lua";
+      flake = false;
+    };
     telescope-fzf-nativeDOTnvim = {
       url = "github:nvim-telescope/telescope-fzf-native.nvim";
       flake = false;
@@ -82,10 +90,6 @@
     };
     fidgetDOTnvim = {
       url = "github:j-hui/fidget.nvim?ref=legacy";
-      flake = false;
-    };
-    nvim-web-devicons = {
-      url = "github:kyazdani42/nvim-web-devicons";
       flake = false;
     };
     nvim-autopairs = {
@@ -486,6 +490,8 @@
       plugins_list = [
         { name = "lazy.nvim"; dotname = "lazyDOTnvim"; source = inputs.lazyDOTnvim; build = false; }
         { name = "plenary.nvim"; dotname = "plenaryDOTnvim"; source = inputs.plenaryDOTnvim; build = false; }
+        { name = "nvim-web-devicons"; dotname = "nvim-web-devicons"; source = inputs.nvim-web-devicons; build = false; }
+        { name = "fzf-lua"; dotname = "fzf-lua"; source = inputs.fzf-lua; build = false; }
         { name = "telescope-fzf-native.nvim"; dotname = "telescope-fzf-nativeDOTnvim"; source = inputs.telescope-fzf-nativeDOTnvim; build = true; }
         { name = "telescope-cmdline.nvim"; dotname = "telescope-cmdlineDOTnvim"; source = inputs.telescope-cmdlineDOTnvim; build = false; }
         { name = "telescope-vim-bookmarks.nvim"; dotname = "telescope-vim-bookmarksDOTnvim"; source = inputs.telescope-vim-bookmarksDOTnvim; build = false; }
@@ -504,7 +510,6 @@
         { name = "statuscol.nvim"; dotname = "statuscolDOTnvim"; source = inputs.statuscolDOTnvim; build = false; }
         { name = "nvim-lightbulb"; dotname = "nvim-lightbulb"; source = inputs.nvim-lightbulb; build = false; }
         { name = "fidget.nvim"; dotname = "fidgetDOTnvim"; source = inputs.fidgetDOTnvim; build = false; }
-        { name = "nvim-web-devicons"; dotname = "nvim-web-devicons"; source = inputs.nvim-web-devicons; build = false; }
         { name = "nvim-autopairs"; dotname = "nvim-autopairs"; source = inputs.nvim-autopairs; build = false; }
         { name = "auto-save.nvim"; dotname = "auto-saveDOTnvim"; source = inputs.auto-saveDOTnvim; build = false; }
         { name = "none-ls.nvim"; dotname = "none-lsDOTnvim"; source = inputs.none-lsDOTnvim; build = false; }
