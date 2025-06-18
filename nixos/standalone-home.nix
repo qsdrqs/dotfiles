@@ -25,6 +25,7 @@ in {
     fastfetch
     neofetch
     tmux
+    nodejs
     config.nix.package
   ];
 

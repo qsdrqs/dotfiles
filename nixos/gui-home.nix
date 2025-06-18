@@ -1,5 +1,7 @@
 { config, pkgs, inputs, lib, ... }:
-
+let
+  homeDir = config.home.homeDirectory;
+in
 {
   home.file.".icons/default".source = "${pkgs.libsForQt5.breeze-qt5}/share/icons/breeze_cursors";
 
@@ -30,4 +32,12 @@
     enable = true;
     indicator = true;
   };
+
+  home.activation.configs = ''
+    mkdir -p ~/.config
+    ln -sf ${homeDir}/dotfiles/hypr ${homeDir}/.config
+    ln -sf ${homeDir}/dotfiles/waybar ${homeDir}/.config
+    ln -sf ${homeDir}/dotfiles/kitty ${homeDir}/.config
+  '';
+
 }

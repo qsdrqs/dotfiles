@@ -1,8 +1,5 @@
 ({ config, pkgs, lib, ... }: {
   home.file = {
-    dotfiles = {
-      source = ../.;
-    };
     ".nvimrc.lua" = lib.mkForce {
       text = ''
         -- dummy function to prevent errors
@@ -17,4 +14,7 @@
       target = ".p10k.zsh";
     };
   };
+  home.activation.dotfiles = ''
+    cp -rf ${../.} ${config.home.homeDirectory}/dotfiles
+  '';
 })

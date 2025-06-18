@@ -320,10 +320,8 @@
         ];
       };
 
-      isoConfig = minimalConfig // {
+      isoBaseConfig = minimalConfig // {
         modules = minimalConfig.modules ++ [
-          "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-
           home-manager.nixosModules.home-manager
           {
             home-manager.users.qsdrqs = import ./nixos/isohome.nix;
@@ -332,6 +330,8 @@
           ({ config, pkgs, lib, ... }: {
             services.getty.autologinUser = nixpkgs.lib.mkForce "qsdrqs";
             networking.networkmanager.enable = nixpkgs.lib.mkForce false;
+            users.users.qsdrqs.password = ""; # empty passwd
+            programs.hyprlock.enable = lib.mkForce false; # disable hyprlock for iso
 
             # Disable ZFS for latest kernel, see https://github.com/NixOS/nixpkgs/issues/58959
             boot.supportedFilesystems = lib.mkForce [ "btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs" ];
@@ -339,8 +339,20 @@
         ];
       };
 
-      isoGuiConfig = isoConfig // {
-        modules = isoConfig.modules ++ [
+      isoMinimalConfig = isoBaseConfig // {
+        modules = isoBaseConfig.modules ++ [
+          "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+        ];
+      };
+
+      isoGuiConfig = isoBaseConfig // {
+        modules = isoBaseConfig.modules ++ [
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.qsdrqs = import ./nixos/gui-home.nix;
+          }
+
+          "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"
           ./nixos/gui-configuration.nix
         ];
       };
@@ -382,7 +394,7 @@
         in
         {
           # iso, build through #images.nixos-iso
-          nixos-iso = (nixpkgs.lib.nixosSystem (removeCustom isoConfig)).config.system.build.isoImage;
+          nixos-iso = (nixpkgs.lib.nixosSystem (removeCustom isoMinimalConfig)).config.system.build.isoImage;
           nixos-iso-gui = (nixpkgs.lib.nixosSystem (removeCustom isoGuiConfig)).config.system.build.isoImage;
           # rpi, build through #images.rpi
           rpi = (nixpkgs.lib.nixosSystem (removeCustom rpiConfig // {

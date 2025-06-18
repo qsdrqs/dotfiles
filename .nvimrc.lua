@@ -26,6 +26,13 @@ if not loop_or_uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+local function load_plugins(plugins)
+  require('lazy').load({ plugins = plugins })
+end
+local function load_plugin(plugin)
+  require('lazy').load({ plugins = { plugin } })
+end
+
 local kind_icons_list = {
   Array               = '󰅪',
   Boolean             = '',
@@ -713,6 +720,10 @@ local plugins = {
             }
           }
         elseif lsp == "lua_ls" then
+          lsp_common_config.on_attach = function(client, bufnr)
+            load_plugin("lazydev.nvim")
+            common_on_attach(client, bufnr)
+          end
           if string.find(vim.fn.expand('%'), '.nvimrc.lua', 1, true) then
             -- lsp_common_config.autostart = false
           end
@@ -728,7 +739,7 @@ local plugins = {
               },
               workspace = {
                 -- Make the server aware of Neovim runtime files
-                library = vim.api.nvim_get_runtime_file("", true),
+                -- library = vim.api.nvim_get_runtime_file("", true),
                 checkThirdParty = false,
               },
               -- Do not send telemetry data containing a randomized but unique identifier
@@ -1302,6 +1313,9 @@ local plugins = {
           implementation = "prefer_rust",
         }
       }
+      if vim.fn.isdirectory(vim.fn.stdpath('data') .. '/lazy/blink.cmp/.git') == 0 then
+        opts.fuzzy.implementation = "lua" -- no Rust fuzzy matcher available
+      end
       require('blink.cmp').setup(opts)
     end,
   },
@@ -1326,11 +1340,7 @@ local plugins = {
     dependencies = {'kevinhwang91/promise-async'},
     config = function()
       if vim.b.treesitter_disable ~= 1 then
-        require('lazy').load {
-          plugins = {
-            'nvim-treesitter',
-          }
-        }
+        load_plugin("nvim-treesitter")
       end
 
       vim.o.foldcolumn = '1'
@@ -3919,7 +3929,7 @@ return {
     keys = {"<leader>at", "<leader>ae"},
     cmd = "AsyncTaskTelescope",
     config = function()
-      require('lazy').load{plugins = {'asynctasks.vim', 'asyncrun.vim'}}
+      load_plugins({'asynctasks.vim', 'asyncrun.vim'})
       -- Fuzzy find over current tasks
       vim.cmd[[command! AsyncTaskTelescope lua require("telescope").extensions.asynctasks.all()]]
       vim.keymap.set('n', '<leader>at', '<cmd>AsyncTaskTelescope<cr>', { silent = true })
@@ -4531,7 +4541,7 @@ local function load_by_filetype(ft_plugins)
   for _, ft_plugin in pairs(ft_plugins) do
     for _, ft in pairs(ft_plugin.ft) do
       if vim.bo.filetype == ft then
-        require('lazy').load { plugins = ft_plugin.plugins }
+        load_plugins(ft_plugin.plugins)
         goto continue
       end
     end
@@ -4540,7 +4550,7 @@ local function load_by_filetype(ft_plugins)
       pattern = ft_plugin.ft,
       group = "LazyLoadFiletype",
       callback = function(ev, opts)
-        require('lazy').load { plugins = ft_plugin.plugins }
+        load_plugins(ft_plugin.plugins)
 
         -- load ftplugin, defer to avoid recursive call
         vim.defer_fn(function()
@@ -4571,53 +4581,51 @@ function LazyLoadPlugins()
     }
   }
 
-  require('lazy').load {
-    plugins = {
-      -- begin lsp
-      'nvim-lspconfig',
-      'nvim-lightbulb',
-      'fidget.nvim',
-      'none-ls.nvim',
-      'lsp_signature.nvim',
-      'dropbar.nvim',
-      'actions-preview.nvim',
-      -- end lsp
+  load_plugins {
+    -- begin lsp
+    'nvim-lspconfig',
+    'nvim-lightbulb',
+    'fidget.nvim',
+    'none-ls.nvim',
+    'lsp_signature.nvim',
+    'dropbar.nvim',
+    'actions-preview.nvim',
+    -- end lsp
 
-      -- begin git
-      'gitsigns.nvim',
-      'git-conflict.nvim',
-      -- end git
+    -- begin git
+    'gitsigns.nvim',
+    'git-conflict.nvim',
+    -- end git
 
-      -- begin vim plugins
-      'vim-sandwich',
-      'vim-log-highlighting',
-      'vim-visual-multi',
-      -- 'coc.nvim',
-      -- end vim plugins
+    -- begin vim plugins
+    'vim-sandwich',
+    'vim-log-highlighting',
+    'vim-visual-multi',
+    -- 'coc.nvim',
+    -- end vim plugins
 
-      -- begin ui
-      'dressing.nvim',
-      'nvim-colorizer.lua',
-      'bufferline.nvim',
-      'nvim-notify',
-      'nvim-hlslens',
-      'satellite.nvim',
-      'lualine.nvim',
-      'alpha-nvim',
-      'todo-comments.nvim',
-      'statuscol.nvim',
-      -- end ui
+    -- begin ui
+    'dressing.nvim',
+    'nvim-colorizer.lua',
+    'bufferline.nvim',
+    'nvim-notify',
+    'nvim-hlslens',
+    'satellite.nvim',
+    'lualine.nvim',
+    'alpha-nvim',
+    'todo-comments.nvim',
+    'statuscol.nvim',
+    -- end ui
 
-      -- begin misc
-      'which-key.nvim',
-      'project.nvim',
-      'nvim-ufo',
-      'toggleterm.nvim',
-      'direnv.vim',
-      'nvim-dap',
-      'auto-session',
-      -- end misc
-    }
+    -- begin misc
+    'which-key.nvim',
+    'project.nvim',
+    'nvim-ufo',
+    'toggleterm.nvim',
+    'direnv.vim',
+    'nvim-dap',
+    'auto-session',
+    -- end misc
   }
 
   -- replace netrw
@@ -4640,13 +4648,9 @@ function LazyLoadPlugins()
 
   vim.api.nvim_create_autocmd("InsertEnter", {
     callback = function()
-      require('lazy').load{
-        plugins = {
-          -- begin cmp
-          'blink.cmp',
-          -- end cmp
-          'copilot.vim',
-        }
+      load_plugins {
+        'blink.cmp',
+        'copilot.vim',
       }
       vim.defer_fn(function()
         vim.cmd[[Copilot]] -- init copilot
@@ -4656,26 +4660,22 @@ function LazyLoadPlugins()
   })
 
   if vim.b.treesitter_disable ~= 1 then
-    require('lazy').load{
-      plugins = {
-        -- begin treesitter (slow performance)
-        'rainbow-delimiters.nvim',   -- performance issue
-        'indent-blankline.nvim',
-        'nvim-treesitter-context',
-        'nvim-ts-autotag',
-        'hlargs.nvim',
-        'vim-matchup',
-        'vim-illuminate',
-        'nvim-treesitter-textobjects'
-        -- end treesitter
-      }
+    load_plugins {
+      -- begin treesitter (slow performance)
+      'rainbow-delimiters.nvim',   -- performance issue
+      'indent-blankline.nvim',
+      'nvim-treesitter-context',
+      'nvim-ts-autotag',
+      'hlargs.nvim',
+      'vim-matchup',
+      'vim-illuminate',
+      'nvim-treesitter-textobjects'
+      -- end treesitter
     }
   else
     vim.treesitter.stop()
-    require('lazy').load {
-      plugins = {
-        'rainbow',
-      }
+    load_plugins {
+      'rainbow',
     }
     vim.schedule(function()
       vim.fn["rainbow_main#load"]()
@@ -4687,7 +4687,11 @@ function LazyLoadPlugins()
 end
 
 function loadTags()
-  require('lazy').load { plugins = { 'cscope_maps.nvim', 'vim-gutentags', 'gutentags_plus' } }
+  load_plugins {
+    'cscope_maps.nvim',
+    'vim-gutentags',
+    'gutentags_plus',
+  }
   vim.cmd("edit %")
   vim.keymap.set('n', '<leader>gt', "<cmd>exec 'ltag ' . expand('<cword>') . '| lopen' <CR>", { silent = false })
 end
@@ -4697,7 +4701,7 @@ vim.cmd("command! LoadTags lua loadTags()")
 ----------------------------Constant Plugins------------------------------------------
 -- quick fix
 function _G.qftf(info)
-  require('lazy').load { plugins = { 'nvim-bqf' } }
+  load_plugin('nvim-bqf')
   local items
   local ret = {}
   if info.quickfix == 1 then
@@ -4877,14 +4881,12 @@ end
 function VscodeNeovimHandler()
   local vscode = require("vscode-neovim")
 
-  require('lazy').load{
-    plugins = {
-      "vim-visual-multi",
-      "nvim-treesitter-textobjects",
-      "vim-matchup",
-      "vim-sandwich",
-      "gitsigns.nvim",
-    }
+  load_plugins {
+    "vim-visual-multi",
+    "nvim-treesitter-textobjects",
+    "vim-matchup",
+    "vim-sandwich",
+    "gitsigns.nvim",
   }
 
   vim.keymap.set('n', '<leader>af',function() vscode.action("editor.action.formatDocument") end, { silent = true })
