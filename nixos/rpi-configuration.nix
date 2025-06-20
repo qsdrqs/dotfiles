@@ -28,7 +28,7 @@ in
     wiringpi
     (python3.withPackages python-packages)
   ];
-  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_rpi4;
+  boot.kernelPackages = pkgs.linuxPackages_rpi4;
 
   # Create gpio group
   users.groups.gpio = { };

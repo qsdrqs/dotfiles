@@ -160,6 +160,7 @@
         ./nixos/standalone-home.nix
       ];
       desktopHomeModules = basicHomeModules ++ guiHomeModules;
+      laptopHomeModules = basicHomeModules ++ guiHomeModules;
 
       special-args = system: {
         inherit inputs;
@@ -285,6 +286,11 @@
           ./nixos/desktop-configuration.nix
         ];
       };
+      laptopConfig = developConfig // guiConfig // {
+        modules = developConfig.modules ++ guiConfig.modules ++ [
+          ./nixos/laptop-configuration.nix
+        ];
+      };
 
       minimalHomeConfig =
         let
@@ -375,6 +381,7 @@
       nixosConfigurations.gui = nixpkgs.lib.nixosSystem guiConfig;
       nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem desktopConfig;
+      nixosConfigurations.laptop = nixpkgs.lib.nixosSystem laptopConfig;
 
       # nix-on-droid
       # nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration rec {

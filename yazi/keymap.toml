@@ -149,7 +149,7 @@ keymap = [
 
 	# Goto
 	{ on = [ "g", "h" ],       run = "plugin smart-goto 'jump ~'",             desc = "Go to the home directory" },
-	{ on = [ "g", "H" ],       run = "plugin smart-goto 'jump /mnt/c/Users/qsdrqs'",     desc = "Go to the Windows home directory" },
+	{ on = [ "g", "H" ],       run = "plugin smart-goto 'jump /mnt/Users/qsdrqs'",     desc = "Go to the Windows home directory" },
 	{ on = [ "g", "w" ], run = "plugin smart-goto 'jump /home/qsdrqs/Documents/WeChat\\ Files/wxid_ap6bpq3h92zg22/FileStorage/File'", desc = "Go to the WeChat directory" },
 	{ on = [ "g", "q" ], run = "plugin smart-goto 'jump /home/qsdrqs/Documents/Tencent\\ Files/1143661020/FileRecv'", desc = "Go to the QQ directory" },
 	{ on = [ "g", "c" ],       run = "plugin smart-goto 'jump ~/.config'",     desc = "Go to the config directory" },

@@ -1,8 +1,9 @@
 { config, pkgs, lib, pkgs-master, pkgs-stable, pkgs-last, inputs, options, ... }:
 let
   hyprlandPackages = with pkgs; [
-    waybar
-    # inputs.waybar.packages.${pkgs.system}.waybar
+    # Add waybar package here due to: https://github.com/Alexays/Waybar/issues/3300
+    # waybar
+    inputs.waybar.packages.${pkgs.system}.waybar
     qt6.qtwayland
     libsForQt5.qt5.qtwayland
     kdePackages.qtwayland
@@ -48,8 +49,13 @@ in
     xdotool
     zenity # color picker
 
+    playerctl
     libsecret
     keepassxc
+
+    libcamera
+    libcamera-qcam
+    v4l-utils
   ] ++ hyprlandPackages ++ (with pkgs.kdePackages; [
     dolphin
     kdeconnect-kde
@@ -72,6 +78,20 @@ in
     };
     jack.enable = true;
     # wireplumber.package = pkgs-stable.wireplumber;
+  };
+
+  boot.loader = {
+    grub = {
+      device = "nodev";
+      efiSupport = true;
+      useOSProber = true;
+      gfxmodeEfi = "1024x768";
+      default = "saved";
+    };
+    efi = {
+      canTouchEfiVariables = true;
+      efiSysMountPoint = "/boot";
+    };
   };
 
   systemd = {
@@ -147,6 +167,8 @@ in
     nerd-fonts.fira-code
     wqy_zenhei
   ];
+
+  services.desktopManager.plasma6.enable = true;
 
   # This fixes the unpopulated MIME menus
   environment.etc."/xdg/menus/applications.menu".text = builtins.readFile "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";

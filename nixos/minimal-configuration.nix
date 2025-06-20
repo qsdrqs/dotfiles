@@ -5,9 +5,17 @@
 { config, pkgs, lib, inputs, options, ... }:
 let
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
+  ctrl2esc = pkgs.writeShellScriptBin "ctrl2esc" ''
+    sudo systemctl stop interception-tools-caps2esc.service
+    sudo systemctl start interception-tools-ctrl2esc.service
+  '';
+  caps2esc = pkgs.writeShellScriptBin "caps2esc" ''
+    sudo systemctl stop interception-tools-ctrl2esc.service
+    sudo systemctl start interception-tools-caps2esc.service
+  '';
 in
 {
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
   # boot.kernelPackages = pkgs.linuxPackages_6_14; # TODO: temperary fix
   # boot.kernelPackages = pkgs.linuxPackages;
   boot.tmp.useTmpfs = true;
@@ -17,9 +25,9 @@ in
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
-  # Set your time zone.
-  time.timeZone = "America/Chicago";
-
+  services.tzupdate = {
+    enable = true;
+  };
   # Configure network proxy if necessary
   # networking.proxy.default = "http://127.0.0.1:1081";
   # networking.proxy.noProxy = "127.0.0.1,localhost";
@@ -206,11 +214,15 @@ in
     (lib.hiPrio inetutils)
     iw
     cntr # container debug tool
+    libinput
 
     # perfing
     config.boot.kernelPackages.perf
     strace
     ltrace
+
+    caps2esc
+    ctrl2esc
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

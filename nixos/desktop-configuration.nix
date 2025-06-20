@@ -166,7 +166,7 @@ in
     wineWowPackages.unstableFull
     wpsoffice-hidpi
     libreoffice
-    seahorse # keyring manager
+    # seahorse # keyring manager
 
     # (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
     # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
@@ -197,6 +197,7 @@ in
     nur.repos.linyinfeng.wemeet
     nur.repos.xddxdd.baidunetdisk
     wechat-uos-hidpi
+    flameshot
   ];
 
   programs.nix-ld.libraries = with pkgs; [
@@ -252,7 +253,6 @@ in
       extraPackages = with pkgs; [
         gpick
         arandr
-        flameshot
         variety
         feh
         picom
