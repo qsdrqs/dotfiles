@@ -176,31 +176,11 @@ local plugins = {
       vim.api.nvim_create_user_command("PlenaryProfileStop", function() require'plenary.profile'.stop() end, { nargs = 0 })
     end
   },
-  {
-    "ibhagwan/fzf-lua",
-    lazy = false,
-    -- optional for icon support
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    -- or if using mini.icons/mini.nvim
-    -- dependencies = { "echasnovski/mini.icons" },
-    config = function()
 
-    end
-  },
   {
     'nvim-telescope/telescope.nvim',
     dependencies = {
       'nvim-lua/plenary.nvim',
-      'nvim-telescope/telescope-fzf-native.nvim',
-      'jonarrien/telescope-cmdline.nvim',
-      'tom-anders/telescope-vim-bookmarks.nvim',
-    },
-    keys = {
-      "<leader>f",
-      "<leader>b",
-      "<leader>gs",
-      "<leader>gg",
-      "<leader>t",
     },
     cond = vim.g.vscode == nil,
     config = function()
@@ -247,42 +227,74 @@ local plugins = {
         opts.defaults.mappings.n["<C-t>"] = trouble_telscope.open
       end
       require('telescope').setup(opts)
+    end
+  },
 
-      local function telescope_grep_string_visual()
-        local saved_reg = vim.fn.getreg "v"
-        vim.cmd [[noautocmd sil norm "vy]]
-        local sele = vim.fn.getreg "v"
-        vim.fn.setreg("v", saved_reg)
-        require('telescope.builtin').grep_string({ search = sele })
-      end
-
-      -- lazy load telescope
-      local telescope_buildin = require('telescope.builtin')
-      vim.keymap.set('n', '<leader>f', telescope_buildin.find_files, { silent = true })
-      vim.keymap.set('n', '<leader>F', function() telescope_buildin.find_files{no_ignore=true} end, { silent = true })
-      vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers<cr>', { silent = true })
-      vim.keymap.set('n', '<leader>gs', '<cmd>Telescope grep_string <cr>', { silent = true })
-      vim.keymap.set('v', '<leader>gs', telescope_grep_string_visual, { silent = true })
-      vim.keymap.set('n', '<leader>gg', telescope_buildin.live_grep, { silent = true })
-      vim.keymap.set('n', '<leader>t', '<cmd>Telescope builtin include_extensions=true <cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rc', '<cmd>Telescope command_history <cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_document_symbols<cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rw', '<cmd>Telescope lsp_dynamic_workspace_symbols<cr>', { silent = true })
-      vim.keymap.set('n', '<leader>rl', '<cmd>Telescope current_buffer_fuzzy_find fuzzy=false <cr>', { silent = true })
-
+  {
+    "ibhagwan/fzf-lua",
+    -- optional for icon support
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    cond = vim.g.vscode == nil,
+    cmd = {
+      "FzfLua"
+    },
+    keys = {
+      "<leader>f",
+      "<leader>b",
+      "<leader>gs",
+      "<leader>gg",
+      "<leader>gG",
+      "<leader>t",
+      "<leader>rc",
+      "<leader>rf",
+      "<leader>rw",
+      "<leader>rl",
+      "<leader>rt",
+    },
+    -- or if using mini.icons/mini.nvim
+    -- dependencies = { "echasnovski/mini.icons" },
+    config = function()
+      local fzf_lua = require('fzf-lua')
+      fzf_lua.setup {
+        grep = {
+          rg_glob = true,
+          -- first returned string is the new search query
+          -- second returned string are (optional) additional rg flags
+          -- @return string, string?
+          rg_glob_fn = function(query, opts)
+            local regex, flags = query:match("^(.-)%s%-%-(.*)$")
+            -- If no separator is detected will return the original query
+            return (regex or query), flags
+          end
+        },
+        winopts = {
+          preview = { default="bat_native" },
+        },
+        keymap = {
+          fzf = {
+            true,
+            -- Use <c-q> to select all items and add them to the quickfix list
+            ["ctrl-q"] = "select-all+accept",
+          },
+        },
+      }
+      vim.keymap.set('n', '<leader>f', fzf_lua.files, { silent = true })
+      vim.keymap.set('n', '<leader>F', function() fzf_lua.files({ no_ignore = true }) end, { silent = true })
+      vim.keymap.set('n', '<leader>b', fzf_lua.buffers, { silent = true })
+      vim.keymap.set('n', '<leader>gs', fzf_lua.grep_cword, { silent = true })
+      vim.keymap.set('v', '<leader>gs', fzf_lua.grep_visual, { silent = true })
+      vim.keymap.set('n', '<leader>gg', fzf_lua.live_grep, { silent = false })
+      vim.keymap.set('n', '<leader>gG', fzf_lua.live_grep_glob, { silent = true })
+      vim.keymap.set('n', '<leader>t', fzf_lua.builtin, { silent = true })
+      vim.keymap.set('n', '<leader>rc', fzf_lua.command_history, { silent = true })
+      vim.keymap.set('n', '<leader>rf', fzf_lua.lsp_document_symbols, { silent = true })
+      vim.keymap.set('n', '<leader>rw', fzf_lua.lsp_workspace_symbols, { silent = true })
+      vim.keymap.set('n', '<leader>rl', fzf_lua.blines, { silent = true })
+      vim.keymap.set('n', '<leader>rt', fzf_lua.treesitter, { silent = true })
     end
   },
   {'seandewar/sigsegvim', cmd = "Sigsegv"},
   {"Eandrju/cellular-automaton.nvim", cmd = "CellularAutomaton"},
-
-  {
-    'nvim-telescope/telescope-live-grep-args.nvim',
-    lazy = true,
-    keys = "<leader>gG",
-    config = function()
-      vim.keymap.set('n', '<leader>gG', require('telescope').extensions.live_grep_args.live_grep_args, { silent = true })
-    end
-  },
 
   {
     'kevinhwang91/nvim-bqf',
@@ -499,6 +511,9 @@ local plugins = {
   },
   {
     "aznhe21/actions-preview.nvim",
+    dependencies = {
+      "nvim-telescope/telescope.nvim",
+    },
     keys = {
       {"<leader>ca", mode = {'v', 'n'}},
     },
@@ -610,7 +625,7 @@ local plugins = {
           },
         }
       })
-      virtualLineEnabled = false
+      local virtualLineEnabled = false
 
       local function changeDiagnostic()
         require("lsp_lines") -- lazy load lsp_lines
@@ -1924,8 +1939,7 @@ local plugins = {
 
   -- cd to project root
   {
-    "LennyPhoenix/project.nvim",
-    branch = "fix-get_clients",
+    "ahmedkhalf/project.nvim",
     config = function()
       require("project_nvim").setup {
         silent_chdir = true,
@@ -1950,10 +1964,6 @@ local plugins = {
     cond = vim.g.vscode == nil,
     config = function()
       vim.keymap.set('n', '<leader>v', '<cmd>AerialToggle!<CR>', { silent = true })
-      local status_ok, telescope = pcall(require, "telescope")
-      if status_ok then
-        telescope.load_extension('aerial')
-      end
       require("aerial").setup({
         backends = {"lsp", "treesitter", "markdown"},
 
@@ -2817,68 +2827,9 @@ local plugins = {
   },
 
   {
-    'nvim-telescope/telescope-fzf-native.nvim',
-    dependencies = { 'nvim-telescope/telescope.nvim' },
-    build = 'make',
-    config = function()
-      require('telescope').setup {
-        extensions = {
-          fzf = {
-            fuzzy = true,                    -- false will only do exact matching
-            override_generic_sorter = true,  -- override the generic sorter
-            override_file_sorter = true,     -- override the file sorter
-            case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
-            -- the default case_mode is "smart_case"
-          }
-        }
-      }
-      -- To get fzf loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require('telescope').load_extension('fzf')
-    end
-  },
-
-  {
-    'jonarrien/telescope-cmdline.nvim',
-    config = function()
-      require("telescope").load_extension('cmdline')
-      require('cmdline.config').values.picker.layout_config = nil
-    end
-  },
-
-  {
-    'MattesGroeger/vim-bookmarks',
-    lazy = true,
-    keys = {
-      '<leader>mm',
-      '<leader>mi',
-      '<leader>mn',
-      '<leader>mp',
-      '<leader>ma',
-      '<leader>mc',
-    },
-    init = function()
-      vim.g.bookmark_no_default_key_mappings = 1
-    end,
-    config = function()
-      vim.g.bookmark_sign = ''
-      vim.keymap.set('n', '<leader>mm', '<cmd>BookmarkToggle<CR>', {silent = true})
-      vim.keymap.set('n', '<leader>mi', '<cmd>BookmarkAnnotate<CR>', {silent = true})
-      vim.keymap.set('n', '<leader>mn', '<cmd>BookmarkNext<CR>', {silent = true})
-      vim.keymap.set('n', '<leader>mp', '<cmd>BookmarkPrev<CR>', {silent = true})
-      vim.keymap.set('n', '<leader>ma', '<cmd>BookmarkShowAll<CR>', {silent = true})
-      vim.keymap.set('n', '<leader>mc', '<cmd>BookmarkClear<CR>', {silent = true})
-    end
-  },
-
-  {
-    'tom-anders/telescope-vim-bookmarks.nvim',
-    dependencies = {
-      'MattesGroeger/vim-bookmarks'
-    },
-    config = function()
-      require('telescope').load_extension('vim_bookmarks')
-    end
+    "chentoast/marks.nvim",
+    event = "VeryLazy",
+    opts = {},
   },
 
   {
@@ -3096,10 +3047,10 @@ local plugins = {
         dashboard.button("l", "󰁯  Load session", "<cmd> SessionRestore <cr>"),
         dashboard.button("y", "  Open file manager", "<cmd>YaziToggle <cr>"),
         dashboard.button("z", "  Z jump", "<cmd>ZjumpToggle <cr>"),
-        dashboard.button("f", "󰍉  Find file", "<cmd>Telescope find_files<CR>"),
-        dashboard.button("h", "󱔗  Recently opened files", "<cmd> Telescope oldfiles <CR>"),
-        dashboard.button("g", "󰈬  Find word","<cmd>Telescope live_grep<CR>"),
-        dashboard.button("m", "󰃃  Jump to bookmarks", "<cmd>Telescope vim_bookmarks<cr>"),
+        dashboard.button("f", "󰍉  Find file", require('fzf-lua').files),
+        dashboard.button("h", "󱔗  Recently opened files", require('fzf-lua').oldfiles),
+        dashboard.button("g", "󰈬  Find word", require('fzf-lua').live_grep),
+        dashboard.button("m", "󰃃  Jump to bookmarks", require('fzf-lua').marks),
         -- dashboard.button("u", "  Update plugins" , ":Lazy sync<CR>"),
         dashboard.button("c", "  Open Config" , "<cmd>e ~/dotfiles/.vimrc<cr><cmd>e ~/dotfiles/.nvimrc.lua<cr>"),
         dashboard.button("q", "󰅚  Quit" , ":qa<CR>"),
@@ -3425,7 +3376,7 @@ local plugins = {
 
   {
     "linux-cultist/venv-selector.nvim",
-    dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
+    dependencies = { "neovim/nvim-lspconfig", "ibhagwan/fzf-lua", "mfussenegger/nvim-dap-python" },
     cmd = {"VenvSelect", "VenvSelectCached"},
     config = function()
       require("venv-selector").setup({
@@ -3769,7 +3720,7 @@ local plugins = {
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
       --- The below dependencies are optional,
-      "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+      "ibhagwan/fzf-lua",
       "saghen/blink.cmp", -- autocompletion for avante commands and mentions
       "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
       'MeanderingProgrammer/render-markdown.nvim',
@@ -4683,7 +4634,7 @@ function LazyLoadPlugins()
   end
 
   -- change <leader><leader> to telescope commands
-  vim.keymap.set('n', '<leader><leader>', '<cmd>Telescope cmdline<cr>', { silent = true })
+  vim.keymap.set('n', '<leader><leader>', require('fzf-lua').commands, { silent = true })
 end
 
 function loadTags()

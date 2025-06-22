@@ -12,6 +12,10 @@
       url = "github:nvim-lua/plenary.nvim";
       flake = false;
     };
+    telescopeDOTnvim = {
+      url = "github:nvim-telescope/telescope.nvim";
+      flake = false;
+    };
     nvim-web-devicons = {
       url = "github:kyazdani42/nvim-web-devicons";
       flake = false;
@@ -20,32 +24,12 @@
       url = "github:ibhagwan/fzf-lua";
       flake = false;
     };
-    telescope-fzf-nativeDOTnvim = {
-      url = "github:nvim-telescope/telescope-fzf-native.nvim";
-      flake = false;
-    };
-    telescope-cmdlineDOTnvim = {
-      url = "github:jonarrien/telescope-cmdline.nvim";
-      flake = false;
-    };
-    telescope-vim-bookmarksDOTnvim = {
-      url = "github:tom-anders/telescope-vim-bookmarks.nvim";
-      flake = false;
-    };
-    telescopeDOTnvim = {
-      url = "github:nvim-telescope/telescope.nvim";
-      flake = false;
-    };
     sigsegvim = {
       url = "github:seandewar/sigsegvim";
       flake = false;
     };
     cellular-automatonDOTnvim = {
       url = "github:Eandrju/cellular-automaton.nvim";
-      flake = false;
-    };
-    telescope-live-grep-argsDOTnvim = {
-      url = "github:nvim-telescope/telescope-live-grep-args.nvim";
       flake = false;
     };
     nvim-bqf = {
@@ -129,7 +113,7 @@
       flake = false;
     };
     blinkDOTcmp = {
-      url = "github:saghen/blink.cmp/v1.3.1";
+      url = "github:saghen/blink.cmp/v1.4.1";
       flake = false;
     };
     blinkDOTcompat = {
@@ -189,7 +173,7 @@
       flake = false;
     };
     projectDOTnvim = {
-      url = "github:LennyPhoenix/project.nvim?ref=fix-get_clients";
+      url = "github:ahmedkhalf/project.nvim";
       flake = false;
     };
     aerialDOTnvim = {
@@ -260,8 +244,8 @@
       url = "github:famiu/bufdelete.nvim";
       flake = false;
     };
-    vim-bookmarks = {
-      url = "github:MattesGroeger/vim-bookmarks";
+    marksDOTnvim = {
+      url = "github:chentoast/marks.nvim";
       flake = false;
     };
     auto-session = {
@@ -490,15 +474,11 @@
       plugins_list = [
         { name = "lazy.nvim"; dotname = "lazyDOTnvim"; source = inputs.lazyDOTnvim; build = false; }
         { name = "plenary.nvim"; dotname = "plenaryDOTnvim"; source = inputs.plenaryDOTnvim; build = false; }
+        { name = "telescope.nvim"; dotname = "telescopeDOTnvim"; source = inputs.telescopeDOTnvim; build = false; }
         { name = "nvim-web-devicons"; dotname = "nvim-web-devicons"; source = inputs.nvim-web-devicons; build = false; }
         { name = "fzf-lua"; dotname = "fzf-lua"; source = inputs.fzf-lua; build = false; }
-        { name = "telescope-fzf-native.nvim"; dotname = "telescope-fzf-nativeDOTnvim"; source = inputs.telescope-fzf-nativeDOTnvim; build = true; }
-        { name = "telescope-cmdline.nvim"; dotname = "telescope-cmdlineDOTnvim"; source = inputs.telescope-cmdlineDOTnvim; build = false; }
-        { name = "telescope-vim-bookmarks.nvim"; dotname = "telescope-vim-bookmarksDOTnvim"; source = inputs.telescope-vim-bookmarksDOTnvim; build = false; }
-        { name = "telescope.nvim"; dotname = "telescopeDOTnvim"; source = inputs.telescopeDOTnvim; build = false; }
         { name = "sigsegvim"; dotname = "sigsegvim"; source = inputs.sigsegvim; build = false; }
         { name = "cellular-automaton.nvim"; dotname = "cellular-automatonDOTnvim"; source = inputs.cellular-automatonDOTnvim; build = false; }
-        { name = "telescope-live-grep-args.nvim"; dotname = "telescope-live-grep-argsDOTnvim"; source = inputs.telescope-live-grep-argsDOTnvim; build = false; }
         { name = "nvim-bqf"; dotname = "nvim-bqf"; source = inputs.nvim-bqf; build = false; }
         { name = "nvim-hlslens"; dotname = "nvim-hlslens"; source = inputs.nvim-hlslens; build = false; }
         { name = "mason.nvim"; dotname = "masonDOTnvim"; source = inputs.masonDOTnvim; build = false; }
@@ -552,7 +532,7 @@
         { name = "vim-illuminate"; dotname = "vim-illuminate"; source = inputs.vim-illuminate; build = false; }
         { name = "nvim-tree.lua"; dotname = "nvim-treeDOTlua"; source = inputs.nvim-treeDOTlua; build = false; }
         { name = "bufdelete.nvim"; dotname = "bufdeleteDOTnvim"; source = inputs.bufdeleteDOTnvim; build = false; }
-        { name = "vim-bookmarks"; dotname = "vim-bookmarks"; source = inputs.vim-bookmarks; build = false; }
+        { name = "marks.nvim"; dotname = "marksDOTnvim"; source = inputs.marksDOTnvim; build = false; }
         { name = "auto-session"; dotname = "auto-session"; source = inputs.auto-session; build = false; }
         { name = "alpha-nvim"; dotname = "alpha-nvim"; source = inputs.alpha-nvim; build = false; }
         { name = "registers.nvim"; dotname = "registersDOTnvim"; source = inputs.registersDOTnvim; build = false; }

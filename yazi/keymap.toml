@@ -160,7 +160,7 @@ keymap = [
 	{ on = [ "<Tab>" ],        run = "plugin smart-goto 'forward'",          desc = "Jump forward" },
 
 	# Help
-	{ on = [ "~" ], run = "help", desc = "Open help" },
+	{ on = [ "<F1>" ], run = "help", desc = "Open help" },
 	{ on = [ "b", "b"], run = "plugin dircount"},
 
 	# Plugins
@@ -194,7 +194,7 @@ keymap = [
 	{ on = [ "<Enter>" ], run = "inspect", desc = "Inspect the task" },
 	{ on = [ "x" ],       run = "cancel",  desc = "Cancel the task" },
 
-	{ on = [ "~" ], run = "help", desc = "Open help" }
+	{ on = [ "<F1>" ], run = "help", desc = "Open help" },
 ]
 
 [select]
@@ -217,7 +217,7 @@ keymap = [
 	{ on = [ "<S-Up>" ],   run = "arrow -5", desc = "Move cursor up 5 lines" },
 	{ on = [ "<S-Down>" ], run = "arrow 5",  desc = "Move cursor down 5 lines" },
 
-	{ on = [ "~" ], run = "help", desc = "Open help" }
+	{ on = [ "<F1>" ], run = "help", desc = "Open help" },
 ]
 
 [input]
@@ -286,7 +286,7 @@ keymap = [
 	{ on = [ "<C-r>" ], run = "redo", desc = "Redo the last operation" },
 
 	# Help
-	{ on = [ "~" ], run = "help", desc = "Open help" }
+	{ on = [ "<F1>" ], run = "help", desc = "Open help" },
 ]
 
 [confirm]
@@ -307,7 +307,6 @@ keymap = [
 	{ on = "<Down>", run = "arrow 1",  desc = "Move cursor down" },
 
 	# Help
-	{ on = "~",    run = "help", desc = "Open help" },
 	{ on = "<F1>", run = "help", desc = "Open help" },
 ]
 
@@ -328,7 +327,6 @@ keymap = [
 	{ on = "<C-n>", run = "arrow 1",  desc = "Move cursor down" },
 
 	# Help
-	{ on = "~",    run = "help", desc = "Open help" },
 	{ on = "<F1>", run = "help", desc = "Open help" },
 ]
 

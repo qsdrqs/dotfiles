@@ -98,7 +98,7 @@ in
     { name = "direnv/direnv.toml"; target = ".config/direnv/direnv.toml"; }
   ] //
   symbfileTargetNoRecursive [
-    { name = "nvim/lua"; target = ".config/nvim/lua"; }
+    { name = "nvim/lua/dotfiles"; target = ".config/nvim/lua/dotfiles"; }
   ] //
   genZshPlugins inputs.zsh-config.plugins //
   genZshThemes inputs.zsh-config.themes //
