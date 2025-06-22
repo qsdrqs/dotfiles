@@ -39,6 +39,7 @@ in
 {
   boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+
   hardware.firmware = with pkgs; [
     linux-firmware
   ];
@@ -75,7 +76,7 @@ in
 
     # NUR
     qq-hidpi
-    nur.repos.linyinfeng.wemeet
+    wemeet
     wechat-uos-hidpi
     flameshot
   ];

@@ -84,7 +84,8 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
-        gpick = pkgs-stable.gpick;
+        wpsoffice = pkgs-last.wpsoffice;
+        mpd = pkgs-last.mpd;
         # End Temporary fixed version packages
 
         # neovim-unwrapped =
@@ -112,6 +113,7 @@ in
             tiktoken
           ];
         }));
+
 
         ranger = super.ranger.overrideAttrs (oldAttrs: {
           src = inputs.ranger-config.ranger;

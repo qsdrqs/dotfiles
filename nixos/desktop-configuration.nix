@@ -194,7 +194,7 @@ in
     # NUR
     qq-hidpi
     qqmusic-hidpi
-    nur.repos.linyinfeng.wemeet
+    wemeet
     nur.repos.xddxdd.baidunetdisk
     wechat-uos-hidpi
     flameshot
@@ -303,6 +303,7 @@ in
   services.ollama = {
     enable = true;
     acceleration = "cuda";
+    package = pkgs-master.ollama;
   };
 
 }
