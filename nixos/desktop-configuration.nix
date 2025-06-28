@@ -177,8 +177,6 @@ in
     # neovide
     termshark
 
-    obs-studio
-
     texlive.combined.scheme-full
 
     pandoc
@@ -205,6 +203,23 @@ in
   ];
 
   services.teamviewer.enable = true;
+
+  programs.obs-studio = {
+    enable = true;
+    package = (
+      pkgs.obs-studio.override {
+        cudaSupport = true;
+      }
+    );
+    plugins = with pkgs.obs-studio-plugins; [
+      wlrobs
+      obs-backgroundremoval
+      obs-pipewire-audio-capture
+      obs-vaapi # optional AMD hardware acceleration
+      obs-gstreamer
+      obs-vkcapture
+    ];
+  };
 
   services.mpd = {
     enable = true;
@@ -283,6 +298,12 @@ in
   environment.etc."modprobe.d/nvidia.conf".text = ''
     options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerLevel=0x3; PowerMizerDefault=0x3; PowerMizerDefaultAC=0x3"
   '';
+
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "nvidia";
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    # GBM_BACKEND = "nvidia-drm";
+  };
 
   # snapshots
   services.snapper.configs = {

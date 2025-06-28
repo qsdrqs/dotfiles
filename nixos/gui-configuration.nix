@@ -114,6 +114,8 @@ in
           Type = "dbus";
           BusName = "org.freedesktop.Notifications";
           ExecStart = "${pkgs.swaynotificationcenter}/bin/swaync";
+          Restart = "on-failure";
+          RestartSec = 5;
         };
       };
       plasma-dolphin = {

@@ -81,6 +81,17 @@ in
         # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+        obs-studio = super.obs-studio.overrideAttrs (oldAttrs: {
+          nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [ pkgs.kdePackages.extra-cmake-modules ];
+          src = pkgs.fetchFromGitHub {
+            owner = "obsproject";
+            repo = "obs-studio";
+            rev = "d3c5d2ce0b15bac7a502f5aef4b3b5ec72ee8e09";
+            hash = "sha256-z6BMgddmq3+IsVkt0a/FP+gShvGi1tI6qBbJlAcHgW8=";
+            fetchSubmodules = true;
+          };
+        });
+
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages

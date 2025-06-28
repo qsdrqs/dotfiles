@@ -87,6 +87,18 @@ in
 
   services.teamviewer.enable = true;
 
+  programs.obs-studio = {
+    enable = true;
+    plugins = with pkgs.obs-studio-plugins; [
+      wlrobs
+      obs-backgroundremoval
+      obs-pipewire-audio-capture
+      obs-vaapi # optional AMD hardware acceleration
+      obs-gstreamer
+      obs-vkcapture
+    ];
+  };
+
   services.mpd = {
     enable = true;
     user = "qsdrqs";
@@ -123,9 +135,7 @@ in
 
   services.zerotierone = {
     enable = true;
-    joinNetworks = lib.strings.splitString "\n" (
-      builtins.readFile ./private/zerotier-network-id
-    );
+    joinNetworks = lib.strings.splitString "\n" (builtins.readFile ./private/zerotier-network-id);
   };
 
   programs.wireshark = {
@@ -141,7 +151,23 @@ in
     docker.enable = true;
   };
 
-  users.users.qsdrqs.extraGroups = [ "wireshark" "libvirtd" "docker" ];
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver # LIBVA_DRIVER_NAME=iHD
+      intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+      libvdpau-va-gl
+    ];
+  };
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "iHD";
+  }; # Force intel-media-driver
+
+  users.users.qsdrqs.extraGroups = [
+    "wireshark"
+    "libvirtd"
+    "docker"
+  ];
 
   # snapshots
   services.snapper.configs = {
