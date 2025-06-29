@@ -85,7 +85,7 @@ in
     gmp
   ];
 
-  services.teamviewer.enable = true;
+  # services.teamviewer.enable = true;
 
   programs.obs-studio = {
     enable = true;

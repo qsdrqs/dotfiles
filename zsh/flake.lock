@@ -3,11 +3,11 @@
     "fast-syntax-highlighting": {
       "flake": false,
       "locked": {
-        "lastModified": 1688591419,
-        "narHash": "sha256-RVX9ZSzjBW3LpFs2W86lKI6vtcvDWP6EPxzeTcRZua4=",
+        "lastModified": 1750837465,
+        "narHash": "sha256-9itq8Pq/+1Yflo7b31eHEVOFrbO9b1CAMr988xYyNLI=",
         "owner": "zdharma-continuum",
         "repo": "fast-syntax-highlighting",
-        "rev": "cf318e06a9b7c9f2219d78f41b46fa6e06011fd9",
+        "rev": "dcee72bb99b422bb8e4510f5087af9c1721392e4",
         "type": "github"
       },
       "original": {
@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1750320340,
-        "narHash": "sha256-o7UCVCSDh/GpzvAPWpD72MQlHIC06nQVhIBj7n/OxXo=",
+        "lastModified": 1750879997,
+        "narHash": "sha256-Py71Qp7D0TSilZsnLV8OdvMsep/RiWPjHLbI+yhY+R0=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "f8022980a3423f25e3d5e1b6a60d2372a2ba006b",
+        "rev": "01433503c2a474c049fa56d792ebfd9274e683cc",
         "type": "github"
       },
       "original": {
@@ -81,11 +81,11 @@
     "spaceship": {
       "flake": false,
       "locked": {
-        "lastModified": 1750354284,
-        "narHash": "sha256-5yYFYQE+Kb2nvveUa3ZBS6ClBlu1Hdmb/a5/WrE3/so=",
+        "lastModified": 1750853402,
+        "narHash": "sha256-g0hiUyGVaUA9Jg5UHFEyf1ioUnMb2cp7tOrtTFLMtvc=",
         "owner": "denysdovhan",
         "repo": "spaceship-prompt",
-        "rev": "ba59c65da94ad7991040ec63a2e13ae659186404",
+        "rev": "a760b581fb590f2644da61366039dbbc80626d51",
         "type": "github"
       },
       "original": {
@@ -145,11 +145,11 @@
     "zsh-autosuggestions": {
       "flake": false,
       "locked": {
-        "lastModified": 1732590459,
-        "narHash": "sha256-85aw9OM2pQPsWklXjuNOzp9El1MsNb+cIiZQVHUzBnk=",
+        "lastModified": 1750781703,
+        "narHash": "sha256-KmkXgK1J6iAyb1FtF/gOa0adUnh1pgFsgQOUnNngBaE=",
         "owner": "zsh-users",
         "repo": "zsh-autosuggestions",
-        "rev": "0e810e5afa27acbd074398eefbe28d13005dbc15",
+        "rev": "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5",
         "type": "github"
       },
       "original": {

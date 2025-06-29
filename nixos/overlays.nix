@@ -95,8 +95,6 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
-        wpsoffice = pkgs-last.wpsoffice;
-        mpd = pkgs-last.mpd;
         # End Temporary fixed version packages
 
         # neovim-unwrapped =
