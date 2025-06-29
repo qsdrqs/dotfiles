@@ -1139,7 +1139,6 @@ local plugins = {
     -- optional: provides snippets for the snippet source
     dependencies = {
       'L3MON4D3/LuaSnip',
-      "Kaiser-Yang/blink-cmp-avante",
       "xzbdmw/colorful-menu.nvim"
     },
     version = '1.*',
@@ -1296,10 +1295,6 @@ local plugins = {
             if vim.bo.filetype == 'lua' then
               table.insert(default, 1, 'lazydev')
             end
-            if vim.bo.filetype:find('^Avante') then
-              print(vim.bo.filetype)
-              table.insert(default, 1, 'avante')
-            end
             return default
           end,
           providers = {
@@ -1309,14 +1304,10 @@ local plugins = {
               -- make lazydev completions top priority (see `:h blink.cmp`)
               score_offset = 100,
             },
-            avante = {
-              module = 'blink-cmp-avante',
-              name = 'Avante',
-              opts = {
-                -- options for blink-cmp-avante
-              }
-            },
           },
+          per_filetype = {
+            codecompanion = { "codecompanion" },
+          }
         },
 
         -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
@@ -1335,7 +1326,6 @@ local plugins = {
     end,
   },
   { "saghen/blink.compat" },
-  { "Kaiser-Yang/blink-cmp-avante" },
 
   {'kevinhwang91/promise-async'},
   {
@@ -3697,9 +3687,17 @@ local plugins = {
 
   {
     "olimorris/codecompanion.nvim",
+    cmd = {
+      "CodeCompanion",
+      "CodeCompanionAction",
+      "CodeCompanionChat",
+      "CodeCompanionCmd",
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
+      "echasnovski/mini.diff",
+      'MeanderingProgrammer/render-markdown.nvim',
     },
     config = function()
       require("codecompanion").setup({
@@ -3711,151 +3709,26 @@ local plugins = {
             adapter = "openai",
           },
         },
+        display = {
+          action_palette = {
+            provider = "fzf_lua",
+          },
+          diff = {
+            provider = "mini_diff", -- default|mini_diff
+          }
+        }
       })
     end
   },
-
   {
-    "yetone/avante.nvim",
-    cond = vim.g.vscode == nil,
-    cmd = {
-      "AvanteAsk",
-      "AvanteEdit",
-      "AvanteRefresh",
-      "AvanteFocus",
-      "AvanteToggle",
-      "AvanteFilesAddCurrent",
-    },
-    keys = {
-      {"<localleader>aa", mode = {'n', 'v'}},
-      {"<localleader>ae", mode = {'n', 'v'}},
-      {"<localleader>af", mode = {'n', 'v'}},
-    },
-    lazy = true,
-    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-    build = "make",
-    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-    dependencies = {
-      "stevearc/dressing.nvim",
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-      --- The below dependencies are optional,
-      "ibhagwan/fzf-lua",
-      "saghen/blink.cmp", -- autocompletion for avante commands and mentions
-      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-      'MeanderingProgrammer/render-markdown.nvim',
-    },
-    init = function(plugin)
-      vim.api.nvim_create_user_command("AvanteBuild", function()
-        -- run `make` under plugin directory
-        vim.system(
-          {"make"},
-          { cwd = plugin.dir },
-          vim.schedule_wrap(function()
-            vim.notify("Avante built successfully", "info", { title = "Avante" })
-          end)
-        )
-      end, { nargs = 0 })
-    end,
+    "echasnovski/mini.diff",
     config = function()
-      local xdg_config_home = os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")
-      local avante_config_path = xdg_config_home .. "/avante.lua"
-      local default_config = [[
-return {
-  provider = "openai",
-  vendors = {
-    ollama = {
-      api_key_name = "",
-      endpoint = "http://127.0.0.1:11434",
-      model = "qwq",
-      disable_tools = true,
-      options = {
-        num_ctx = 32768,
-      },
-    },
-    deepseek = {
-      __inherited_from = "openai",
-      endpoint = "https://api.deepseek.com",
-      model = "deepseek-chat",
-      disable_tools = true,
-    },
-  },
-  openai = {
-    model = "gpt-4o",
-    timeout = 30000,
-    max_tokens = 4096,
-  },
-  hints = {
-    enabled = false,
-  },
-  mappings = {
-    ask = "<localleader>aa",
-    edit = "<localleader>ae",
-    refresh = "<localleader>ar",
-    focus = "<localleader>af",
-    toggle = {
-      default = "<localleader>at",
-      debug = "<localleader>ad",
-      hint = "<localleader>ah",
-      suggestion = "<localleader>as",
-      repomap = "<localleader>aR",
-    },
-    files = {
-      add_current = "<localleader>ac",
-    },
-  }
-}
-]]
-      -- Check if the configuration file exists
-      local file = io.open(avante_config_path, "r")
-      if not file then
-        -- If the file does not exist, create it with the default configuration
-        file = io.open(avante_config_path, "w")
-        file:write(default_config)
-        file:close()
-      else
-        -- If the file exists, read and execute it
-        file:close()
-      end
-      local opts = dofile(avante_config_path)
-
-      -- ollama support
-      local ollama = require("dotfiles.avante.providers.ollama")
-      opts.vendors.ollama = vim.tbl_extend("error", opts.vendors.ollama, ollama)
-
-      local provider = opts.provider
-      if opts[provider] == nil and opts.vendors[provider] == nil then
-        opts[provider] = {}
-      end
-
-      if provider == 'ollama' then
-        opts.vendors.ollama.model = vim.fn.input("Enter Ollama model: ", opts.vendors.ollama.model)
-      end
-
-      local key_env_loaded = os.getenv("KEY_ENV_LOADED")
-      if opts.vendors[provider] ~= nil
-        and opts.vendors[provider].api_key_name == nil then
-        if key_env_loaded ~= nil then
-          opts.vendors[provider].api_key_name = provider:upper() .. "_API_KEY"
-        elseif vim.fn.executable("secret-tool") == 1 then
-          opts.vendors[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
-        end
-      elseif opts[provider] ~= nil
-        and opts[provider].api_key_name == nil then
-        if key_env_loaded ~= nil then
-          opts[provider].api_key_name = provider:upper() .. "_API_KEY"
-        elseif vim.fn.executable("secret-tool") == 1 then
-          opts[provider].api_key_name = {"secret-tool", "lookup", "Title", provider .. " api key"}
-        end
-      end
-      require("avante").setup(opts)
-
-      -- set keymaps
-      local avante_api = require("avante.api")
-      vim.keymap.set({'n', 'v'}, '<localleader>aa', function() avante_api.ask() end, { silent = true })
-      vim.keymap.set({'n', 'v'}, '<localleader>ae', function() avante_api.edit() end, { silent = true })
-      vim.keymap.set({'n', 'v'}, '<localleader>af', function() avante_api.focus() end, { silent = true })
-    end
+      local diff = require("mini.diff")
+      diff.setup({
+        -- Disabled by default
+        source = diff.gen_source.none(),
+      })
+    end,
   },
 
   {

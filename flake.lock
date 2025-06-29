@@ -209,38 +209,6 @@
         "type": "github"
       }
     },
-    "avanteDOTnvim": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1751117979,
-        "narHash": "sha256-AJx06ktkksIr/8NSedTtz5VWOCjenxRaQs3eG6oo4hI=",
-        "owner": "yetone",
-        "repo": "avante.nvim",
-        "rev": "f04cee670d3033353350016a628fbf1d711cdf3e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "yetone",
-        "repo": "avante.nvim",
-        "type": "github"
-      }
-    },
-    "blink-cmp-avante": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1750608300,
-        "narHash": "sha256-erYg/oTS5iq83XjGck/JQCPrFCylly/8ZwFGTjICXzk=",
-        "owner": "Kaiser-Yang",
-        "repo": "blink-cmp-avante",
-        "rev": "5cf0854b065073083de72d9a988cff1c4b419148",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Kaiser-Yang",
-        "repo": "blink-cmp-avante",
-        "type": "github"
-      }
-    },
     "blinkDOTcmp": {
       "flake": false,
       "locked": {
@@ -370,6 +338,22 @@
         "ref": "master",
         "type": "git",
         "url": "https://aur.archlinux.org/code-marketplace.git"
+      }
+    },
+    "codecompanionDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1751200004,
+        "narHash": "sha256-8hqEX3O6Wqibpf0wzMNW7+Tc1MA/jaf8C7PxpLbu3rA=",
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "rev": "cab997e5eead6641efa2530847004ae5078ab9bb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "type": "github"
       }
     },
     "colorful-menuDOTnvim": {
@@ -1537,6 +1521,22 @@
         "type": "github"
       }
     },
+    "miniDOTdiff": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1750938834,
+        "narHash": "sha256-BxijLTuktm7OA1D4TPvvlde+tmMnaFma/t9upAuLXFw=",
+        "owner": "echasnovski",
+        "repo": "mini.diff",
+        "rev": "63a7ce537ced356b8180892d9586826b0afb519c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "echasnovski",
+        "repo": "mini.diff",
+        "type": "github"
+      }
+    },
     "naersk": {
       "inputs": {
         "nixpkgs": [
@@ -1813,22 +1813,6 @@
         "type": "github"
       }
     },
-    "nuiDOTnvim": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1749392788,
-        "narHash": "sha256-41slmnvt1z7sCxvpiVuFmQ9g7eCaxQi1dDCL3AxSL1A=",
-        "owner": "MunifTanjim",
-        "repo": "nui.nvim",
-        "rev": "de740991c12411b663994b2860f1a4fd0937c130",
-        "type": "github"
-      },
-      "original": {
-        "owner": "MunifTanjim",
-        "repo": "nui.nvim",
-        "type": "github"
-      }
-    },
     "nur": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1910,14 +1894,13 @@
         "asynctasksDOTvim": "asynctasksDOTvim",
         "auto-saveDOTnvim": "auto-saveDOTnvim",
         "auto-session": "auto-session",
-        "avanteDOTnvim": "avanteDOTnvim",
-        "blink-cmp-avante": "blink-cmp-avante",
         "blinkDOTcmp": "blinkDOTcmp",
         "blinkDOTcompat": "blinkDOTcompat",
         "bufdeleteDOTnvim": "bufdeleteDOTnvim",
         "bufferlineDOTnvim": "bufferlineDOTnvim",
         "cellular-automatonDOTnvim": "cellular-automatonDOTnvim",
         "clangd_extensionsDOTnvim": "clangd_extensionsDOTnvim",
+        "codecompanionDOTnvim": "codecompanionDOTnvim",
         "colorful-menuDOTnvim": "colorful-menuDOTnvim",
         "copilotDOTvim": "copilotDOTvim",
         "cscope_mapsDOTnvim": "cscope_mapsDOTnvim",
@@ -1950,10 +1933,10 @@
         "markdown-previewDOTnvim": "markdown-previewDOTnvim",
         "marksDOTnvim": "marksDOTnvim",
         "masonDOTnvim": "masonDOTnvim",
+        "miniDOTdiff": "miniDOTdiff",
         "neovim": "neovim",
         "none-ls-extrasDOTnvim": "none-ls-extrasDOTnvim",
         "none-lsDOTnvim": "none-lsDOTnvim",
-        "nuiDOTnvim": "nuiDOTnvim",
         "nvim-autopairs": "nvim-autopairs",
         "nvim-bqf": "nvim-bqf",
         "nvim-colorizerDOTlua": "nvim-colorizerDOTlua",
