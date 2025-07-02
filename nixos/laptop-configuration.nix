@@ -1,5 +1,6 @@
 { config, pkgs, lib, inputs, ... }:
 let
+  packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
   wpsoffice-hidpi = pkgs.symlinkJoin {
     name = "wps-office";
     paths = [ pkgs.wpsoffice ];
@@ -35,6 +36,14 @@ let
       sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/com.tencent.wechat.desktop
     '';
   };
+  caps2esc = pkgs.writeScript "start-caps2esc.sh" ''
+    ${pkgs.systemd}/bin/systemctl stop interception-tools-ctrl2esc.service
+    ${pkgs.systemd}/bin/systemctl start interception-tools-caps2esc.service
+  '';
+  ctrl2esc = pkgs.writeScript "start-ctrl2esc.sh" ''
+    ${pkgs.systemd}/bin/systemctl stop interception-tools-caps2esc.service
+    ${pkgs.systemd}/bin/systemctl start interception-tools-ctrl2esc.service
+  '';
 in
 {
   boot.kernelModules = [ "v4l2loopback" ];
@@ -112,6 +121,10 @@ in
 
   services.tlp = {
     enable = true;
+    settings = {
+      START_CHARGE_THRESH_BAT0=75;
+      STOP_CHARGE_THRESH_BAT0=80;
+    };
   };
   services.power-profiles-daemon.enable = false;
 
@@ -155,6 +168,8 @@ in
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver # LIBVA_DRIVER_NAME=iHD
+      vaapiIntel
+      vaapiVdpau
       intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
       libvdpau-va-gl
     ];
@@ -184,4 +199,9 @@ in
     };
   };
   services.btrfs.autoScrub.enable = true;
+  services.udev.extraRules = ''
+    # HHKB
+    ACTION=="add",    ATTRS{idVendor}=="04fe", ATTRS{idProduct}=="0021", RUN+="${pkgs.bash}/bin/bash ${ctrl2esc}"
+    ACTION=="remove", ATTRS{idVendor}=="04fe", ATTRS{idProduct}=="0021", RUN+="${pkgs.bash}/bin/bash ${caps2esc}"
+  '';
 }

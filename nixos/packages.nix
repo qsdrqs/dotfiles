@@ -104,4 +104,12 @@ patchdir = { pkgs }: pkgs.writeShellScriptBin "patchdir" ''
     fi
   ' _ {} \;
 '';
+ctrl2esc = { pkgs }: pkgs.writeShellScriptBin "ctrl2esc" ''
+  sudo systemctl stop interception-tools-caps2esc.service
+  sudo systemctl start interception-tools-ctrl2esc.service
+'';
+caps2esc = { pkgs }: pkgs.writeShellScriptBin "caps2esc" ''
+  sudo systemctl stop interception-tools-ctrl2esc.service
+  sudo systemctl start interception-tools-caps2esc.service
+'';
 }

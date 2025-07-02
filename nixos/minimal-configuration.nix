@@ -5,14 +5,6 @@
 { config, pkgs, lib, inputs, options, ... }:
 let
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
-  ctrl2esc = pkgs.writeShellScriptBin "ctrl2esc" ''
-    sudo systemctl stop interception-tools-caps2esc.service
-    sudo systemctl start interception-tools-ctrl2esc.service
-  '';
-  caps2esc = pkgs.writeShellScriptBin "caps2esc" ''
-    sudo systemctl stop interception-tools-ctrl2esc.service
-    sudo systemctl start interception-tools-caps2esc.service
-  '';
 in
 {
   boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
@@ -221,8 +213,11 @@ in
     strace
     ltrace
 
-    caps2esc
-    ctrl2esc
+    usbutils
+    libusb1
+
+    packages.caps2esc
+    packages.ctrl2esc
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -324,10 +319,10 @@ in
       };
     in
     {
-      interception-tools-caps2esc = interception-tools-service "caps2esc" // {
+      interception-tools-caps2esc = interception-tools-service "caps2esc";
+      interception-tools-ctrl2esc = interception-tools-service "ctrl2esc" // {
         wantedBy = [ ];
-      }; # disable by default
-      interception-tools-ctrl2esc = interception-tools-service "ctrl2esc";
+      };
     };
 
   environment.variables = {

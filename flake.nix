@@ -10,6 +10,7 @@
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
+    nixpkgs-intel-npu-driver.url = "github:pseudocc/nixpkgs/intel-npu-firmware";
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -140,6 +141,7 @@
           "pkgs-master"
           "pkgs-stable"
           "pkgs-ghcup"
+          "pkgs-intel-npu-driver"
           "pkgs-last"
           "pkgs"
         ]
@@ -167,6 +169,7 @@
         pkgs-master = pkgs-collect.pkgs-master system;
         pkgs-stable = pkgs-collect.pkgs-stable system;
         pkgs-ghcup = pkgs-collect.pkgs-ghcup system;
+        pkgs-intel-npu-driver = pkgs-collect.pkgs-intel-npu-driver system;
         pkgs-last = pkgs-collect.pkgs-last system;
       };
 

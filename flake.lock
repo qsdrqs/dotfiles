@@ -343,11 +343,11 @@
     "codecompanionDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1751200004,
-        "narHash": "sha256-8hqEX3O6Wqibpf0wzMNW7+Tc1MA/jaf8C7PxpLbu3rA=",
+        "lastModified": 1751472755,
+        "narHash": "sha256-6JL48zfriR9klE195ZMNEDC8hUQH3l7Vdi35UP6wOdw=",
         "owner": "olimorris",
         "repo": "codecompanion.nvim",
-        "rev": "cab997e5eead6641efa2530847004ae5078ab9bb",
+        "rev": "0b3831ddee88a389aa663fb05e35f2724f6df7da",
         "type": "github"
       },
       "original": {
@@ -1685,6 +1685,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-intel-npu-driver": {
+      "locked": {
+        "lastModified": 1741186302,
+        "narHash": "sha256-7obwFZPGOmNiL/2hpEVD0lschFF11+a1IM+w0LgYNiw=",
+        "owner": "pseudocc",
+        "repo": "nixpkgs",
+        "rev": "0ba746a0092dc906d5b1dfc9633ff0830df6b0a6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pseudocc",
+        "ref": "intel-npu-firmware",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-last": {
       "locked": {
         "lastModified": 1750365781,
@@ -2643,6 +2659,7 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",
         "nixpkgs-ghcup": "nixpkgs-ghcup",
+        "nixpkgs-intel-npu-driver": "nixpkgs-intel-npu-driver",
         "nixpkgs-last": "nixpkgs-last",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable",
