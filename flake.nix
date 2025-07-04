@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/08f22084e6085d19bcfb4be30d1ca76ecb96fe54";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/30e2e2857ba47844aa71991daa6ed1fc678bcbb7";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
@@ -250,9 +250,9 @@
           }
         ];
       };
-      guiConfig = minimalConfig // {
+      guiMinimalConfig = minimalConfig // {
         modules = minimalConfig.modules ++ [
-          ./nixos/gui-configuration.nix
+          ./nixos/gui-minimal-configuration.nix
 
           home-manager.nixosModules.home-manager
           {
@@ -261,6 +261,11 @@
             };
             home-manager.extraSpecialArgs = special-args minimalConfig.system;
           }
+        ];
+      };
+      guiBasicConfig = guiMinimalConfig // {
+        modules = guiMinimalConfig.modules ++ [
+          ./nixos/gui-basic-configuration.nix
         ];
       };
 
@@ -284,13 +289,13 @@
         ];
       };
 
-      desktopConfig = developConfig // guiConfig // {
-        modules = developConfig.modules ++ guiConfig.modules ++ [
+      desktopConfig = developConfig // guiBasicConfig // {
+        modules = developConfig.modules ++ guiBasicConfig.modules ++ [
           ./nixos/desktop-configuration.nix
         ];
       };
-      laptopConfig = developConfig // guiConfig // {
-        modules = developConfig.modules ++ guiConfig.modules ++ [
+      laptopConfig = developConfig // guiBasicConfig // {
+        modules = developConfig.modules ++ guiBasicConfig.modules ++ [
           ./nixos/laptop-configuration.nix
         ];
       };
@@ -365,7 +370,7 @@
           }
 
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"
-          ./nixos/gui-configuration.nix
+          ./nixos/gui-minimal-configuration.nix
         ];
       };
 
@@ -384,7 +389,8 @@
       nixosConfigurations.develop = nixpkgs.lib.nixosSystem developConfig;
       nixosConfigurations.server = nixpkgs.lib.nixosSystem serverConfig;
       nixosConfigurations.rpi = nixpkgs.lib.nixosSystem rpiConfig;
-      nixosConfigurations.gui = nixpkgs.lib.nixosSystem guiConfig;
+      nixosConfigurations.gui-minimal = nixpkgs.lib.nixosSystem guiMinimalConfig;
+      nixosConfigurations.gui-basic = nixpkgs.lib.nixosSystem guiBasicConfig;
       nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem desktopConfig;
       nixosConfigurations.laptop = nixpkgs.lib.nixosSystem laptopConfig;
