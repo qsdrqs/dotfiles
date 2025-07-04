@@ -43,53 +43,6 @@ let
       xorg.xcbutilkeysyms
     ];
   };
-  wpsoffice-hidpi = pkgs.symlinkJoin {
-    name = "wps-office";
-    paths = [ pkgs.wpsoffice ];
-    buildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      for bin in $(ls $out/bin); do
-        wrapProgram $out/bin/$bin \
-          --set QT_FONT_DPI 144
-      done
-      for desktop in $(ls $out/share/applications); do
-        sed -i "s|Exec=.*/bin/\(.*\)|Exec=$out/bin/\1|" $out/share/applications/$desktop
-      done
-    '';
-  };
-  qq-hidpi = pkgs.symlinkJoin {
-    name = "qq";
-    paths = [ pkgs.qq ];
-    buildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      sed -i "s|Exec=.*/bin/qq \(.*\)|Exec=$out/bin/qq --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime \1|" $out/share/applications/qq.desktop
-    '';
-  };
-  wechat-uos-hidpi = pkgs.symlinkJoin {
-    name = "wechat";
-    paths = [
-      pkgs.wechat-uos # need to build glibc
-      # (config.nur.repos.xddxdd.wechat-uos.override {
-      #   sources = {
-      #     wechat-uos = {
-      #       pname = "wechat-uos";
-      #       version = "1.0.0.241";
-      #       src = builtins.fetchurl {
-      #         url = "https://pro-store-packages.uniontech.com/appstore/pool/appstore/c/com.tencent.wechat/com.tencent.wechat_1.0.0.241_amd64.deb";
-      #         sha256 = "18wq6fqcjzyi5rx1g90idkx6h1mjlx7xd0gg2pakn1zjfrrsjs17";
-      #       };
-      #     };
-      #   };
-      # })
-    ];
-    buildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/wechat-uos \
-        --set QT_FONT_DPI 144
-      # sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/wechat-uos.desktop
-      sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/com.tencent.wechat.desktop
-    '';
-  };
   qqmusic-hidpi = pkgs.symlinkJoin {
     name = "qqmusic";
     paths = [
@@ -126,144 +79,26 @@ let
   '');
 in
 {
-  boot.kernelModules = [ "v4l2loopback" ];
-  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
   # boot.kernelParams = [
   #   "nvidia_drm.fbdev=1"
   #   "initcall_blacklist=simpledrm_platform_driver_init"
   # ];
 
-  boot.loader = {
-    grub = {
-      device = "nodev";
-      efiSupport = true;
-      useOSProber = true;
-      gfxmodeEfi = "1024x768";
-      default = "saved";
-    };
-    efi = {
-      canTouchEfiVariables = true;
-      efiSysMountPoint = "/boot";
-    };
-  };
-
-  nixpkgs.config.permittedInsecurePackages = [
-    "openssl-1.1.1w" # For wechat-uos
-    "electron-11.5.0" # For baidunetdisk
-  ];
-
   environment.systemPackages = with pkgs; [
-    telegram-desktop
-    slack
-    snapper-gui
     ida64-fhs
-    (google-chrome.override (prev: {
-      commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
-    }))
-    zoom-us
-    kdePackages.kate
-    scrcpy
-    wineWowPackages.unstableFull
-    wpsoffice-hidpi
     libreoffice
     # seahorse # keyring manager
-
     # (vscode-wrapper "${vscode-insiders}/bin/code-insiders" "code-wrapper-insiders")
     # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
 
-    virt-manager
-    linux-wifi-hotspot
-    hotspot
-    # neovide
-    termshark
-
-    texlive.combined.scheme-full
-
-    pandoc
-    zotero
-    xournalpp
-    apktool
     tor-browser
     nvitop
-    realvnc-vnc-viewer
-    drawio
     (pkgs.callPackage (import "${inputs.nixpkgs-ghcup}/pkgs/development/tools/haskell/ghcup/default.nix") { })
 
     # NUR
-    qq-hidpi
     qqmusic-hidpi
-    wemeet
     nur.repos.xddxdd.baidunetdisk
-    wechat-uos-hidpi
-    flameshot
   ];
-
-  programs.nix-ld.libraries = with pkgs; [
-    gmp
-  ];
-
-  # services.teamviewer.enable = true;
-
-  programs.obs-studio = {
-    enable = true;
-    package = (
-      pkgs.obs-studio.override {
-        cudaSupport = true;
-      }
-    );
-    plugins = with pkgs.obs-studio-plugins; [
-      wlrobs
-      obs-backgroundremoval
-      obs-pipewire-audio-capture
-      obs-vaapi # optional AMD hardware acceleration
-      obs-gstreamer
-      obs-vkcapture
-    ];
-  };
-
-  services.mpd = {
-    enable = true;
-    user = "qsdrqs";
-    extraConfig = ''
-      audio_output {
-        type "pipewire"
-        name "My PipeWire Output"
-      }
-    '';
-  };
-
-  systemd = {
-    services = {
-      mpd.environment = {
-        # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/609
-        XDG_RUNTIME_DIR = "/run/user/1000"; # User-id 1000 must match above user. MPD will look inside this directory for the PipeWire socket.
-      };
-      interception-tools-ctrl2esc.wantedBy = [ "multi-user.target" ];
-      interception-tools-caps2esc.wantedBy = lib.mkForce [ ];
-    };
-  };
-
-  services.zerotierone = {
-    enable = true;
-    joinNetworks = lib.strings.splitString "\n" (
-      builtins.readFile ./private/zerotier-network-id
-    );
-  };
-
-  programs.wireshark = {
-    enable = true;
-    package = pkgs.wireshark;
-  };
-
-  virtualisation = {
-    libvirtd = {
-      enable = true;
-      qemu.vhostUserPackages = [ pkgs.virtiofsd ];
-    };
-    docker.enable = true;
-  };
-
-  users.users.qsdrqs.extraGroups = [ "wireshark" "libvirtd" "docker" ];
 
   services.xserver = {
     videoDrivers = [ "nvidia" ];
@@ -278,7 +113,6 @@ in
       ];
     };
   };
-  services.desktopManager.plasma6.enable = true;
 
   nixpkgs.config.nvidia.acceptLicense = true;
   hardware = {
@@ -308,22 +142,6 @@ in
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     # GBM_BACKEND = "nvidia-drm";
   };
-
-  # snapshots
-  services.snapper.configs = {
-    home = {
-      SUBVOLUME = "/home";
-      ALLOW_USERS = [ "qsdrqs" ];
-      TIMELINE_CREATE = true;
-      TIMELINE_CLEANUP = true;
-      TIMELINE_LIMIT_HOURLY = 10;
-      TIMELINE_LIMIT_DAILY = 10;
-      TIMELINE_LIMIT_WEEKLY = 0;
-      TIMELINE_LIMIT_MONTHLY = 0;
-      TIMELINE_LIMIT_YEARLY = 0;
-    };
-  };
-  services.btrfs.autoScrub.enable = true;
 
   services.ollama = {
     enable = true;
