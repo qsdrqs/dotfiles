@@ -21,6 +21,7 @@
     bfg-repo-cleaner
     tree-sitter
     act
+    inotify-tools
 
     # android
     android-file-transfer

@@ -1929,7 +1929,7 @@ local plugins = {
 
   -- cd to project root
   {
-    "ahmedkhalf/project.nvim",
+    "DrKJeff16/project.nvim",
     config = function()
       require("project_nvim").setup {
         silent_chdir = true,

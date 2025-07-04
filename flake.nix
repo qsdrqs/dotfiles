@@ -338,7 +338,6 @@
 
           ({ config, pkgs, lib, ... }: {
             services.getty.autologinUser = nixpkgs.lib.mkForce "qsdrqs";
-            networking.networkmanager.enable = nixpkgs.lib.mkForce false;
             users.users.qsdrqs.password = ""; # empty passwd
             programs.hyprlock.enable = lib.mkForce false; # disable hyprlock for iso
 
@@ -351,6 +350,10 @@
       isoMinimalConfig = isoBaseConfig // {
         modules = isoBaseConfig.modules ++ [
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+
+          ({ config, pkgs, lib, ... }: {
+            networking.wireless.enable = false; # disable wpa_supplicant for iso
+          })
         ];
       };
 

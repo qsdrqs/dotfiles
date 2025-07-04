@@ -52,6 +52,7 @@ in
   hardware.firmware = with pkgs; [
     linux-firmware
   ];
+  hardware.sensor.iio.enable = true;
 
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.1.1w" # For wechat-uos
@@ -82,6 +83,7 @@ in
     xournalpp
     apktool
     realvnc-vnc-viewer
+    libwacom
 
     # NUR
     qq-hidpi

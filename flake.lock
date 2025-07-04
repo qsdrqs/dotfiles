@@ -343,11 +343,11 @@
     "codecompanionDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1751472755,
-        "narHash": "sha256-6JL48zfriR9klE195ZMNEDC8hUQH3l7Vdi35UP6wOdw=",
+        "lastModified": 1751490453,
+        "narHash": "sha256-c1r2ysimAL50D5vHdsqm9bMHbcVp5ho0X5cZIRz9JT8=",
         "owner": "olimorris",
         "repo": "codecompanion.nvim",
-        "rev": "0b3831ddee88a389aa663fb05e35f2724f6df7da",
+        "rev": "ba140d819b817c2dbfd047a14fd151f5dc5279e0",
         "type": "github"
       },
       "original": {
