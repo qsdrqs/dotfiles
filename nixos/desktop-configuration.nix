@@ -100,6 +100,12 @@ in
     nur.repos.xddxdd.baidunetdisk
   ];
 
+  programs.obs-studio.package = (
+    pkgs.obs-studio.override {
+      cudaSupport = true;
+    }
+  );
+
   services.xserver = {
     videoDrivers = [ "nvidia" ];
     windowManager.i3 = {

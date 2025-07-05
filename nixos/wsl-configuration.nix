@@ -29,7 +29,6 @@
 
   environment.systemPackages = with pkgs; [
     kitty
-    texlive.combined.scheme-full
     zathura
     xdg-utils
   ];

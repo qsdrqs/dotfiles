@@ -48,6 +48,7 @@ in
     networkmanagerapplet
     xdotool
     zenity # color picker
+    chntpw # Windows registry editor
 
     playerctl
     libsecret

@@ -327,7 +327,7 @@ alias prox="export http_proxy=http://$PROX:1081\
 && export all_proxy=http://$PROX:1081\
 && export ftp_proxy=http://$PROX:1081
 "
-alias tra="~/translate-shell/build/trans :zh+en"
+alias tra="python ~/dotfiles/translate.py"
 alias vim="nvim"
 alias vimm="\vim"
 # if [[ -x `command -v code-insiders` ]]; then
