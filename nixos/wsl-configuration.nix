@@ -26,6 +26,7 @@
 
     usbip.enable = true;
   };
+  programs.fuse.userAllowOther = true;
 
   environment.systemPackages = with pkgs; [
     kitty
@@ -59,6 +60,7 @@
   services.syncthing.guiAddress = "0.0.0.0:8384";
 
   # WSL2 does not support modprobe for wireguard
+  systemd.services.wg-quick-wg0.enable = false;
   systemd.services.wg-quick-wg0.serviceConfig.ExecStart = lib.mkForce
     (utils.systemdUtils.lib.makeJobScript {
       name = "wg-quick-wg0-start";

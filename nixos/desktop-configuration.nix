@@ -100,6 +100,13 @@ in
     nur.repos.xddxdd.baidunetdisk
   ];
 
+  systemd = {
+    services = {
+      interception-tools-ctrl2esc.wantedBy = [ "multi-user.target" ];
+      interception-tools-caps2esc.wantedBy = lib.mkForce [ ];
+    };
+  };
+
   programs.obs-studio.package = (
     pkgs.obs-studio.override {
       cudaSupport = true;

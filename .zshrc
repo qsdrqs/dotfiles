@@ -285,13 +285,14 @@ snr-switch-remote() {
         trap "cd ${original_pwd}" INT
         nixos-rebuild build --flake path:.#$@
     fi
-    sudo nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
-    (
-        sudo ./result/bin/switch-to-configuration switch
-        if [[ -L ./result ]];then
-            rm result
-        fi
-    )
+    sudo nixos-rebuild switch --flake path:.#$1
+    # sudo nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
+    # (
+    #     sudo ./result/bin/switch-to-configuration switch
+    #     if [[ -L ./result ]];then
+    #         rm result
+    #     fi
+    # )
 }
 hm-switch() {
     local original_pwd=$(pwd)

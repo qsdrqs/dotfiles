@@ -3300,7 +3300,8 @@ local plugins = {
         "[inlay_hints] LSP error:Invalid offset",
         "LSP[rust_analyzer] rust-analyzer failed to load workspace: Failed to read Cargo metadata from Cargo.toml",
         "position_encoding param is required",
-        "warning: multiple different client offset_encodings detected for buffer"
+        "warning: multiple different client offset_encodings detected for buffer",
+        "The language server is either not installed, missing from PATH, or not executable."
       }
 
       vim.notify = function (msg, ...)

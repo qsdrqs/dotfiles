@@ -85,7 +85,6 @@ in
     xournalpp
     apktool
     realvnc-vnc-viewer
-    libwacom
     drawio
 
     # NUR
@@ -93,6 +92,9 @@ in
     wemeet
     wechat-uos-hidpi
     flameshot
+    # (flameshot.override {
+    #   enableWlrSupport = true;
+    # })
   ];
 
   programs.nix-ld.libraries = with pkgs; [

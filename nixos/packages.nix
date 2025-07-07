@@ -1,14 +1,16 @@
 {
   rtl88x2bu =
-    { stdenv
-    , lib
-    , fetchFromGitHub
-    , kernel
-    , kmod
-    , inputs
-    , dpkg
-    , bc
-    }: stdenv.mkDerivation rec {
+    {
+      stdenv,
+      lib,
+      fetchFromGitHub,
+      kernel,
+      kmod,
+      inputs,
+      dpkg,
+      bc,
+    }:
+    stdenv.mkDerivation rec {
       pname = "rtl88x2bu";
       version = "5.13.1";
       name = "${pname}-${version}-${kernel.version}";
@@ -16,7 +18,10 @@
       src = inputs.rtl88x2bu-dkms;
 
       sourceRoot = "usr/src/${pname}-${version}";
-      hardeningDisable = [ "pic" "format" ];
+      hardeningDisable = [
+        "pic"
+        "format"
+      ];
       nativeBuildInputs = [
         dpkg
         bc
@@ -48,68 +53,98 @@
       };
     };
 
-  dummy = { pkgs }: pkgs.writeShellScriptBin "_dummy" ''
-    echo "Dummy package as a placeholder for some other package"
-  '';
+  dummy =
+    { pkgs }:
+    pkgs.writeShellScriptBin "_dummy" ''
+      echo "Dummy package as a placeholder for some other package"
+    '';
 
-  editor-wrapped = { pkgs }: pkgs.writeShellScriptBin "editor-wrapped" ''
-    if [[ -z $EDITOR ]]; then
-      export EDITOR=nvim
-    fi
-    if [[ $QUIT_ON_OPEN == "1" ]]; then
-      $EDITOR "$@"
-      kill -9 $(ps -o ppid= -p $$)
-    else
-      $EDITOR "$@"
-    fi
-  '';
+  editor-wrapped =
+    { pkgs }:
+    pkgs.writeShellScriptBin "editor-wrapped" ''
+      if [[ -z $EDITOR ]]; then
+        export EDITOR=nvim
+      fi
+      if [[ $QUIT_ON_OPEN == "1" ]]; then
+        $EDITOR "$@"
+        kill -9 $(ps -o ppid= -p $$)
+      else
+        $EDITOR "$@"
+      fi
+    '';
 
-  neovim-reloadable-unwrapped = { pkgs, lib }: pkgs.symlinkJoin (
+  neovim-reloadable-unwrapped =
+    { pkgs, lib }:
+    pkgs.symlinkJoin (
+      let
+        reloadable-script = pkgs.writeShellScriptBin "nvim" ''
+          while true; do
+            ${pkgs.neovim-unwrapped}/bin/nvim "$@"
+            RET=$?
+            if [[ $RET != 100 ]]; then
+              exit $RET
+            fi
+          done
+        '';
+      in
+      rec {
+        inherit (pkgs.neovim-unwrapped) meta lua;
+        pname = "neovim-reloadable-unwrapped";
+        version = lib.getVersion pkgs.neovim-unwrapped;
+        name = "${pname}-${version}";
+        paths = [ pkgs.neovim-unwrapped ];
+        postBuild = ''
+          rm $out/bin/nvim
+          cp ${reloadable-script}/bin/nvim $out/bin/nvim
+        '';
+      }
+    );
+
+  mkcd =
+    { pkgs }:
+    pkgs.writeShellScriptBin "mkcd" ''
+      mkdir -p "$1" && cd "$1"
+    '';
+
+  patchdir =
+    { pkgs }:
+    pkgs.writeShellScriptBin "patchdir" ''
+      if [[ -z $1 ]]; then
+        echo "Usage: patchdir <directory>"
+        exit 1
+      fi
+      ${pkgs.findutils}/bin/find "$1" -type f -exec sh -c '
+        if ${pkgs.file}/bin/file "$1" | grep -q "ELF"; then
+          ${pkgs.patchelf}/bin/patchelf --add-rpath $NIX_LD_LIBRARY_PATH "$1"
+        fi
+      ' _ {} \;
+    '';
+  ctrl2esc =
+    { pkgs }:
+    pkgs.writeShellScriptBin "ctrl2esc" ''
+      sudo systemctl stop interception-tools-caps2esc.service
+      sudo systemctl start interception-tools-ctrl2esc.service
+    '';
+  caps2esc =
+    { pkgs }:
+    pkgs.writeShellScriptBin "caps2esc" ''
+      sudo systemctl stop interception-tools-ctrl2esc.service
+      sudo systemctl start interception-tools-caps2esc.service
+    '';
+  zenbook-kb-backlight =
+    {
+      writeShellScriptBin,
+      python3,
+      libusb1,
+    }:
     let
-      reloadable-script = pkgs.writeShellScriptBin "nvim" ''
-        while true; do
-          ${pkgs.neovim-unwrapped}/bin/nvim "$@"
-          RET=$?
-          if [[ $RET != 100 ]]; then
-            exit $RET
-          fi
-        done
-      '';
+      python_usb = python3.withPackages (ps: with ps; [
+        pyusb
+      ]);
     in
-    rec {
-      inherit (pkgs.neovim-unwrapped) meta lua;
-      pname = "neovim-reloadable-unwrapped";
-      version = lib.getVersion pkgs.neovim-unwrapped;
-      name = "${pname}-${version}";
-      paths = [ pkgs.neovim-unwrapped ];
-      postBuild = ''
-        rm $out/bin/nvim
-        cp ${reloadable-script}/bin/nvim $out/bin/nvim
-      '';
-    }
-  );
+    writeShellScriptBin "kb-backlight" ''
+      export LD_LIBRARY_PATH=${libusb1}/lib:$LD_LIBRARY_PATH
+      ${python_usb}/bin/python ${./scripts/kb.py} "$@"
+    '';
 
-  mkcd = { pkgs }: pkgs.writeShellScriptBin "mkcd" ''
-    mkdir -p "$1" && cd "$1"
-  '';
-
-patchdir = { pkgs }: pkgs.writeShellScriptBin "patchdir" ''
-  if [[ -z $1 ]]; then
-    echo "Usage: patchdir <directory>"
-    exit 1
-  fi
-  ${pkgs.findutils}/bin/find "$1" -type f -exec sh -c '
-    if ${pkgs.file}/bin/file "$1" | grep -q "ELF"; then
-      ${pkgs.patchelf}/bin/patchelf --add-rpath $NIX_LD_LIBRARY_PATH "$1"
-    fi
-  ' _ {} \;
-'';
-ctrl2esc = { pkgs }: pkgs.writeShellScriptBin "ctrl2esc" ''
-  sudo systemctl stop interception-tools-caps2esc.service
-  sudo systemctl start interception-tools-ctrl2esc.service
-'';
-caps2esc = { pkgs }: pkgs.writeShellScriptBin "caps2esc" ''
-  sudo systemctl stop interception-tools-ctrl2esc.service
-  sudo systemctl start interception-tools-caps2esc.service
-'';
 }
