@@ -1685,6 +1685,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-howdy": {
+      "locked": {
+        "lastModified": 1748432150,
+        "narHash": "sha256-DXn05voIPT1wsCj6Eyz9aGQpMy4ZrBbLLvUW12ETiYo=",
+        "owner": "fufexan",
+        "repo": "nixpkgs",
+        "rev": "db31088cf11ff7e244a61381981135b6e3814f3e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "fufexan",
+        "ref": "howdy",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-intel-npu-driver": {
       "locked": {
         "lastModified": 1751530291,
@@ -2659,6 +2675,7 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",
         "nixpkgs-ghcup": "nixpkgs-ghcup",
+        "nixpkgs-howdy": "nixpkgs-howdy",
         "nixpkgs-intel-npu-driver": "nixpkgs-intel-npu-driver",
         "nixpkgs-last": "nixpkgs-last",
         "nixpkgs-master": "nixpkgs-master",

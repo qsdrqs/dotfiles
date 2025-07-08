@@ -11,6 +11,7 @@
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
     nixpkgs-intel-npu-driver.url = "github:pseudocc/nixpkgs/intel-npu-firmware";
+    nixpkgs-howdy.url = "github:fufexan/nixpkgs/howdy";
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -142,6 +143,7 @@
           "pkgs-stable"
           "pkgs-ghcup"
           "pkgs-intel-npu-driver"
+          "pkgs-howdy"
           "pkgs-last"
           "pkgs"
         ]
@@ -170,6 +172,7 @@
         pkgs-stable = pkgs-collect.pkgs-stable system;
         pkgs-ghcup = pkgs-collect.pkgs-ghcup system;
         pkgs-intel-npu-driver = pkgs-collect.pkgs-intel-npu-driver system;
+        pkgs-howdy = pkgs-collect.pkgs-howdy system;
         pkgs-last = pkgs-collect.pkgs-last system;
       };
 
