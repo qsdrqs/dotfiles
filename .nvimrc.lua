@@ -3450,6 +3450,8 @@ local plugins = {
       vim.g.matchup_matchparen_offscreen = { method = "" }
       vim.g.matchup_matchparen_deferred = 1
       vim.g.matchup_matchparen_hi_surround_always = 1
+      vim.g.matchup_treesitter_disable_virtual_text = true
+      vim.g.matchup_treesitter_enabled = true
     end,
     config = function()
       require'nvim-treesitter.configs'.setup {

@@ -30,11 +30,15 @@ in
           p.pycairo
           p.pygobject3
         ]);
+        wrappedPy = super.writeShellScriptBin "python-howdy-wrapper" ''
+          export OMP_NUM_THREADS=1
+          exec ${pyEnv.interpreter} "$@"
+        '';
       in
       {
-          mesonFlags = old.mesonFlags ++ [
-            "-Dpython_path=${pyEnv.interpreter}"
-          ];
+        mesonFlags = old.mesonFlags ++ [
+          "-Dpython_path=${wrappedPy}/bin/python-howdy-wrapper"
+        ];
       });
     })
   ];
