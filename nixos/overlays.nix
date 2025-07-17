@@ -113,6 +113,17 @@ in
           ];
         }));
 
+        keepassxc = super.keepassxc.overrideAttrs (oldAttrs: {
+          src = super.fetchFromGitHub {
+            owner = "keepassxreboot";
+            repo = "keepassxc";
+            rev = "56b63a9e0fc93d9b052e85e340ee22c097825d4d";
+            hash = "sha256-p6/hx1V/rlFoUQChME5iN/DA40eZmsVQCoJC0yGuO6M=";
+          };
+          nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [
+            super.keyutils
+          ];
+        });
 
         ranger = super.ranger.overrideAttrs (oldAttrs: {
           src = inputs.ranger-config.ranger;

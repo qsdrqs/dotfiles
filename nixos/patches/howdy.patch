@@ -1,8 +1,8 @@
 diff --git a/howdy/src/pam/main.cc b/howdy/src/pam/main.cc
-index d3af59d..86d5872 100644
+index d3af59d..93b86fb 100644
 --- a/howdy/src/pam/main.cc
 +++ b/howdy/src/pam/main.cc
-@@ -266,14 +266,32 @@ auto identify(pam_handle_t *pamh, int flags, int argc, const char **argv,
+@@ -266,14 +266,48 @@ auto identify(pam_handle_t *pamh, int flags, int argc, const char **argv,
                                COMPARE_PROCESS_PATH, username, nullptr};
    pid_t child_pid;
 
@@ -14,11 +14,27 @@ index d3af59d..86d5872 100644
 +  }
 +  // +3 for the two new variables and the final nullptr
 +  char **new_env = new char *[env_count + 3];
++  const char* old_path = getenv("PATH");
++  std::string path_str =
++      std::string("PATH=") + EXTRA_PATH + ":" + (old_path ? old_path : "");
++  bool path_found = false;
 +  for (int i = 0; i < env_count; i++) {
++    if (strncmp(environ[i], "PATH=", 5) == 0) {
++      // Replace the PATH variable with our own
++      new_env[i] = strdup(path_str.c_str());
++      path_found = true;
++      continue;
++    }
 +    new_env[i] = environ[i];
 +  }
++
 +  new_env[env_count] = "OMP_NUM_THREADS=1";
-+  new_env[env_count + 1] = "PYTHONWARNINGS=ignore::SyntaxWarning";
++  if (!path_found) {
++    // If we didn't find the PATH variable, add it at the end
++    new_env[env_count + 1] = strdup(path_str.c_str());
++  } else {
++    new_env[env_count + 1] = nullptr;
++  }
 +  new_env[env_count + 2] = nullptr;
 +
    // Start the python subprocess
@@ -36,6 +52,78 @@ index d3af59d..86d5872 100644
    // NOTE: We should replace mutex and condition_variable by atomic wait, but
    // it's too recent (C++20)
    std::mutex mutx;
+diff --git a/howdy/src/pam/paths.hh.in b/howdy/src/pam/paths.hh.in
+index d8cd7eb..5e455f1 100644
+--- a/howdy/src/pam/paths.hh.in
++++ b/howdy/src/pam/paths.hh.in
+@@ -1,4 +1,5 @@
+ const auto COMPARE_PROCESS_PATH = "@compare_script_path@";
+ const auto CONFIG_FILE_PATH = "@config_file_path@";
+ const auto USER_MODELS_DIR = "@user_models_dir@";
+-const auto PYTHON_EXECUTABLE_PATH = "@python_path@";
+\ No newline at end of file
++const auto PYTHON_EXECUTABLE_PATH = "@python_path@";
++const auto EXTRA_PATH = "@extra_path@";
+\ No newline at end of file
+diff --git a/howdy/src/pam/meson.build b/howdy/src/pam/meson.build
+index 35cdb03..4116914 100644
+--- a/howdy/src/pam/meson.build
++++ b/howdy/src/pam/meson.build
+@@ -7,6 +7,7 @@ threads = dependency('threads')
+ subdir('po')
+
+ # Paths
++pam_module_conf_data.set('extra_path', get_option('extra_path'))
+ paths_h = configure_file(
+ 	input: 'paths.hh.in',
+ 	output: 'paths.hh',
+diff --git a/meson.options b/meson.options
+index 56c8f16..47af6ef 100644
+--- a/meson.options
++++ b/meson.options
+@@ -8,4 +8,5 @@ option('install_in_site_packages', type: 'boolean', value: false, description: '
+ option('py_sources_dir', type: 'string', value: '', description: 'Set the python sources directory')
+ option('install_pam_config', type: 'boolean', value: false, description: 'Install pam config file (for Debian/Ubuntu)')
+ option('python_path', type: 'string', value: '/usr/bin/python', description: 'Set the path to the python executable')
++option('extra_path', type: 'string', value: '/usr/bin', description: 'Set the extra path to be added to the PATH environment variable')
+ option('with_polkit', type: 'boolean', value: false, description: 'Install polkit policy config file')
+diff --git a/howdy/src/rubberstamps/__init__.py b/howdy/src/rubberstamps/__init__.py
+index 57a115f..b860111 100644
+--- a/howdy/src/rubberstamps/__init__.py
++++ b/howdy/src/rubberstamps/__init__.py
+@@ -32,13 +32,17 @@ class RubberStamp:
+
+ 		# If we're connected to the ui
+ 		if self.gtk_proc:
+-			# Send the command as bytes
+-			self.gtk_proc.stdin.write(bytearray(command.encode("utf-8")))
+-			self.gtk_proc.stdin.flush()
++			try:
++				if self.gtk_proc.poll() is None: # Make sure the gtk_proc is still running before write into the pipe
++					# Send the command as bytes
++					self.gtk_proc.stdin.write(bytearray(command.encode("utf-8")))
++					self.gtk_proc.stdin.flush()
+
+-			# Write a padding line to force the command through any buffers
+-			self.gtk_proc.stdin.write(bytearray("P=_PADDING \n".encode("utf-8")))
+-			self.gtk_proc.stdin.flush()
++					# Write a padding line to force the command through any buffers
++					self.gtk_proc.stdin.write(bytearray("P=_PADDING \n".encode("utf-8")))
++					self.gtk_proc.stdin.flush()
++			except IOError:
++				pass
+
+
+ def execute(config, gtk_proc, opencv):
+@@ -73,7 +77,7 @@ def execute(config, gtk_proc, opencv):
+ 			continue
+
+ 		# Parse the rule with regex
+-		regex_result = re.search("^(\w+)\s+([\w\.]+)\s+([a-z]+)(.*)?$", rule, re.IGNORECASE)
++		regex_result = re.search(r"^(\w+)\s+([\w\.]+)\s+([a-z]+)(.*)?$", rule, re.IGNORECASE)
+
+ 		# Error out if the regex did not match (invalid line)
+ 		if not regex_result:
 diff --git a/howdy-gtk/src/authsticky.py b/howdy-gtk/src/authsticky.py
 index 4a8c8a3..5cae4cc 100644
 --- a/howdy-gtk/src/authsticky.py

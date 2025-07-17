@@ -133,7 +133,7 @@ in
       description = "Run chown-ssh@${userName}.service periodically";
       timerConfig = {
         OnCalendar = "hourly";
-        Persistent = true; # if the system was off when the timer was supposed to run
+        Persistent = false;
         Unit = "chown-ssh@${userName}.service";
       };
       wantedBy = [ "timers.target" ];

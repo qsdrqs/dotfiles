@@ -32,11 +32,20 @@ in
         ]);
       in
       {
+        version = "2.6.1-unstable-2025-06-22";
+        src = super.fetchFromGitHub {
+          owner = "boltgolt";
+          repo = "howdy";
+          rev = "d3ab99382f88f043d15f15c1450ab69433892a1c";
+          hash = "sha256-Xd/uScMnX1GMwLD5GYSbE2CwEtzrhwHocsv0ESKV8IM=";
+        };
+        postPatch = "";
         patches = old.patches ++ [
           ./patches/howdy.patch
         ];
         mesonFlags = old.mesonFlags ++ [
           "-Dpython_path=${pyEnv.interpreter}"
+          "-Dextra_path=${pkgs-howdy.kbd}/bin/"
         ];
       });
     })

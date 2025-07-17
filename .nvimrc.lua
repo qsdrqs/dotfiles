@@ -281,6 +281,9 @@ local plugins = {
             ["ctrl-q"] = "select-all+accept",
           },
         },
+        fzf_opts = {
+          ["--cycle"] = true,
+        }
       }
       vim.keymap.set('n', '<leader>f', fzf_lua.files, { silent = true })
       vim.keymap.set('n', '<leader>F', function() fzf_lua.files({ no_ignore = true }) end, { silent = true })

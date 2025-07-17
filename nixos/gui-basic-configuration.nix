@@ -93,10 +93,10 @@ in
     qq-hidpi
     wemeet
     wechat-uos-hidpi
-    flameshot
-    # (flameshot.override {
-    #   enableWlrSupport = true;
-    # })
+    # flameshot
+    (flameshot.override {
+      enableWlrSupport = true;
+    })
   ];
 
   programs.nix-ld.libraries = with pkgs; [
