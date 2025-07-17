@@ -268,7 +268,11 @@ local plugins = {
           end
         },
         winopts = {
-          preview = { default="bat_native" },
+          preview = {
+            default = "bat_native",
+            horizontal = "right:55%",
+          },
+          width = 0.85
         },
         keymap = {
           fzf = {

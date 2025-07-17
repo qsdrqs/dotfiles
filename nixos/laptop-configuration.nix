@@ -30,14 +30,13 @@ in
           p.pycairo
           p.pygobject3
         ]);
-        wrappedPy = super.writeShellScriptBin "python-howdy-wrapper" ''
-          export OMP_NUM_THREADS=1
-          exec ${pyEnv.interpreter} "$@"
-        '';
       in
       {
+        patches = old.patches ++ [
+          ./patches/howdy.patch
+        ];
         mesonFlags = old.mesonFlags ++ [
-          "-Dpython_path=${wrappedPy}/bin/python-howdy-wrapper"
+          "-Dpython_path=${pyEnv.interpreter}"
         ];
       });
     })
@@ -48,6 +47,9 @@ in
       # you may not need these
       core.no_confirmation = true;
       video.dark_threshold = 90;
+      video.certainty=3;
+      rubberstamps.enabled = true;
+      rubberstamps.stamp_rules = "hotkey 5s failsafe";
     };
   };
   services.linux-enable-ir-emitter = {

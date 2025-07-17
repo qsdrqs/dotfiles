@@ -1,0 +1,63 @@
+diff --git a/howdy/src/pam/main.cc b/howdy/src/pam/main.cc
+index d3af59d..86d5872 100644
+--- a/howdy/src/pam/main.cc
++++ b/howdy/src/pam/main.cc
+@@ -266,14 +266,32 @@ auto identify(pam_handle_t *pamh, int flags, int argc, const char **argv,
+                               COMPARE_PROCESS_PATH, username, nullptr};
+   pid_t child_pid;
+
++  // Prepare new environment
++  extern char **environ;
++  int env_count = 0;
++  while (environ[env_count] != nullptr) {
++    env_count++;
++  }
++  // +3 for the two new variables and the final nullptr
++  char **new_env = new char *[env_count + 3];
++  for (int i = 0; i < env_count; i++) {
++    new_env[i] = environ[i];
++  }
++  new_env[env_count] = "OMP_NUM_THREADS=1";
++  new_env[env_count + 1] = "PYTHONWARNINGS=ignore::SyntaxWarning";
++  new_env[env_count + 2] = nullptr;
++
+   // Start the python subprocess
+   if (posix_spawnp(&child_pid, PYTHON_EXECUTABLE_PATH, nullptr, nullptr,
+-                   const_cast<char *const *>(args), nullptr) != 0) {
++                   const_cast<char *const *>(args), new_env) != 0) {
+     syslog(LOG_ERR, "Can't spawn the howdy process: %s (%d)", strerror(errno),
+            errno);
++    delete[] new_env;
+     return PAM_SYSTEM_ERR;
+   }
+
++  delete[] new_env;
++
+   // NOTE: We should replace mutex and condition_variable by atomic wait, but
+   // it's too recent (C++20)
+   std::mutex mutx;
+diff --git a/howdy-gtk/src/authsticky.py b/howdy-gtk/src/authsticky.py
+index 4a8c8a3..5cae4cc 100644
+--- a/howdy-gtk/src/authsticky.py
++++ b/howdy-gtk/src/authsticky.py
+@@ -138,6 +138,8 @@ class StickyWindow(gtk.Window):
+ 			if comm[0] == "S":
+ 				# self.subtext += " "
+ 				self.subtext = comm[2:].strip()
++			if comm[0] == "I":
++				gtk.main_quit()
+
+ 		# Redraw the ui
+ 		self.queue_draw()
+diff --git a/howdy/src/compare.py b/howdy/src/compare.py
+index 35e85fb..841acfa 100644
+--- a/howdy/src/compare.py
++++ b/howdy/src/compare.py
+@@ -32,6 +32,7 @@ def exit(code=None):
+
+ 	# Exit the auth ui process if there is one
+ 	if "gtk_proc" in globals():
++		send_to_ui("I", "")
+ 		gtk_proc.terminate()
+
+ 	# Exit compare
