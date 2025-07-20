@@ -3713,10 +3713,16 @@ local plugins = {
       require("codecompanion").setup({
         strategies = {
           chat = {
-            adapter = "openai",
+            adapter = {
+              name = "openai",
+              model = "o4-mini"
+            },
           },
           inline = {
-            adapter = "openai",
+            adapter = {
+              name = "openai",
+              model = "o4-mini"
+            }
           },
         },
         display = {

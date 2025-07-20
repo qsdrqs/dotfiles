@@ -517,4 +517,19 @@ ghcs() {
     ghcs $@
 }
 
+update_ssh_auth_sock() {
+    # Look for valid agent sockets
+    for sock in /tmp/ssh-*/agent.*; do
+        if [[ -S $sock ]]; then
+            export SSH_AUTH_SOCK=$sock
+            break
+        fi
+    done
+}
 
+# if current $SSH_AUTH_SOCK starts from '/tmp/ssh-*' and it's not valid,
+# then try to find the first valid ssh-agent socket in `/tmp/ssh-*`
+# if found, then set it to $SSH_AUTH_SOCK
+if [[ -n $SSH_AUTH_SOCK && $SSH_AUTH_SOCK == /tmp/ssh-* && ! -S $SSH_AUTH_SOCK ]]; then
+    update_ssh_auth_sock
+fi
