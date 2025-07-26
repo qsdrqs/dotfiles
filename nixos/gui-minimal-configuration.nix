@@ -203,6 +203,7 @@ in
 
   programs.hyprland = {
     enable = true;
+    package = pkgs-stable.hyprland;
     # package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
@@ -213,7 +214,6 @@ in
   xdg.portal = {
     extraPortals = [
       pkgs.kdePackages.xdg-desktop-portal-kde
-      pkgs.xdg-desktop-portal-hyprland
     ];
     config.hyprland = {
       "org.freedesktop.impl.portal.ScreenCast" = "hyprland";

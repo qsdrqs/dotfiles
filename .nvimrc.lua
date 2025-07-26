@@ -1670,7 +1670,7 @@ local plugins = {
         auto_install = true,
 
         -- List of parsers to ignore installing
-        -- ignore_install = { "javascript" },
+        ignore_install = { "bash" },
 
         highlight = {
           -- `false` will disable the whole extension

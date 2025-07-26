@@ -7,6 +7,9 @@ let
   vpn_connect = pkgs.writeShellScriptBin "vpn_connect" ''
     sudo sh ${./scripts/vpn_connect.sh}
   '';
+  vpn_connect_gui = pkgs.writeShellScriptBin "vpn_connect_gui" ''
+    sh ${./scripts/vpn_connect_gui.sh}
+  '';
   load_gpg_key = pkgs.writeShellScriptBin "load_gpg_key" ''
     sh ${./scripts/load_gpg_key.sh}
   '';
@@ -25,6 +28,7 @@ in
     lazygit
     echoerr
     vpn_connect
+    vpn_connect_gui
     load_gpg_key
   ];
 
