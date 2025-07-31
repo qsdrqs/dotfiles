@@ -69,6 +69,8 @@ in
       size = 500000;
       save = 500000;
       expireDuplicatesFirst = true;
+      saveNoDups = true;
+      path = "${config.home.homeDirectory}/.zsh_history";
     };
     completionInit = ""; # define in my own zshrc
   };

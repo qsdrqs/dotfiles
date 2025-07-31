@@ -57,9 +57,9 @@ export HISTSIZE=500000
 export SAVEHIST=500000
 setopt HIST_SAVE_NO_DUPS
 setopt HIST_EXPIRE_DUPS_FIRST
-setopt APPEND_HISTORY
-setopt INC_APPEND_HISTORY
-unsetopt SHARE_HISTORY
+# setopt APPEND_HISTORY
+# setopt INC_APPEND_HISTORY
+# unsetopt SHARE_HISTORY
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH

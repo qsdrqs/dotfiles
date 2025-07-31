@@ -30,6 +30,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+    code-cursor
     vscode
     pkgs.firefox-devedition
     firefox-alias
@@ -81,6 +82,7 @@ in
     jack.enable = true;
     # wireplumber.package = pkgs-stable.wireplumber;
   };
+  security.rtkit.enable = true; # For realtime scheduling of PipeWire
 
   services.mpd = {
     enable = true;
@@ -92,6 +94,7 @@ in
       }
     '';
   };
+  services.blueman.enable = true;
 
   systemd = {
     services = {
@@ -203,7 +206,8 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs-stable.hyprland;
+    package = pkgs-master.hyprland;
+    portalPackage = pkgs-master.xdg-desktop-portal-hyprland;
     # package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
@@ -212,11 +216,9 @@ in
   };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   xdg.portal = {
-    extraPortals = [
-      pkgs.kdePackages.xdg-desktop-portal-kde
-    ];
     config.hyprland = {
       "org.freedesktop.impl.portal.ScreenCast" = "hyprland";
+      default = [ "hyprland" "gtk" ];
     };
   };
 
