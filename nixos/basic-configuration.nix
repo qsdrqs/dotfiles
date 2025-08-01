@@ -121,28 +121,15 @@ in
         else
           { };
     };
-    services."chown-ssh@" = {
-      description = "Recursively chown /home/%i/.ssh back to %i";
+    services."chown-ssh" = {
+      wantedBy = [ "multi-user.target" ];
+      description = "Change ownership of .ssh directory";
+      path = [ pkgs.inotify-tools pkgs.coreutils ];
       serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.coreutils}/bin/chown -R %i:users /home/%i/.ssh";
+        ExecStart = ./scripts/chown_ssh.sh;
       };
-    };
-    timers."chown-ssh@${userName}" = {
-      enable = true;
-      description = "Run chown-ssh@${userName}.service periodically";
-      timerConfig = {
-        OnCalendar = "hourly";
-        Persistent = false;
-        Unit = "chown-ssh@${userName}.service";
-      };
-      wantedBy = [ "timers.target" ];
     };
   };
-
-  system.activationScripts.change-ssh-permissions = ''
-    chown -R ${userName}:users ${homeDir}/.ssh
-  '';
 
   # 3) Define a timer that triggers that service every hour
   # avoid v2ray service to create config file

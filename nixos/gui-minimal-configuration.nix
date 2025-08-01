@@ -115,35 +115,6 @@ in
       };
     };
     user.services = {
-      sway-notification-center = {
-        wantedBy = [ "graphical-session.target" ];
-        unitConfig = {
-          Description = "Sway Notification Center";
-          PartOf = [ "graphical-session.target" ];
-        };
-        serviceConfig = {
-          Type = "dbus";
-          BusName = "org.freedesktop.Notifications";
-          ExecStart = "${pkgs.swaynotificationcenter}/bin/swaync";
-          Restart = "on-failure";
-          RestartSec = 5;
-        };
-      };
-      plasma-dolphin = {
-        unitConfig = {
-          Description = "Dolphin file manager";
-          PartOf = [ "graphical-session.target" ];
-        };
-        path = [ "/run/current-system/sw" ];
-        environment = {
-          QT_QPA_PLATFORM = "wayland";
-        };
-        serviceConfig = {
-          Type = "dbus";
-          BusName = "org.freedesktop.FileManager1";
-          ExecStart = "${pkgs.kdePackages.dolphin}/bin/dolphin";
-        };
-      };
       kdeconnect-cli-autorefresh =
       let
         kdeconnect-cli-path = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnect-cli";
@@ -206,8 +177,8 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs-master.hyprland;
-    portalPackage = pkgs-master.xdg-desktop-portal-hyprland;
+    # package = pkgs-master.hyprland;
+    # portalPackage = pkgs-master.xdg-desktop-portal-hyprland;
     # package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
