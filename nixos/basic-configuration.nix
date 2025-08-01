@@ -67,9 +67,9 @@ in
   services = {
     syncthing = {
       enable = true;
-      user = "qsdrqs";
-      configDir = "/home/qsdrqs/.config/syncthing";
-      dataDir = "/home/qsdrqs";
+      user = userName;
+      configDir = "${homeDir}/.config/syncthing";
+      dataDir = "${homeDir}";
     };
     xray = {
       enable = true;
@@ -123,6 +123,7 @@ in
     };
     services."chown-ssh" = {
       wantedBy = [ "multi-user.target" ];
+      before = [ "home-manager-${userName}.service" ];
       description = "Change ownership of .ssh directory";
       path = [ pkgs.inotify-tools pkgs.coreutils ];
       serviceConfig = {

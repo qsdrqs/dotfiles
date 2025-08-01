@@ -7,6 +7,7 @@ if [ "$(stat -Lc %U /root)" != "root" ]; then
   REAL_UID=$(stat -Lc %u /root)
   REAL_GID=$(stat -Lc %g /root)
   echo "Watching $WATCH for changes in ownership: $REAL_UID:$REAL_GID ($REAL_OWNER:$REAL_GROUP)"
+  chown -R --no-dereference "$REAL_OWNER":"$REAL_GROUP" $WATCH # Run this once to ensure the initial ownership is correct
   inotifywait -mrq -e create,move,attrib --format '%w%f' "$WATCH" |
   while read -r f; do
       [[ -e "$f" ]] || continue

@@ -109,7 +109,7 @@
       flake = false;
     };
     blinkDOTcmp = {
-      url = "github:saghen/blink.cmp/v1.4.1";
+      url = "github:saghen/blink.cmp/v1.6.0";
       flake = false;
     };
     blinkDOTcompat = {
@@ -169,7 +169,7 @@
       flake = false;
     };
     projectDOTnvim = {
-      url = "github:ahmedkhalf/project.nvim";
+      url = "github:DrKJeff16/project.nvim";
       flake = false;
     };
     aerialDOTnvim = {
@@ -388,6 +388,10 @@
       url = "github:olimorris/codecompanion.nvim";
       flake = false;
     };
+    claude-codeDOTnvim = {
+      url = "github:greggh/claude-code.nvim";
+      flake = false;
+    };
     sudaDOTvim = {
       url = "github:lambdalisue/suda.vim";
       flake = false;
@@ -564,6 +568,7 @@
         { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
         { name = "mini.diff"; dotname = "miniDOTdiff"; source = inputs.miniDOTdiff; build = false; }
         { name = "codecompanion.nvim"; dotname = "codecompanionDOTnvim"; source = inputs.codecompanionDOTnvim; build = false; }
+        { name = "claude-code.nvim"; dotname = "claude-codeDOTnvim"; source = inputs.claude-codeDOTnvim; build = false; }
         { name = "suda.vim"; dotname = "sudaDOTvim"; source = inputs.sudaDOTvim; build = false; }
         { name = "undotree"; dotname = "undotree"; source = inputs.undotree; build = false; }
         { name = "vim-sandwich"; dotname = "vim-sandwich"; source = inputs.vim-sandwich; build = false; }

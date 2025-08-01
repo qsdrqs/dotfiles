@@ -79,15 +79,6 @@ in
     ln -sf ${pkgs.bash}/bin/bash /usr/bin/bash
   '';
 
-  # Set .ssh directory to the same owner as the home directory
-  system.activationScripts.chown_ssh_dir.text = ''
-    if [ "$(${pkgs.coreutils}/bin/stat -Lc %U /root)" != "root" ]; then
-      REAL_OWNER=$(${pkgs.coreutils}/bin/stat -Lc %U /root)
-      REAL_GROUP=$(${pkgs.coreutils}/bin/stat -Lc %G /root)
-      ${pkgs.coreutils}/bin/chown -R $REAL_OWNER:$REAL_GROUP /root/.ssh
-    fi
-  '';
-
   security.wrappers.direnv = {
     source = "${pkgs.direnv}/bin/direnv";
     owner = "root";

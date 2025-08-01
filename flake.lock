@@ -212,16 +212,16 @@
     "blinkDOTcmp": {
       "flake": false,
       "locked": {
-        "lastModified": 1750183731,
-        "narHash": "sha256-0RmX/uANgU/di3Iu0V6Oe3jZj4ikzeegW/XQUZhPgRc=",
+        "lastModified": 1753373099,
+        "narHash": "sha256-IHRYgKcYP+JDGu8Vtawgzlhq25vpROFqb8KmpfVMwCk=",
         "owner": "saghen",
         "repo": "blink.cmp",
-        "rev": "9bcb14b43852a6f2bfd5ac9ef29cb5cf09b1b39b",
+        "rev": "bae4bae0eedd1fa55f34b685862e94a222d5c6f8",
         "type": "github"
       },
       "original": {
         "owner": "saghen",
-        "ref": "v1.4.1",
+        "ref": "v1.6.0",
         "repo": "blink.cmp",
         "type": "github"
       }
@@ -303,6 +303,22 @@
       "original": {
         "owner": "p00f",
         "repo": "clangd_extensions.nvim",
+        "type": "github"
+      }
+    },
+    "claude-codeDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1751485230,
+        "narHash": "sha256-ZEIPutxhgyaAhq+fJw1lTO781IdjTXbjKy5yKgqSLjM=",
+        "owner": "greggh",
+        "repo": "claude-code.nvim",
+        "rev": "c9a31e51069977edaad9560473b5d031fcc5d38b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "greggh",
+        "repo": "claude-code.nvim",
         "type": "github"
       }
     },
@@ -1954,6 +1970,7 @@
         "bufferlineDOTnvim": "bufferlineDOTnvim",
         "cellular-automatonDOTnvim": "cellular-automatonDOTnvim",
         "clangd_extensionsDOTnvim": "clangd_extensionsDOTnvim",
+        "claude-codeDOTnvim": "claude-codeDOTnvim",
         "codecompanionDOTnvim": "codecompanionDOTnvim",
         "colorful-menuDOTnvim": "colorful-menuDOTnvim",
         "copilotDOTvim": "copilotDOTvim",
@@ -2474,15 +2491,15 @@
     "projectDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1680567592,
-        "narHash": "sha256-avV3wMiDbraxW4mqlEsKy0oeewaRj9Q33K8NzWoaptU=",
-        "owner": "ahmedkhalf",
+        "lastModified": 1753949989,
+        "narHash": "sha256-jB+lR0c+d5f9SWmxAFfPhEpNq9DYjykPhg390t9N/3A=",
+        "owner": "DrKJeff16",
         "repo": "project.nvim",
-        "rev": "8c6bad7d22eef1b71144b401c9f74ed01526a4fb",
+        "rev": "7cb53763040bc9aea3d228a9a2f4cd82d24290c4",
         "type": "github"
       },
       "original": {
-        "owner": "ahmedkhalf",
+        "owner": "DrKJeff16",
         "repo": "project.nvim",
         "type": "github"
       }
