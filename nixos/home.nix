@@ -55,7 +55,7 @@ in
 
   programs.zsh = {
     enable = true;
-    dotDir = ".config/zsh";
+    dotDir = "${config.xdg.configHome}/zsh";
     initContent = lib.mkBefore ''
       if [ -e $HOME/.zshrc ]; then
         ZSH_CUSTOM="$HOME/.zsh"
