@@ -108,6 +108,10 @@
       url = "github:L3MON4D3/LuaSnip";
       flake = false;
     };
+    blink-cmp-avante = {
+      url = "github:Kaiser-Yang/blink-cmp-avante";
+      flake = false;
+    };
     blinkDOTcmp = {
       url = "github:saghen/blink.cmp/v1.6.0";
       flake = false;
@@ -380,16 +384,24 @@
       url = "github:MeanderingProgrammer/render-markdown.nvim";
       flake = false;
     };
-    miniDOTdiff = {
-      url = "github:echasnovski/mini.diff";
+    nuiDOTnvim = {
+      url = "github:MunifTanjim/nui.nvim";
       flake = false;
     };
-    codecompanionDOTnvim = {
-      url = "github:olimorris/codecompanion.nvim";
+    copilotDOTlua = {
+      url = "github:zbirenbaum/copilot.lua";
+      flake = false;
+    };
+    avanteDOTnvim = {
+      url = "github:yetone/avante.nvim";
       flake = false;
     };
     claude-codeDOTnvim = {
       url = "github:greggh/claude-code.nvim";
+      flake = false;
+    };
+    miniDOTdiff = {
+      url = "github:echasnovski/mini.diff";
       flake = false;
     };
     sudaDOTvim = {
@@ -498,6 +510,7 @@
         { name = "lsp_signature.nvim"; dotname = "lsp_signatureDOTnvim"; source = inputs.lsp_signatureDOTnvim; build = false; }
         { name = "colorful-menu.nvim"; dotname = "colorful-menuDOTnvim"; source = inputs.colorful-menuDOTnvim; build = false; }
         { name = "LuaSnip"; dotname = "LuaSnip"; source = inputs.LuaSnip; build = false; }
+        { name = "blink-cmp-avante"; dotname = "blink-cmp-avante"; source = inputs.blink-cmp-avante; build = false; }
         { name = "blink.cmp"; dotname = "blinkDOTcmp"; source = inputs.blinkDOTcmp; build = false; }
         { name = "blink.compat"; dotname = "blinkDOTcompat"; source = inputs.blinkDOTcompat; build = false; }
         { name = "promise-async"; dotname = "promise-async"; source = inputs.promise-async; build = false; }
@@ -566,9 +579,11 @@
         { name = "friendly-snippets"; dotname = "friendly-snippets"; source = inputs.friendly-snippets; build = false; }
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
         { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
-        { name = "mini.diff"; dotname = "miniDOTdiff"; source = inputs.miniDOTdiff; build = false; }
-        { name = "codecompanion.nvim"; dotname = "codecompanionDOTnvim"; source = inputs.codecompanionDOTnvim; build = false; }
+        { name = "nui.nvim"; dotname = "nuiDOTnvim"; source = inputs.nuiDOTnvim; build = false; }
+        { name = "copilot.lua"; dotname = "copilotDOTlua"; source = inputs.copilotDOTlua; build = false; }
+        { name = "avante.nvim"; dotname = "avanteDOTnvim"; source = inputs.avanteDOTnvim; build = true; }
         { name = "claude-code.nvim"; dotname = "claude-codeDOTnvim"; source = inputs.claude-codeDOTnvim; build = false; }
+        { name = "mini.diff"; dotname = "miniDOTdiff"; source = inputs.miniDOTdiff; build = false; }
         { name = "suda.vim"; dotname = "sudaDOTvim"; source = inputs.sudaDOTvim; build = false; }
         { name = "undotree"; dotname = "undotree"; source = inputs.undotree; build = false; }
         { name = "vim-sandwich"; dotname = "vim-sandwich"; source = inputs.vim-sandwich; build = false; }

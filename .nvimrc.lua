@@ -1146,7 +1146,8 @@ local plugins = {
     -- optional: provides snippets for the snippet source
     dependencies = {
       'L3MON4D3/LuaSnip',
-      "xzbdmw/colorful-menu.nvim"
+      "xzbdmw/colorful-menu.nvim",
+      'Kaiser-Yang/blink-cmp-avante',
     },
     version = '1.*',
     config = function()
@@ -1302,6 +1303,9 @@ local plugins = {
             if vim.bo.filetype == 'lua' then
               table.insert(default, 1, 'lazydev')
             end
+            if vim.bo.filetype:find('^Avante') then
+              table.insert(default, 1, 'avante')
+            end
             return default
           end,
           providers = {
@@ -1311,6 +1315,13 @@ local plugins = {
               -- make lazydev completions top priority (see `:h blink.cmp`)
               score_offset = 100,
             },
+            avante = {
+              module = 'blink-cmp-avante',
+              name = 'Avante',
+              opts = {
+                -- options for blink-cmp-avante
+              }
+            }
           },
           per_filetype = {
             codecompanion = { "codecompanion" },
@@ -3690,51 +3701,135 @@ local plugins = {
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
     config = function()
       require('render-markdown').setup {
-        file_types = { "markdown", "codecompanion" },
+        file_types = { "markdown", "codecompanion", "Avante" },
       }
     end
   },
 
+  -- {
+  --   "olimorris/codecompanion.nvim",
+  --   cmd = {
+  --     "CodeCompanion",
+  --     "CodeCompanionAction",
+  --     "CodeCompanionChat",
+  --     "CodeCompanionCmd",
+  --   },
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-treesitter/nvim-treesitter",
+  --     "echasnovski/mini.diff",
+  --     'MeanderingProgrammer/render-markdown.nvim',
+  --   },
+  --   config = function()
+  --     require("codecompanion").setup({
+  --       strategies = {
+  --         chat = {
+  --           adapter = {
+  --             name = "openai",
+  --             model = "o4-mini"
+  --           },
+  --         },
+  --         inline = {
+  --           adapter = {
+  --             name = "openai",
+  --             model = "o4-mini"
+  --           }
+  --         },
+  --       },
+  --       display = {
+  --         action_palette = {
+  --           provider = "fzf_lua",
+  --         },
+  --         diff = {
+  --           provider = "mini_diff", -- default|mini_diff
+  --         }
+  --       }
+  --     })
+  --   end
+  -- },
   {
-    "olimorris/codecompanion.nvim",
-    cmd = {
-      "CodeCompanion",
-      "CodeCompanionAction",
-      "CodeCompanionChat",
-      "CodeCompanionCmd",
-    },
+    "yetone/avante.nvim",
+    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+    build = vim.fn.has("win32") ~= 0
+    and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
+    or "make",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      "echasnovski/mini.diff",
+      "MunifTanjim/nui.nvim",
+      --- The below dependencies are optional,
+      "ibhagwan/fzf-lua", -- for file_selector provider fzf
+      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+      "zbirenbaum/copilot.lua", -- for providers='copilot'
       'MeanderingProgrammer/render-markdown.nvim',
     },
+    cmd = {
+      "AvanteAsk",
+      "AvanteEdit",
+      "AvanteRefresh",
+      "AvanteFocus",
+      "AvanteToggle",
+      "AvanteFilesAddCurrent",
+    },
+    keys = {
+      {"<localleader>aa", mode = {'n', 'v'}},
+      {"<localleader>ae", mode = {'n', 'v'}},
+      {"<localleader>af", mode = {'n', 'v'}},
+    },
     config = function()
-      require("codecompanion").setup({
-        strategies = {
-          chat = {
-            adapter = {
-              name = "openai",
-              model = "o4-mini"
+      local opts = {
+        -- add any opts here
+        -- for example
+        provider = "openai",
+        providers = {
+          openai = {
+            model = "o4-mini",
+            timeout = 30000, -- Timeout in milliseconds
+          },
+          claude = {
+            endpoint = "https://api.anthropic.com",
+            model = "claude-sonnet-4-20250514",
+            timeout = 30000, -- Timeout in milliseconds
+            extra_request_body = {
+              temperature = 0.75,
+              max_tokens = 20480,
             },
           },
-          inline = {
-            adapter = {
-              name = "openai",
-              model = "o4-mini"
-            }
+          moonshot = {
+            endpoint = "https://api.moonshot.ai/v1",
+            model = "kimi-k2-0711-preview",
+            timeout = 30000, -- Timeout in milliseconds
+            extra_request_body = {
+              temperature = 0.75,
+              max_tokens = 32768,
+            },
           },
         },
-        display = {
-          action_palette = {
-            provider = "fzf_lua",
+        hints = {
+          enabled = false,
+        },
+        mappings = {
+          ask = "<localleader>aa",
+          edit = "<localleader>ae",
+          refresh = "<localleader>ar",
+          focus = "<localleader>af",
+          toggle = {
+            default = "<localleader>at",
+            debug = "<localleader>ad",
+            hint = "<localleader>ah",
+            suggestion = "<localleader>as",
+            repomap = "<localleader>aR",
           },
-          diff = {
-            provider = "mini_diff", -- default|mini_diff
-          }
+          files = {
+            add_current = "<localleader>ac",
+          },
         }
-      })
+      }
+      require("avante").setup(opts)
+
     end
+  },
+  {
+    "Kaiser-Yang/blink-cmp-avante",
   },
   {
     "greggh/claude-code.nvim",
@@ -3745,7 +3840,11 @@ local plugins = {
       "nvim-lua/plenary.nvim", -- Required for git operations
     },
     config = function()
-      require("claude-code").setup()
+      require("claude-code").setup {
+        window = {
+          position = "vertical",
+        }
+      }
     end
   },
   {
