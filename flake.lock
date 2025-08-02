@@ -2491,11 +2491,11 @@
     "projectDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1753949989,
-        "narHash": "sha256-jB+lR0c+d5f9SWmxAFfPhEpNq9DYjykPhg390t9N/3A=",
+        "lastModified": 1754028941,
+        "narHash": "sha256-8UxMiLrYZj4kKS98lMPPPLqZGvwuHqNlugc4kammc48=",
         "owner": "DrKJeff16",
         "repo": "project.nvim",
-        "rev": "7cb53763040bc9aea3d228a9a2f4cd82d24290c4",
+        "rev": "4e8a71472de0c2a7fcdae5b8eb36ee6c3058f617",
         "type": "github"
       },
       "original": {
