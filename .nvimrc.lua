@@ -3826,6 +3826,11 @@ local plugins = {
       }
       require("avante").setup(opts)
 
+      -- set keymaps
+      local avante_api = require("avante.api")
+      vim.keymap.set({'n', 'v'}, '<localleader>aa', function() avante_api.ask() end, { silent = true })
+      vim.keymap.set({'n', 'v'}, '<localleader>ae', function() avante_api.edit() end, { silent = true })
+      vim.keymap.set({'n', 'v'}, '<localleader>af', function() avante_api.focus() end, { silent = true })
     end
   },
   {
@@ -3842,7 +3847,7 @@ local plugins = {
     config = function()
       require("claude-code").setup {
         window = {
-          position = "vertical",
+          position = "botright vertical",
         }
       }
     end

@@ -84,6 +84,7 @@ in
   #   "initcall_blacklist=simpledrm_platform_driver_init"
   # ];
 
+  nixpkgs.config.allowBroken = true;
   environment.systemPackages = with pkgs; [
     ida64-fhs
     libreoffice
@@ -92,6 +93,9 @@ in
     # (vscode-wrapper "${vscode}/bin/code" "code-wrapper")
 
     tor-browser
+    (llama-cpp.override {
+      cudaSupport = true;
+    })
     nvitop
     (pkgs.callPackage (import "${inputs.nixpkgs-ghcup}/pkgs/development/tools/haskell/ghcup/default.nix") { })
 
@@ -154,12 +158,6 @@ in
     LIBVA_DRIVER_NAME = "nvidia";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     # GBM_BACKEND = "nvidia-drm";
-  };
-
-  services.ollama = {
-    enable = true;
-    acceleration = "cuda";
-    package = pkgs-master.ollama;
   };
 
 }

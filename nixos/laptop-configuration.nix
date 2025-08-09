@@ -65,6 +65,10 @@ in
     enable = true;
   };
 
+  environment.systemPackages = with pkgs; [
+    wluma
+  ];
+
   hardware.firmware = with pkgs; [
     linux-firmware
   ];

@@ -19,6 +19,10 @@ in
 
   services.tzupdate = {
     enable = true;
+    timer = {
+      enable = true;
+      interval = "*:0/5"; # Update timezone data every 5 minutes.
+    };
   };
   # Configure network proxy if necessary
   # networking.proxy.default = "http://127.0.0.1:1081";
