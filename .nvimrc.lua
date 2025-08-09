@@ -1151,16 +1151,7 @@ local plugins = {
     },
     version = '1.*',
     config = function()
-      local function copilot_key(key_name)
-        return function()
-          local ok, copilot_key = pcall(vim.fn[key_name])
-          if not ok or copilot_key == "" then
-            return
-          end
-          vim.api.nvim_feedkeys(copilot_key, "i", true)
-          return true
-        end
-      end
+      local copilot_suggestion = require("copilot.suggestion")
       local nobold_cache = {}
       local opts = {
         snippets = { preset = 'luasnip' }, -- Use 'luasnip' as the snippet engine
@@ -1192,7 +1183,12 @@ local plugins = {
               if cmp.snippet_active() then return cmp.accept()
               else return cmp.select_and_accept() end
             end,
-            copilot_key("copilot#Accept"),
+            function()
+              if copilot_suggestion.is_visible() then
+                copilot_suggestion.accept()
+                return true
+              end
+            end,
             'snippet_forward',
             'fallback'
           },
@@ -1202,7 +1198,12 @@ local plugins = {
           },
           ['<C-e>'] = {
             'hide',
-            copilot_key("copilot#Dismiss"),
+            function()
+              if copilot_suggestion.is_visible() then
+                copilot_suggestion.dismiss()
+                return true
+              end
+            end,
             'fallback',
           },
         },
@@ -2553,7 +2554,7 @@ local plugins = {
 
       local copilot = function()
         if vim.g.copilot_initialized == 1 then
-          if vim.api.nvim_eval("copilot#Enabled()") == 1 then
+          if vim.b.copilot_suggestion_hidden == false then
             return ' '
           else
             return '󱃓 '
@@ -3361,7 +3362,7 @@ local plugins = {
     -- Lazy load firenvim
     -- Explanation: https://github.com/folke/lazy.nvim/discussions/463#discussioncomment-4819297
     lazy = not vim.g.started_by_firenvim,
-    dependencies = { 'github/copilot.vim', 'neovim/nvim-lspconfig' },
+    dependencies = { 'zbirenbaum/copilot.lua', 'neovim/nvim-lspconfig' },
     build = function()
       require("lazy").load({ plugins = "firenvim", wait = true })
       vim.fn["firenvim#install"](0)
@@ -3641,7 +3642,7 @@ local plugins = {
   },
 
   {
-    'github/copilot.vim',
+    'zbirenbaum/copilot.lua',
     lazy = true,
     init = function()
       vim.g.copilot_filetypes = {
@@ -3651,20 +3652,47 @@ local plugins = {
       }
     end,
     config = function()
+      require('copilot').setup {
+        panel = {
+          keymap = {
+            open = "<M-\\>"
+          },
+          layout = {
+            position = "top", -- | top | left | right
+            ratio = 0.4
+          },
+        },
+        suggestion = {
+          auto_trigger = true,
+          debounce = 75,
+          keymap = {
+            accept = nil,
+            accept_word = false,
+            accept_line = false,
+            next = "<M-]>",
+            prev = "<M-[>",
+            dismiss = "<C-]>",
+          },
+        },
+        filetypes = {
+          ["dap-repl"] = false,
+          dapui_watches = false,
+          markdown = true
+        },
+      }
       vim.g.copilot_echo_num_completions = 1
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
 
-      -- vim.keymap.set('i', '<C-e>', copilot_dismiss, { silent = true})
-      vim.keymap.set('i', '<M-\\>', "<Cmd>Copilot panel<CR>", { silent = true})
+      vim.keymap.set('i', '<C-e>', require("copilot.suggestion").dismiss, { silent = true})
     end
   },
 
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = {
-      "github/copilot.vim",
+      "zbirenbaum/copilot.lua",
       'nvim-lua/plenary.nvim',
     },
     cmd = {
@@ -4626,11 +4654,9 @@ function LazyLoadPlugins()
     callback = function()
       load_plugins {
         'blink.cmp',
-        'copilot.vim',
+        'copilot.lua',
       }
-      vim.defer_fn(function()
-        vim.cmd[[Copilot]] -- init copilot
-      end, 0)
+      vim.b.copilot_suggestion_hidden = false
     end,
     once = true
   })

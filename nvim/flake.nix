@@ -296,8 +296,8 @@
       url = "git+https://git.sr.ht/~whynothugo/lsp_lines.nvim";
       flake = false;
     };
-    copilotDOTvim = {
-      url = "github:github/copilot.vim";
+    copilotDOTlua = {
+      url = "github:zbirenbaum/copilot.lua";
       flake = false;
     };
     firenvim = {
@@ -386,10 +386,6 @@
     };
     nuiDOTnvim = {
       url = "github:MunifTanjim/nui.nvim";
-      flake = false;
-    };
-    copilotDOTlua = {
-      url = "github:zbirenbaum/copilot.lua";
       flake = false;
     };
     avanteDOTnvim = {
@@ -557,7 +553,7 @@
         { name = "todo-comments.nvim"; dotname = "todo-commentsDOTnvim"; source = inputs.todo-commentsDOTnvim; build = false; }
         { name = "nvim-notify"; dotname = "nvim-notify"; source = inputs.nvim-notify; build = false; }
         { name = "lsp_lines.nvim"; dotname = "lsp_linesDOTnvim"; source = inputs.lsp_linesDOTnvim; build = false; }
-        { name = "copilot.vim"; dotname = "copilotDOTvim"; source = inputs.copilotDOTvim; build = false; }
+        { name = "copilot.lua"; dotname = "copilotDOTlua"; source = inputs.copilotDOTlua; build = false; }
         { name = "firenvim"; dotname = "firenvim"; source = inputs.firenvim; build = true; }
         { name = "nvim-dap-python"; dotname = "nvim-dap-python"; source = inputs.nvim-dap-python; build = false; }
         { name = "venv-selector.nvim"; dotname = "venv-selectorDOTnvim"; source = inputs.venv-selectorDOTnvim; build = false; }
@@ -580,7 +576,6 @@
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
         { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
         { name = "nui.nvim"; dotname = "nuiDOTnvim"; source = inputs.nuiDOTnvim; build = false; }
-        { name = "copilot.lua"; dotname = "copilotDOTlua"; source = inputs.copilotDOTlua; build = false; }
         { name = "avante.nvim"; dotname = "avanteDOTnvim"; source = inputs.avanteDOTnvim; build = true; }
         { name = "claude-code.nvim"; dotname = "claude-codeDOTnvim"; source = inputs.claude-codeDOTnvim; build = false; }
         { name = "mini.diff"; dotname = "miniDOTdiff"; source = inputs.miniDOTdiff; build = false; }

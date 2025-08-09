@@ -436,22 +436,6 @@
         "type": "github"
       }
     },
-    "copilotDOTvim": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1753723225,
-        "narHash": "sha256-c7t/U8oFKVryK2+ypy3dgiYTYvYnxmhtve1h6tLg/qM=",
-        "owner": "github",
-        "repo": "copilot.vim",
-        "rev": "51f80c0ed4f70d1c7e8c0ff11a792a9d84502c03",
-        "type": "github"
-      },
-      "original": {
-        "owner": "github",
-        "repo": "copilot.vim",
-        "type": "github"
-      }
-    },
     "cscope_mapsDOTnvim": {
       "flake": false,
       "locked": {
@@ -2023,7 +2007,6 @@
         "claude-codeDOTnvim": "claude-codeDOTnvim",
         "colorful-menuDOTnvim": "colorful-menuDOTnvim",
         "copilotDOTlua": "copilotDOTlua",
-        "copilotDOTvim": "copilotDOTvim",
         "cscope_mapsDOTnvim": "cscope_mapsDOTnvim",
         "dialDOTnvim": "dialDOTnvim",
         "diffviewDOTnvim": "diffviewDOTnvim",
