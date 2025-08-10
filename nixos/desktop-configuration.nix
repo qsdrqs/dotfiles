@@ -104,6 +104,11 @@ in
     nur.repos.xddxdd.baidunetdisk
   ];
 
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda";
+  };
+
   systemd = {
     services = {
       interception-tools-ctrl2esc.wantedBy = [ "multi-user.target" ];
@@ -130,6 +135,9 @@ in
       ];
     };
   };
+
+  # Enable CUDA support in packages that support it
+  nixpkgs.config.cudaSupport = true;
 
   nixpkgs.config.nvidia.acceptLicense = true;
   hardware = {

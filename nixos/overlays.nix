@@ -81,6 +81,7 @@ in
         # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+        llama-cpp = pkgs-master.llama-cpp;
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
