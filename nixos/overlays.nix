@@ -85,7 +85,6 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
-        clisp = pkgs-stable.clisp;
         # End Temporary fixed version packages
 
         # neovim-unwrapped =

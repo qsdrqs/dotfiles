@@ -2672,6 +2672,7 @@ local plugins = {
       end
       require("yazi").setup {
         floating_window_scaling_factor = 0.7,
+        open_for_directories = true,
         yazi_floating_window_border = {
           {"╭", "FloatBorderClear"},
           {"─", "FloatBorderClear"},

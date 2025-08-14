@@ -1,8 +1,8 @@
 { config, pkgs, pkgs-master, lib, inputs, ... }:
 let
-  wpsoffice-hidpi = pkgs.symlinkJoin {
-    name = "wps-office";
-    paths = [ pkgs.wpsoffice ];
+  wpsoffice-cn-hidpi = pkgs.symlinkJoin {
+    name = "wps-office-cn";
+    paths = [ pkgs.wpsoffice-cn ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       for bin in $(ls $out/bin); do
@@ -57,8 +57,7 @@ in
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "openssl-1.1.1w" # For wechat-uos
-    "electron-11.5.0" # For baidunetdisk
+    "ventoy-1.1.05"
   ];
 
   environment.systemPackages = with pkgs; [
@@ -70,9 +69,10 @@ in
     }))
     zoom-us
     scrcpy
-    wpsoffice-hidpi
+    wpsoffice-cn-hidpi
     kdePackages.kate
     wineWowPackages.unstableFull
+    ventoy-full
 
     virt-manager
     linux-wifi-hotspot

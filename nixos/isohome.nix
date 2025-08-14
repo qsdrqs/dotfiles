@@ -16,5 +16,6 @@
   };
   home.activation.dotfiles = ''
     cp -rf ${../.} ${config.home.homeDirectory}/dotfiles
+    touch ${config.xdg.configHome}/hypr-monitor.conf
   '';
 })
