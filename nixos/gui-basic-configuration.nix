@@ -58,6 +58,7 @@ in
 
   nixpkgs.config.permittedInsecurePackages = [
     "ventoy-1.1.05"
+    "electron-11.5.0" # baidunetdisk
   ];
 
   environment.systemPackages = with pkgs; [

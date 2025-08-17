@@ -2672,7 +2672,6 @@ local plugins = {
       end
       require("yazi").setup {
         floating_window_scaling_factor = 0.7,
-        open_for_directories = true,
         yazi_floating_window_border = {
           {"╭", "FloatBorderClear"},
           {"─", "FloatBorderClear"},
@@ -4880,6 +4879,15 @@ vim.deprecate = function(name, alt, plugin, backtrace)
   original_deprecate(name, alt, plugin, backtrace)
 end
 
+local function yazi_here()
+  vim.cmd("enew")
+  vim.bo.buflisted = false
+  vim.bo.swapfile = false
+  vim.fn.termopen({ "yazi" })
+  vim.cmd("startinsert")
+end
+
+vim.keymap.set("n", "-", function() yazi_here() end, { desc = "Yazi here" })
 ---------------------------vscode neovim----------------------------------------------
 function VscodeNeovimHandler()
   local vscode = require("vscode-neovim")

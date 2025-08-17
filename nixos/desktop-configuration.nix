@@ -84,7 +84,6 @@ in
   #   "initcall_blacklist=simpledrm_platform_driver_init"
   # ];
 
-  nixpkgs.config.allowBroken = true;
   environment.systemPackages = with pkgs; [
     ida64-fhs
     libreoffice
