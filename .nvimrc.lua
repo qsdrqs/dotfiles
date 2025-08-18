@@ -1950,7 +1950,7 @@ local plugins = {
   {
     "DrKJeff16/project.nvim",
     config = function()
-      require("project_nvim").setup {
+      require("project").setup {
         silent_chdir = true,
         manual_mode = false,
         patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc", "pom.xml" },

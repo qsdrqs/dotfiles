@@ -35,10 +35,11 @@ in
 
   home.activation.configs = ''
     mkdir -p ~/.config
-    ln -sf ${homeDir}/dotfiles/hypr ${homeDir}/.config
-    ln -sf ${homeDir}/dotfiles/waybar ${homeDir}/.config
-    ln -sf ${homeDir}/dotfiles/kitty ${homeDir}/.config
-    ln -sf ${homeDir}/dotfiles/rofi ${homeDir}/.config
+    for cfg in hypr waybar kitty rofi; do
+      if [ ! -e ${homeDir}/.config/$cfg ]; then
+        ln -s ${homeDir}/dotfiles/$cfg ${homeDir}/.config
+      fi
+    done
   '';
 
 }

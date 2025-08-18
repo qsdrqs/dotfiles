@@ -85,6 +85,7 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
+        swaynotificationcenter = pkgs-stable.swaynotificationcenter;
         # End Temporary fixed version packages
 
         # neovim-unwrapped =

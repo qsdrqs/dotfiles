@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-master, lib, inputs, ... }:
+{ config, pkgs, pkgs-howdy,  pkgs-master, lib, inputs, ... }:
 let
   wpsoffice-cn-hidpi = pkgs.symlinkJoin {
     name = "wps-office-cn";
@@ -37,6 +37,62 @@ let
   };
 in
 {
+  # begin howdy
+  disabledModules = [ "security/pam.nix" ];
+  imports = [
+    "${inputs.nixpkgs-howdy}/nixos/modules/security/pam.nix"
+    "${inputs.nixpkgs-howdy}/nixos/modules/services/security/howdy"
+    "${inputs.nixpkgs-howdy}/nixos/modules/services/misc/linux-enable-ir-emitter.nix"
+  ];
+  nixpkgs.overlays = [
+    (self: super: {
+      linux-enable-ir-emitter = pkgs-howdy.linux-enable-ir-emitter;
+      howdy = pkgs-howdy.howdy.overrideAttrs (old:
+      let
+        pyEnv = pkgs-howdy.python3.withPackages (p: [
+          p.dlib
+          p.elevate
+          p.face-recognition.override
+          p.keyboard
+          (p.opencv4.override { enableGtk3 = true; })
+          p.pycairo
+          p.pygobject3
+        ]);
+      in
+      {
+        version = "2.6.1-unstable-2025-06-22";
+        src = super.fetchFromGitHub {
+          owner = "boltgolt";
+          repo = "howdy";
+          rev = "d3ab99382f88f043d15f15c1450ab69433892a1c";
+          hash = "sha256-Xd/uScMnX1GMwLD5GYSbE2CwEtzrhwHocsv0ESKV8IM=";
+        };
+        postPatch = "";
+        patches = old.patches ++ [
+          ./patches/howdy.patch
+        ];
+        mesonFlags = old.mesonFlags ++ [
+          "-Dpython_path=${pyEnv.interpreter}"
+          "-Dextra_path=${pkgs-howdy.kbd}/bin/"
+        ];
+      });
+    })
+  ];
+  services.howdy = {
+    enable = true;
+    settings = {
+      # you may not need these
+      core.no_confirmation = true;
+      video.dark_threshold = 90;
+      rubberstamps.enabled = true;
+      rubberstamps.stamp_rules = "hotkey 5s failsafe";
+    };
+  };
+  services.linux-enable-ir-emitter = {
+    enable = true;
+  };
+  # end howdy
+
   boot.kernelModules = [
     # "v4l2loopback"
   ];

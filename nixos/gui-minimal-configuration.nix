@@ -32,7 +32,7 @@ in
   environment.systemPackages = with pkgs; [
     code-cursor
     vscode
-    pkgs.firefox-devedition
+    firefox-devedition
     firefox-alias
     kitty
     xclip
