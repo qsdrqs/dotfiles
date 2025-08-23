@@ -266,7 +266,7 @@ in
     locate = {
       enable = true;
       package = pkgs.plocate;
-      interval = "hourly";
+      interval = "daily";
       # localuser = null;
       pruneBindMounts = false; # btrfs can't be pruned
       prunePaths = options.services.locate.prunePaths.default ++ [

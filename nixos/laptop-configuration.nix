@@ -58,7 +58,7 @@ in
 
   services.udev.extraRules = ''
     # HHKB
-    ACTION=="add",    ATTRS{idVendor}=="04fe", ATTRS{idProduct}=="0021", RUN+="${pkgs.bash}/bin/bash ${ctrl2esc}"
-    ACTION=="remove", ATTRS{idVendor}=="04fe", ATTRS{idProduct}=="0021", RUN+="${pkgs.bash}/bin/bash ${caps2esc}"
+    KERNEL=="event*", SUBSYSTEM=="input", ENV{ID_INPUT_KEYBOARD}=="1", ATTRS{name}=="*HHKB*", ACTION=="add", RUN+="${pkgs.bash}/bin/bash ${ctrl2esc}"
+    KERNEL=="event*", SUBSYSTEM=="input", ENV{ID_INPUT_KEYBOARD}=="1", ATTRS{name}=="*HHKB*", ACTION=="remove", RUN+="${pkgs.bash}/bin/bash ${caps2esc}"
   '';
 }

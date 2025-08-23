@@ -392,8 +392,12 @@
       url = "github:yetone/avante.nvim";
       flake = false;
     };
-    claude-codeDOTnvim = {
-      url = "github:greggh/claude-code.nvim";
+    snacksDOTnvim = {
+      url = "github:folke/snacks.nvim";
+      flake = false;
+    };
+    claudecodeDOTnvim = {
+      url = "github:coder/claudecode.nvim";
       flake = false;
     };
     miniDOTdiff = {
@@ -577,7 +581,8 @@
         { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
         { name = "nui.nvim"; dotname = "nuiDOTnvim"; source = inputs.nuiDOTnvim; build = false; }
         { name = "avante.nvim"; dotname = "avanteDOTnvim"; source = inputs.avanteDOTnvim; build = true; }
-        { name = "claude-code.nvim"; dotname = "claude-codeDOTnvim"; source = inputs.claude-codeDOTnvim; build = false; }
+        { name = "snacks.nvim"; dotname = "snacksDOTnvim"; source = inputs.snacksDOTnvim; build = false; }
+        { name = "claudecode.nvim"; dotname = "claudecodeDOTnvim"; source = inputs.claudecodeDOTnvim; build = false; }
         { name = "mini.diff"; dotname = "miniDOTdiff"; source = inputs.miniDOTdiff; build = false; }
         { name = "suda.vim"; dotname = "sudaDOTvim"; source = inputs.sudaDOTvim; build = false; }
         { name = "undotree"; dotname = "undotree"; source = inputs.undotree; build = false; }

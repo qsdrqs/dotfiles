@@ -1042,6 +1042,30 @@ local plugins = {
         defer_save = { "InsertLeave", "TextChanged" }, -- vim events that trigger a deferred save (saves after `debounce_delay`)
         cancel_deferred_save = { "InsertEnter" }, -- vim events that cancel a pending deferred save
       },
+      condition = function(buf) -- for claude code
+        -- Exclude claudecode diff buffers by buffer name patterns
+        local bufname = vim.api.nvim_buf_get_name(buf)
+        if bufname:match('%(proposed%)') or bufname:match('%(NEW FILE %- proposed%)') or bufname:match('%(New%)') then
+          return false
+        end
+
+        -- Exclude by buffer variables (claudecode sets these)
+        if
+            vim.b[buf].claudecode_diff_tab_name
+            or vim.b[buf].claudecode_diff_new_win
+            or vim.b[buf].claudecode_diff_target_win
+        then
+          return false
+        end
+
+        -- Exclude by buffer type (claudecode diff buffers use "acwrite")
+        local buftype = vim.fn.getbufvar(buf, '&buftype')
+        if buftype == 'acwrite' then
+          return false
+        end
+
+        return true -- Safe to auto-save
+      end,
     }
   },
 
@@ -3810,8 +3834,11 @@ local plugins = {
         provider = "openai",
         providers = {
           openai = {
-            model = "o4-mini",
+            model = "gpt-5",
             timeout = 30000, -- Timeout in milliseconds
+            extra_request_body = {
+              temperature = 1,
+            },
           },
           claude = {
             endpoint = "https://api.anthropic.com",
@@ -3822,14 +3849,11 @@ local plugins = {
               max_tokens = 20480,
             },
           },
-          moonshot = {
-            endpoint = "https://api.moonshot.ai/v1",
-            model = "kimi-k2-0711-preview",
-            timeout = 30000, -- Timeout in milliseconds
-            extra_request_body = {
-              temperature = 0.75,
-              max_tokens = 32768,
-            },
+          deepseek = {
+            __inherited_from = "openai",
+            api_key_name = "DEEPSEEK_API_KEY",
+            endpoint = "https://api.deepseek.com",
+            model = "deepseek-chat",
           },
         },
         hints = {
@@ -3865,20 +3889,16 @@ local plugins = {
     "Kaiser-Yang/blink-cmp-avante",
   },
   {
-    "greggh/claude-code.nvim",
+    "coder/claudecode.nvim",
     cmd = {
       "ClaudeCode",
     },
-    dependencies = {
-      "nvim-lua/plenary.nvim", -- Required for git operations
-    },
-    config = function()
-      require("claude-code").setup {
-        window = {
-          position = "botright vertical",
-        }
+    dependencies = { "folke/snacks.nvim" },
+    opts = {
+      terminal = {
+        split_side = "right",
       }
-    end
+    }
   },
   {
     "echasnovski/mini.diff",
@@ -4880,10 +4900,15 @@ vim.deprecate = function(name, alt, plugin, backtrace)
 end
 
 local function yazi_here()
+  local buf_path = vim.fn.expand("%")
   vim.cmd("enew")
   vim.bo.buflisted = false
   vim.bo.swapfile = false
-  vim.fn.termopen({ "yazi" })
+  vim.notify(buf_path)
+  vim.fn.jobstart({
+    "yazi",
+    buf_path,
+  }, {term = true})
   vim.cmd("startinsert")
 end
 

@@ -338,19 +338,19 @@
         "type": "github"
       }
     },
-    "claude-codeDOTnvim": {
+    "claudecodeDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1751485230,
-        "narHash": "sha256-ZEIPutxhgyaAhq+fJw1lTO781IdjTXbjKy5yKgqSLjM=",
-        "owner": "greggh",
-        "repo": "claude-code.nvim",
-        "rev": "c9a31e51069977edaad9560473b5d031fcc5d38b",
+        "lastModified": 1754661792,
+        "narHash": "sha256-b4jCKIqowkVuWhI9jxthluZISBOnIc8eOIgkw5++HRY=",
+        "owner": "coder",
+        "repo": "claudecode.nvim",
+        "rev": "985b4b117ea13ec85c92830ecac8f63543dd5ead",
         "type": "github"
       },
       "original": {
-        "owner": "greggh",
-        "repo": "claude-code.nvim",
+        "owner": "coder",
+        "repo": "claudecode.nvim",
         "type": "github"
       }
     },
@@ -2004,7 +2004,7 @@
         "bufferlineDOTnvim": "bufferlineDOTnvim",
         "cellular-automatonDOTnvim": "cellular-automatonDOTnvim",
         "clangd_extensionsDOTnvim": "clangd_extensionsDOTnvim",
-        "claude-codeDOTnvim": "claude-codeDOTnvim",
+        "claudecodeDOTnvim": "claudecodeDOTnvim",
         "colorful-menuDOTnvim": "colorful-menuDOTnvim",
         "copilotDOTlua": "copilotDOTlua",
         "cscope_mapsDOTnvim": "cscope_mapsDOTnvim",
@@ -2077,6 +2077,7 @@
         "rustaceanvim": "rustaceanvim",
         "satelliteDOTnvim": "satelliteDOTnvim",
         "sigsegvim": "sigsegvim",
+        "snacksDOTnvim": "snacksDOTnvim",
         "statuscolDOTnvim": "statuscolDOTnvim",
         "sudaDOTvim": "sudaDOTvim",
         "telescope-asynctasksDOTnvim": "telescope-asynctasksDOTnvim",
@@ -2863,6 +2864,22 @@
       "original": {
         "owner": "seandewar",
         "repo": "sigsegvim",
+        "type": "github"
+      }
+    },
+    "snacksDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1740868622,
+        "narHash": "sha256-Gw0Bp2YeoESiBLs3NPnqke3xwEjuiQDDU1CPofrhtig=",
+        "owner": "folke",
+        "repo": "snacks.nvim",
+        "rev": "bc0630e43be5699bb94dadc302c0d21615421d93",
+        "type": "github"
+      },
+      "original": {
+        "owner": "folke",
+        "repo": "snacks.nvim",
         "type": "github"
       }
     },

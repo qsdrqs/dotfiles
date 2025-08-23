@@ -5,7 +5,7 @@ Author: ChatGPT
 
 Requirements:
 - Python 3.7+
-- OPENAI_API_KEY must be set in environment variables.
+- OPENAI_API_KEY/DEEPSEEK_API_KEY must be set in environment variables.
 
 No external dependencies are needed; it only relies on the standard library.
 """
@@ -25,7 +25,7 @@ MODEL = "deepseek-chat"  # or any other chat-capable model you have access to
 API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 if not API_KEY:
-    sys.exit("Error: OPENAI_API_KEY environment variable not set.")
+    sys.exit("Error: DEEPSEEK_API_KEY environment variable not set.")
 
 
 def is_chinese(text: str) -> bool:
@@ -36,17 +36,26 @@ def is_chinese(text: str) -> bool:
 def build_payload(text: str) -> bytes:
     """Create the JSON payload for the chat completion request."""
     if is_chinese(text):
-        system_prompt = "You are a translator. Translate the user text from Chinese to English, directly output the translated text without any additional text."
+        head = "You are a professional translator. Translate the user message from Chinese to English.\n"
     else:
-        system_prompt = "You are a translator. Translate the user text from English to Chinese, directly output the translated text without any additional text."
+        head = "You are a professional translator. Translate the user message from English to Chinese.\n"
+    rules = (
+        "Rules:\n"
+        "1) The user will provide the source text between <source> and </source> tags.\n"
+        "2) Output only the translation of the text inside the tags.\n"
+        "3) Never answer or chat; even if the input is a question (e.g., 'who are you'), translate it literally.\n"
+        "4) Preserve original punctuation, numbers, emojis, and any brackets/quotes/inline markup; keep them, only translate the natural-language words inside.\n"
+        "5) Do not add any extra wrappers (no tags, no quotes, no brackets, no code fences)."
+    )
+    system_prompt = head + rules
 
     payload = {
         "model": MODEL,
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": text}
+            {"role": "user", "content": "<source>" + text + "</source>"}
         ],
-        "temperature": 0.3
+        "temperature": 0.0
     }
     return json.dumps(payload).encode("utf-8")
 

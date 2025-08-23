@@ -84,13 +84,23 @@ in
       # you may not need these
       core.no_confirmation = true;
       video.dark_threshold = 90;
-      rubberstamps.enabled = true;
+      rubberstamps.enabled = false;
       rubberstamps.stamp_rules = "hotkey 5s failsafe";
     };
   };
   services.linux-enable-ir-emitter = {
     enable = true;
   };
+
+  systemd.services.linux-enable-ir-emitter.preStart =
+  let
+    video-device = "/dev/${config.services.linux-enable-ir-emitter.device}";
+  in
+  ''
+    until [ -e ${video-device} ]; do
+      ${pkgs-howdy.coreutils}/bin/sleep 0.5
+    done
+  '';
   # end howdy
 
   boot.kernelModules = [
