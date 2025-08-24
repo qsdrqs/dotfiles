@@ -28,6 +28,16 @@ in
   };
   services.power-profiles-daemon.enable = false;
 
+  services.logind = {
+    lidSwitch = "suspend-then-hibernate";
+    lidSwitchExternalPower = "ignore";
+  };
+
+  systemd.sleep.extraConfig = ''
+    [Sleep]
+    HibernateDelaySec=18h
+  '';
+
   systemd = {
     user.services.libinput-gestures = {
       enable = true;

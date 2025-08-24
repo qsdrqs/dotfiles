@@ -497,7 +497,7 @@ if filereadable(expand(getcwd() . "/.prerc.vim"))
 endif
 
 " 重启vim，设置退出return 100为重启，需要shell相关函数支持
-  nnoremap <leader>rs <cmd>cquit 100<cr>
+nnoremap <leader>rs <cmd>cquit 100<cr>
 
 " 不要自动添加EOL
 set nofixeol
@@ -539,6 +539,9 @@ function! s:toggleBinaryEdit()
   endif
 endfunction
 command! -nargs=0 BinaryEditToggle call s:toggleBinaryEdit()
+
+" 在 diff 模式下自动启用 wrap
+autocmd OptionSet diff if &diff | setlocal wrap | endif
 
 "-------------------杂项-----------------------"}}}
 "

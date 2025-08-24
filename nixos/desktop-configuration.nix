@@ -103,6 +103,8 @@ in
     nur.repos.xddxdd.baidunetdisk
   ];
 
+  services.howdy.settings.core.use_cnn = true;
+
   services.ollama = {
     enable = true;
     acceleration = "cuda";

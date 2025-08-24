@@ -49,7 +49,8 @@ in
       linux-enable-ir-emitter = pkgs-howdy.linux-enable-ir-emitter;
       howdy = pkgs-howdy.howdy.overrideAttrs (old:
       let
-        pyEnv = pkgs-howdy.python3.withPackages (p: [
+        # use pkgs.python3 to allow nixpkgs configs
+        pyEnv = pkgs.python3.withPackages (p: [
           p.dlib
           p.elevate
           p.face-recognition.override
