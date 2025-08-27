@@ -27,6 +27,18 @@ in
     target = ".local/bin/rofi-hyprwindow";
     executable = true;
   };
+  services.swaync = {
+    enable = true;
+    # settings = {
+    #   scripts = {
+    #     sound-script = {
+    #       exec = ../swaync/sound-script.sh;
+    #       "app-name" = ".*";
+    #     };
+    #   };
+    # };
+    style = ../swaync/style.css;
+  };
 
   services.kdeconnect = {
     enable = true;

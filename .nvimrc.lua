@@ -3892,6 +3892,8 @@ local plugins = {
     "coder/claudecode.nvim",
     cmd = {
       "ClaudeCode",
+      "ClaudeCodeSend",
+      "ClaudeCodeAdd"
     },
     dependencies = { "folke/snacks.nvim" },
     opts = {
@@ -4904,7 +4906,9 @@ local function yazi_here()
   vim.cmd("enew")
   vim.bo.buflisted = false
   vim.bo.swapfile = false
-  vim.notify(buf_path)
+  if buf_path == "" then
+    buf_path = vim.fn.getcwd()
+  end
   vim.fn.jobstart({
     "yazi",
     buf_path,

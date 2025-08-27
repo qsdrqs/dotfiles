@@ -514,11 +514,11 @@ function! s:deleteTrailing()
   endif
 endfunction
 " use editorconfig instead
-if !exists('g:vscode')
-  autocmd BufWritePre * call s:deleteTrailing()
-else
-  autocmd InsertLeave * call s:deleteTrailing()
-endif
+" if !exists('g:vscode')
+"   autocmd BufWritePre * call s:deleteTrailing()
+" else
+"   autocmd InsertLeave * call s:deleteTrailing()
+" endif
 
 function s:is_xxd_layout()
   " check if the first line is starting with 00000000
