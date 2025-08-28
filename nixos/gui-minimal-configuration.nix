@@ -37,6 +37,7 @@ in
     kitty
     xclip
     wl-clipboard
+    wdisplays
     pavucontrol
     libnotify
     mpv

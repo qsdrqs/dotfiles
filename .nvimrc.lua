@@ -722,7 +722,7 @@ local plugins = {
               -- rootDirectory = vim.fn.getcwd(),
               auxDirectory = "latex.out",
               build = {
-                onSave = false, -- Automatically build latex on save
+                onSave = true, -- Automatically build latex on save
                 args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
                 -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
                 -- args = { "-pdflua", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
