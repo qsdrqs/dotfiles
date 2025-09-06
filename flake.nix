@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/fbcf476f790d8a217c3eab4e12033dc4a0f6d23c";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/20075955deac2583bb12f07151c2df830ef346b4";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
@@ -292,7 +292,19 @@
         ];
       };
 
-      desktopConfig = developConfig // guiBasicConfig // {
+      desktopConfig = developConfig // guiBasicConfig // rec {
+        system = developConfig.system;
+        specialArgs = developConfig.specialArgs // {
+          pkgs-howdy = import inputs.nixpkgs-howdy {
+            inherit system;
+            config = {
+              allowUnfree = true;
+              cudaSupport = true;
+            };
+            overlays =
+              (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
+          };
+        };
         modules = developConfig.modules ++ guiBasicConfig.modules ++ [
           ./nixos/desktop-configuration.nix
         ];

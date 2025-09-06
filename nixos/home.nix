@@ -74,8 +74,11 @@ in
     };
     completionInit = ""; # define in my own zshrc
   };
-  programs.ssh.enable = true;
-  programs.ssh.includes = [ "ssh-config" ];
+  programs.ssh = {
+    enable = true;
+    includes = [ "ssh-config" ];
+    enableDefaultConfig = false;
+  };
   home.file."extra_config" = {
     source = ./private/ssh-config;
     target = ".ssh/ssh-config";

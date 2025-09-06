@@ -28,9 +28,9 @@ in
   };
   services.power-profiles-daemon.enable = false;
 
-  services.logind = {
-    lidSwitch = "suspend-then-hibernate";
-    lidSwitchExternalPower = "ignore";
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandleLidSwitchExternalPower = "ignore";
   };
 
   systemd.sleep.extraConfig = ''

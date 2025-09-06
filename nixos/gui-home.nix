@@ -3,7 +3,7 @@ let
   homeDir = config.home.homeDirectory;
 in
 {
-  home.file.".icons/default".source = "${pkgs.libsForQt5.breeze-qt5}/share/icons/breeze_cursors";
+  home.file.".icons/default".source = "${pkgs.kdePackages.breeze}/share/icons/breeze_cursors";
 
   # xdg.mimeApps = {
   #   enable = true;

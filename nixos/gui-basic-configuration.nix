@@ -22,17 +22,17 @@ let
       sed -i "s|Exec=.*/bin/qq \(.*\)|Exec=$out/bin/qq --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime \1|" $out/share/applications/qq.desktop
     '';
   };
-  wechat-uos-hidpi = pkgs.symlinkJoin {
+  wechat-hidpi = pkgs.symlinkJoin {
     name = "wechat";
     paths = [
-      pkgs.wechat-uos # need to build glibc
+      pkgs.wechat # need to build glibc
     ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-      wrapProgram $out/bin/wechat-uos \
+      wrapProgram $out/bin/wechat \
         --set QT_FONT_DPI 144
-      # sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/wechat-uos.desktop
-      sed -i "s|Exec=.*|Exec=$out/bin/wechat-uos|" $out/share/applications/com.tencent.wechat.desktop
+      sed -i "s|Exec=.*|Exec=$out/bin/wechat|" $out/share/applications/wechat.desktop
+      # sed -i "s|Exec=.*|Exec=$out/bin/wechat|" $out/share/applications/com.tencent.wechat.desktop
     '';
   };
 in
@@ -50,7 +50,7 @@ in
       howdy = pkgs-howdy.howdy.overrideAttrs (old:
       let
         # use pkgs.python3 to allow nixpkgs configs
-        pyEnv = pkgs.python3.withPackages (p: [
+        pyEnv = pkgs-howdy.python3.withPackages (p: [
           p.dlib
           p.elevate
           p.face-recognition.override
@@ -160,11 +160,13 @@ in
     # NUR
     qq-hidpi
     wemeet
-    wechat-uos-hidpi
+    wechat
     # flameshot
     (flameshot.override {
       enableWlrSupport = true;
     })
+
+    samba
   ];
 
   programs.nix-ld.libraries = with pkgs; [
@@ -210,6 +212,14 @@ in
     "libvirtd"
     "docker"
   ];
+
+  services.printing = {
+    enable = true;
+    drivers = with pkgs; [
+      gutenprint
+      hplip
+    ];
+  };
 
   # snapshots
   services.snapper.configs = {

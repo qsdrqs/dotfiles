@@ -33,6 +33,7 @@ in
     nix-serve
     socat
     xray
+    samba
 
     poppler_utils # pdf2txt
     jless
