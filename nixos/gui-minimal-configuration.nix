@@ -37,7 +37,7 @@ in
     kitty
     xclip
     wl-clipboard
-    wdisplays
+    wdisplays # show connected monitors
     pavucontrol
     libnotify
     mpv
