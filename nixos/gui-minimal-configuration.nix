@@ -15,7 +15,7 @@ let
     slurp
     jq
     swayidle
-    inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
+    grimblast
     wayvnc
   ];
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
@@ -47,7 +47,7 @@ in
     swaynotificationcenter
     pulseaudio
     alsa-utils
-    rofi-wayland
+    rofi
     networkmanagerapplet
     xdotool
     zenity # color picker

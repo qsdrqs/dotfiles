@@ -124,7 +124,6 @@ in
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "ventoy-1.1.05"
     "electron-11.5.0" # baidunetdisk
   ];
 
@@ -140,7 +139,6 @@ in
     wpsoffice-cn-hidpi
     kdePackages.kate
     wineWowPackages.unstableFull
-    ventoy-full
 
     virt-manager
     linux-wifi-hotspot
