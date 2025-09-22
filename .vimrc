@@ -503,7 +503,7 @@ nnoremap <leader>rs <cmd>cquit 100<cr>
 set nofixeol
 
 " 自动删除trailing spaces
-function! s:deleteTrailing()
+function! DeleteTrailing()
   let l:match_line = search('\s\+$', 'n')
   if l:match_line > 0
     " echo "delete trailing spaces"
@@ -513,6 +513,34 @@ function! s:deleteTrailing()
     call cursor(l:curr_line, l:curr_col)
   endif
 endfunction
+
+function! CopyRelativePath()
+  let l:relative_path = fnamemodify(expand('%'), ':~:.')
+  if l:relative_path == ''
+    let l:relative_path = '[No Name]'
+  endif
+  let @+ = '@' . l:relative_path
+  echo 'Copied to clipboard: @' . l:relative_path
+endfunction
+command! -nargs=0 CopyRelativePath call CopyRelativePath()
+nmap <leader>yp :CopyRelativePath<CR>
+
+function! CopyRelativePathWithLines() range
+  let l:relative_path = fnamemodify(expand('%'), ':~:.')
+  if l:relative_path == ''
+    let l:relative_path = '[No Name]'
+  endif
+  if a:firstline == a:lastline
+    let l:result = '@' . l:relative_path . '#L' . a:firstline
+  else
+    let l:result = '@' . l:relative_path . '#L' . a:firstline . '-' . a:lastline
+  endif
+  let @+ = l:result
+  echo 'Copied to clipboard: ' . l:result
+endfunction
+command! -range CopyRelativePathWithLines <line1>,<line2>call CopyRelativePathWithLines()
+vmap <leader>yp :'<,'>CopyRelativePathWithLines<CR>
+
 " use editorconfig instead
 " if !exists('g:vscode')
 "   autocmd BufWritePre * call s:deleteTrailing()

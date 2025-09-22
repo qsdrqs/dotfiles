@@ -225,7 +225,7 @@ local get_git_root = function(url)
 	end
 
 	-- not found in cache, get git root by git command
-	local child, code = Command("git"):arg({ "rev-parse", "--show-toplevel" }):cwd(url):stdout(Command.PIPED):spawn()
+	local child, code = Command("git"):arg({ "rev-parse", "--show-cdup" }):cwd(url):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
 		ya.err("cwd: " .. url)
@@ -238,7 +238,8 @@ local get_git_root = function(url)
 		return 3
 	end
 
-	local git_root = next:match("^(.*)\n$")
+	local cdup = (next and next:gsub("\r?\n$", "")) or ""
+	local git_root = (cdup == "" and url) or (url .. "/" .. cdup):gsub("/+$","")
 	update_git_roots(git_root, false)
 	return git_root
 end

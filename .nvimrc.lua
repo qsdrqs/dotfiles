@@ -3077,7 +3077,7 @@ local plugins = {
 
       dashboard.section.buttons.val = {
         dashboard.button("e", "  New file", "<cmd>ene <CR>"),
-        dashboard.button("l", "󰁯  Load session", "<cmd> SessionRestore <cr>"),
+        dashboard.button("l", "󰁯  Load session", "<cmd>AutoSession restore <cr>"),
         dashboard.button("y", "  Open file manager", "<cmd>YaziToggle <cr>"),
         dashboard.button("z", "  Z jump", "<cmd>ZjumpToggle <cr>"),
         dashboard.button("f", "󰍉  Find file", require('fzf-lua').files),
