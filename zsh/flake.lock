@@ -19,11 +19,11 @@
     "fzf-tab": {
       "flake": false,
       "locked": {
-        "lastModified": 1752213303,
-        "narHash": "sha256-1g3kToboNGXNJTd+LEIB/j76VgPdYqG2PNs3u6Zke9s=",
+        "lastModified": 1758160945,
+        "narHash": "sha256-1Ior+/9e+M+Fc1u0uq5HhknlGRS96q7tazhEE6rmx9Y=",
         "owner": "Aloxaf",
         "repo": "fzf-tab",
-        "rev": "fc6f0dcb2d5e41a4a685bfe9af2f2393dc39f689",
+        "rev": "fac145167f7ec1861233c54de0c8900b09c650fe",
         "type": "github"
       },
       "original": {
@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1757467804,
-        "narHash": "sha256-HhU7aP7tZP6x/dOO5fxKnrEqAv2fkwd3YcI/eq5cdC0=",
+        "lastModified": 1758531059,
+        "narHash": "sha256-b0Nh7Xjcm3fsXzJ/TU3Qd/JK3JLgDaFg/y0BaAToz4s=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "9e23925b8581d22033f07f1983587412d3761494",
+        "rev": "58cba614652ce8115138fef5c7d80c8a0c0a58f4",
         "type": "github"
       },
       "original": {
@@ -161,11 +161,11 @@
     "zsh-vi-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1757864138,
-        "narHash": "sha256-DvTa3pGBTfTUHTFyydaNVZgfNSm06zslF+eCbawEYqk=",
+        "lastModified": 1758096999,
+        "narHash": "sha256-MHKDyUgkpy27edpbjvN4MkMPym7VpEQyNg450PdsctY=",
         "owner": "jeffreytse",
         "repo": "zsh-vi-mode",
-        "rev": "22a677383aafef2ec482a64d40cc3d40032b849f",
+        "rev": "73dc70e1e35347adaa4dde65a548eee9d7bf48d7",
         "type": "github"
       },
       "original": {

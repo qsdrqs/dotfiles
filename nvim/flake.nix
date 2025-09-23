@@ -113,7 +113,7 @@
       flake = false;
     };
     blinkDOTcmp = {
-      url = "github:saghen/blink.cmp/v1.6.0";
+      url = "github:saghen/blink.cmp/v1.7.0";
       flake = false;
     };
     blinkDOTcompat = {

@@ -550,8 +550,6 @@ local plugins = {
       -- vim.lsp.set_log_level('DEBUG')
       vim.lsp.set_log_level('OFF')
 
-      local lspconfig = require('lspconfig')
-
       function common_on_attach(client, bufnr)
         -- Enable completion triggered by <c-x><c-o>
         vim.bo[bufnr].omnifunc = 'v:lua.vim.lsp.omnifunc'
@@ -684,27 +682,38 @@ local plugins = {
       }
 
       -- add my magic python lsp
+      local python_server_name = 'pyright'
+      local python_custom_config
+      local python_commands
       local ok, pycfg = pcall(require, 'dotfiles.private.magic_py_lsp')
-      if not ok or pycfg.config == nil then
-        servers[#servers+1] = 'pyright'
-      else
-        require('lspconfig.configs')[pycfg.name] = pycfg.config
-        servers[#servers+1] = pycfg.name
+      if ok and type(pycfg) == 'table' and pycfg.config ~= nil then
+        python_server_name = pycfg.name or python_server_name
+        python_custom_config = pycfg.config
+        python_commands = pycfg.commands
       end
+      servers[#servers+1] = python_server_name
+
+      local python_settings_patch = {
+        python = {
+          analysis = {
+            diagnosticSeverityOverrides = {
+              -- reportGeneralTypeIssues = "warning"
+            },
+          },
+        },
+      }
+
       for _, lsp in ipairs(servers) do
         local lsp_common_config = get_lsp_common_config()
         if lsp == 'ts_ls' then
           -- lsp_common_config.root_dir = require('lspconfig.util').root_pattern("*")
-        elseif lsp == "pyright" or lsp == pycfg.name then
-          lsp_common_config.settings = {
-            python = {
-              analysis = {
-                diagnosticSeverityOverrides = {
-                  -- reportGeneralTypeIssues = "warning"
-                },
-              }
-            }
-          }
+        end
+
+        if lsp == python_server_name then
+          if python_custom_config then
+            lsp_common_config = vim.tbl_deep_extend('force', lsp_common_config, python_custom_config)
+          end
+          lsp_common_config.settings = vim.tbl_deep_extend('force', lsp_common_config.settings or {}, python_settings_patch)
         elseif lsp == "clangd" then
           lsp_common_config.cmd = { "clangd", "--header-insertion-decorators=0", "-header-insertion=never",
             "--background-index" }
@@ -832,7 +841,20 @@ local plugins = {
             }
           }
         end
-        lspconfig[lsp].setup(lsp_merge_project_config(lsp_common_config))
+        vim.lsp.config[lsp] = lsp_merge_project_config(lsp_common_config)
+        vim.lsp.enable(lsp)
+      end
+
+      if python_commands then
+        for name, spec in pairs(python_commands) do
+          local handler = spec[1]
+          if type(handler) == 'function' then
+            pcall(vim.api.nvim_del_user_command, name)
+            pcall(vim.api.nvim_create_user_command, name, function()
+              handler()
+            end, { desc = spec.description })
+          end
+        end
       end
 
       local vim_version = vim.version()
@@ -1506,19 +1528,6 @@ local plugins = {
           end):catch(function(err)
               return handleFallbackException(err, 'indent')
           end)
-      end
-
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities.textDocument.foldingRange = {
-        dynamicRegistration = false,
-        lineFoldingOnly = true
-      }
-      local language_servers = vim.lsp.get_clients() -- or list servers manually like {'gopls', 'clangd'}
-      for _, ls in ipairs(language_servers) do
-        require('lspconfig')[ls].setup({
-          capabilities = capabilities
-          -- you can add other fields for setting up lsp server in this table
-        })
       end
 
       require('ufo').setup{
