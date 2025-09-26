@@ -318,6 +318,15 @@ in
       interception-tools-ctrl2esc = interception-tools-service "ctrl2esc" // {
         wantedBy = [ ];
       };
+
+      # remove this when upstream provide option to enable it
+      tzupdate.script = lib.mkForce ''
+        timezone="$(${lib.getExe pkgs.tzupdate} --consensus --print-only)"
+        if [[ -n "$timezone" ]]; then
+          echo "Setting timezone to '$timezone'"
+          timedatectl set-timezone "$timezone"
+        fi
+      '';
     };
 
   environment.variables = {

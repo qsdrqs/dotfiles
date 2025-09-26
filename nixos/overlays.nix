@@ -82,6 +82,18 @@ in
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         llama-cpp = pkgs-master.llama-cpp;
+        tzupdate = super.rustPlatform.buildRustPackage rec {
+          pname = "tzupdate";
+          version = "unstable-2025-09-02";
+          src = super.fetchFromGitHub {
+            owner = "cdown";
+            repo = "tzupdate";
+            rev = "91d65d861c4e10d2353357edfd33158197e8dc09";
+            hash = "sha256-XWl0erykdn8mHFczr8jPkjk7jgNOXndmMNrV6QKb0jY=";
+          };
+          cargoHash = "sha256-96lD0Sc2hdhNKeIS4zkiG4J0dxEFt6/Np7HHMSoF8j4=";
+          meta = super.tzupdate.meta;
+        };
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
