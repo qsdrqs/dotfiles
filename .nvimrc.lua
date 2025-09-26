@@ -721,10 +721,17 @@ local plugins = {
           -- set offset encoding
           lsp_common_config.capabilities.offsetEncoding = 'utf-8'
         elseif lsp == "texlab" then
+          local texlab_runtime = vim.api.nvim_get_runtime_file('lsp/texlab.lua', false)[1]
+          local texlab_defaults = dofile(texlab_runtime)
+          local texlab_default_on_attach = texlab_defaults.on_attach
           lsp_common_config.on_attach = function(client, bufnr)
-            common_on_attach(client,bufnr)
-            vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>v', '<cmd>TexlabForward<cr>', { noremap=true, silent=true })
-            vim.api.nvim_buf_set_keymap(bufnr, 'n', '<localleader>b', '<cmd>TexlabBuild<cr>', { noremap=true, silent=true })
+            if texlab_default_on_attach then
+              texlab_default_on_attach(client, bufnr)
+            end
+            common_on_attach(client, bufnr)
+            local map_opts = { buffer = bufnr, noremap = true, silent = true }
+            vim.keymap.set('n', '<localleader>v', '<cmd>LspTexlabForward<cr>', map_opts)
+            vim.keymap.set('n', '<localleader>b', '<cmd>LspTexlabBuild<cr>', map_opts)
           end
           lsp_common_config.settings = {
             texlab = {
@@ -751,7 +758,13 @@ local plugins = {
             }
           }
         elseif lsp == "lua_ls" then
+          local lua_runtime = vim.api.nvim_get_runtime_file('lsp/lua_ls.lua', false)[1]
+          local lua_defaults = dofile(lua_runtime)
+          local lua_default_on_attach = lua_defaults.on_attach
           lsp_common_config.on_attach = function(client, bufnr)
+            if lua_default_on_attach then
+              lua_default_on_attach(client, bufnr)
+            end
             load_plugin("lazydev.nvim")
             common_on_attach(client, bufnr)
           end
@@ -841,7 +854,7 @@ local plugins = {
             }
           }
         end
-        vim.lsp.config[lsp] = lsp_merge_project_config(lsp_common_config)
+        vim.lsp.config(lsp, lsp_merge_project_config(lsp_common_config))
         vim.lsp.enable(lsp)
       end
 
