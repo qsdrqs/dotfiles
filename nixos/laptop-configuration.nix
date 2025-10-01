@@ -12,6 +12,7 @@ in
 {
   environment.systemPackages = with pkgs; [
     wluma
+    powertop
   ];
 
   hardware.firmware = with pkgs; [
