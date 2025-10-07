@@ -733,23 +733,26 @@ local plugins = {
             vim.keymap.set('n', '<localleader>v', '<cmd>LspTexlabForward<cr>', map_opts)
             vim.keymap.set('n', '<localleader>b', '<cmd>LspTexlabBuild<cr>', map_opts)
           end
+          local latexmkrc_exists = vim.fn.filereadable(vim.fn.getcwd() .. "/latexmkrc") == 1
+            or vim.fn.filereadable(vim.fn.getcwd() .. "/.latexmkrc") == 1
+          local args = {}
+          if not latexmkrc_exists then
+            args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" }
+            -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+            -- args = { "-pdflua", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+          end
           lsp_common_config.settings = {
             texlab = {
               -- rootDirectory = vim.fn.getcwd(),
               auxDirectory = "latex.out",
               build = {
                 onSave = true, -- Automatically build latex on save
-                args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
-                -- args = { "-pdfxe", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
-                -- args = { "-pdflua", "-interaction=nonstopmode", "-synctex=1", "%f", "-outdir=latex.out" },
+                useFileList = true, -- use .fls file to determine which files to compile
+                args = args,
               },
               forwardSearch = {
                 executable = "zathura",
-                args = {
-                  '--synctex-forward',
-                  '%l:1:%f',
-                  '%p',
-                },
+                args = { '--synctex-forward', '%l:1:%f', '%p' },
               },
             },
             chktex = {
