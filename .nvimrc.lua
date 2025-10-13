@@ -1681,7 +1681,7 @@ local plugins = {
                   pattern = "DirenvLoaded",
                   callback = function()
                     vim.defer_fn(function()
-                      require('auto-session').RestoreSession()
+                      require('auto-session').restore_session()
                     end, 0)
                   end,
                   once = true,
@@ -2895,7 +2895,7 @@ local plugins = {
     init = function()
       if #vim.fn.argv() == 1 and vim.fn.isdirectory(vim.fn.argv()[1]) == 1 then
         vim.cmd.cd(vim.fn.argv()[1])
-        local res = require('auto-session').RestoreSession()
+        local res = require('auto-session').restore_session()
         -- if res then
         --   vim.cmd("bdelete " .. vim.fn.getcwd())
         -- end
@@ -2907,7 +2907,7 @@ local plugins = {
         and vim.g.remote_ui == nil then
         vim.defer_fn(function() -- execute after function exit (setted up)
           local last_session = require('auto-session').get_latest_session()
-          require('auto-session').RestoreSession(last_session)
+          require('auto-session').restore_session(last_session)
         end, 0)
       end
       require('auto-session').setup {
@@ -2926,7 +2926,7 @@ local plugins = {
         },
       }
       vim.api.nvim_create_user_command("SessionClose", function()
-        require('auto-session').SaveSession()
+        require('auto-session').save_session()
         vim.cmd("Alpha")
       end, { nargs = 0 })
     end
@@ -3385,7 +3385,7 @@ local plugins = {
         if string.find(msg, "auto-session ERROR: Error restoring session", 1, true) then
           vim.cmd("normal! zR")
           vim.notify("Auto session corrupted, restored the old", "info", { title = "Auto Session" })
-          require('auto-session').SaveSession()
+          require('auto-session').save_session()
           return
         end
         local ok, notify = pcall(require, 'notify')

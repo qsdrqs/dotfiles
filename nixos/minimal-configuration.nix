@@ -238,6 +238,7 @@ in
       libraries = with pkgs; [
         stdenv.cc.cc.lib
         glib
+        libGL
       ];
     };
     gnupg.agent.enable = true;
