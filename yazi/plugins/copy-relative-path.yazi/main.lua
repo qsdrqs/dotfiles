@@ -8,8 +8,21 @@ local get_cwd = ya.sync(function(_)
 	return cx.active.current.cwd
 end)
 
-local get_abs_path = ya.sync(function(_)
-	return cx.active.current.hovered.url
+local get_selected_paths = ya.sync(function(_)
+	local selected = {}
+	local active = cx.active
+
+	if active.selected then
+		for _, url in pairs(active.selected) do
+			selected[#selected + 1] = tostring(url)
+		end
+	end
+
+	if #selected == 0 and active.current.hovered then
+		selected[1] = tostring(active.current.hovered.url)
+	end
+
+	return selected
 end)
 
 function M.setup(st, args)
@@ -24,11 +37,8 @@ function string:endswith(suffix)
     return self:sub(-#suffix) == suffix
 end
 
-function M.entry()
-	local cwd = tostring(get_cwd())
-	local root_files = get_root_files()
-	local copy_path = tostring(get_abs_path())
-	local target_cwd = nil
+local function find_target_root(cwd, root_files)
+	local target = nil
 
 	repeat
 		local child, code = Command("ls"):arg({ "-la" }):cwd(cwd):stdout(Command.PIPED):spawn()
@@ -50,8 +60,8 @@ function M.entry()
 			end
 			for _, file in ipairs(root_files) do
 				if string.endswith(line, file) then
-					target_cwd =cwd
-					goto exit
+					target = cwd
+					goto exit_loop
 				end
 			end
 			::continue::
@@ -62,12 +72,39 @@ function M.entry()
 	end
 	until not cwd or cwd == ""
 
-	::exit::
-	if target_cwd then
-		copy_path = copy_path:sub(#target_cwd + 2)
+	::exit_loop::
+
+	return target
+end
+
+function M.entry()
+	ya.manager_emit("escape", { visual = true })
+
+	local cwd = tostring(get_cwd())
+	local root_files = get_root_files()
+	local selected_paths = get_selected_paths()
+
+	if #selected_paths == 0 then
+		return
 	end
 
-	ya.clipboard(copy_path)
+	local target_cwd = find_target_root(cwd, root_files)
+	local results = {}
+
+	for _, path in ipairs(selected_paths) do
+		local relative = path
+
+		if target_cwd and path:sub(1, #target_cwd) == target_cwd then
+			relative = path:sub(#target_cwd + 2)
+			if relative == "" then
+				relative = "."
+			end
+		end
+
+		results[#results + 1] = relative
+	end
+
+	ya.clipboard(table.concat(results, "\n"))
 end
 
 return M

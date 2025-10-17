@@ -3856,7 +3856,7 @@ local plugins = {
       local opts = {
         -- add any opts here
         -- for example
-        provider = "openai",
+        provider = "codex",
         providers = {
           openai = {
             model = "gpt-5",
@@ -3899,7 +3899,30 @@ local plugins = {
           files = {
             add_current = "<localleader>ac",
           },
-        }
+        },
+        acp_providers = {
+          ["gemini-cli"] = {
+            command = "gemini",
+            args = { "--experimental-acp" },
+            env = {
+              NODE_NO_WARNINGS = "1",
+            },
+          },
+          ["claude-code"] = {
+            command = "claude-code-acp",
+            -- args = { "@zed-industries/claude-code-acp" },
+            env = {
+              NODE_NO_WARNINGS = "1",
+            },
+          },
+          ["codex"] = {
+            command = "codex-acp",
+            args = { "--dangerously-bypass-approvals-and-sandbox" },
+            thinking = {
+              type = "disabled",
+            },
+          },
+        },
       }
       require("avante").setup(opts)
 

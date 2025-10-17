@@ -80,9 +80,10 @@ in
         #   else throw "Unsupported system: ${pkgs.system}";
         # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
-        # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         llama-cpp = pkgs-master.llama-cpp;
-        tzupdate = super.rustPlatform.buildRustPackage rec {
+
+        # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+        tzupdate = super.rustPlatform.buildRustPackage {
           pname = "tzupdate";
           version = "unstable-2025-09-02";
           src = super.fetchFromGitHub {
@@ -94,6 +95,13 @@ in
           cargoHash = "sha256-96lD0Sc2hdhNKeIS4zkiG4J0dxEFt6/Np7HHMSoF8j4=";
           meta = super.tzupdate.meta;
         };
+        slack = super.slack.overrideAttrs (oldAttrs: {
+          version = "4.46.101";
+          src = super.fetchurl {
+            url = "https://downloads.slack-edge.com/desktop-releases/linux/x64/4.46.101/slack-desktop-4.46.101-amd64.deb";
+            hash = "sha256-HK8B8aUq6FxYhvffiO/yeKcU0mJ5IgGYYIH3SMFweTU=";
+          };
+        });
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages

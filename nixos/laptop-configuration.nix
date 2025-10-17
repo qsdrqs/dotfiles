@@ -8,6 +8,9 @@ let
     ${pkgs.systemd}/bin/systemctl stop interception-tools-caps2esc.service
     ${pkgs.systemd}/bin/systemctl start interception-tools-ctrl2esc.service
   '';
+  hyprMonitorPower = pkgs.writeShellScriptBin "hypr-monitor-power" ''
+    exec ${pkgs.python3}/bin/python3 ${./scripts/hypr-monitor-power.py}
+  '';
 in
 {
   environment.systemPackages = with pkgs; [
@@ -40,15 +43,30 @@ in
   '';
 
   systemd = {
-    user.services.libinput-gestures = {
-      enable = true;
-      path = [ pkgs.hyprland ];
-      description = "libinput-gestures service";
-      wantedBy = [ "graphical-session.target" ];
-      serviceConfig = {
-        ExecStart = "${pkgs.libinput-gestures}/bin/libinput-gestures";
-        Restart = "on-failure";
-        RestartSec = 5;
+    user.services = {
+      libinput-gestures = {
+        enable = true;
+        path = [ pkgs.hyprland ];
+        description = "libinput-gestures service";
+        wantedBy = [ "graphical-session.target" ];
+        serviceConfig = {
+          ExecStart = "${pkgs.libinput-gestures}/bin/libinput-gestures";
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+      };
+
+      hypr-monitor-power = {
+        enable = true;
+        description = "Toggle Hypr powersave include based on AC/battery state";
+        wantedBy = [ "graphical-session.target" ];
+        after = [ "graphical-session.target" ];
+        path = [ pkgs.hyprland ];
+        serviceConfig = {
+          ExecStart = "${hyprMonitorPower}/bin/hypr-monitor-power";
+          Restart = "always";
+          RestartSec = 5;
+        };
       };
     };
   };

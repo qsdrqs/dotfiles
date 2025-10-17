@@ -22,6 +22,7 @@
     tree-sitter
     act
     inotify-tools
+    pkg-config
 
     # android
     android-file-transfer
