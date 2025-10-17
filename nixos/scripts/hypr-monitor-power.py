@@ -13,7 +13,7 @@ CONFIG_PATH = pathlib.Path.home() / ".config" / "hypr-monitor.conf"
 STATE_PATH = pathlib.Path(
     os.environ.get("XDG_STATE_HOME", pathlib.Path.home() / ".local" / "state")
 ) / "hypr-monitor-power" / "state"
-POLL_SECONDS = float(os.environ.get("HYPR_MONITOR_POWER_INTERVAL", "15"))
+POLL_SECONDS = float(os.environ.get("HYPR_MONITOR_POWER_INTERVAL", "10"))
 
 
 def log(message: str) -> None:
@@ -73,17 +73,6 @@ def load_last_state() -> str:
         return ""
 
 
-def maybe_reload() -> None:
-    if shutil.which("hyprctl") is None:
-        return
-    try:
-        subprocess.run(
-            ["hyprctl", "reload"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-    except OSError:
-        pass
-
-
 def main():
     last_state = load_last_state()
     while True:
@@ -92,7 +81,6 @@ def main():
             update_config(state)
             remember_state(state)
             log(f"Power source changed to {state}; updated {CONFIG_PATH}")
-            maybe_reload()
             last_state = state
         time.sleep(POLL_SECONDS)
 
