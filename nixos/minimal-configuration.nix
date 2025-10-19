@@ -204,7 +204,7 @@ in
     libinput
 
     # perfing
-    config.boot.kernelPackages.perf
+    perf
     strace
     ltrace
 

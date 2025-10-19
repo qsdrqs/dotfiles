@@ -1999,6 +1999,7 @@ local plugins = {
   {
     "DrKJeff16/project.nvim",
     config = function()
+      vim.g.project_lsp_nowarn = 1
       require("project").setup {
         silent_chdir = true,
         manual_mode = false,
@@ -3733,8 +3734,6 @@ local plugins = {
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
       vim.g.copilot_tab_fallback = ""
-
-      vim.keymap.set('i', '<C-e>', require("copilot.suggestion").dismiss, { silent = true})
     end
   },
 
