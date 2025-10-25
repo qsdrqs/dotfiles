@@ -78,6 +78,13 @@ let
     source = inputs.${plugin};
     target = ".tmux/plugins/${plugin}";
   });
+
+  yazi-plugins = pkgs.runCommand "yazi-plugins" { } ''
+    cp -r ${inputs.yazi-plugins} $out
+    chmod -R u+w $out
+    substituteInPlace $out/mime-ext.yazi/main.lua \
+      --replace-fail 'cu = "application/cu-seeme",' 'cu = "text/x-cuda",'
+  '';
 in
 {
   home.file = symbfile [
@@ -172,7 +179,7 @@ in
               '')
               plugins-3rdpty) + lib.strings.concatStrings (map
             (plugin: ''
-              ln -s ${inputs.yazi-plugins}/${plugin}.yazi $out/plugins/${plugin}.yazi
+              ln -s ${yazi-plugins}/${plugin}.yazi $out/plugins/${plugin}.yazi
             '')
             plugins-offical);
       };
