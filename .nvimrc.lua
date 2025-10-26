@@ -1209,7 +1209,7 @@ local plugins = {
     dependencies = {
       'L3MON4D3/LuaSnip',
       "xzbdmw/colorful-menu.nvim",
-      'Kaiser-Yang/blink-cmp-avante',
+      -- 'Kaiser-Yang/blink-cmp-avante',
     },
     version = '1.*',
     config = function()
@@ -1366,9 +1366,9 @@ local plugins = {
             if vim.bo.filetype == 'lua' then
               table.insert(default, 1, 'lazydev')
             end
-            if vim.bo.filetype:find('^Avante') then
-              table.insert(default, 1, 'avante')
-            end
+            -- if vim.bo.filetype:find('^Avante') then
+            --   table.insert(default, 1, 'avante')
+            -- end
             return default
           end,
           providers = {
@@ -1378,13 +1378,13 @@ local plugins = {
               -- make lazydev completions top priority (see `:h blink.cmp`)
               score_offset = 100,
             },
-            avante = {
-              module = 'blink-cmp-avante',
-              name = 'Avante',
-              opts = {
-                -- options for blink-cmp-avante
-              }
-            }
+            -- avante = {
+            --   module = 'blink-cmp-avante',
+            --   name = 'Avante',
+            --   opts = {
+            --     -- options for blink-cmp-avante
+            --   }
+            -- }
           },
           per_filetype = {
             codecompanion = { "codecompanion" },
@@ -3823,141 +3823,218 @@ local plugins = {
   --     })
   --   end
   -- },
+  -- {
+  --   "yetone/avante.nvim",
+  --   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+  --   build = vim.fn.has("win32") ~= 0
+  --   and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
+  --   or "make",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "MunifTanjim/nui.nvim",
+  --     --- The below dependencies are optional,
+  --     "ibhagwan/fzf-lua", -- for file_selector provider fzf
+  --     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+  --     "zbirenbaum/copilot.lua", -- for providers='copilot'
+  --     'MeanderingProgrammer/render-markdown.nvim',
+  --   },
+  --   cmd = {
+  --     "AvanteAsk",
+  --     "AvanteEdit",
+  --     "AvanteRefresh",
+  --     "AvanteFocus",
+  --     "AvanteToggle",
+  --     "AvanteFilesAddCurrent",
+  --   },
+  --   keys = {
+  --     {"<localleader>aa", mode = {'n', 'v'}},
+  --     {"<localleader>ae", mode = {'n', 'v'}},
+  --     {"<localleader>af", mode = {'n', 'v'}},
+  --   },
+  --   config = function()
+  --     local opts = {
+  --       -- add any opts here
+  --       -- for example
+  --       provider = "codex",
+  --       providers = {
+  --         openai = {
+  --           model = "gpt-5",
+  --           timeout = 30000, -- Timeout in milliseconds
+  --           extra_request_body = {
+  --             temperature = 1,
+  --           },
+  --         },
+  --         claude = {
+  --           endpoint = "https://api.anthropic.com",
+  --           model = "claude-sonnet-4-20250514",
+  --           timeout = 30000, -- Timeout in milliseconds
+  --           extra_request_body = {
+  --             temperature = 0.75,
+  --             max_tokens = 20480,
+  --           },
+  --         },
+  --         deepseek = {
+  --           __inherited_from = "openai",
+  --           api_key_name = "DEEPSEEK_API_KEY",
+  --           endpoint = "https://api.deepseek.com",
+  --           model = "deepseek-chat",
+  --         },
+  --       },
+  --       hints = {
+  --         enabled = false,
+  --       },
+  --       mappings = {
+  --         ask = "<localleader>aa",
+  --         edit = "<localleader>ae",
+  --         refresh = "<localleader>ar",
+  --         focus = "<localleader>af",
+  --         toggle = {
+  --           default = "<localleader>at",
+  --           debug = "<localleader>ad",
+  --           hint = "<localleader>ah",
+  --           suggestion = "<localleader>as",
+  --           repomap = "<localleader>aR",
+  --         },
+  --         files = {
+  --           add_current = "<localleader>ac",
+  --         },
+  --       },
+  --       acp_providers = {
+  --         ["gemini-cli"] = {
+  --           command = "gemini",
+  --           args = { "--experimental-acp" },
+  --           env = {
+  --             NODE_NO_WARNINGS = "1",
+  --           },
+  --         },
+  --         ["claude-code"] = {
+  --           command = "claude-code-acp",
+  --           -- args = { "@zed-industries/claude-code-acp" },
+  --           env = {
+  --             NODE_NO_WARNINGS = "1",
+  --           },
+  --         },
+  --         ["codex"] = {
+  --           command = "codex-acp",
+  --           args = { "--dangerously-bypass-approvals-and-sandbox" },
+  --           thinking = {
+  --             type = "disabled",
+  --           },
+  --         },
+  --       },
+  --     }
+  --     require("avante").setup(opts)
+  --
+  --     -- set keymaps
+  --     local avante_api = require("avante.api")
+  --     vim.keymap.set({'n', 'v'}, '<localleader>aa', function() avante_api.ask() end, { silent = true })
+  --     vim.keymap.set({'n', 'v'}, '<localleader>ae', function() avante_api.edit() end, { silent = true })
+  --     vim.keymap.set({'n', 'v'}, '<localleader>af', function() avante_api.focus() end, { silent = true })
+  --
+  --     -- press `D` to remove all todos
+  --     vim.api.nvim_create_autocmd('FileType', {
+  --       pattern = 'AvanteTodos',
+  --       callback = function(ctx)
+  --         vim.keymap.set('n', 'D', function()
+  --           require('avante').get():update_todos {}
+  --         end, { buffer = ctx.buf })
+  --       end,
+  --     })
+  --
+  --     -- press `D` to remove selected code
+  --     vim.api.nvim_create_autocmd('FileType', {
+  --       pattern = 'AvanteSelectedCode',
+  --       callback = function(ctx)
+  --         vim.keymap.set('n', 'D', function()
+  --           local sidebar = require('avante').get()
+  --           sidebar.code.selection = nil
+  --           sidebar.containers.selected_code:unmount()
+  --           sidebar.containers.selected_code = nil
+  --         end, { buffer = ctx.buf })
+  --       end,
+  --     })
+  --   end
+  -- },
   {
-    "yetone/avante.nvim",
-    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-    build = vim.fn.has("win32") ~= 0
-    and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
-    or "make",
+    "folke/sidekick.nvim",
     dependencies = {
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-      --- The below dependencies are optional,
-      "ibhagwan/fzf-lua", -- for file_selector provider fzf
-      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-      "zbirenbaum/copilot.lua", -- for providers='copilot'
-      'MeanderingProgrammer/render-markdown.nvim',
+      'zbirenbaum/copilot.lua'
     },
-    cmd = {
-      "AvanteAsk",
-      "AvanteEdit",
-      "AvanteRefresh",
-      "AvanteFocus",
-      "AvanteToggle",
-      "AvanteFilesAddCurrent",
+    opts = {
+      -- add any options here
+      cli = {
+        mux = {
+          backend = "tmux",
+          enabled = true,
+        },
+         prompts = {
+          commit = "Based on the current changes in this Git repository and the commit history, generate a descriptive git commit message that matches the style of previous commits."
+        }
+      },
     },
     keys = {
-      {"<localleader>aa", mode = {'n', 'v'}},
-      {"<localleader>ae", mode = {'n', 'v'}},
-      {"<localleader>af", mode = {'n', 'v'}},
+      {
+        "<tab>",
+        function()
+          -- if there is a next edit, jump to it, otherwise apply it if any
+          if not require("sidekick").nes_jump_or_apply() then
+            return "<Tab>" -- fallback to normal tab
+          end
+        end,
+        expr = true,
+        desc = "Goto/Apply Next Edit Suggestion",
+      },
+      {
+        "<c-.>",
+        function() require("sidekick.cli").toggle() end,
+        desc = "Sidekick Toggle",
+        mode = { "n", "t", "i", "x" },
+      },
+      {
+        "<localleader>aa",
+        function() require("sidekick.cli").send({ msg = "{file}" }) end,
+        desc = "Send File",
+        mode = { "n", "t", "i" },
+      },
+      {
+        "<localleader>as",
+        function() require("sidekick.cli").select({ filter = { installed = true } }) end,
+        desc = "Select CLI",
+      },
+      {
+        "<localleader>ad",
+        function() require("sidekick.cli").close() end,
+        desc = "Detach a CLI Session",
+      },
+      {
+        "<localleader>at",
+        function() require("sidekick.cli").send({ msg = "{this}" }) end,
+        mode = { "x", "n" },
+        desc = "Send This",
+      },
+      {
+        "<localleader>aa",
+        function() require("sidekick.cli").send({ msg = "{selection}" }) end,
+        mode = { "x" },
+        desc = "Send Visual Selection",
+      },
+      {
+        "<localleader>ap",
+        function() require("sidekick.cli").prompt() end,
+        mode = { "n", "x" },
+        desc = "Sidekick Select Prompt",
+      },
+      -- Example of a keybinding to open codex directly
+      {
+        "<localleader>ac",
+        function() require("sidekick.cli").toggle({ name = "codex", focus = true }) end,
+        desc = "Sidekick Toggle Codex",
+      },
     },
-    config = function()
-      local opts = {
-        -- add any opts here
-        -- for example
-        provider = "codex",
-        providers = {
-          openai = {
-            model = "gpt-5",
-            timeout = 30000, -- Timeout in milliseconds
-            extra_request_body = {
-              temperature = 1,
-            },
-          },
-          claude = {
-            endpoint = "https://api.anthropic.com",
-            model = "claude-sonnet-4-20250514",
-            timeout = 30000, -- Timeout in milliseconds
-            extra_request_body = {
-              temperature = 0.75,
-              max_tokens = 20480,
-            },
-          },
-          deepseek = {
-            __inherited_from = "openai",
-            api_key_name = "DEEPSEEK_API_KEY",
-            endpoint = "https://api.deepseek.com",
-            model = "deepseek-chat",
-          },
-        },
-        hints = {
-          enabled = false,
-        },
-        mappings = {
-          ask = "<localleader>aa",
-          edit = "<localleader>ae",
-          refresh = "<localleader>ar",
-          focus = "<localleader>af",
-          toggle = {
-            default = "<localleader>at",
-            debug = "<localleader>ad",
-            hint = "<localleader>ah",
-            suggestion = "<localleader>as",
-            repomap = "<localleader>aR",
-          },
-          files = {
-            add_current = "<localleader>ac",
-          },
-        },
-        acp_providers = {
-          ["gemini-cli"] = {
-            command = "gemini",
-            args = { "--experimental-acp" },
-            env = {
-              NODE_NO_WARNINGS = "1",
-            },
-          },
-          ["claude-code"] = {
-            command = "claude-code-acp",
-            -- args = { "@zed-industries/claude-code-acp" },
-            env = {
-              NODE_NO_WARNINGS = "1",
-            },
-          },
-          ["codex"] = {
-            command = "codex-acp",
-            args = { "--dangerously-bypass-approvals-and-sandbox" },
-            thinking = {
-              type = "disabled",
-            },
-          },
-        },
-      }
-      require("avante").setup(opts)
-
-      -- set keymaps
-      local avante_api = require("avante.api")
-      vim.keymap.set({'n', 'v'}, '<localleader>aa', function() avante_api.ask() end, { silent = true })
-      vim.keymap.set({'n', 'v'}, '<localleader>ae', function() avante_api.edit() end, { silent = true })
-      vim.keymap.set({'n', 'v'}, '<localleader>af', function() avante_api.focus() end, { silent = true })
-
-      -- press `D` to remove all todos
-      vim.api.nvim_create_autocmd('FileType', {
-        pattern = 'AvanteTodos',
-        callback = function(ctx)
-          vim.keymap.set('n', 'D', function()
-            require('avante').get():update_todos {}
-          end, { buffer = ctx.buf })
-        end,
-      })
-
-      -- press `D` to remove selected code
-      vim.api.nvim_create_autocmd('FileType', {
-        pattern = 'AvanteSelectedCode',
-        callback = function(ctx)
-          vim.keymap.set('n', 'D', function()
-            local sidebar = require('avante').get()
-            sidebar.code.selection = nil
-            sidebar.containers.selected_code:unmount()
-            sidebar.containers.selected_code = nil
-          end, { buffer = ctx.buf })
-        end,
-      })
-    end
   },
-  {
-    "Kaiser-Yang/blink-cmp-avante",
-  },
+  -- {
+  --   "Kaiser-Yang/blink-cmp-avante",
+  -- },
   {
     "coder/claudecode.nvim",
     cmd = {
@@ -4022,7 +4099,7 @@ local plugins = {
   {
     'GustavoKatel/telescope-asynctasks.nvim',
     lazy = true,
-    keys = {"<leader>at", "<leader>ae"},
+    keys = {"<localleader>at", "<leader>ae"},
     cmd = "AsyncTaskTelescope",
     config = function()
       load_plugins({'asynctasks.vim', 'asyncrun.vim'})
@@ -4747,6 +4824,16 @@ function LazyLoadPlugins()
       load_plugins {
         'blink.cmp',
         'copilot.lua',
+      }
+      vim.b.copilot_suggestion_hidden = false
+    end,
+    once = true
+  })
+
+  vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
+    callback = function()
+      load_plugins {
+        'sidekick.nvim',
       }
       vim.b.copilot_suggestion_hidden = false
     end,

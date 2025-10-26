@@ -108,10 +108,6 @@
       url = "github:L3MON4D3/LuaSnip";
       flake = false;
     };
-    blink-cmp-avante = {
-      url = "github:Kaiser-Yang/blink-cmp-avante";
-      flake = false;
-    };
     blinkDOTcmp = {
       url = "github:saghen/blink.cmp/v1.7.0";
       flake = false;
@@ -384,12 +380,8 @@
       url = "github:MeanderingProgrammer/render-markdown.nvim";
       flake = false;
     };
-    nuiDOTnvim = {
-      url = "github:MunifTanjim/nui.nvim";
-      flake = false;
-    };
-    avanteDOTnvim = {
-      url = "github:yetone/avante.nvim";
+    sidekickDOTnvim = {
+      url = "github:folke/sidekick.nvim";
       flake = false;
     };
     snacksDOTnvim = {
@@ -510,7 +502,6 @@
         { name = "lsp_signature.nvim"; dotname = "lsp_signatureDOTnvim"; source = inputs.lsp_signatureDOTnvim; build = false; }
         { name = "colorful-menu.nvim"; dotname = "colorful-menuDOTnvim"; source = inputs.colorful-menuDOTnvim; build = false; }
         { name = "LuaSnip"; dotname = "LuaSnip"; source = inputs.LuaSnip; build = false; }
-        { name = "blink-cmp-avante"; dotname = "blink-cmp-avante"; source = inputs.blink-cmp-avante; build = false; }
         { name = "blink.cmp"; dotname = "blinkDOTcmp"; source = inputs.blinkDOTcmp; build = false; }
         { name = "blink.compat"; dotname = "blinkDOTcompat"; source = inputs.blinkDOTcompat; build = false; }
         { name = "promise-async"; dotname = "promise-async"; source = inputs.promise-async; build = false; }
@@ -579,8 +570,7 @@
         { name = "friendly-snippets"; dotname = "friendly-snippets"; source = inputs.friendly-snippets; build = false; }
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
         { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
-        { name = "nui.nvim"; dotname = "nuiDOTnvim"; source = inputs.nuiDOTnvim; build = false; }
-        { name = "avante.nvim"; dotname = "avanteDOTnvim"; source = inputs.avanteDOTnvim; build = true; }
+        { name = "sidekick.nvim"; dotname = "sidekickDOTnvim"; source = inputs.sidekickDOTnvim; build = false; }
         { name = "snacks.nvim"; dotname = "snacksDOTnvim"; source = inputs.snacksDOTnvim; build = false; }
         { name = "claudecode.nvim"; dotname = "claudecodeDOTnvim"; source = inputs.claudecodeDOTnvim; build = false; }
         { name = "mini.diff"; dotname = "miniDOTdiff"; source = inputs.miniDOTdiff; build = false; }

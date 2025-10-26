@@ -209,38 +209,6 @@
         "type": "github"
       }
     },
-    "avanteDOTnvim": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1761460697,
-        "narHash": "sha256-5kyttSOLDX1M0rC+9mhW4dD2U/0ry9bKBqkJBE+m3tQ=",
-        "owner": "yetone",
-        "repo": "avante.nvim",
-        "rev": "7e9f7b57de46534a9113980ec950a2b05eb8861f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "yetone",
-        "repo": "avante.nvim",
-        "type": "github"
-      }
-    },
-    "blink-cmp-avante": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1753324560,
-        "narHash": "sha256-tozXOgP0dzIFd3a6mjGehUdytqerkWdfOo89CEVC/Rk=",
-        "owner": "Kaiser-Yang",
-        "repo": "blink-cmp-avante",
-        "rev": "4f494c6e124acbe31a8f5d58effa0c14aa38a6d5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Kaiser-Yang",
-        "repo": "blink-cmp-avante",
-        "type": "github"
-      }
-    },
     "blinkDOTcmp": {
       "flake": false,
       "locked": {
@@ -1882,22 +1850,6 @@
         "type": "github"
       }
     },
-    "nuiDOTnvim": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1749392788,
-        "narHash": "sha256-41slmnvt1z7sCxvpiVuFmQ9g7eCaxQi1dDCL3AxSL1A=",
-        "owner": "MunifTanjim",
-        "repo": "nui.nvim",
-        "rev": "de740991c12411b663994b2860f1a4fd0937c130",
-        "type": "github"
-      },
-      "original": {
-        "owner": "MunifTanjim",
-        "repo": "nui.nvim",
-        "type": "github"
-      }
-    },
     "nur": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1978,8 +1930,6 @@
         "asynctasksDOTvim": "asynctasksDOTvim",
         "auto-saveDOTnvim": "auto-saveDOTnvim",
         "auto-session": "auto-session",
-        "avanteDOTnvim": "avanteDOTnvim",
-        "blink-cmp-avante": "blink-cmp-avante",
         "blinkDOTcmp": "blinkDOTcmp",
         "blinkDOTcompat": "blinkDOTcompat",
         "bufdeleteDOTnvim": "bufdeleteDOTnvim",
@@ -2023,7 +1973,6 @@
         "neovim": "neovim",
         "none-ls-extrasDOTnvim": "none-ls-extrasDOTnvim",
         "none-lsDOTnvim": "none-lsDOTnvim",
-        "nuiDOTnvim": "nuiDOTnvim",
         "nvim-autopairs": "nvim-autopairs",
         "nvim-bqf": "nvim-bqf",
         "nvim-colorizerDOTlua": "nvim-colorizerDOTlua",
@@ -2058,6 +2007,7 @@
         "rnvimr": "rnvimr",
         "rustaceanvim": "rustaceanvim",
         "satelliteDOTnvim": "satelliteDOTnvim",
+        "sidekickDOTnvim": "sidekickDOTnvim",
         "sigsegvim": "sigsegvim",
         "snacksDOTnvim": "snacksDOTnvim",
         "statuscolDOTnvim": "statuscolDOTnvim",
@@ -2830,6 +2780,22 @@
       "original": {
         "owner": "lewis6991",
         "repo": "satellite.nvim",
+        "type": "github"
+      }
+    },
+    "sidekickDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1761292665,
+        "narHash": "sha256-70md0tZN4zgRT82lIBWLMvY9q/pNqlu3TzRzerTI8UY=",
+        "owner": "folke",
+        "repo": "sidekick.nvim",
+        "rev": "bd1f79a506b7447d44873f78ffc0de7ea232bc88",
+        "type": "github"
+      },
+      "original": {
+        "owner": "folke",
+        "repo": "sidekick.nvim",
         "type": "github"
       }
     },
