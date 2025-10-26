@@ -94,6 +94,10 @@
   background: @noti-bg-hover;
 }
 
+.notification-row .notification-background .notification .notification-action label {
+  color: @text-color;
+}
+
 .notification-row .notification-background .notification .notification-default-action {
   /* The large action that also displays the notification summary and body */
   border-radius: 12px;
