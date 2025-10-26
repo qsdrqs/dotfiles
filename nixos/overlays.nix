@@ -105,6 +105,9 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
+        qt6Packages = super.qt6Packages // {
+          fcitx5-with-addons = pkgs-last.fcitx5-with-addons;
+        };
         # End Temporary fixed version packages
 
         # neovim-unwrapped =

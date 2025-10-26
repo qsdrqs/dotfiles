@@ -95,11 +95,9 @@ in
 
   programs.git = {
     enable = true;
-    userName = "qsdrqs";
-    userEmail = "qsdrqs@gmail.com";
-    signing.key = "E2D709340CE26E78";
-    signing.signByDefault = true;
-    extraConfig = {
+    settings = {
+      user.email = "qsdrqs@gmail.com";
+      user.name = "qsdrqs";
       core = {
         editor = "$EDITOR";
         pager = "cat";
@@ -111,6 +109,8 @@ in
         rebase = true;
       };
     };
+    signing.key = "E2D709340CE26E78";
+    signing.signByDefault = true;
   };
 
   # provide org.freedesktop.secrets
