@@ -1,6 +1,33 @@
 --- @sync entry
 local M = {}
 
+local CACHE_TTL = 3 -- seconds
+
+local Cache = { ttl = tonumber(os.getenv("YAZI_GITSTATUS_CACHE_TTL")) or CACHE_TTL }
+local Scanner = {}
+
+local function refresh_linemode(st)
+	Linemode.file_gitstatus = function(self, file)
+		local url = tostring(file.url)
+		if st.git_roots_curr then
+			local state = st.git_roots_curr[url]
+			if state == "clean" then
+				return "󰊢:clean"
+			elseif state == "dirty" then
+				return "󰊢:dirty"
+			end
+		end
+		if st.tracked then
+			local file_tracked = st.tracked[url]
+			if file_tracked ~= nil then
+				return file_tracked
+			end
+		end
+		return " "
+	end
+	ya.render()
+end
+
 local debug_table = function(table)
 	for k, v in pairs(table) do
 		ya.err(tostring(k) .. " " .. tostring(v))
@@ -19,7 +46,7 @@ local clean_up_all = ya.sync(function(st)
 	st.git_roots_curr = {}
 	st.tracked = {}
 	st.status = {}
-	ya.render()
+	refresh_linemode(st)
 end)
 
 local get_git_roots = ya.sync(function(st, sub)
@@ -51,53 +78,121 @@ local update_tracked = ya.sync(function(st, git_root, tracked)
 		st.tracked = {}
 	end
 	for url, type in pairs(tracked) do
-		if st.tracked[tostring(url)] == nil or st.tracked[tostring(url)] == "✓" then
-			st.tracked[tostring(url)] = type
-		end
+		local key = tostring(url)
+		st.tracked[key] = type
 	end
-	Linemode.file_gitstatus = function(self, file)
-		local file_tracked = st.tracked[tostring(file.url)]
-		if file_tracked == nil then
-			return " "
-		end
-		return file_tracked
-	end
-	ya.render()
 end)
 
 local update_git_roots_curr = ya.sync(function(st, git_roots_curr)
-	if not st.git_roots_curr then
-		st.git_roots_curr = {}
-	end
-	for git_root, _ in pairs(git_roots_curr) do
-		st.git_roots_curr[git_root] = true
-	end
-	Linemode.file_gitstatus = function(self, file)
-		if st.git_roots_curr[tostring(file.url)] then
-			return "󰊢"
+	st.git_roots_curr = st.git_roots_curr or {}
+	for git_root, state in pairs(git_roots_curr) do
+		if state == false then
+			st.git_roots_curr[git_root] = nil
+		else
+			if state ~= "clean" and state ~= "dirty" then
+				state = "dirty"
+			end
+			st.git_roots_curr[git_root] = state
 		end
-		return " "
 	end
-	ya.render()
+	refresh_linemode(st)
 end)
 
-local update_status = ya.sync(function(st, git_root, status, dir_status)
+local update_status = ya.sync(function(st, git_root, status, dir_status, state, checked_at)
 	if not st.status then
 		st.status = {}
 	end
 	st.status[git_root] = {
 		status = status,
 		dir_status = dir_status,
+		state = state,
+		checked_at = checked_at or os.time(),
 	}
 end)
 
 local get_status = ya.sync(function(st, git_root)
-	if st.status and st.status[git_root] then
-		return st.status[git_root].status, st.status[git_root].dir_status
+	if st.status then
+		return st.status[git_root]
 	end
 end)
 
-local parse_git_status = function(git_status_line)
+function Cache.peek(root)
+	return get_status(root)
+end
+
+function Cache.is_fresh(entry, now)
+	if not entry or entry.state ~= "clean" then
+		return false
+	end
+	local checked_at = entry.checked_at
+	if not checked_at then
+		return false
+	end
+	now = now or os.time()
+	return (now - checked_at) <= Cache.ttl
+end
+
+function Cache.store(root, status, dir_status, state, now)
+	update_status(root, status, dir_status, state, now)
+	return get_status(root)
+end
+
+local PlaceholderView = {}
+PlaceholderView.__index = PlaceholderView
+
+function PlaceholderView.new()
+	return setmetatable({
+		state_map = {},
+		pending = {},
+	}, PlaceholderView)
+end
+
+function PlaceholderView:add(root, state, mark_pending)
+	local icon_state = state or "clean"
+	self.state_map[root] = icon_state
+	if mark_pending then
+		self.pending[root] = true
+	else
+		self.pending[root] = nil
+	end
+	update_git_roots_curr({ [root] = icon_state })
+end
+
+function PlaceholderView:pending_count()
+	return next(self.pending) ~= nil
+end
+
+function PlaceholderView:update(root, state)
+	if not state then
+		return
+	end
+	self.state_map[root] = state
+	self.pending[root] = nil
+	update_git_roots_curr({ [root] = state })
+end
+
+function PlaceholderView:resolve(resolver, skip_root)
+	if not next(self.pending) then
+		return
+	end
+	local updates = {}
+	for root, _ in pairs(self.pending) do
+		if root ~= skip_root then
+			local state = resolver(root)
+			if state then
+				self.state_map[root] = state
+				updates[root] = state
+			end
+		end
+		self.pending[root] = nil
+	end
+	self.pending = {}
+	if next(updates) then
+		update_git_roots_curr(updates)
+	end
+end
+
+function Scanner.parse_line(git_status_line)
 	local type, update_git_root = nil, false
 	local status_code = git_status_line:sub(1, 2)
 	local status_translations = {
@@ -145,7 +240,7 @@ local parse_git_status = function(git_status_line)
 	return type, update_git_root, trimed_next
 end
 
-local get_git_status = function(git_root)
+function Scanner.collect(git_root)
 	local tracked = {}
 	-- check tracked files
 	local child, code = Command("git"):arg({ "status", "--ignored", "--short" }):cwd(git_root):stdout(Command.PIPED)
@@ -167,11 +262,18 @@ local get_git_status = function(git_root)
 
 		local trimed_next = next:match("^(.*)\n$")
 		-- if match "^!! ", it is ignored file
-		local type, update_git_root = parse_git_status(trimed_next)
+		local type, update_git_root = Scanner.parse_line(trimed_next)
 		if update_git_root then
 			ya.err("update" .. trimed_next)
 		end
 		trimed_next = trimed_next:sub(4)
+		local renamed_from, renamed_to = trimed_next:match("^(.-)%s+%-%>%s+(.+)$")
+		if renamed_from and renamed_to then
+			trimed_next = renamed_to
+		end
+		if trimed_next:sub(1, 1) == '"' and trimed_next:sub(-1) == '"' then
+			trimed_next = trimed_next:sub(2, -2)
+		end
 		-- if trimed_next ends with /, it is a directory
 		if trimed_next:match("/$") then
 			trimed_next = trimed_next:sub(1, -2) -- remove last /
@@ -204,6 +306,38 @@ local get_git_status = function(git_root)
 	end
 
 	return tracked, dir_tracked
+end
+
+function Scanner.compute_state(git_status, dir_git_status)
+	local has_changes = false
+	for _, v in pairs(git_status) do
+		if v ~= "·" and v ~= " " then
+			has_changes = true
+			break
+		end
+	end
+	if not has_changes then
+		for _, _ in pairs(dir_git_status) do
+			has_changes = true
+			break
+		end
+	end
+
+	return has_changes and "dirty" or "clean"
+end
+
+
+local repo_state_for = function(git_root)
+	local now = os.time()
+	local cached = Cache.peek(git_root)
+	if Cache.is_fresh(cached, now) then
+		return cached.state, cached.status, cached.dir_status
+	end
+
+	local git_status, dir_git_status = Scanner.collect(git_root)
+	local state = Scanner.compute_state(git_status, dir_git_status)
+	Cache.store(git_root, git_status, dir_git_status, state, now)
+	return state, git_status, dir_git_status
 end
 
 local get_git_root = function(url)
@@ -249,20 +383,35 @@ function M:fetch(job)
 	if #job.files == 0 then
 		return 3
 	end
-	local git_roots_curr = {}
+	local view = PlaceholderView.new()
+
+	local function register_repo(path)
+		local cached = Cache.peek(path)
+		local cached_state = cached and cached.state or nil
+		view:add(path, cached_state, cached_state == nil)
+		return cached_state
+	end
+
+	local function resolve_state(path)
+		local state = repo_state_for(path)
+		return state
+	end
+
 	local ls_flag = false
 	for _, file in ipairs(job.files) do
 		if file.cha.is_dir then
 			local sub_url = tostring(file.url)
 			local git_roots = get_git_roots(true)
 			if git_roots[sub_url] then
-				git_roots_curr[sub_url] = true
+				if not view.state_map[sub_url] then
+					register_repo(sub_url)
+				end
 				goto continue
 			end
 		end
 		::continue::
 	end
-	if next(git_roots_curr) ~= nil then
+	if next(view.state_map) ~= nil then
 		-- current directory is not in git repository
 		ls_flag = true
 	end
@@ -288,12 +437,12 @@ function M:fetch(job)
 		for _, file in ipairs(job.files) do
 			if file.cha.is_dir then
 				local sub_url = tostring(file.url)
-				if git_roots_curr[sub_url] then
+				if view.state_map[sub_url] then
 					goto continue
 				end
 				local git_roots = get_git_roots(false)
 				if git_roots[sub_url] then
-					git_roots_curr[sub_url] = true
+					register_repo(sub_url)
 					goto continue
 				end
 				-- use ls -d to check if it is a git repository
@@ -312,22 +461,30 @@ function M:fetch(job)
 			if sub_event == 0 then
 				-- subdirectory is in git repository
 				update_git_roots(sub_url, true)
-				git_roots_curr[sub_url] = true
+				register_repo(sub_url)
 			end
 		end
 
-		update_git_roots_curr(git_roots_curr)
+		view:resolve(resolve_state)
 
 		return 3
 	end
 
-	local git_status, dir_git_status = get_status(git_root)
-	if git_status == nil then
-		git_status, dir_git_status = get_git_status(git_root)
-		update_status(git_root, git_status, dir_git_status)
+	local cached_root = Cache.peek(git_root)
+	if cached_root and cached_root.state then
+		view:add(git_root, cached_root.state, false)
+	else
+		view:add(git_root, nil, true)
 	end
 
-	if dir_git_status == nil then
+	local state, git_status, dir_git_status = repo_state_for(git_root)
+	if state then
+		view:update(git_root, state)
+	end
+
+	view:resolve(resolve_state, git_root)
+
+	if not git_status or not dir_git_status then
 		ya.err("dir_git_status is nil")
 		return 2
 	end
@@ -335,7 +492,7 @@ function M:fetch(job)
 	local update_track = {}
 	for _, file in ipairs(job.files) do
 		local url = tostring(file.url)
-		if url ~= nil and url:match(".git$") then
+		if url ~= nil and url:match("/%.git$") then
 			update_track[url] = " "
 			goto continue
 		end

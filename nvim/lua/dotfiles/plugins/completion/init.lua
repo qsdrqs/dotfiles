@@ -450,15 +450,15 @@ function M.setup(ctx)
           desc = "Detach a CLI Session",
         },
         {
-          "<localleader>at",
+          "<localleader>aa",
           function()
             require("sidekick.cli").send({ msg = "{this}" })
           end,
-          mode = { "x", "n" },
+          mode = { "x" },
           desc = "Send This",
         },
         {
-          "<localleader>aa",
+          "<localleader>av",
           function()
             require("sidekick.cli").send({ msg = "{selection}" })
           end,

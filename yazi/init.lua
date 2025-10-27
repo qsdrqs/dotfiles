@@ -4,7 +4,8 @@ local gitstatus_check = { fg = "green" }
 local gitstatus_star = { fg = "green" }
 local gitstatus_plus = { fg = "red" }
 local gitstatus_minus = { fg = "red" }
-local gitstatus_git = { fg = "yellow" }
+local gitstatus_git_dirty = { fg = "yellow" }
+local gitstatus_git_clean = { fg = "green" }
 local gitstatus_question = { fg = "cyan" }
 local gitstatus_conflict = { fg = "magenta" }
 
@@ -105,17 +106,35 @@ function Linemode:gitstatus()
 		['?'] = gitstatus_question,
 		['✓'] = gitstatus_check,
 		['X'] = gitstatus_conflict,
-		['󰊢'] = gitstatus_git,
+		['󰊢'] = gitstatus_git_dirty,
+		['󰊢:dirty'] = gitstatus_git_dirty,
+		['󰊢:clean'] = gitstatus_git_clean,
 	}
-	if gitstatus then
-		if f.is_hovered then
-			return ui.Line(gitstatus)
-		elseif status_color_tbl[gitstatus] then
-			return ui.Line(gitstatus):style(status_color_tbl[gitstatus])
-		else
-			return ui.Line(gitstatus)
+
+	if not gitstatus then
+		return
+	end
+
+	local display = gitstatus
+	local color_key = gitstatus
+	if type(gitstatus) == "string" then
+		local icon, state = gitstatus:match("^(.-):([%w_]+)$")
+		if icon and state and icon ~= "" then
+			display = icon
+			color_key = gitstatus
 		end
 	end
+
+	if f.is_hovered then
+		return ui.Line(display)
+	end
+
+	local style = status_color_tbl[color_key]
+	if style then
+		return ui.Line(display):style(style)
+	end
+
+	return ui.Line(display)
 end
 
 Linemode:children_add(Linemode.gitstatus, 2000)
