@@ -2,7 +2,7 @@ local i = require("dotfiles.luasnip.util")
 local M = {
   i.s(
     {
-      trig = [[CALC%s+([^\n]-)%s+CALC$]],
+      trig = [[CALC%s+([^\n]-)%s+CALC]],
       regTrig = true,
       wordTrig = false,
     },
