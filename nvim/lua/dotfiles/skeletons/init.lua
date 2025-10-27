@@ -5,14 +5,7 @@ local snipmate_parse_fn = require("luasnip.util.parser").parse_snipmate
 local insert = function(skeleton)
   local skeleton_content = vim.fn.readfile(skeleton)
   local joined_skeleton_content = table.concat(skeleton_content, "\n")
-  ls.snip_expand(
-    snipmate_parse_fn(
-      "",
-      joined_skeleton_content,
-      { trim_empty = false, dedent = false }
-    ),
-    {}
-  )
+  ls.snip_expand(snipmate_parse_fn("", joined_skeleton_content, { trim_empty = false, dedent = false }), {})
 end
 
 local insert_luasnip = function(skeleton_lua)
@@ -67,4 +60,3 @@ M.insert_skeleton = function(opts)
 end
 
 return M
-

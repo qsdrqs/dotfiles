@@ -13,3 +13,4 @@ __pycache__
 custom.nix
 home-custom.nix
 nixos/custom
+AGENTS.md

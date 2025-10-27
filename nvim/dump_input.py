@@ -58,25 +58,58 @@ def get_repo_versions(owner, repo):
 
 def main():
     dotfiles_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    cmd = f'nvim --clean --headless \
-        --cmd "let g:plugins_loaded=1 | let g:no_wait_headless = 1" \
-        -c \'lua DumpPluginsList(); vim.cmd("q")\' \
-        -u {dotfiles_dir}/.nvimrc.lua'
-    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cmd = [
+        "nvim",
+        "--clean",
+        "--headless",
+        "--cmd",
+        "let g:plugins_loaded=1 | let g:no_wait_headless = 1",
+        "-c",
+        'lua DumpPluginsList(); vim.cmd("q")',
+        "-u",
+        f"{dotfiles_dir}/.nvimrc.lua",
+    ]
+    env = os.environ.copy()
+    env["LUA_PATH"] = (
+        f"{dotfiles_dir}/nvim/lua/?.lua;"
+        f"{dotfiles_dir}/nvim/lua/?/init.lua;;"
+    )
+    result = subprocess.run(
+        cmd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
 
     plugins: list[str] = []
-    for line in result.stderr.decode('utf-8').split("\r\n\r\n"):
-        if line != '\r\n' and line != '':
-            # remove the '\r\n' and the empty line
-            line = line.replace('\r\n', '')
-            plugins.append(line)
+    raw_output = result.stdout if result.stdout.strip() else result.stderr
+    output = raw_output.replace("\r\n", "\n")
+    for line in output.split("\n\n"):
+        line = line.strip()
+        if not line:
+            continue
+        plugins.append(line)
 
     plugins_dict = {}
     for plugin in plugins:
         tmp = plugin.split()
         plugin = tmp[0]
-        opts = ' '.join(tmp[1:])
-        json_opts = json.loads(opts)
+        opts = ' '.join(tmp[1:]) if len(tmp) > 1 else "{}"
+        try:
+            json_opts = json.loads(opts)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"Failed to parse plugin options for {plugin}: {opts}") from exc
+
+        if isinstance(json_opts, list):
+            json_opts = {}
+
+        dependencies = json_opts.get("dependencies")
+        if isinstance(dependencies, str):
+            json_opts["dependencies"] = [dependencies]
+        elif isinstance(dependencies, dict):
+            json_opts["dependencies"] = [dependencies]
 
         # check dependency
         if 'dependencies' in json_opts:
@@ -160,7 +193,9 @@ def main():
                 'build': need_build,
             }
 
-    with open('flake.nix', 'w') as f:
+    nvim_dir = os.path.dirname(os.path.realpath(__file__))
+    output_path = os.path.join(nvim_dir, "flake.nix")
+    with open(output_path, 'w') as f:
         plugin_lines = ';'.join(f'''
     {k} = {{
       url = "{v['url']}";
@@ -186,8 +221,7 @@ def main():
       inherit self inputs;
     }};
 }}''')
-
-
+    print(f"Plugin list written to {output_path}")
 
 if __name__ == '__main__':
     main()

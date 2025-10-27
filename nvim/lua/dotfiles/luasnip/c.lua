@@ -1,6 +1,5 @@
 local i = require("dotfiles.luasnip.util")
 
-local M = {
-}
+local M = {}
 
 return M
