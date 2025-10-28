@@ -142,31 +142,39 @@ PlaceholderView.__index = PlaceholderView
 
 function PlaceholderView.new()
 	return setmetatable({
-		state_map = {},
+		initial = {},
 		pending = {},
+		shown = {},
 	}, PlaceholderView)
 end
 
 function PlaceholderView:add(root, state, mark_pending)
+	if self.shown[root] then
+		return
+	end
 	local icon_state = state or "clean"
-	self.state_map[root] = icon_state
+	self.initial[root] = icon_state
+	self.shown[root] = icon_state
 	if mark_pending then
 		self.pending[root] = true
 	else
 		self.pending[root] = nil
 	end
-	update_git_roots_curr({ [root] = icon_state })
 end
 
-function PlaceholderView:pending_count()
-	return next(self.pending) ~= nil
+function PlaceholderView:has(root)
+	return self.shown[root] ~= nil or self.initial[root] ~= nil
+end
+
+function PlaceholderView:is_empty()
+	return next(self.shown) == nil and next(self.initial) == nil
 end
 
 function PlaceholderView:update(root, state)
 	if not state then
 		return
 	end
-	self.state_map[root] = state
+	self.shown[root] = state
 	self.pending[root] = nil
 	update_git_roots_curr({ [root] = state })
 end
@@ -175,21 +183,24 @@ function PlaceholderView:resolve(resolver, skip_root)
 	if not next(self.pending) then
 		return
 	end
-	local updates = {}
 	for root, _ in pairs(self.pending) do
 		if root ~= skip_root then
 			local state = resolver(root)
 			if state then
-				self.state_map[root] = state
-				updates[root] = state
+				self:update(root, state)
 			end
 		end
 		self.pending[root] = nil
 	end
 	self.pending = {}
-	if next(updates) then
-		update_git_roots_curr(updates)
+end
+
+function PlaceholderView:apply_initial()
+	if not next(self.initial) then
+		return
 	end
+	update_git_roots_curr(self.initial)
+	self.initial = {}
 end
 
 function Scanner.parse_line(git_status_line)
@@ -311,15 +322,17 @@ end
 function Scanner.compute_state(git_status, dir_git_status)
 	local has_changes = false
 	for _, v in pairs(git_status) do
-		if v ~= "·" and v ~= " " then
+		if v ~= "·" and v ~= " " and v ~= "?" then
 			has_changes = true
 			break
 		end
 	end
 	if not has_changes then
-		for _, _ in pairs(dir_git_status) do
-			has_changes = true
-			break
+		for _, v in pairs(dir_git_status) do
+			if v ~= "·" and v ~= "?" then
+				has_changes = true
+				break
+			end
 		end
 	end
 
@@ -403,7 +416,7 @@ function M:fetch(job)
 			local sub_url = tostring(file.url)
 			local git_roots = get_git_roots(true)
 			if git_roots[sub_url] then
-				if not view.state_map[sub_url] then
+				if not view:has(sub_url) then
 					register_repo(sub_url)
 				end
 				goto continue
@@ -411,7 +424,7 @@ function M:fetch(job)
 		end
 		::continue::
 	end
-	if next(view.state_map) ~= nil then
+	if not view:is_empty() then
 		-- current directory is not in git repository
 		ls_flag = true
 	end
@@ -437,7 +450,7 @@ function M:fetch(job)
 		for _, file in ipairs(job.files) do
 			if file.cha.is_dir then
 				local sub_url = tostring(file.url)
-				if view.state_map[sub_url] then
+				if view:has(sub_url) then
 					goto continue
 				end
 				local git_roots = get_git_roots(false)
@@ -465,6 +478,7 @@ function M:fetch(job)
 			end
 		end
 
+		view:apply_initial()
 		view:resolve(resolve_state)
 
 		return 3
@@ -476,6 +490,8 @@ function M:fetch(job)
 	else
 		view:add(git_root, nil, true)
 	end
+
+	view:apply_initial()
 
 	local state, git_status, dir_git_status = repo_state_for(git_root)
 	if state then

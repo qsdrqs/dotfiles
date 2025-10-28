@@ -7,15 +7,32 @@ local M = {
       wordTrig = false,
     },
     i.f(function(_, snip)
-      local expr = snip.captures[1] -- text between the CALC tags
-      -- Evaluate safely via the system’s python (simple use-case; extend as needed).
-      local handle = io.popen(string.format("python3 - <<'PY'\nprint(%s)\nPY", expr:gsub("'", [["]])))
-      if not handle then
-        return "<python error>"
+      local expr = snip.captures[1]
+      if not expr then
+        return "<calc error>"
       end
-      local out = handle:read("*a")
-      handle:close()
-      return (out or ""):gsub("%s+$", "") -- strip trailing newline/space
+      expr = expr:match("^%s*(.-)%s*$")
+      if expr == "" then
+        return "<calc error>"
+      end
+
+      -- Reject obviously unsafe input early (only allow math-ish characters).
+      if expr:find("[^%w_%s%+%-%*/%%%^%(%)%.%,]") then
+        return "<calc error>"
+      end
+
+      local env = { math = math }
+      setmetatable(env, { __index = function() return nil end })
+
+      local chunk, load_err = load("return " .. expr, "calc_expr", "t", env)
+      if not chunk then
+        return "<calc error>"
+      end
+      local ok, result = pcall(chunk)
+      if not ok then
+        return "<calc error>"
+      end
+      return tostring(result)
     end, {})
   ),
 }
