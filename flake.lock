@@ -2786,11 +2786,11 @@
     "sidekickDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1761292665,
-        "narHash": "sha256-70md0tZN4zgRT82lIBWLMvY9q/pNqlu3TzRzerTI8UY=",
+        "lastModified": 1761664540,
+        "narHash": "sha256-M20jP6rP4Evy+kgj7rhgmwfubpUDCnVMHt45Deg2FOU=",
         "owner": "folke",
         "repo": "sidekick.nvim",
-        "rev": "bd1f79a506b7447d44873f78ffc0de7ea232bc88",
+        "rev": "6c53e5fb5430821634062e034e3004a9cbea24e6",
         "type": "github"
       },
       "original": {

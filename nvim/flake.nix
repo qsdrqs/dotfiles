@@ -16,16 +16,16 @@
       url = "github:nvim-telescope/telescope.nvim";
       flake = false;
     };
+    telescope-asynctasksDOTnvim = {
+      url = "github:GustavoKatel/telescope-asynctasks.nvim";
+      flake = false;
+    };
     nvim-web-devicons = {
       url = "github:kyazdani42/nvim-web-devicons";
       flake = false;
     };
     fzf-lua = {
       url = "github:ibhagwan/fzf-lua";
-      flake = false;
-    };
-    sigsegvim = {
-      url = "github:seandewar/sigsegvim";
       flake = false;
     };
     cellular-automatonDOTnvim = {
@@ -38,10 +38,6 @@
     };
     nvim-hlslens = {
       url = "github:kevinhwang91/nvim-hlslens";
-      flake = false;
-    };
-    projectDOTnvim = {
-      url = "github:DrKJeff16/project.nvim";
       flake = false;
     };
     hopDOTnvim = {
@@ -62,6 +58,10 @@
     };
     registersDOTnvim = {
       url = "github:tversteeg/registers.nvim";
+      flake = false;
+    };
+    yaziDOTnvim = {
+      url = "github:mikavilpas/yazi.nvim";
       flake = false;
     };
     masonDOTnvim = {
@@ -168,14 +168,6 @@
       url = "github:CopilotC-Nvim/CopilotChat.nvim";
       flake = false;
     };
-    nvim-treesitter = {
-      url = "github:nvim-treesitter/nvim-treesitter";
-      flake = false;
-    };
-    render-markdownDOTnvim = {
-      url = "github:MeanderingProgrammer/render-markdown.nvim";
-      flake = false;
-    };
     sidekickDOTnvim = {
       url = "github:folke/sidekick.nvim";
       flake = false;
@@ -186,6 +178,10 @@
     };
     claudecodeDOTnvim = {
       url = "github:coder/claudecode.nvim";
+      flake = false;
+    };
+    nvim-treesitter = {
+      url = "github:nvim-treesitter/nvim-treesitter";
       flake = false;
     };
     playground = {
@@ -258,6 +254,10 @@
     };
     dropbarDOTnvim = {
       url = "github:Bekaboo/dropbar.nvim";
+      flake = false;
+    };
+    render-markdownDOTnvim = {
+      url = "github:MeanderingProgrammer/render-markdown.nvim";
       flake = false;
     };
     lualineDOTnvim = {
@@ -352,8 +352,8 @@
       url = "github:MTDL9/vim-log-highlighting";
       flake = false;
     };
-    telescope-asynctasksDOTnvim = {
-      url = "github:GustavoKatel/telescope-asynctasks.nvim";
+    sigsegvim = {
+      url = "github:seandewar/sigsegvim";
       flake = false;
     };
     asyncrunDOTvim = {
@@ -400,16 +400,16 @@
       url = "github:kevinhwang91/rnvimr";
       flake = false;
     };
-    yaziDOTnvim = {
-      url = "github:mikavilpas/yazi.nvim";
-      flake = false;
-    };
     vim-textobj-user = {
       url = "github:kana/vim-textobj-user";
       flake = false;
     };
     vim-textobj-entire = {
       url = "github:kana/vim-textobj-entire";
+      flake = false;
+    };
+    projectDOTnvim = {
+      url = "github:DrKJeff16/project.nvim";
       flake = false;
     };
     nvim-dap-ui = {
@@ -479,18 +479,18 @@
         { name = "lazy.nvim"; dotname = "lazyDOTnvim"; source = inputs.lazyDOTnvim; build = false; }
         { name = "plenary.nvim"; dotname = "plenaryDOTnvim"; source = inputs.plenaryDOTnvim; build = false; }
         { name = "telescope.nvim"; dotname = "telescopeDOTnvim"; source = inputs.telescopeDOTnvim; build = false; }
+        { name = "telescope-asynctasks.nvim"; dotname = "telescope-asynctasksDOTnvim"; source = inputs.telescope-asynctasksDOTnvim; build = false; }
         { name = "nvim-web-devicons"; dotname = "nvim-web-devicons"; source = inputs.nvim-web-devicons; build = false; }
         { name = "fzf-lua"; dotname = "fzf-lua"; source = inputs.fzf-lua; build = false; }
-        { name = "sigsegvim"; dotname = "sigsegvim"; source = inputs.sigsegvim; build = false; }
         { name = "cellular-automaton.nvim"; dotname = "cellular-automatonDOTnvim"; source = inputs.cellular-automatonDOTnvim; build = false; }
         { name = "nvim-bqf"; dotname = "nvim-bqf"; source = inputs.nvim-bqf; build = false; }
         { name = "nvim-hlslens"; dotname = "nvim-hlslens"; source = inputs.nvim-hlslens; build = false; }
-        { name = "project.nvim"; dotname = "projectDOTnvim"; source = inputs.projectDOTnvim; build = false; }
         { name = "hop.nvim"; dotname = "hopDOTnvim"; source = inputs.hopDOTnvim; build = false; }
         { name = "flash.nvim"; dotname = "flashDOTnvim"; source = inputs.flashDOTnvim; build = false; }
         { name = "which-key.nvim"; dotname = "which-keyDOTnvim"; source = inputs.which-keyDOTnvim; build = false; }
         { name = "marks.nvim"; dotname = "marksDOTnvim"; source = inputs.marksDOTnvim; build = false; }
         { name = "registers.nvim"; dotname = "registersDOTnvim"; source = inputs.registersDOTnvim; build = false; }
+        { name = "yazi.nvim"; dotname = "yaziDOTnvim"; source = inputs.yaziDOTnvim; build = false; }
         { name = "mason.nvim"; dotname = "masonDOTnvim"; source = inputs.masonDOTnvim; build = false; }
         { name = "nvim-jdtls"; dotname = "nvim-jdtls"; source = inputs.nvim-jdtls; build = false; }
         { name = "rustaceanvim"; dotname = "rustaceanvim"; source = inputs.rustaceanvim; build = false; }
@@ -517,11 +517,10 @@
         { name = "friendly-snippets"; dotname = "friendly-snippets"; source = inputs.friendly-snippets; build = false; }
         { name = "copilot.lua"; dotname = "copilotDOTlua"; source = inputs.copilotDOTlua; build = false; }
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
-        { name = "nvim-treesitter"; dotname = "nvim-treesitter"; source = inputs.nvim-treesitter; build = true; }
-        { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
         { name = "sidekick.nvim"; dotname = "sidekickDOTnvim"; source = inputs.sidekickDOTnvim; build = false; }
         { name = "snacks.nvim"; dotname = "snacksDOTnvim"; source = inputs.snacksDOTnvim; build = false; }
         { name = "claudecode.nvim"; dotname = "claudecodeDOTnvim"; source = inputs.claudecodeDOTnvim; build = false; }
+        { name = "nvim-treesitter"; dotname = "nvim-treesitter"; source = inputs.nvim-treesitter; build = true; }
         { name = "playground"; dotname = "playground"; source = inputs.playground; build = false; }
         { name = "nvim-treesitter-textobjects"; dotname = "nvim-treesitter-textobjects"; source = inputs.nvim-treesitter-textobjects; build = false; }
         { name = "nvim-treesitter-context"; dotname = "nvim-treesitter-context"; source = inputs.nvim-treesitter-context; build = false; }
@@ -540,6 +539,7 @@
         { name = "bufferline.nvim"; dotname = "bufferlineDOTnvim"; source = inputs.bufferlineDOTnvim; build = false; }
         { name = "aerial.nvim"; dotname = "aerialDOTnvim"; source = inputs.aerialDOTnvim; build = false; }
         { name = "dropbar.nvim"; dotname = "dropbarDOTnvim"; source = inputs.dropbarDOTnvim; build = false; }
+        { name = "render-markdown.nvim"; dotname = "render-markdownDOTnvim"; source = inputs.render-markdownDOTnvim; build = false; }
         { name = "lualine.nvim"; dotname = "lualineDOTnvim"; source = inputs.lualineDOTnvim; build = false; }
         { name = "auto-session"; dotname = "auto-session"; source = inputs.auto-session; build = false; }
         { name = "alpha-nvim"; dotname = "alpha-nvim"; source = inputs.alpha-nvim; build = false; }
@@ -563,7 +563,7 @@
         { name = "nvim-fundo"; dotname = "nvim-fundo"; source = inputs.nvim-fundo; build = true; }
         { name = "vim-sandwich"; dotname = "vim-sandwich"; source = inputs.vim-sandwich; build = false; }
         { name = "vim-log-highlighting"; dotname = "vim-log-highlighting"; source = inputs.vim-log-highlighting; build = false; }
-        { name = "telescope-asynctasks.nvim"; dotname = "telescope-asynctasksDOTnvim"; source = inputs.telescope-asynctasksDOTnvim; build = false; }
+        { name = "sigsegvim"; dotname = "sigsegvim"; source = inputs.sigsegvim; build = false; }
         { name = "asyncrun.vim"; dotname = "asyncrunDOTvim"; source = inputs.asyncrunDOTvim; build = false; }
         { name = "asynctasks.vim"; dotname = "asynctasksDOTvim"; source = inputs.asynctasksDOTvim; build = false; }
         { name = "vCoolor.vim"; dotname = "vCoolorDOTvim"; source = inputs.vCoolorDOTvim; build = false; }
@@ -575,9 +575,9 @@
         { name = "dial.nvim"; dotname = "dialDOTnvim"; source = inputs.dialDOTnvim; build = false; }
         { name = "Comment.nvim"; dotname = "CommentDOTnvim"; source = inputs.CommentDOTnvim; build = false; }
         { name = "rnvimr"; dotname = "rnvimr"; source = inputs.rnvimr; build = false; }
-        { name = "yazi.nvim"; dotname = "yaziDOTnvim"; source = inputs.yaziDOTnvim; build = false; }
         { name = "vim-textobj-user"; dotname = "vim-textobj-user"; source = inputs.vim-textobj-user; build = false; }
         { name = "vim-textobj-entire"; dotname = "vim-textobj-entire"; source = inputs.vim-textobj-entire; build = false; }
+        { name = "project.nvim"; dotname = "projectDOTnvim"; source = inputs.projectDOTnvim; build = false; }
         { name = "nvim-dap-ui"; dotname = "nvim-dap-ui"; source = inputs.nvim-dap-ui; build = false; }
         { name = "nvim-dap-virtual-text"; dotname = "nvim-dap-virtual-text"; source = inputs.nvim-dap-virtual-text; build = false; }
         { name = "nvim-dap-python"; dotname = "nvim-dap-python"; source = inputs.nvim-dap-python; build = false; }
