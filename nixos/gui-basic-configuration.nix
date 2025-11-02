@@ -167,10 +167,6 @@ in
     samba
   ];
 
-  programs.nix-ld.libraries = with pkgs; [
-    gmp
-  ];
-
   # services.teamviewer.enable = true;
 
   programs.obs-studio = {

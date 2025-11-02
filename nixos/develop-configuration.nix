@@ -26,7 +26,6 @@
 
     # android
     android-file-transfer
-    android-udev-rules
     android-tools
 
   ];

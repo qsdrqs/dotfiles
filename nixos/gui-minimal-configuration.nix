@@ -206,6 +206,12 @@ in
     };
   };
 
+  programs.nix-ld.libraries = with pkgs; [
+    config.hardware.graphics.package
+    gmp
+  ];
+  environment.variables.NIX_LD_LIBRARY_PATH = lib.mkForce "/run/current-system/sw/share/nix-ld/lib:/run/opengl-driver/lib";
+
   # hardware.pulseaudio.enable = true;
   users.extraUsers.qsdrqs.extraGroups = [ "audio" ];
   # hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";

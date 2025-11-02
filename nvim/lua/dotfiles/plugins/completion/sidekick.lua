@@ -56,7 +56,7 @@ return function(ctx)
             require("sidekick.cli").send({ msg = "{file}" })
           end,
           desc = "Send File",
-          mode = { "n", "t", "i" },
+          mode = { "n", "t" },
         },
         {
           "<localleader>as",

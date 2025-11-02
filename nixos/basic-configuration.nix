@@ -35,7 +35,7 @@ in
     xray
     samba
 
-    poppler_utils # pdf2txt
+    poppler-utils # pdf2txt
     jless
 
     w3m
