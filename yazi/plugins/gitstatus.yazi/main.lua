@@ -6,9 +6,45 @@ local CACHE_TTL = 3 -- seconds
 local Cache = { ttl = tonumber(os.getenv("YAZI_GITSTATUS_CACHE_TTL")) or CACHE_TTL }
 local Scanner = {}
 
+-- Normalize absolute/relative paths lexically:
+-- - Collapse multiple slashes
+-- - Resolve "." and ".." segments
+-- - Drop trailing slash (except for root)
+function normalize_path(path)
+	if not path or path == "" then
+		return path
+	end
+	path = path:gsub("/+", "/")
+	local is_abs = path:sub(1, 1) == "/"
+	local parts = {}
+	for seg in path:gmatch("[^/]+") do
+		if seg == "." or seg == "" then
+			-- skip
+		elseif seg == ".." then
+			if #parts > 0 and parts[#parts] ~= ".." then
+				table.remove(parts)
+			else
+				if not is_abs then
+					table.insert(parts, seg)
+				end
+			end
+		else
+			table.insert(parts, seg)
+		end
+	end
+	local norm = table.concat(parts, "/")
+	if is_abs then
+		norm = "/" .. norm
+	end
+	if norm == "/" or norm == "" then
+		return "/"
+	end
+	return (norm:gsub("/+$", ""))
+end
+
 local function refresh_linemode(st)
 	Linemode.file_gitstatus = function(self, file)
-		local url = tostring(file.url)
+		local url = normalize_path(tostring(file.url))
 		if st.git_roots_curr then
 			local state = st.git_roots_curr[url]
 			if state == "clean" then
@@ -61,6 +97,7 @@ local get_git_roots = ya.sync(function(st, sub)
 end)
 
 local update_git_roots = ya.sync(function(st, git_root, sub)
+	git_root = normalize_path(git_root)
 	if not st.git_roots then
 		st.git_roots = {}
 	end
@@ -78,7 +115,7 @@ local update_tracked = ya.sync(function(st, git_root, tracked)
 		st.tracked = {}
 	end
 	for url, type in pairs(tracked) do
-		local key = tostring(url)
+		local key = normalize_path(tostring(url))
 		st.tracked[key] = type
 	end
 end)
@@ -99,6 +136,7 @@ local update_git_roots_curr = ya.sync(function(st, git_roots_curr)
 end)
 
 local update_status = ya.sync(function(st, git_root, status, dir_status, state, checked_at)
+	git_root = normalize_path(git_root)
 	if not st.status then
 		st.status = {}
 	end
@@ -111,6 +149,7 @@ local update_status = ya.sync(function(st, git_root, status, dir_status, state, 
 end)
 
 local get_status = ya.sync(function(st, git_root)
+	git_root = normalize_path(git_root)
 	if st.status then
 		return st.status[git_root]
 	end
@@ -251,11 +290,19 @@ function Scanner.parse_line(git_status_line)
 	return type, update_git_root, trimed_next
 end
 
+-- Collect git status entries for files under `scan_dir` (usually the
+-- currently opened directory in Yazi). Using the scanning directory as
+-- the working directory keeps Git's relative paths aligned with the
+-- absolute URLs Yazi reports, avoiding mismatches at startup when Yazi
+-- is opened in a deep subdirectory.
 function Scanner.collect(git_root)
 	local tracked = {}
 	-- check tracked files
-	local child, code = Command("git"):arg({ "status", "--ignored", "--short" }):cwd(git_root):stdout(Command.PIPED)
-			:spawn()
+	local child, code = Command("git")
+		:arg({ "-c", "core.quotepath=false", "status", "--ignored", "--short" })
+		:cwd(git_root)
+		:stdout(Command.PIPED)
+		:spawn()
 	if not child then
 		ya.err("spawn `git` command returns " .. tostring(code))
 		ya.err("cwd: " .. git_root)
@@ -277,6 +324,7 @@ function Scanner.collect(git_root)
 		if update_git_root then
 			ya.err("update" .. trimed_next)
 		end
+		-- drop the two status columns and the separating space
 		trimed_next = trimed_next:sub(4)
 		local renamed_from, renamed_to = trimed_next:match("^(.-)%s+%-%>%s+(.+)$")
 		if renamed_from and renamed_to then
@@ -289,7 +337,9 @@ function Scanner.collect(git_root)
 		if trimed_next:match("/$") then
 			trimed_next = trimed_next:sub(1, -2) -- remove last /
 		end
-		local url = git_root .. "/" .. trimed_next
+		-- Build absolute URL based on repo root and normalize to
+		-- eliminate ../../../ style segments so it matches Yazi's URL.
+		local url = normalize_path(git_root .. "/" .. trimed_next)
 		if update_git_root then
 			update_git_roots(url, false)
 		end
@@ -355,6 +405,7 @@ end
 
 local get_git_root = function(url)
 	local url = url:match("^(.*)/$")
+	url = url and normalize_path(url) or url
 	if url == nil then
 		-- root directory
 		return 3
@@ -387,6 +438,7 @@ local get_git_root = function(url)
 
 	local cdup = (next and next:gsub("\r?\n$", "")) or ""
 	local git_root = (cdup == "" and url) or (url .. "/" .. cdup):gsub("/+$","")
+	git_root = normalize_path(git_root)
 	update_git_roots(git_root, false)
 	return git_root
 end

@@ -10,7 +10,7 @@ while IFS= read -r key; do
         KEYGRIP="${key#GnuPG: n/}"
         echo "loading $KEYGRIP"
         secret=$(echo "$PASSWORD" | keepassxc-cli show -q -a Password $HOME/global/Passwords.kdbx "secrets/$key")
-        /run/current-system/sw/libexec/gpg-preset-passphrase --preset $KEYGRIP <<< "$secret"
+        /run/current-system/sw/bin/gpg-preset-passphrase --preset $KEYGRIP <<< "$secret"
     fi
 done <<< "$KEYS"
 export KEY_ENV_LOADED=true

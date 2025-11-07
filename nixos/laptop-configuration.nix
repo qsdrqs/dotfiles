@@ -26,6 +26,29 @@ in
   services.tlp = {
     enable = true;
     settings = {
+      CPU_DRIVER_OPMODE_ON_AC = "active";
+      CPU_DRIVER_OPMODE_ON_BAT = "active";
+
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power"; # more aggressive
+
+      CPU_HWP_DYN_BOOST_ON_AC = 1;
+      CPU_HWP_DYN_BOOST_ON_BAT = 0;
+
+      # CPU_MAX_PERF_ON_BAT = 60;
+      CPU_MAX_PERF_ON_BAT = 45; # more aggressive
+
+      CPU_BOOST_ON_AC = 1;
+      CPU_BOOST_ON_BAT = 0;
+
+      PLATFORM_PROFILE_ON_AC = "performance";
+      PLATFORM_PROFILE_ON_BAT = "quiet";
+
+      PCIE_ASPM_ON_AC = "default";
+      # PCIE_ASPM_ON_BAT = "powersave";
+      PCIE_ASPM_ON_BAT = "powersupersave"; # more aggressive
+
+      DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE = "bluetooth"; # disable bluetooth when not connected
+
       START_CHARGE_THRESH_BAT0 = 75;
       STOP_CHARGE_THRESH_BAT0 = 80;
     };
@@ -75,8 +98,7 @@ in
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver # LIBVA_DRIVER_NAME=iHD
-      vaapiIntel
-      vaapiVdpau
+      libva-vdpau-driver
       intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
       libvdpau-va-gl
     ];

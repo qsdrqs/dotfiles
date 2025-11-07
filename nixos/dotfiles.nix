@@ -145,9 +145,11 @@ in
         src = inputs.ranger-config;
         installPhase = commonInstallPhase;
         postInstall = ''
+          rm -rf $out/colorschemes
           cp -r ${inputs.ranger-config.colorschemes} $out/colorschemes
         '' + lib.strings.concatStrings (map
           (plugin: ''
+            rm -rf $out/plugins/${plugin}
             ln -s ${inputs.ranger-config.inputs.${plugin}} $out/plugins/${plugin}
           '')
           inputs.ranger-config.plugins);

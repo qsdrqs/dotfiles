@@ -54,6 +54,14 @@ function M.lazy_load_by_filetype(definitions)
   end
 end
 
+function M.is_in_ssh()
+  return os.getenv("SSH_CONNECTION") ~= nil
+end
+
+function M.is_in_win_wsl()
+  return vim.fn.has("wsl") == 1 and M.is_in_ssh() == false
+end
+
 ---Trim whitespace at the beginning and end of a string.
 --@param text string
 --@return string

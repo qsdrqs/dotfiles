@@ -60,18 +60,19 @@
   services.syncthing.guiAddress = "0.0.0.0:8384";
 
   # WSL2 does not support modprobe for wireguard
-  systemd.services.wg-quick-wg0.enable = false;
-  systemd.services.wg-quick-wg0.serviceConfig.ExecStart = lib.mkForce
-    (utils.systemdUtils.lib.makeJobScript {
-      name = "wg-quick-wg0-start";
-      text = let
-        str2list = lib.strings.splitString "\n"
-          config.systemd.services.wg-quick-wg0.script;
-        listRemove =
-          lib.lists.remove "${pkgs.kmod}/bin/modprobe wireguard" str2list;
-      in lib.strings.concatStrings listRemove;
-      enableStrictShellChecks = false;
-    });
+  systemd.services.wg-quick-wg0.enable = lib.mkDefault false;
+  # systemd.services.wg-quick-wg0.serviceConfig.ExecStart = lib.mkForce
+  #   (utils.systemdUtils.lib.makeJobScript {
+  #     name = "wg-quick-wg0-start";
+  #     text = let
+  #       str2list = lib.strings.splitString "\n"
+  #         config.systemd.services.wg-quick-wg0.script;
+  #       listRemove =
+  #         lib.lists.remove "${pkgs.kmod}/bin/modprobe wireguard" str2list;
+  #     in lib.strings.concatStrings listRemove;
+  #     enableStrictShellChecks = false;
+  #   });
+  environment.variables.NIX_LD_LIBRARY_PATH = lib.mkOverride 80 "/run/current-system/sw/share/nix-ld/lib:/run/opengl-driver/lib:/usr/lib/wsl/lib";
 
   # use vcxsrv instead of wslg
   # environment.variables.DISPLAY =

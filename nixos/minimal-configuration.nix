@@ -199,6 +199,7 @@ in
     sqlite
     sshfs
     (lib.hiPrio inetutils)
+    net-tools
     iw
     cntr # container debug tool
     libinput

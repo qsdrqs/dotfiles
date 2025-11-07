@@ -44,6 +44,7 @@ in
     scc
     sshping
     nasm
+    nodejs
   ];
 
   environment.variables = {

@@ -116,12 +116,38 @@ in
       useOSProber = true;
       gfxmodeEfi = "1024x768";
       default = "saved";
+      extraGrubInstallArgs = [
+        "--disable-shim-lock" # TODO: unsafe but needed for custom kernels
+        "--modules=tpm"
+      ];
     };
     efi = {
       canTouchEfiVariables = true;
       efiSysMountPoint = "/boot";
     };
   };
+  boot.loader.grub.extraInstallCommands = ''
+    set -euo pipefail
+    export PATH=${pkgs.sbctl}/bin:$PATH
+
+    if [ -f /boot/EFI/Boot/bootx64.efi ]; then
+      sbctl sign /boot/EFI/Boot/bootx64.efi || true
+    fi
+
+    if [ -f /boot/EFI/NixOS-boot/grubx64.efi ]; then
+      sbctl sign /boot/EFI/NixOS-boot/grubx64.efi
+    fi
+
+    for f in /boot/grub/**/*.efi; do
+      [ -e "$f" ] && sbctl sign "$f"
+    done
+
+    if [ -d /boot/kernels ]; then
+      for f in /boot/kernels/*-bzImage; do
+        [ -e "$f" ] && sbctl sign "$f"
+      done
+    fi
+  '';
 
   nixpkgs.config.permittedInsecurePackages = [
     "electron-11.5.0" # baidunetdisk
@@ -165,6 +191,12 @@ in
     })
 
     samba
+    freerdp
+
+    # secure boot and UEFI tools
+    sbsigntool
+    efibootmgr
+    sbctl
   ];
 
   # services.teamviewer.enable = true;

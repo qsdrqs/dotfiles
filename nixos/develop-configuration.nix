@@ -1,7 +1,6 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    nodejs
     inferno # flamegraph
     cmake
     extra-cmake-modules
@@ -28,5 +27,6 @@
     android-file-transfer
     android-tools
 
+    keepassxc
   ];
 }

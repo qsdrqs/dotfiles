@@ -210,7 +210,7 @@ in
     config.hardware.graphics.package
     gmp
   ];
-  environment.variables.NIX_LD_LIBRARY_PATH = lib.mkForce "/run/current-system/sw/share/nix-ld/lib:/run/opengl-driver/lib";
+  environment.variables.NIX_LD_LIBRARY_PATH = lib.mkOverride 90 "/run/current-system/sw/share/nix-ld/lib:/run/opengl-driver/lib";
 
   # hardware.pulseaudio.enable = true;
   users.extraUsers.qsdrqs.extraGroups = [ "audio" ];

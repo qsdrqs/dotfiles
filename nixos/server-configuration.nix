@@ -113,4 +113,31 @@ in
         chmod 640 ${runConfig}
       '';
     };
+
+  services.livekit = {
+    enable = lib.mkDefault false;
+    settings = {
+      port = 7880;
+      bind_addresses = [ "127.0.0.1" "::1" ];
+      rtc = {
+        tcp_port = 7881;
+        port_range_start = 50000;
+        port_range_end = 60000;
+        use_external_ip = true;
+      };
+      turn.tls_port = 5349;
+      room.auto_create = false;
+    };
+    keyFile = "/etc/livekit/livekit-server.key";
+  };
+
+  services.lk-jwt-service = {
+    enable = lib.mkDefault false;
+    port = 4000;
+    keyFile = "/etc/livekit/livekit-server.key";
+    livekitUrl = "wss://qsdrqs.site/livekit/sfu";
+  };
+  systemd.services.lk-jwt-service = {
+    environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = "qsdrqs.site";
+  };
 }

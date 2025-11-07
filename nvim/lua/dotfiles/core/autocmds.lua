@@ -5,7 +5,7 @@ local M = {}
 -- neovide has its own clipboard system
 ---Configure clipboard behaviour for WSL when neovide is not active.
 local function setup_clipboard()
-  if vim.g.neovide == nil and vim.fn.has("wsl") == 1 and vim.fn.executable("win32yank.exe") == 1 then
+  if vim.g.neovide == nil and helpers.is_in_win_wsl() then
     vim.g.clipboard = {
       name = "win32yank",
       -- TODO: may change to async here
@@ -18,6 +18,8 @@ local function setup_clipboard()
         ["*"] = { "win32yank.exe", "-o", "--lf" },
       },
     }
+  elseif helpers.is_in_ssh() then
+    vim.g.clipboard = "osc52"
   end
 end
 
@@ -50,7 +52,7 @@ local function setup_input_method_switch()
   local is_windows = false
   local im_switch_job
 
-  if vim.fn.has("wsl") == 1 and os.getenv("SSH_CONNECTION") == nil then
+  if helpers.is_in_win_wsl() then
     im_switch = "im-select.exe"
     default_im = "1033"
     is_windows = true

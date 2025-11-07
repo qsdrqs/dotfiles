@@ -33,7 +33,7 @@ if [[ $NOTMUX != 1 ]]; then
         if [[ $WSLPATH != "" ]]; then
             session_name="wsl"
             call_tmux $session_name
-        elif [[ "$SSH_CONNECTION" != ""  ]]; then
+        elif [[ "$SSH_CONNECTION" != "" ]]; then
             session_name="ssh"
             if [[ -x `command -v notify-send` ]]; then
                 (timeout 3 notify-send "ssh connected" &)
@@ -490,19 +490,6 @@ fi
 #     done
 # }
 
-if [[ -S /tmp/ssh-agent.sock ]]; then
-    export SSH_AUTH_SOCK=/tmp/ssh-agent.sock
-elif [[ -n $XDG_RUNTIME_DIR ]]; then
-    if ! pgrep -u "$USER" ssh-agent > /dev/null && [[ ! -f "$XDG_RUNTIME_DIR/ssh-agent.env" ]]; then
-        ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
-    fi
-    if [[ ! -S "$SSH_AUTH_SOCK" ]] && [[ ! -f "$SSH_AUTH_SOCK" ]]; then
-        if [[ -f "$XDG_RUNTIME_DIR/ssh-agent.env" ]]; then
-            source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
-        fi
-    fi
-fi
-
 # Change Yazi's CWD to PWD on subshell exit
 if [[ -n $YAZI_ID ]]; then
     function _yazi_cd() {
@@ -517,19 +504,93 @@ ghcs() {
     ghcs $@
 }
 
-update_ssh_auth_sock() {
-    # Look for valid agent sockets
-    for sock in /tmp/ssh-*/agent.*; do
-        if [[ -S $sock ]]; then
-            export SSH_AUTH_SOCK=$sock
-            break
-        fi
-    done
+
+# SSH Agent setup
+# Return 0 if $1 is a usable SSH agent socket (exists and answers ssh-add -l)
+_is_usable_agent_sock() {
+    [[ -S "$1" ]] && SSH_AUTH_SOCK="$1" ssh-add -l >/dev/null 2>&1
 }
 
-# if current $SSH_AUTH_SOCK starts from '/tmp/ssh-*' and it's not valid,
-# then try to find the first valid ssh-agent socket in `/tmp/ssh-*`
-# if found, then set it to $SSH_AUTH_SOCK
-if [[ -n $SSH_AUTH_SOCK && $SSH_AUTH_SOCK == /tmp/ssh-* && ! -S $SSH_AUTH_SOCK ]]; then
-    update_ssh_auth_sock
+# Discover a valid SSH agent socket across common locations
+# Compatible with OpenSSH 10.1+ (~/.ssh/agent/...) and older (/tmp/ssh-*/agent.*)
+update_ssh_auth_sock() {
+    # 1) Keep an already working socket
+    if [[ -n "$SSH_AUTH_SOCK" ]] && _is_usable_agent_sock "$SSH_AUTH_SOCK"; then
+        return 0
+    fi
+
+    local candidates=()
+
+    # 2) systemd / desktop common paths
+    [[ -n "$XDG_RUNTIME_DIR" ]] && candidates+=("$XDG_RUNTIME_DIR/ssh-agent" "$XDG_RUNTIME_DIR/ssh/agent")
+    candidates+=("/run/user/$UID/ssh-agent" "/run/user/$UID/ssh/agent")
+
+    # 3) OpenSSH 10.1+ default under ~/.ssh/agent/
+    if [[ -d "$HOME/.ssh/agent" ]]; then
+        while IFS= read -r -d '' s; do candidates+=("$s"); done < <(
+            find "$HOME/.ssh/agent" -maxdepth 1 -type s -name 's.*' -print0 2>/dev/null
+        )
+    fi
+
+    # 4) Legacy default in /tmp
+    while IFS= read -r -d '' s; do candidates+=("$s"); done < <(
+        find /tmp -maxdepth 2 -type s -path '/tmp/ssh-*/agent.*' -print0 2>/dev/null
+    )
+
+    # 5) Optional fixed socket you might use locally
+    [[ -S "$HOME/.ssh/agent.sock" ]] && candidates+=("$HOME/.ssh/agent.sock")
+
+    # 6) Pick the first usable one
+    for sock in "${candidates[@]}"; do
+        if _is_usable_agent_sock "$sock"; then
+            export SSH_AUTH_SOCK="$sock"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# Start a local ssh-agent into a predictable path if none is available
+_bootstrap_local_agent() {
+    # Do not start one if something usable already exists
+    if update_ssh_auth_sock; then
+        return 0
+    fi
+
+    # Choose a stable path to host the socket (prefer XDG runtime dir)
+    local target
+    if [[ -n "$XDG_RUNTIME_DIR" ]]; then
+        target="$XDG_RUNTIME_DIR/ssh-agent"
+    else
+        target="$HOME/.ssh/agent.sock"
+        mkdir -p "$HOME/.ssh"
+        chmod 700 "$HOME/.ssh"
+    fi
+
+    # If something stale exists, remove it
+    [[ -e "$target" && ! -S "$target" ]] && rm -f "$target"
+
+    # Start a fresh agent bound to that path
+    if command -v ssh-agent >/dev/null 2>&1; then
+        # -a to set socket path, -s to print env; eval to capture SSH_AGENT_PID if emitted
+        eval "$(ssh-agent -a "$target" -s 2>/dev/null)" >/dev/null
+        export SSH_AUTH_SOCK="$target"
+    fi
+}
+
+### Control flow
+
+# Case A: inside an SSH session (SSH_AUTH_SOCK likely comes from forwarding)
+# Be conservative: only fix it if missing or unusable
+if [[ -n "$SSH_CONNECTION" ]]; then
+    if [[ -z "$SSH_AUTH_SOCK" ]] || ! _is_usable_agent_sock "$SSH_AUTH_SOCK"; then
+        update_ssh_auth_sock
+    fi
+
+# Case B: local interactive shell
+else
+    # Try to discover an existing agent or start one if needed
+    _bootstrap_local_agent
 fi
+ 
