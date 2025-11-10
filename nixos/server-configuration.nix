@@ -4,11 +4,11 @@ let
 in
 {
   imports = [
-    (if builtins.pathExists ./private/server-private.nix then
-      ./private/server-private.nix
-    else
-      lib.warn "No private files found"
-        ./empty.nix
+    (
+      if builtins.pathExists ./private/server-private.nix then
+        ./private/server-private.nix
+      else
+        lib.warn "No private files found" ./empty.nix
     )
   ];
 
@@ -97,6 +97,17 @@ in
       '';
     };
   };
+  services.postgresql = {
+    enable = lib.mkDefault false;
+
+    ensureDatabases = [ "matrix-synapse" ];
+    ensureUsers = [
+      {
+        name = "matrix-synapse";
+        ensureDBOwnership = true;
+      }
+    ];
+  };
 
   services.coturn = {
     enable = lib.mkDefault false;
@@ -118,7 +129,10 @@ in
     enable = lib.mkDefault false;
     settings = {
       port = 7880;
-      bind_addresses = [ "127.0.0.1" "::1" ];
+      bind_addresses = [
+        "127.0.0.1"
+        "::1"
+      ];
       rtc = {
         tcp_port = 7881;
         port_range_start = 50000;
