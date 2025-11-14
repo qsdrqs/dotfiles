@@ -62,7 +62,7 @@ in
 
   systemd.sleep.extraConfig = ''
     [Sleep]
-    HibernateDelaySec=18h
+    HibernateDelaySec=3h
   '';
 
   systemd = {
@@ -106,6 +106,38 @@ in
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "iHD";
   }; # Force intel-media-driver
+
+  # battery monitoring
+  services.prometheus = {
+    enable = true;
+    globalConfig.scrape_interval = "30s";
+    exporters.node = {
+      enable = true;
+      port = 9100;
+      enabledCollectors = [ "systemd" ];
+    };
+
+    scrapeConfigs = [
+      {
+        job_name = "laptop-node";
+        static_configs = [{
+          targets = [
+            "localhost:${toString config.services.prometheus.exporters.node.port}"
+          ];
+        }];
+      }
+    ];
+  };
+  services.grafana = {
+    enable = true;
+    settings = {
+      server = {
+        http_addr = "127.0.0.1";
+        http_port = 3000;
+        domain = "localhost";
+      };
+    };
+  };
 
   services.udev.extraRules = ''
     # HHKB
