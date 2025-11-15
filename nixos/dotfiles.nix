@@ -131,7 +131,7 @@ in
     # gitstatusd
     gitstatusd =
       let
-        arch_split = lib.strings.splitString "-" pkgs.system;
+        arch_split = lib.strings.splitString "-" pkgs.stdenv.hostPlatform.system;
         arch_reverse = lib.foldr (a: b: if b == "" then a else b + "-" + a) "" arch_split;
       in
       {

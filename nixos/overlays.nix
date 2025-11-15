@@ -33,15 +33,15 @@ let
     })
   ]);
   pkgs-master = import inputs.nixpkgs-master {
-    system = pkgs.system;
+    system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
   pkgs-stable = import inputs.nixpkgs-stable {
-    system = pkgs.system;
+    system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
   pkgs-last = import inputs.nixpkgs-last {
-    system = pkgs.system;
+    system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
 in
@@ -79,8 +79,6 @@ in
         #       }
         #   else throw "Unsupported system: ${pkgs.system}";
         # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
-
-        llama-cpp = pkgs-master.llama-cpp;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         tzupdate = super.rustPlatform.buildRustPackage {
@@ -138,12 +136,16 @@ in
           src = super.fetchFromGitHub {
             owner = "keepassxreboot";
             repo = "keepassxc";
-            rev = "56b63a9e0fc93d9b052e85e340ee22c097825d4d";
-            hash = "sha256-p6/hx1V/rlFoUQChME5iN/DA40eZmsVQCoJC0yGuO6M=";
+            rev = "eefee1f092f5f1dc85c7f06da68637c7c5cabbc7";
+            hash = "sha256-+/0Ee3tOY51YiKlYPxE33Q+g2AuNXfO/lsnaYx9i5cI=";
           };
           nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [
             super.keyutils
           ];
+          patches = [
+            (builtins.elemAt oldAttrs.patches 0)
+          ];
+          doCheck = false;
         });
 
         ranger = super.ranger.overrideAttrs (oldAttrs: {
