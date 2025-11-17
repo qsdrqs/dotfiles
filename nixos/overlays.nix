@@ -97,7 +97,9 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
-        wrapGAppsHook = super.wrapGAppsHook3;
+        kitty = pkgs-stable.kitty;
+        # End Temporary fixed version packages
+
         scaphandre = super.scaphandre.overrideAttrs (old: {
           cargoDeps = super.runCommand "${old.pname}-${old.version}-vendor-patched" {} ''
             cp -r ${old.cargoDeps} $out
@@ -106,7 +108,6 @@ in
           '';
           meta.broken = false;
         });
-        # End Temporary fixed version packages
 
         # neovim-unwrapped =
         #   (super.neovim-unwrapped.override {

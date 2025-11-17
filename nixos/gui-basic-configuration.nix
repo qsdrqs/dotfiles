@@ -118,7 +118,7 @@ in
       default = "saved";
       extraGrubInstallArgs = [
         "--disable-shim-lock"
-        "--pubkey=${./gpg-signing.pub}"
+        # "--pubkey=${./gpg-signing.pub}"
         "--modules=tpm gcry_sha512 gcry_rsa"
       ];
     };
