@@ -106,6 +106,7 @@ in
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "iHD";
   }; # Force intel-media-driver
+  boot.kernelModules = [ "intel_rapl_common" ];
 
   # battery monitoring
   services.prometheus = {
@@ -120,13 +121,34 @@ in
     scrapeConfigs = [
       {
         job_name = "laptop-node";
-        static_configs = [{
-          targets = [
-            "localhost:${toString config.services.prometheus.exporters.node.port}"
-          ];
-        }];
+        static_configs = [
+          {
+            targets = [
+              "localhost:${toString config.services.prometheus.exporters.node.port}"
+            ];
+          }
+        ];
+      }
+      {
+        job_name = "scaphandre";
+        fallback_scrape_protocol = "PrometheusText0.0.4";
+        static_configs = [
+          {
+            targets = [ "127.0.0.1:8081" ];
+          }
+        ];
       }
     ];
+  };
+  services.prometheus.exporters.scaphandre = {
+    enable = true;
+    listenAddress = "127.0.0.1";
+    port = 8081;
+    telemetryPath = "metrics";
+    user = "root";
+    group = "root";
+
+    extraFlags = [ "--containers" ];
   };
   services.grafana = {
     enable = true;

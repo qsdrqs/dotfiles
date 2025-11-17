@@ -117,8 +117,9 @@ in
       gfxmodeEfi = "1024x768";
       default = "saved";
       extraGrubInstallArgs = [
-        "--disable-shim-lock" # TODO: unsafe but needed for custom kernels
-        "--modules=tpm"
+        "--disable-shim-lock"
+        "--pubkey=${./gpg-signing.pub}"
+        "--modules=tpm gcry_sha512 gcry_rsa"
       ];
     };
     efi = {
@@ -197,6 +198,7 @@ in
     sbsigntool
     efibootmgr
     sbctl
+    element-desktop
   ];
 
   # services.teamviewer.enable = true;

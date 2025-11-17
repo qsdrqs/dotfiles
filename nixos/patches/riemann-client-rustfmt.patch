@@ -1,0 +1,12 @@
+diff --git a/riemann_client-0.9.0/src/proto/mod_pb.rs b/riemann_client-0.9.0/src/proto/mod_pb.rs
+index 4786797..8cb5695 100755
+--- a/riemann_client-0.9.0/src/proto/mod_pb.rs
++++ b/riemann_client-0.9.0/src/proto/mod_pb.rs
+@@ -6,7 +6,6 @@
+ #![allow(clippy::all)]
+
+ #![allow(unused_attributes)]
+-#![rustfmt::skip]
+
+ #![allow(box_pointers)]
+ #![allow(dead_code)]

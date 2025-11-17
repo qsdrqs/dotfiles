@@ -44,6 +44,7 @@ let
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
+  packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
 in
 {
   nixpkgs.overlays = [
@@ -93,17 +94,18 @@ in
           cargoHash = "sha256-96lD0Sc2hdhNKeIS4zkiG4J0dxEFt6/Np7HHMSoF8j4=";
           meta = super.tzupdate.meta;
         };
-        slack = super.slack.overrideAttrs (oldAttrs: {
-          version = "4.46.101";
-          src = super.fetchurl {
-            url = "https://downloads.slack-edge.com/desktop-releases/linux/x64/4.46.101/slack-desktop-4.46.101-amd64.deb";
-            hash = "sha256-HK8B8aUq6FxYhvffiO/yeKcU0mJ5IgGYYIH3SMFweTU=";
-          };
-        });
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
         wrapGAppsHook = super.wrapGAppsHook3;
+        scaphandre = super.scaphandre.overrideAttrs (old: {
+          cargoDeps = super.runCommand "${old.pname}-${old.version}-vendor-patched" {} ''
+            cp -r ${old.cargoDeps} $out
+            chmod -R u+w $out
+            patch -p1 -d $out < ${./patches/riemann-client-rustfmt.patch}
+          '';
+          meta.broken = false;
+        });
         # End Temporary fixed version packages
 
         # neovim-unwrapped =
@@ -231,6 +233,28 @@ in
           nativeCheckInputs = [ ];
           doCheck = false;
         });
+
+        element-desktop = super.element-desktop.overrideAttrs (oldAttrs: {
+          desktopItem = super.makeDesktopItem {
+            name = "element-desktop";
+            exec = "element-desktop --password-store=\"gnome-libsecret\" %u";
+            icon = "element";
+            desktopName = "Element";
+            genericName = "Matrix Client";
+            comment = oldAttrs.meta.description;
+            categories = [
+              "Network"
+              "InstantMessaging"
+              "Chat"
+            ];
+            startupWMClass = "Element";
+            mimeTypes = [
+              "x-scheme-handler/element"
+              "x-scheme-handler/io.element.desktop"
+            ];
+          };
+        });
+
       })
   ];
 }

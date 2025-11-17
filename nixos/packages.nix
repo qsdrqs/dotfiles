@@ -25,7 +25,8 @@
       nativeBuildInputs = [
         dpkg
         bc
-      ] ++ kernel.moduleBuildDependencies;
+      ]
+      ++ kernel.moduleBuildDependencies;
 
       unpackPhase = ''
         dpkg-deb -x $src .
@@ -138,9 +139,11 @@
       libusb1,
     }:
     let
-      python_usb = python3.withPackages (ps: with ps; [
-        pyusb
-      ]);
+      python_usb = python3.withPackages (
+        ps: with ps; [
+          pyusb
+        ]
+      );
     in
     writeShellScriptBin "kb-backlight" ''
       export LD_LIBRARY_PATH=${libusb1}/lib:$LD_LIBRARY_PATH

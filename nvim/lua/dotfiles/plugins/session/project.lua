@@ -20,8 +20,9 @@ return function(ctx)
         require("project").setup({
           silent_chdir = true,
           manual_mode = false,
+          use_lsp = true,
           patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc", "pom.xml" },
-          detection_methods = { "pattern", "lsp" },
+          allow_patterns_for_lsp = true,
           ignore_lsp = { "clangd" },
           exclude_dirs = { "~" },
           -- your configuration comes here
