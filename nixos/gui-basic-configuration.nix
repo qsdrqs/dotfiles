@@ -266,4 +266,10 @@ in
   services.btrfs.autoScrub.enable = true;
 
   services.desktopManager.plasma6.enable = true;
+
+  # turn on bluetooth on startup
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="bluetooth", RUN+="${pkgs.util-linux}/bin/rfkill unblock bluetooth"
+  '';
+
 }

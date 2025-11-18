@@ -97,7 +97,6 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
-        kitty = pkgs-stable.kitty;
         # End Temporary fixed version packages
 
         scaphandre = super.scaphandre.overrideAttrs (old: {
