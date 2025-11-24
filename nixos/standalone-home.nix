@@ -29,6 +29,30 @@ in {
     config.nix.package
   ];
 
+  # Mimic the default nix-ld library set that NixOS exposes at
+  # /run/current-system/sw/share/nix-ld/lib. On non-NixOS we can't rely on that
+  # path, so build the same search list directly.
+  home.sessionVariables = let
+    nixLdDefaultLibs = with pkgs; [
+      zlib
+      zstd
+      stdenv.cc.cc
+      curl
+      openssl
+      attr
+      libssh
+      bzip2
+      libxml2
+      acl
+      libsodium
+      util-linux
+      xz
+      systemd
+    ];
+  in {
+    NIX_LD_LIBRARY_PATH = lib.makeLibraryPath nixLdDefaultLibs;
+  };
+
   nix = {
     settings = {
       auto-optimise-store = lib.mkDefault true;

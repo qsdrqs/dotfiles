@@ -5,10 +5,32 @@ import shutil
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from typing import Iterable
 
-TARGET_LINE = "source = ~/.config/hypr/hyprpowersave.conf"
-COMMENTED_LINE = f"# {TARGET_LINE}"
+
+@dataclass(frozen=True)
+class TargetRule:
+    text: str
+    comment_in: frozenset[str]
+
+    def desired_line(self, mode: str) -> str:
+        return f"# {self.text}" if mode in self.comment_in else self.text
+
+
+TARGET_RULES = [
+    # Enable powersave config only on battery; comment when on AC.
+    TargetRule(
+        text="source = ~/.config/hypr/hyprpowersave.conf",
+        comment_in=frozenset({"ac"}),
+    ),
+    # Comment the default high-refresh eDP-1 line on battery; hyprpowersave.conf provides a low-refresh eDP config there.
+    TargetRule(
+        text="monitor=eDP-1,2880x1800@120, 0x0,2",
+        comment_in=frozenset({"battery"}),
+    ),
+]
+
 CONFIG_PATH = pathlib.Path.home() / ".config" / "hypr-monitor.conf"
 STATE_PATH = pathlib.Path(
     os.environ.get("XDG_STATE_HOME", pathlib.Path.home() / ".local" / "state")
@@ -44,17 +66,23 @@ def update_config(mode: str) -> None:
         lines = []
 
     def replace(lines_iter: Iterable[str]) -> list[str]:
-        seen = False
+        seen: set[str] = set()
         result = []
         for raw_line in lines_iter:
             stripped = raw_line.strip()
-            if stripped in (TARGET_LINE, COMMENTED_LINE):
-                seen = True
-                result.append(TARGET_LINE if mode == "battery" else COMMENTED_LINE)
-            else:
+            matched = False
+            for rule in TARGET_RULES:
+                if stripped in (rule.text, f"# {rule.text}"):
+                    result.append(rule.desired_line(mode))
+                    seen.add(rule.text)
+                    matched = True
+                    break
+            if not matched:
                 result.append(raw_line)
-        if not seen:
-            result.append(TARGET_LINE if mode == "battery" else COMMENTED_LINE)
+
+        for rule in TARGET_RULES:
+            if rule.text not in seen:
+                result.append(rule.desired_line(mode))
         return result
 
     updated_lines = replace(lines)

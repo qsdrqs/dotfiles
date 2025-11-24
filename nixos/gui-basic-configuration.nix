@@ -61,14 +61,6 @@ in
         ]);
       in
       {
-        version = "2.6.1-unstable-2025-06-22";
-        src = super.fetchFromGitHub {
-          owner = "boltgolt";
-          repo = "howdy";
-          rev = "d3ab99382f88f043d15f15c1450ab69433892a1c";
-          hash = "sha256-Xd/uScMnX1GMwLD5GYSbE2CwEtzrhwHocsv0ESKV8IM=";
-        };
-        postPatch = "";
         patches = old.patches ++ [
           ./patches/howdy.patch
         ];
@@ -199,6 +191,8 @@ in
     efibootmgr
     sbctl
     element-desktop
+
+    kdePackages.kclock
   ];
 
   # services.teamviewer.enable = true;
@@ -226,6 +220,8 @@ in
     enable = true;
     package = pkgs.wireshark;
   };
+
+  services.dbus.packages = [ pkgs.kdePackages.kclock ];
 
   virtualisation = {
     libvirtd = {
