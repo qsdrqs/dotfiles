@@ -539,6 +539,7 @@ update_ssh_auth_sock() {
 
     # 5) Optional fixed socket you might use locally
     [[ -S "$HOME/.ssh/agent.sock" ]] && candidates+=("$HOME/.ssh/agent.sock")
+    [[ -S "/tmp/ssh-agent.sock" ]] && candidates+=("/tmp/ssh-agent.sock")
 
     # 6) Pick the first usable one
     for sock in "${candidates[@]}"; do

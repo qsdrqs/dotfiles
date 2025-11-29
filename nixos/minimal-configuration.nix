@@ -2,7 +2,14 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, inputs, options, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  options,
+  ...
+}:
 let
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
 in
@@ -11,6 +18,11 @@ in
   # boot.kernelPackages = pkgs.linuxPackages_6_14; # TODO: temperary fix
   # boot.kernelPackages = pkgs.linuxPackages;
   boot.tmp.useTmpfs = true;
+  boot.supportedFilesystems = {
+    ext4 = true;
+    btrfs = true;
+    ntfs = true;
+  };
 
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
@@ -128,13 +140,11 @@ in
     substituters = [
       "https://yazi.cachix.org"
       "https://nix-community.cachix.org"
-      "https://cache.nixos.org/"
       "https://cache.nixos-cuda.org"
     ];
     trusted-public-keys = [
       "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
     ];
   };
@@ -191,7 +201,8 @@ in
     kmod
     nmap
     lm_sensors
-    lua
+    luajit
+    luajitPackages.luarocks
     home-manager
     nix-tree
     duf
@@ -301,7 +312,8 @@ in
         path = [
           pkgs.bash
           pkgs.interception-tools
-        ] ++ interception-tools-plugins;
+        ]
+        ++ interception-tools-plugins;
         serviceConfig = {
           ExecStart = ''
             ${pkgs.interception-tools}/bin/udevmon -c \

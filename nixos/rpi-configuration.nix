@@ -5,8 +5,8 @@ let
     rpi-gpio
     gpiozero
   ];
-  wifi-interface-internal = "wlp1s0u1u2";
-  eth-interface-internal = "enp1s0u1u3c2";
+  wifi-interface-internal = "wlp1s0u1u1";
+  eth-interface-internal = "enp1s0u2u3c2";
 in
 {
   imports = [

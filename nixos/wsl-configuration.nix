@@ -1,7 +1,12 @@
-{ pkgs, config, modulesPath, inputs, lib, options, utils, ... }: {
+{ pkgs, config, modulesPath, inputs, lib, options, utils, ... }:
+{
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
     inputs.home-manager.nixosModules.home-manager
+  ];
+
+  nix.settings.substituters = [
+    "/mnt/NixOS?trusted=1"
   ];
 
   wsl = {
@@ -41,14 +46,15 @@
 
   systemd.user = {
     services.ssh-agent-share =
-      let user_local = "${config.users.users.qsdrqs.home}/.local";
-      in {
+      let
+        user_local = "${config.users.users.qsdrqs.home}/.local";
+      in
+      {
         description = "Share SSH agent socket between WSL and Windows";
         wantedBy = [ "default.target" ];
         after = [ "network.target" ];
         serviceConfig = {
-          ExecStart = ''
-            ${pkgs.socat}/bin/socat UNIX-LISTEN:/tmp/ssh-agent.sock,fork EXEC:"${user_local}/bin/winsocat.exe STDIO NPIPE\\:openssh-ssh-agent"'';
+          ExecStart = ''${pkgs.socat}/bin/socat UNIX-LISTEN:/tmp/ssh-agent.sock,fork EXEC:"${user_local}/bin/winsocat.exe STDIO NPIPE\\:openssh-ssh-agent"'';
           Restart = "on-failure";
           RestartSec = 5;
         };
