@@ -45,6 +45,7 @@ in
     sshping
     nasm
     nodejs
+    aichat
   ];
 
   environment.variables = {

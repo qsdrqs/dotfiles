@@ -223,14 +223,6 @@ in
 
   services.dbus.packages = [ pkgs.kdePackages.kclock ];
 
-  virtualisation = {
-    libvirtd = {
-      enable = true;
-      qemu.vhostUserPackages = [ pkgs.virtiofsd ];
-    };
-    docker.enable = true;
-  };
-
   users.users.qsdrqs.extraGroups = [
     "wireshark"
     "libvirtd"

@@ -29,4 +29,13 @@
 
     keepassxc
   ];
+
+  virtualisation = {
+    libvirtd = {
+      enable = true;
+      qemu.vhostUserPackages = [ pkgs.virtiofsd ];
+    };
+    docker.enable = true;
+  };
+
 }

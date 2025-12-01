@@ -1,0 +1,11 @@
+customCommands:
+  - key: "<c-a>"
+    description: "Pick AI commit"
+    context: "files"
+    prompts:
+      - type: "menuFromCommand"
+        title: "Select AI commit message"
+        key: "Message"
+        command: "sh -c \"$HOME/.config/lazygit/ai_commit_message.sh\""
+    command: "git commit -m {{.Form.Message | quote}}"
+    output: terminal
