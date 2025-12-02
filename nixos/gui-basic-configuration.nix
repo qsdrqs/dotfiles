@@ -165,8 +165,6 @@ in
     # neovide
     termshark
 
-    texlive.combined.scheme-full
-
     pandoc
     zotero
     xournalpp
