@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/c5ae371f1a6a7fd27823bc500d9390b38c05fa55";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/117cc7f94e8072499b0a7aa4c52084fa4e11cc9b";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
