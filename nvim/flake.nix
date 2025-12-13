@@ -146,7 +146,7 @@
     };
     blinkDOTcmp = {
       url = "github:saghen/blink.cmp/v1.8.0";
-      flake = false;
+      flake = true;
     };
     blinkDOTcompat = {
       url = "github:saghen/blink.compat";

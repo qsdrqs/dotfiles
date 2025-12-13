@@ -224,6 +224,9 @@ local function dump_plugins_list(plugins)
     if plugin.commit ~= nil then
       opt.commit = plugin.commit
     end
+    if plugin.flake ~= nil then
+      opt.flake = plugin.flake
+    end
     if plugin[1] ~= nil then
       print(plugin[1], vim.json.encode(opt))
     else

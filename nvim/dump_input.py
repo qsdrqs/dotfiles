@@ -120,10 +120,12 @@ def main():
                     if dep_name in plugins_dict:
                         continue
                     dep_url = f'github:{dep}'
-                    plugins_dict[dep_name] = {
-                        'url': dep_url,
-                        'build': False,
-                    }
+                    if plugins_dict.get(dep_name) is None:
+                        plugins_dict[dep_name] = {
+                            'url': dep_url,
+                            'build': False,
+                            'flake': 'false',
+                        }
 
         plugin_url: str = ""
         plugin_name: str = ""
@@ -178,6 +180,10 @@ def main():
         if 'commit' in json_opts:
             commit = json_opts['commit']
 
+        flake = 'false'
+        if 'flake' in json_opts:
+            flake = json_opts['flake']
+
         if plugin_url != "" and plugin_name != "":
             if branch != None and commit != None:
                 raise Exception(f'plugin {plugin_name} has both branch and commit')
@@ -191,6 +197,7 @@ def main():
             plugins_dict[plugin_name] = {
                 'url': url,
                 'build': need_build,
+                'flake': flake,
             }
 
     nvim_dir = os.path.dirname(os.path.realpath(__file__))
@@ -199,7 +206,7 @@ def main():
         plugin_lines = ';'.join(f'''
     {k} = {{
       url = "{v['url']}";
-      flake = false;
+      flake = {str(v['flake']).lower()};
     }}''' for k, v in plugins_dict.items())
 
         plugins_list = '\n        '.join(f'{{ name = "{k.replace("DOT", ".")}"; dotname = "{k}"; source = inputs.{k}; build = {str(v["build"]).lower()}; }}' for k, v in plugins_dict.items())

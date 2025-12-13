@@ -76,16 +76,7 @@ let
         ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/avante.nvim/build $out/build
       '';
     };
-    blinkDOTcmp = pkgs.stdenv.mkDerivation {
-      name = "blink.cmp";
-      src = inputs.nvim-config.inputs.blinkDOTcmp;
-      buildPhase = dummyBuildPhase;
-      installPhase = commonInstallPhase;
-      postInstall = ''
-        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/blink.cmp/target $out/target
-        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/blink.cmp/.git $out/.git
-      '';
-    };
+    blinkDOTcmp = inputs.nvim-config.inputs.blinkDOTcmp.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
     (entry: {

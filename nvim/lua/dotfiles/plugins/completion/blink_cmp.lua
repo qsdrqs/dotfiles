@@ -22,6 +22,7 @@ return function(ctx)
         -- 'Kaiser-Yang/blink-cmp-avante',
       },
       version = "1.*",
+      flake = true,
       config = function()
         local copilot_suggestion = require("copilot.suggestion")
         local nobold_cache = {}
@@ -211,6 +212,10 @@ return function(ctx)
           -- See the fuzzy documentation for more information
           fuzzy = {
             implementation = "prefer_rust",
+            prebuilt_binaries = {
+              download = false,
+              ignore_version_mismatch = true,
+            },
           },
         }
         if vim.fn.isdirectory(vim.fn.stdpath("data") .. "/lazy/blink.cmp/.git") == 0 then
