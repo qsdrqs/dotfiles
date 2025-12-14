@@ -108,6 +108,41 @@ return function(ctx)
 
         require("bufferline").setup(opts)
 
+        local function set_bufferline_diagnostics(enabled)
+          opts.options.diagnostics = enabled and "nvim_lsp" or false
+          require("bufferline").setup(opts)
+        end
+
+        -- Disable bufferline diagnostics when texlab is attached (to avoid slowing down the ui)
+        local texlab_bufs = {}
+        vim.api.nvim_create_autocmd("LspAttach", {
+          callback = function(args)
+            local client = vim.lsp.get_client_by_id(args.data.client_id)
+            if not client or client.name ~= "texlab" then
+              return
+            end
+            if texlab_bufs[args.buf] then
+              return
+            end
+            texlab_bufs[args.buf] = true
+            set_bufferline_diagnostics(false)
+          end,
+        })
+
+        vim.api.nvim_create_autocmd("LspDetach", {
+          callback = function(args)
+            local client = vim.lsp.get_client_by_id(args.data.client_id)
+            if not client or client.name ~= "texlab" then
+              return
+            end
+            texlab_bufs[args.buf] = nil
+            if next(texlab_bufs) == nil then
+              set_bufferline_diagnostics(true)
+            end
+          end,
+        })
+
+
         -- use alt + number to go to buffer
         for i = 1, 9 do
           vim.keymap.set("n", "<M-" .. i .. ">", function()

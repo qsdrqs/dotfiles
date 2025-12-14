@@ -229,6 +229,7 @@ return function(ctx)
               texlab = {
                 -- rootDirectory = vim.fn.getcwd(),
                 auxDirectory = "latex.out",
+                diagnosticsDelay = 800,
                 build = {
                   onSave = true, -- Automatically build latex on save
                   useFileList = true, -- use .fls file to determine which files to compile
