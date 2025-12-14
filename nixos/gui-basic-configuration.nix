@@ -175,7 +175,7 @@ in
     # NUR
     qq-hidpi
     wemeet
-    wechat
+    wechat-hidpi
     # flameshot
     (flameshot.override {
       enableWlrSupport = true;

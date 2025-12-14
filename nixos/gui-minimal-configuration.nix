@@ -141,7 +141,10 @@ in
 
   programs = {
     dconf.enable = true;
+    niri.enable = true;
   };
+  services.gnome.gcr-ssh-agent.enable = false;
+  services.gnome.gnome-keyring.enable = false;
 
   # provide org.freedesktop.secrets
   # services.gnome.gnome-keyring.enable = true;
@@ -187,6 +190,21 @@ in
     enable = true;
   };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment.sessionVariables.HYPR_PLUGIN_DIR =
+    let
+      hyprPluginDir = pkgs.symlinkJoin {
+        name = "hyprland-plugins";
+        paths = with pkgs.hyprlandPlugins; [
+          hyprbars
+          hyprfocus
+          hyprexpo
+          hyprscrolling
+          hyprtrails
+          hyprwinwrap
+        ];
+      };
+    in
+    hyprPluginDir;
   xdg.portal = {
     config.hyprland = {
       "org.freedesktop.impl.portal.ScreenCast" = "hyprland";
