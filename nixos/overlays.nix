@@ -97,6 +97,7 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
+        freerdp = super.freerdp.override { openh264 = null; };
         # End Temporary fixed version packages
 
         scaphandre = super.scaphandre.overrideAttrs (old: {

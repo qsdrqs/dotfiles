@@ -7,6 +7,7 @@
 }:
 let
   py = python3.withPackages (ps: with ps; [
+    tree-sitter-language-pack
   ]);
 in
 stdenv.mkDerivation {

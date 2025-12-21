@@ -68,6 +68,7 @@ in
     ark
 
     xorg.xlsclients
+    xwayland-satellite
   ]);
 
   qt.platformTheme = "kde";
@@ -139,10 +140,9 @@ in
     };
   };
 
-  programs = {
-    dconf.enable = true;
-    niri.enable = true;
-  };
+  programs.dconf.enable = true;
+
+  programs.niri.enable = true;
   services.gnome.gcr-ssh-agent.enable = false;
   services.gnome.gnome-keyring.enable = false;
 
@@ -166,10 +166,10 @@ in
     enable = true;
     autoNumlock = true;
     settings = {
-      Autologin = {
-        Session = "hyprland.desktop";
-        User = "qsdrqs";
-      };
+      # Autologin = {
+      #   Session = "hyprland.desktop";
+      #   User = "qsdrqs";
+      # };
     };
   };
   # Workaround for kwin to work with numlock on

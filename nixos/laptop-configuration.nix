@@ -11,6 +11,9 @@ let
   hyprMonitorPower = pkgs.writeShellScriptBin "hypr-monitor-power" ''
     exec ${pkgs.python3}/bin/python3 ${./scripts/hypr-monitor-power.py}
   '';
+  niriMonitorPower = pkgs.writeShellScriptBin "niri-monitor-power" ''
+    exec ${pkgs.python3}/bin/python3 ${./scripts/niri-monitor-power.py}
+  '';
 in
 {
   environment.systemPackages = with pkgs; [
@@ -87,6 +90,19 @@ in
         path = [ pkgs.hyprland ];
         serviceConfig = {
           ExecStart = "${hyprMonitorPower}/bin/hypr-monitor-power";
+          Restart = "always";
+          RestartSec = 5;
+        };
+      };
+
+      niri-monitor-power = {
+        enable = true;
+        description = "Toggle niri monitor powersave config based on AC/battery state";
+        wantedBy = [ "graphical-session.target" ];
+        after = [ "graphical-session.target" ];
+        path = [ pkgs.niri ];
+        serviceConfig = {
+          ExecStart = "${niriMonitorPower}/bin/niri-monitor-power";
           Restart = "always";
           RestartSec = 5;
         };

@@ -137,9 +137,15 @@ return function(ctx)
                   },
                   label = {
                     text = function(ctx)
+                      if ctx.item.label == '\0' then
+                        ctx.item.label = ''
+                      end
                       return require("colorful-menu").blink_components_text(ctx)
                     end,
                     highlight = function(ctx)
+                      if ctx.item.label == '\0' then
+                        ctx.item.label = ''
+                      end
                       local highlights = {}
                       local highlights_info = require("colorful-menu").blink_highlights(ctx)
                       if highlights_info ~= nil then

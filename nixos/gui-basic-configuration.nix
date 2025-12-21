@@ -170,6 +170,7 @@ in
     xournalpp
     apktool
     realvnc-vnc-viewer
+    kdePackages.krdc
     drawio
 
     # NUR
@@ -182,7 +183,9 @@ in
     })
 
     samba
-    freerdp
+    (freerdp.override {
+      openh264 = null;
+    })
 
     # secure boot and UEFI tools
     sbsigntool

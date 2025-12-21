@@ -5,10 +5,8 @@
     // "width": 1280, // Waybar width
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
-    "modules-left": ["hyprland/workspaces", "hyprland/submap", "sway/scratchpad", "custom/media"],
-    "modules-center": ["hyprland/window"],
-    // "modules-left": ["niri/workspaces", "hyprland/workspaces", "hyprland/submap", "sway/scratchpad", "custom/media"],
-    // "modules-center": ["niri/window", "hyprland/window"],
+    "modules-left": ["ext/workspaces", "hyprland/submap", "sway/scratchpad", "custom/media"],
+    "modules-center": ["niri/window", "hyprland/window"],
     // "modules-right": ["mpd", "idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "keyboard-state", "sway/language", "battery", "battery#bat2", "clock", "tray"],
     "modules-right": ["idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "keyboard-state", "sway/language", "battery", "battery#bat2", "clock", "tray", "custom/notification"],
     // Modules configuration
@@ -28,7 +26,7 @@
     //         "default": ""
     //     }
     // },
-    "hyprland/workspaces": {
+    "ext/workspaces": {
         "on-click": "activate",
     },
     "niri/workspaces": {

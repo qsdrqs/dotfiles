@@ -45,13 +45,30 @@ in
     indicator = true;
   };
 
-  home.activation.configs = ''
+  home.activation.configs = let
+    linkConfigs = [
+      "hypr"
+      "waybar"
+      "kitty"
+      "rofi"
+      "niri"
+    ];
+    touchConfigs = [
+      "hypr-monitor.conf"
+      "niri-monitor.kdl"
+    ];
+  in ''
     mkdir -p ~/.config
-    for cfg in hypr waybar kitty rofi; do
-      if [ ! -e ${homeDir}/.config/$cfg ]; then
-        ln -s ${homeDir}/dotfiles/$cfg ${homeDir}/.config
+    ${lib.concatMapStringsSep "\n" (cfg: ''
+      if [ ! -e ${homeDir}/.config/${cfg} ]; then
+        ln -s ${homeDir}/dotfiles/${cfg} ${homeDir}/.config
       fi
-    done
+    '') linkConfigs}
+    ${lib.concatMapStringsSep "\n" (cfg: ''
+      if [ ! -e ${homeDir}/.config/${cfg} ]; then
+        touch ${homeDir}/.config/${cfg}
+      fi
+    '') touchConfigs}
   '';
 
 }
