@@ -24,9 +24,12 @@
       "battery",
       "battery#bat2",
       "custom/separator",
-      "clock",
+      "clock#time",
+      "custom/separator",
+      "clock#date",
       "custom/separator",
       "tray",
+      "custom/separator",
       "custom/notification"
     ],
     // Modules configuration
@@ -111,10 +114,18 @@
             "element": "/run/current-system/sw/share/icons/hicolor/512x512/apps/element.png"
         }
     },
-    "clock": {
+    "clock#date": {
         // "timezone": "America/New_York",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format": "{:%Y-%m-%d %a %H:%M}"
+        // "format": "{0:%Y-%m-%d %a} <span font='18px'>{0:%H:%M}</span>",
+        "format": "{:%Y-%m-%d %a}"
+    },
+    "clock#time": {
+        // "timezone": "America/New_York",
+        "format": "<big>{:%H:%M}</big>",
+        "format-alt": "<big>{:%H:%M:%S}</big>",
+        "tooltip-format": "<big>{:%H:%M:%S}</big>",
+        "interval": 1
     },
     "cpu": {
         "format": "{usage}% ",

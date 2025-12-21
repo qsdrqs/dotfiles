@@ -1,5 +1,5 @@
 @define-color panel_bg rgba(40, 40, 40, 0.85);
-@define-color panel_bg_hover rgba(255, 255, 255, 0.05);
+@define-color panel_bg_hover rgba(255, 255, 255, 0.10);
 @define-color panel_border rgba(255, 255, 255, 0.1);
 @define-color text_main rgba(255, 255, 255, 0.95);
 @define-color text_dim rgba(255, 255, 255, 0.6);
@@ -92,7 +92,18 @@ window#waybar {
 }
 
 #keyboard-state label {
-  padding: 0 4px;
+  padding: 0 6px;
+}
+
+#keyboard-state label.locked {
+  background: @accent;
+  color: @accent_text;
+  border-radius: 4px;
+}
+
+#keyboard-state label.numlock.locked {
+  background: @panel_bg_hover;
+  color: @text_main;
 }
 
 /* 激活/聚焦的工作区高亮 */
@@ -100,7 +111,7 @@ window#waybar {
 #workspaces button.active {
   background: @accent;
   color: @accent_text;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px @shadow;
 }
 
 #workspaces button.urgent {
@@ -121,6 +132,7 @@ tooltip {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 10px;
+  box-shadow: 0px 4px 8px @shadow;
 }
 
 tooltip label {
