@@ -38,19 +38,19 @@ window#waybar {
 #language,
 #battery,
 #clock,
-#tray > .passive,
-#tray > .active,
-#tray > .needs-attention {
-  -gtk-icon-effect: highlight;
-}
-
 #tray,
 #custom-notification {
-  padding: 0px 10px;
+  padding: 0px 5px;
   background: transparent;
   transition: background 0.2s;
   margin: 4px 2px;
   border-radius: 4px;
+}
+
+#tray > .passive,
+#tray > .active,
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
 }
 
 /* 悬停效果 */
@@ -73,6 +73,10 @@ window#waybar {
   background: @panel_bg_hover;
 }
 
+#idle_inhibitor {
+  padding: 0px 10px;
+}
+
 #idle_inhibitor.activated {
   background: @accent;
   color: #000000;
@@ -87,13 +91,8 @@ window#waybar {
   border-radius: 4px;
 }
 
-#keyboard-state {
-  min-width: 16px;
-}
-
 #keyboard-state label {
-  padding: 0 0px;
-  margin: 0 5px;
+  padding: 0 4px;
 }
 
 /* 激活/聚焦的工作区高亮 */

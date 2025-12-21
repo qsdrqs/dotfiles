@@ -40,7 +40,7 @@ window#waybar {
 #clock,
 #tray,
 #custom-notification {
-  padding: 0px 10px;
+  padding: 0px 5px;
   background: transparent;
   transition: background 0.2s;
   margin: 4px 2px;
@@ -67,6 +67,10 @@ window#waybar {
   background: @panel_bg_hover;
 }
 
+#idle_inhibitor {
+  padding: 0px 10px;
+}
+
 #idle_inhibitor.activated {
   background: @accent;
   color: #000000;
@@ -79,10 +83,6 @@ window#waybar {
   padding: 0px 8px;
   margin: 4px 2px;
   border-radius: 4px;
-}
-
-#keyboard-state {
-  min-width: 65px;
 }
 
 #keyboard-state label {
