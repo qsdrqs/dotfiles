@@ -34,6 +34,7 @@ let
     nvim-treesitter = pkgs.stdenv.mkDerivation {
       name = "nvim-treesitter";
       src = inputs.nvim-config.inputs.nvim-treesitter;
+      buildPhase = dummyBuildPhase;
       installPhase = commonInstallPhase;
       postInstall = ''
         rm -rf $out/parser-info

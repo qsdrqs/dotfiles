@@ -89,12 +89,12 @@ in
   services.mpd = {
     enable = true;
     user = "qsdrqs";
-    extraConfig = ''
-      audio_output {
-        type "pipewire"
-        name "My PipeWire Output"
-      }
-    '';
+    settings = {
+      audio_output = [{
+        type="pipewire";
+        name="My PipeWire Output";
+      }];
+    };
   };
   services.blueman.enable = true;
 
@@ -166,10 +166,10 @@ in
     enable = true;
     autoNumlock = true;
     settings = {
-      # Autologin = {
-      #   Session = "hyprland.desktop";
-      #   User = "qsdrqs";
-      # };
+      Autologin = {
+        Session = "niri.desktop";
+        User = "qsdrqs";
+      };
     };
   };
   # Workaround for kwin to work with numlock on

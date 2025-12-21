@@ -16,61 +16,63 @@ return function(ctx)
     {
       "nvim-treesitter/nvim-treesitter-textobjects",
       lazy = true,
+      branch = "main",
       cond = function()
-        return vim.b.treesitter_disable ~= true
+        return vim.g.treesitter_disable ~= true and not vim.g.vscode
       end,
       config = function()
         if vim.g.treesitter_disable == true then
           return
         end
-        local opts = {
-          textobjects = {
-            select = {
-              enable = true,
-
-              -- Automatically jump forward to textobj, similar to targets.vim
-              lookahead = true,
-
-              keymaps = {
-                -- You can use the capture groups defined in textobjects.scm
-                ["af"] = "@function.outer",
-                ["if"] = "@function.inner",
-                ["ac"] = "@class.outer",
-                ["ic"] = "@class.inner",
-                ["ap"] = "@parameter.outer",
-                ["ip"] = "@parameter.inner",
-              },
-            },
-            swap = {
-              enable = true,
-              swap_next = {
-                ["<leader>sl"] = "@parameter.inner",
-              },
-              swap_previous = {
-                ["<leader>sh"] = "@parameter.inner",
-              },
-            },
+        local textobjects = require("nvim-treesitter-textobjects")
+        textobjects.setup({
+          select = {
+            -- Automatically jump forward to textobj, similar to targets.vim
+            lookahead = true,
           },
-        }
-        if vim.bo.filetype ~= "lua" then
-          opts.textobjects.move = {
-            enable = true,
+          move = {
             set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-              ["]m"] = "@function.outer",
-            },
-            goto_next_end = {
-              ["]M"] = "@function.outer",
-            },
-            goto_previous_start = {
-              ["[m"] = "@function.outer",
-            },
-            goto_previous_end = {
-              ["[M"] = "@function.outer",
-            },
-          }
+          },
+        })
+
+        local select = require("nvim-treesitter-textobjects.select")
+        local swap = require("nvim-treesitter-textobjects.swap")
+        local move = require("nvim-treesitter-textobjects.move")
+
+        local function map_select(lhs, capture)
+          vim.keymap.set({ "x", "o" }, lhs, function()
+            select.select_textobject(capture, "textobjects")
+          end)
         end
-        require("nvim-treesitter.configs").setup(opts)
+
+        map_select("af", "@function.outer")
+        map_select("if", "@function.inner")
+        map_select("ac", "@class.outer")
+        map_select("ic", "@class.inner")
+        map_select("ap", "@parameter.outer")
+        map_select("ip", "@parameter.inner")
+
+        vim.keymap.set("n", "<leader>sl", function()
+          swap.swap_next("@parameter.inner", "textobjects")
+        end)
+        vim.keymap.set("n", "<leader>sh", function()
+          swap.swap_previous("@parameter.inner", "textobjects")
+        end)
+
+        if vim.bo.filetype ~= "lua" then
+          vim.keymap.set({ "n", "x", "o" }, "]m", function()
+            move.goto_next_start("@function.outer", "textobjects")
+          end)
+          vim.keymap.set({ "n", "x", "o" }, "]M", function()
+            move.goto_next_end("@function.outer", "textobjects")
+          end)
+          vim.keymap.set({ "n", "x", "o" }, "[m", function()
+            move.goto_previous_start("@function.outer", "textobjects")
+          end)
+          vim.keymap.set({ "n", "x", "o" }, "[M", function()
+            move.goto_previous_end("@function.outer", "textobjects")
+          end)
+        end
       end,
     },
 

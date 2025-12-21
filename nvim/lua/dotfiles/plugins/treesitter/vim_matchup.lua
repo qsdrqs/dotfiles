@@ -22,15 +22,6 @@ return function(ctx)
         vim.g.matchup_treesitter_disable_virtual_text = true
         vim.g.matchup_treesitter_enabled = true
       end,
-      config = function()
-        require("nvim-treesitter.configs").setup({
-          matchup = {
-            enable = true, -- mandatory, false will disable the whole extension
-            disable_virtual_text = true,
-            -- [options]
-          },
-        })
-      end,
     },
 
   }

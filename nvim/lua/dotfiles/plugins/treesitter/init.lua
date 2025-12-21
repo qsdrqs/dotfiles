@@ -2,7 +2,6 @@ local M = {}
 
 local modules = {
   require("dotfiles.plugins.treesitter.nvim_treesitter"),
-  require("dotfiles.plugins.treesitter.playground"),
   require("dotfiles.plugins.treesitter.nvim_treesitter_textobjects"),
   require("dotfiles.plugins.treesitter.nvim_treesitter_context"),
   require("dotfiles.plugins.treesitter.nvim_ts_autotag"),

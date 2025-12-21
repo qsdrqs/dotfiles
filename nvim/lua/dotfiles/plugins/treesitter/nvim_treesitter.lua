@@ -16,59 +16,69 @@ return function(ctx)
       "nvim-treesitter/nvim-treesitter",
       build = ":TSUpdate",
       cond = function()
-        return vim.g.treesitter_disable ~= true
+        return vim.g.treesitter_disable ~= true and not vim.g.vscode
       end,
       config = function()
         if vim.g.treesitter_disable == true or vim.g.vscode then
           return
         end
-        require("nvim-treesitter.configs").setup({
-          -- One of "all", or a list of languages
-          ensure_installed = { "c", "cpp", "java", "python", "javascript", "rust", "markdown" },
+        local ts = require("nvim-treesitter")
+        ts.setup()
 
-          -- Install languages synchronously (only applied to `ensure_installed`)
-          sync_install = false,
-
-          -- Automatically install missing parsers when entering buffer
-          -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-          auto_install = true,
-
-          -- List of parsers to ignore installing
-          ignore_install = { "bash" },
-
-          highlight = {
-            -- `false` will disable the whole extension
-            enable = true,
-
-            -- list of language that will be disabled
-            disable = function(lang, bufnr) -- Disable in large C++ buffers
-              return vim.api.nvim_buf_line_count(bufnr) > 20000
-            end,
-
-            -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-            -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-            -- Using this option may slow down your editor, and you may see some duplicate highlights.
-            -- Instead of true it can also be a list of languages
-            additional_vim_regex_highlighting = true,
-            custom_captures = {
-              -- disable comment hightlight (for javadoc)
-              ["comment"] = "NONE",
+        local function register_matlab_parser()
+          require("nvim-treesitter.parsers").matlab = {
+            install_info = {
+              url = "https://github.com/mstanciu552/tree-sitter-matlab.git",
+              files = { "src/parser.c" },
+              branch = "main",
             },
-          },
-          indent = {
-            enable = false,
-          },
+            filetype = "matlab", -- Keep filetype consistent with parser name.
+          }
+        end
+
+        register_matlab_parser()
+
+        local group = vim.api.nvim_create_augroup("TreesitterConfig", { clear = true })
+
+        vim.api.nvim_create_autocmd("User", {
+          group = group,
+          pattern = "TSUpdate",
+          callback = register_matlab_parser,
         })
-        -- matlab
-        local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-        parser_config.matlab = {
-          install_info = {
-            url = "https://github.com/mstanciu552/tree-sitter-matlab.git",
-            files = { "src/parser.c" },
-            branch = "main",
-          },
-          filetype = "matlab", -- if filetype does not agrees with parser name
-        }
+
+        -- Install parsers (async; no-op if already installed).
+        ts.install({ "c", "cpp", "java", "python", "javascript", "rust", "markdown" })
+
+        local function apply_treesitter(bufnr)
+          -- Stop treesitter for buffers marked disabled.
+          if vim.b[bufnr].treesitter_disable == 1 then
+            pcall(vim.treesitter.stop, bufnr)
+            return
+          end
+
+          -- Require a real filetype.
+          if vim.bo[bufnr].filetype == "" then
+            return
+          end
+
+          -- Start treesitter; only enable indentexpr on success.
+          if pcall(vim.treesitter.start, bufnr) then
+            vim.bo[bufnr].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end
+
+        vim.api.nvim_create_autocmd("FileType", {
+          group = group,
+          callback = function(args)
+            apply_treesitter(args.buf)
+          end,
+        })
+
+        for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.api.nvim_buf_is_loaded(bufnr) then
+            apply_treesitter(bufnr)
+          end
+        end
       end,
     },
 
