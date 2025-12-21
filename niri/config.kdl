@@ -296,7 +296,7 @@ spawn-at-startup "sleep 5; keepassxc"
 spawn-at-startup "hypridle"
 // spawn-at-startup "hyprlock"
 spawn-at-startup "wluma"
-spawn-at-startup "flameshot"
+// spawn-at-startup "flameshot"
 
 spawn-sh-at-startup "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
 spawn-sh-at-startup "systemctl --user start hyprland-session.target"

@@ -3,12 +3,32 @@
     // "position": "bottom", // Waybar position (top|bottom|left|right)
     "height": 30, // Waybar height (to be removed for auto height)
     // "width": 1280, // Waybar width
-    "spacing": 4, // Gaps between modules (4px)
+    "spacing": 0, // Gaps between modules (0px for continuous look)
     // Choose the order of the modules
     "modules-left": ["ext/workspaces", "hyprland/submap", "sway/scratchpad", "custom/media"],
     "modules-center": ["niri/window", "hyprland/window"],
-    // "modules-right": ["mpd", "idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "keyboard-state", "sway/language", "battery", "battery#bat2", "clock", "tray"],
-    "modules-right": ["idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "keyboard-state", "sway/language", "battery", "battery#bat2", "clock", "tray", "custom/notification"],
+    "modules-right": [
+      "idle_inhibitor",
+      "custom/separator",
+      "pulseaudio",
+      "backlight",
+      "custom/separator",
+      "network",
+      "custom/separator",
+      "cpu",
+      "memory",
+      "temperature",
+      "custom/separator",
+      "keyboard-state",
+      "sway/language",
+      "battery",
+      "battery#bat2",
+      "custom/separator",
+      "clock",
+      "custom/separator",
+      "tray",
+      "custom/notification"
+    ],
     // Modules configuration
     // "wlr/workspaces": {
     //     "disable-scroll": true,
@@ -192,6 +212,10 @@
         "on-click": "swaync-client -t -sw",
         "on-click-right": "swaync-client -d -sw",
         "escape": true
+    },
+    "custom/separator": {
+        "format": " ",
+        "tooltip": false
     },
 }
 

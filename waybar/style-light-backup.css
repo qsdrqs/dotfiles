@@ -1,12 +1,12 @@
-@define-color panel_bg rgba(40, 40, 40, 0.85);
-@define-color panel_bg_hover rgba(255, 255, 255, 0.05);
-@define-color panel_border rgba(255, 255, 255, 0.1);
-@define-color text_main rgba(255, 255, 255, 0.95);
-@define-color text_dim rgba(255, 255, 255, 0.6);
-@define-color accent rgba(61, 174, 233, 0.8);
-@define-color accent_text #ffffff;
-@define-color urgent rgba(255, 92, 92, 0.9);
-@define-color shadow rgba(0, 0, 0, 0.3);
+@define-color panel_bg rgba(215, 215, 215, 0.85);
+@define-color panel_bg_hover rgba(0, 0, 0, 0.05);
+@define-color panel_border rgba(0, 0, 0, 0.1);
+@define-color text_main rgba(0, 0, 0, 0.85);
+@define-color text_dim rgba(0, 0, 0, 0.6);
+@define-color accent rgba(61, 174, 233, 0.35);
+@define-color accent_text #000000;
+@define-color urgent rgba(255, 92, 92, 0.8);
+@define-color shadow rgba(0, 0, 0, 0.1);
 
 * {
   border: none;
@@ -38,12 +38,6 @@ window#waybar {
 #language,
 #battery,
 #clock,
-#tray > .passive,
-#tray > .active,
-#tray > .needs-attention {
-  -gtk-icon-effect: highlight;
-}
-
 #tray,
 #custom-notification {
   padding: 0px 10px;
@@ -88,12 +82,11 @@ window#waybar {
 }
 
 #keyboard-state {
-  min-width: 16px;
+  min-width: 65px;
 }
 
 #keyboard-state label {
-  padding: 0 0px;
-  margin: 0 5px;
+  padding: 0 4px;
 }
 
 /* 激活/聚焦的工作区高亮 */
@@ -101,7 +94,7 @@ window#waybar {
 #workspaces button.active {
   background: @accent;
   color: @accent_text;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 #workspaces button.urgent {
@@ -110,18 +103,19 @@ window#waybar {
 }
 
 #battery.warning {
-  color: #ffe082;
+  color: #f67400;
 }
 
 #battery.critical {
-  color: #ff8a80;
+  color: #da4453;
 }
 
 tooltip {
-  background: rgba(40, 40, 40, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 10px;
+  box-shadow: 0px 4px 8px @shadow;
 }
 
 tooltip label {
@@ -129,7 +123,7 @@ tooltip label {
 }
 
 #custom-separator {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
   margin: 10px 4px;
   min-width: 1px;
 }
