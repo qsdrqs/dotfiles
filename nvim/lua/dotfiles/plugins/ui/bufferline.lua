@@ -107,9 +107,21 @@ return function(ctx)
         end
 
         require("bufferline").setup(opts)
+        local bufferline_diagnostic_handler = vim.diagnostic.handlers["bufferline"]
+        local noop_diagnostic_handler = {
+          show = function() end,
+          hide = function() end,
+        }
 
         local function set_bufferline_diagnostics(enabled)
           opts.options.diagnostics = enabled and "nvim_lsp" or false
+          if enabled then
+            if bufferline_diagnostic_handler then
+              vim.diagnostic.handlers["bufferline"] = bufferline_diagnostic_handler
+            end
+          else
+            vim.diagnostic.handlers["bufferline"] = noop_diagnostic_handler
+          end
           require("bufferline").setup(opts)
         end
 
