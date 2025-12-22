@@ -33,7 +33,7 @@ in
     enable = true;
     timer = {
       enable = true;
-      interval = "*:0/5"; # Update timezone data every 5 minutes.
+      interval = "hourly";
     };
   };
   # Configure network proxy if necessary

@@ -15,6 +15,7 @@ return function(ctx)
     {
       "nvim-treesitter/nvim-treesitter",
       build = ":TSUpdate",
+      branch = "main",
       cond = function()
         return vim.g.treesitter_disable ~= true and not vim.g.vscode
       end,
@@ -57,7 +58,34 @@ return function(ctx)
           end
 
           -- Require a real filetype.
-          if vim.bo[bufnr].filetype == "" then
+          local filetype = vim.bo[bufnr].filetype
+          if filetype == "" then
+            return
+          end
+
+          -- Auto-install missing parsers for new filetypes.
+          local lang = vim.treesitter.language.get_lang(filetype) or filetype
+          if not vim.treesitter.language.add(lang) then
+            if require("nvim-treesitter.parsers")[lang] then
+              local ok, err = pcall(ts.install, lang)
+              if not ok then
+                vim.notify(
+                  ("treesitter: auto-install failed for %s: %s"):format(lang, err),
+                  vim.log.levels.WARN
+                )
+              else
+                -- One-shot retry to enable TS after async install finishes.
+                vim.defer_fn(function()
+                  if not vim.api.nvim_buf_is_loaded(bufnr) or vim.b[bufnr].treesitter_disable == 1 then
+                    return
+                  end
+                  if vim.treesitter.language.add(lang) then
+                    pcall(vim.treesitter.start, bufnr)
+                    vim.bo[bufnr].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                  end
+                end, 500)
+              end
+            end
             return
           end
 

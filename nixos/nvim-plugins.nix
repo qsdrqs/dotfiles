@@ -31,18 +31,7 @@ let
       '';
     };
     nvim-fundo = trivialDerivation "nvim-fundo" inputs.nvim-config.inputs.nvim-fundo;
-    nvim-treesitter = pkgs.stdenv.mkDerivation {
-      name = "nvim-treesitter";
-      src = inputs.nvim-config.inputs.nvim-treesitter;
-      buildPhase = dummyBuildPhase;
-      installPhase = commonInstallPhase;
-      postInstall = ''
-        rm -rf $out/parser-info
-        rm -rf $out/parser
-        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/nvim-treesitter/parser-info $out/parser-info
-        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/nvim-treesitter/parser $out/parser
-      '';
-    };
+    nvim-treesitter = trivialDerivation "nvim-treesitter" inputs.nvim-config.inputs.nvim-treesitter;
     LuaSnip = pkgs.stdenv.mkDerivation {
       name = "LuaSnip";
       src = inputs.nvim-config.inputs.LuaSnip;
