@@ -1701,22 +1701,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-intel-npu-driver": {
-      "locked": {
-        "lastModified": 1764139219,
-        "narHash": "sha256-OTq1uCBvpeLq9d+dnIqzijD2Xnp/NLnw4ZlZ6O/oaJQ=",
-        "owner": "pseudocc",
-        "repo": "nixpkgs",
-        "rev": "27a07b0ca9c40f5f6a4326aafc842f5b700c3cca",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pseudocc",
-        "ref": "intel-npu-firmware",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-last": {
       "locked": {
         "lastModified": 1765186076,
@@ -2689,7 +2673,6 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-ghcup": "nixpkgs-ghcup",
         "nixpkgs-howdy": "nixpkgs-howdy",
-        "nixpkgs-intel-npu-driver": "nixpkgs-intel-npu-driver",
         "nixpkgs-last": "nixpkgs-last",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable",

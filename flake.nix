@@ -10,7 +10,6 @@
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
-    nixpkgs-intel-npu-driver.url = "github:pseudocc/nixpkgs/intel-npu-firmware";
     nixpkgs-howdy.url = "github:fufexan/nixpkgs/howdy";
     naersk = {
       url = "github:nix-community/naersk";
