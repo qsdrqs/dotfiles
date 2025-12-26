@@ -4,6 +4,7 @@ let
   python-packages = ps: with ps; [
     rpi-gpio
     gpiozero
+    lgpio
   ];
   wifi-interface-internal = "wlu1";
   eth-interface-internal = "enu1u3c2";
