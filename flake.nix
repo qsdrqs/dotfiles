@@ -337,6 +337,7 @@
       laptopConfig = developConfig // guiBasicConfig // {
         modules = developConfig.modules ++ guiBasicConfig.modules ++ [
           ./nixos/laptop-configuration.nix
+          ./nixos/custom/laptop.nix
         ];
       };
 
