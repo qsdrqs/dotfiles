@@ -116,19 +116,17 @@ in
     };
     efi = {
       canTouchEfiVariables = true;
-      efiSysMountPoint = "/boot";
+      efiSysMountPoint = "/boot/efi";
     };
   };
   boot.loader.grub.extraInstallCommands = ''
     set -euo pipefail
-    export PATH=${pkgs.sbctl}/bin:$PATH
 
-    if [ -f /boot/EFI/Boot/bootx64.efi ]; then
-      sbctl sign /boot/EFI/Boot/bootx64.efi || true
-    fi
+    # sign EFI binaries for Secure Boot
+    export PATH=${lib.makeBinPath [ pkgs.sbctl pkgs.util-linux pkgs.gawk pkgs.coreutils ]}:$PATH
 
-    if [ -f /boot/EFI/NixOS-boot/grubx64.efi ]; then
-      sbctl sign /boot/EFI/NixOS-boot/grubx64.efi
+    if [ -f /boot/efi/EFI/NixOS-boot-efi/grubx64.efi ]; then
+      sbctl sign /boot/efi/EFI/NixOS-boot-efi/grubx64.efi
     fi
 
     for f in /boot/grub/**/*.efi; do
@@ -140,6 +138,12 @@ in
         [ -e "$f" ] && sbctl sign "$f"
       done
     fi
+
+    # patch grub.cfg to use custom grubenv location
+    if [ ! -f ${config.boot.loader.efi.efiSysMountPoint}/grubenv ]; then
+      cp /boot/grub/grubenv ${config.boot.loader.efi.efiSysMountPoint}/grubenv
+    fi
+    ${./scripts/patch-grubcfg.sh} /boot/grub/grub.cfg ${lib.escapeShellArg config.boot.loader.efi.efiSysMountPoint}
   '';
 
   nixpkgs.config.permittedInsecurePackages = [
@@ -222,6 +226,11 @@ in
     package = pkgs.wireshark;
   };
 
+  programs.steam = {
+    enable = true;
+  };
+  programs.java.enable = true;
+
   services.dbus.packages = [ pkgs.kdePackages.kclock ];
 
   users.users.qsdrqs.extraGroups = [
@@ -243,6 +252,17 @@ in
     home = {
       SUBVOLUME = "/home";
       ALLOW_USERS = [ "qsdrqs" ];
+      TIMELINE_CREATE = true;
+      TIMELINE_CLEANUP = true;
+      TIMELINE_LIMIT_HOURLY = 10;
+      TIMELINE_LIMIT_DAILY = 10;
+      TIMELINE_LIMIT_WEEKLY = 0;
+      TIMELINE_LIMIT_MONTHLY = 0;
+      TIMELINE_LIMIT_YEARLY = 0;
+    };
+    boot = {
+      SUBVOLUME = "/boot";
+      ALLOW_USERS = [ "root" ];
       TIMELINE_CREATE = true;
       TIMELINE_CLEANUP = true;
       TIMELINE_LIMIT_HOURLY = 10;

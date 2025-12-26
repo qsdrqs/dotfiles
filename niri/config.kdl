@@ -405,6 +405,7 @@ binds {
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
     Mod+P hotkey-overlay-title="Open Browser" { spawn "firefox"; }
+    Mod+T hotkey-overlay-title="Open File Explorer" { spawn "dolphin"; }
     Mod+D hotkey-overlay-title="Run an Application: rofi" { spawn-sh "rofi -combi-modi drun,run,ssh  -font 'fira code nerd font 15' -show combi -icon-theme 'Papirus' -show-icons -matching fuzzy"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
