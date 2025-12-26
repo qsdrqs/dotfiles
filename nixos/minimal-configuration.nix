@@ -8,6 +8,7 @@
   lib,
   inputs,
   options,
+  dot,
   ...
 }:
 let
@@ -141,12 +142,14 @@ in
       "https://yazi.cachix.org"
       "https://nix-community.cachix.org"
       "https://cache.nixos-cuda.org"
+      "https://nixos-raspberrypi.cachix.org"
       "/mnt/NixOS?trusted=1"
     ];
     trusted-public-keys = [
       "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
       "10.100.0.2-1:yxCD0+mOsSs/IdWSqaVza1q3KadK8iletFliq/Vd6sc="
     ];
   };
@@ -226,6 +229,7 @@ in
 
     usbutils
     libusb1
+    pciutils
 
     packages.caps2esc
     packages.ctrl2esc
@@ -375,6 +379,6 @@ in
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "25.05"; # Did you read the comment?
+  system.stateVersion = "25.11"; # Did you read the comment?
 
 }

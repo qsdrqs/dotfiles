@@ -40,6 +40,10 @@ let
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
+  pkgs-unstable = import inputs.nixpkgs {
+    system = pkgs.stdenv.hostPlatform.system;
+    config.allowUnfree = true;
+  };
   pkgs-last = import inputs.nixpkgs-last {
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
@@ -53,6 +57,7 @@ in
         makeModulesClosure = x:
           super.makeModulesClosure (x // { allowMissing = true; });
 
+        yazi = pkgs-unstable.yazi;
         # yazi = inputs.yazi.packages.${super.system}.default;
         #   if pkgs.system == "x86_64-linux" then inputs.yazi.packages.${super.system}.default
         #   else if pkgs.system == "aarch64-linux" then

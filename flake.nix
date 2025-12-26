@@ -7,7 +7,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     nixpkgs-last.url = "github:NixOS/nixpkgs/addf7cf5f383a3101ecfba091b98d0a1263dc9b8";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
     nixpkgs-howdy.url = "github:fufexan/nixpkgs/howdy";
@@ -93,6 +93,8 @@
       flake = false;
     };
 
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi";
+
     # vscode-insiders = {
     #   url = "tarball+https://update.code.visualstudio.com/latest/linux-x64/insider";
     #   flake = false;
@@ -127,7 +129,7 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, vscode-server, nur, dev-shell, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, vscode-server, nur, dev-shell, nixos-raspberrypi, ... }@inputs:
     rec {
       pkgs-collect = builtins.listToAttrs (builtins.map
         (pkg: {
@@ -168,7 +170,8 @@
       special-args = system: {
         inherit inputs;
         pkgs-master = pkgs-collect.pkgs-master system;
-        pkgs-stable = pkgs-collect.pkgs-stable system;
+        pkgs-unstable = pkgs-collect.pkgs system; # default in unstable nixpkgs
+        pkgs-stable = pkgs-collect.pkgs-stable system; # default in stable nixpkgs
         pkgs-ghcup = pkgs-collect.pkgs-ghcup system;
         pkgs-intel-npu-driver = pkgs-collect.pkgs-intel-npu-driver system;
         pkgs-howdy = pkgs-collect.pkgs-howdy system;
@@ -179,11 +182,11 @@
         system = "x86_64-linux";
         specialArgs = special-args system;
         modules = [
+          ./nixos/compat.nix
           (if builtins.pathExists ./nixos/custom.nix then
             ./nixos/custom.nix
           else
-            nixpkgs.lib.warn "No custom.nix found, maybe you forgot to copy the hardware-configuration.nix?"
-              ./nixos/empty.nix
+            ./nixos/empty.nix
           )
           ./nixos/minimal-configuration.nix
           ./nixos/overlays.nix
@@ -234,13 +237,17 @@
       serverConfig = basicConfig // {
         modules = basicConfig.modules ++ [
           ./nixos/server-configuration.nix
+          ./nixos/custom/server.nix
         ];
       };
       rpiConfig = basicConfig // rec {
         system = "aarch64-linux";
-        specialArgs = special-args system;
+        specialArgs = special-args system // {
+          nixos-raspberrypi = inputs.nixos-raspberrypi;
+        };
         modules = basicConfig.modules ++ [
           ./nixos/rpi-configuration.nix
+          ./nixos/custom/rpi.nix
 
           # aarch64-linux home-manager
           home-manager.nixosModules.home-manager
@@ -250,6 +257,14 @@
             };
             home-manager.extraSpecialArgs = special-args system;
           }
+        ];
+      };
+      # Build/deploy the RPi system from a x86_64 machine:
+      # - keep the system as native aarch64 (so binary caches and/or QEMU/binfmt can do most of the work)
+      # - cross-compile only the kernel + yazi for speed (override as needed)
+      rpiCrossConfig = rpiConfig // {
+        modules = rpiConfig.modules ++ [
+          ./nixos/rpi-cross-compile.nix
         ];
       };
       guiMinimalConfig = minimalConfig // {
@@ -290,6 +305,16 @@
           }
         ];
       };
+      wslDesktopConfig = wslConfig // guiBasicConfig // {
+        modules = wslConfig.modules ++ guiBasicConfig.modules ++ [
+          ./nixos/custom/wsl-desktop.nix
+        ];
+      };
+      wslLaptopConfig = wslConfig // guiBasicConfig // {
+        modules = wslConfig.modules ++ guiBasicConfig.modules ++ [
+          ./nixos/custom/wsl-laptop.nix
+        ];
+      };
 
       desktopConfig = developConfig // guiBasicConfig // rec {
         system = developConfig.system;
@@ -306,6 +331,7 @@
         };
         modules = developConfig.modules ++ guiBasicConfig.modules ++ [
           ./nixos/desktop-configuration.nix
+          ./nixos/custom/desktop.nix
         ];
       };
       laptopConfig = developConfig // guiBasicConfig // {
@@ -320,6 +346,7 @@
         in
         {
           pkgs = pkgs-collect.pkgs system;
+          nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi";
           modules = minimalHomeModules;
           extraSpecialArgs = special-args system;
         };
@@ -401,11 +428,14 @@
       nixosConfigurations.minimal = nixpkgs.lib.nixosSystem minimalConfig;
       nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
       nixosConfigurations.develop = nixpkgs.lib.nixosSystem developConfig;
-      nixosConfigurations.server = nixpkgs.lib.nixosSystem serverConfig;
-      nixosConfigurations.rpi = nixpkgs.lib.nixosSystem rpiConfig;
+      nixosConfigurations.server = inputs.nixpkgs-stable.lib.nixosSystem serverConfig;
+      nixosConfigurations.rpi = nixos-raspberrypi.lib.nixosSystem rpiConfig;
+      nixosConfigurations.rpi-cross = nixos-raspberrypi.lib.nixosSystem rpiCrossConfig;
       nixosConfigurations.gui-minimal = nixpkgs.lib.nixosSystem guiMinimalConfig;
       nixosConfigurations.gui-basic = nixpkgs.lib.nixosSystem guiBasicConfig;
-      nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
+      # nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
+      nixosConfigurations.wsl-desktop = nixpkgs.lib.nixosSystem wslDesktopConfig;
+      nixosConfigurations.wsl-laptop = nixpkgs.lib.nixosSystem wslLaptopConfig;
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem desktopConfig;
       nixosConfigurations.laptop = nixpkgs.lib.nixosSystem laptopConfig;
 

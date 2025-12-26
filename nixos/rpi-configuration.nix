@@ -1,34 +1,28 @@
-{ config, pkgs, lib, inputs, options, ... }:
+{ config, pkgs, lib, inputs, nixos-raspberrypi, options, ... }:
 let
   rtl88x2bu_module = config.boot.kernelPackages.callPackage (import ./packages.nix).rtl88x2bu { inputs = inputs; };
   python-packages = ps: with ps; [
     rpi-gpio
     gpiozero
   ];
-  wifi-interface-internal = "wlp1s0u1u1";
-  eth-interface-internal = "enp1s0u2u3c2";
+  wifi-interface-internal = "wlu1";
+  eth-interface-internal = "enu1u3c2";
 in
 {
-  imports = [
-    inputs.nixos-hardware.nixosModules.raspberry-pi-4
+  imports = with nixos-raspberrypi.nixosModules.raspberry-pi-5; [
+    base
+    page-size-16k
+    display-vc4
+    bluetooth
   ];
-  hardware = {
-    raspberry-pi."4" = {
-      apply-overlays-dtmerge.enable = true;
-      fkms-3d.enable = true;
-    };
-    deviceTree = {
-      enable = true;
-      # filter = "*rpi-4-*.dtb";
-    };
-  };
   environment.systemPackages = with pkgs; [
     libraspberrypi
     raspberrypi-eeprom
     wiringpi
     (python3.withPackages python-packages)
   ];
-  boot.kernelPackages = pkgs.linuxPackages_rpi4;
+  boot.kernelPackages = pkgs.linuxPackages_rpi5;
+  boot.loader.raspberryPi.bootloader = "kernel";
 
   # Create gpio group
   users.groups.gpio = { };
@@ -42,18 +36,18 @@ in
 
   users.users.qsdrqs.extraGroups = [ "gpio" ];
 
-  # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
+  # Disable GRUB boot loader
   boot.loader.grub.enable = false;
-  # Enables the generation of /boot/extlinux/extlinux.conf
-  boot.loader.generic-extlinux-compatible.enable = true;
 
   boot.initrd.availableKernelModules = [ "xhci_pci" ];
   boot.initrd.kernelModules = [ ];
 
-  boot.kernelModules = [ "88x2bu" ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu ];
-  boot.kernelParams = [ "iomem=relaxed" ];
+  # In favor of using rtw88_8822bu in-kernel module instead of out-of-tree 88x2bu module, commented out old config.
+  # boot.kernelModules = [ "88x2bu" ];
+  # boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu ];
   # boot.extraModulePackages = [ rtl88x2bu_module ];
+
+  boot.kernelParams = [ "iomem=relaxed" ];
 
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
@@ -71,7 +65,7 @@ in
     enable = true;
     networks = {
       enp1s0 = {
-        matchConfig.Name = "enp1s0*";
+        matchConfig.Name = eth-interface-internal;
         address = [ "192.168.100.1/24" "fdc1:7bb0:a600:1::1/64" ];
         networkConfig = {
           DHCPServer = true;
@@ -131,8 +125,27 @@ in
     #   };
     # };
     radios."${wifi-interface-internal}" = {
-      channel = 6;
       countryCode = "US";
+      channel = 36;
+      band = "5g";
+      wifi4 = {
+        enable = true;
+        capabilities = [
+          "HT40+"
+          "SHORT-GI-20"
+          "SHORT-GI-40"
+        ];
+      };
+      wifi5 = {
+        enable = true;
+        operatingChannelWidth = "80";
+        capabilities = [
+          "SHORT-GI-80"
+        ];
+      };
+      settings = {
+        vht_oper_centr_freq_seg0_idx = 42; # for wifi5 to work
+      };
       networks = {
         "${wifi-interface-internal}" = {
           ssid = "RaspNix";
@@ -160,6 +173,7 @@ in
       high = 60;
     in
     {
+      enable = false; # no longer needed for rpi5
       wantedBy = [ "multi-user.target" ];
       description = "Auto control fan on/off";
       serviceConfig = {

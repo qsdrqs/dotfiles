@@ -24,13 +24,12 @@ in
     global
     ctags
     openconnect_openssl
-    # (if config.nixpkgs.system == "x86_64-linux" then cloudflare-warp else dummy)
+    # (if pkgs.stdenv.hostPlatform.system == "x86_64-linux" then cloudflare-warp else dummy)
     openssl
     openssl.out # openssl lib
     parted
     gh
     exiftool
-    nix-serve
     socat
     xray
     samba
@@ -46,6 +45,7 @@ in
     nasm
     nodejs
     aichat
+    nix-serve-ng
   ];
 
   environment.variables = {
@@ -90,9 +90,10 @@ in
     };
   };
 
-  # enable qemu emulation compile, only for x86_64-linux to emulate aarch64-linux
-  boot.binfmt.emulatedSystems =
-    if config.nixpkgs.system == "aarch64-linux" then [ ] else [ "aarch64-linux" ];
+  # Enable QEMU binfmt on x86_64 build hosts (for building aarch64 derivations locally when cache misses).
+  boot.binfmt.emulatedSystems = lib.mkDefault (
+    lib.optionals (pkgs.stdenv.hostPlatform.system == "x86_64-linux") [ "aarch64-linux" ]
+  );
 
   systemd = {
     services.frpc = {
@@ -108,12 +109,12 @@ in
       };
     };
     services.warp-svc = {
-      enable = if config.nixpkgs.system == "x86_64-linux" then true else false;
+      enable = pkgs.stdenv.hostPlatform.system == "x86_64-linux";
       wantedBy = [ "multi-user.target" ];
       after = [ "pre-network.target" ];
       description = "CloudflareWARP daemon";
       serviceConfig =
-        if config.nixpkgs.system == "x86_64-linux" then
+        if pkgs.stdenv.hostPlatform.system == "x86_64-linux" then
           {
             ExecStart = ''${pkgs.cloudflare-warp}/bin/warp-svc'';
             CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SYS_PTRACE";
