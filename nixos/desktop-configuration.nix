@@ -96,6 +96,7 @@ in
       cudaSupport = true;
     })
     nvitop
+    nvtopPackages.full
     (pkgs.callPackage (import "${inputs.nixpkgs-ghcup}/pkgs/development/tools/haskell/ghcup/default.nix") { })
 
     # NUR
@@ -124,7 +125,10 @@ in
   );
 
   services.xserver = {
-    videoDrivers = [ "nvidia" ];
+    videoDrivers = [
+      "modesetting"
+      "nvidia"
+    ];
     windowManager.i3 = {
       enable = true;
       extraPackages = with pkgs; [
@@ -141,12 +145,20 @@ in
   nixpkgs.config.cudaSupport = true;
 
   nixpkgs.config.nvidia.acceptLicense = true;
+  services.switcherooControl.enable = true;
   hardware = {
     nvidia = {
       modesetting.enable = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
       open = true;
+      prime = {
+        offload = {
+          enable = true;
+          enableOffloadCmd = true;
+        };
+        # Bus ID in custom configuration files
+      };
       # package = (config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: rec {
       #   version = "535.154.05";
       #   pkgSuffix = oldAttrs.pkgSuffix or "";

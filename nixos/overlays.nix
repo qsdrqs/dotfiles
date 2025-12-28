@@ -139,6 +139,7 @@ in
             tiktoken
           ];
         }));
+        neovide = pkgs-unstable.neovide; # use neovide directly from unstable pkgs to avoid build
 
         keepassxc = super.keepassxc.overrideAttrs (oldAttrs: {
           src = super.fetchFromGitHub {
@@ -234,11 +235,6 @@ in
           src = inputs.ctrl2esc;
         });
         interception-tools-plugins.caps2esc = super.interception-tools-plugins.caps2esc;
-
-        neovide = super.neovide.overrideAttrs (oldAttrs: {
-          nativeCheckInputs = [ ];
-          doCheck = false;
-        });
 
         element-desktop = super.element-desktop.overrideAttrs (oldAttrs: {
           desktopItem = super.makeDesktopItem {

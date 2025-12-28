@@ -14,7 +14,11 @@ return function(ctx)
   return {
     {
       "nvim-treesitter/nvim-treesitter",
-      build = ":TSUpdate",
+      build = function()
+        if vim.fn.executable("tree-sitter") == 1 then
+          vim.cmd.TSUpdate()
+        end
+      end,
       branch = "main",
       cond = function()
         return vim.g.treesitter_disable ~= true and not vim.g.vscode
@@ -23,8 +27,19 @@ return function(ctx)
         if vim.g.treesitter_disable == true or vim.g.vscode then
           return
         end
+        local has_tree_sitter_cli = vim.fn.executable("tree-sitter") == 1
+        if not has_tree_sitter_cli then
+          vim.api.nvim_echo(
+            { { "treesitter: tree-sitter CLI not found; parser installation disabled", "WarningMsg" } },
+            true,
+            {}
+          )
+        end
+
         local ts = require("nvim-treesitter")
-        ts.setup()
+        ts.setup {
+          install_dir = vim.fn.stdpath('data') .. '/site'
+        }
 
         local function register_matlab_parser()
           require("nvim-treesitter.parsers").matlab = {
@@ -48,7 +63,9 @@ return function(ctx)
         })
 
         -- Install parsers (async; no-op if already installed).
-        ts.install({ "c", "cpp", "java", "python", "javascript", "rust", "markdown" })
+        if has_tree_sitter_cli then
+          ts.install({ "c", "cpp", "java", "python", "javascript", "rust", "markdown" })
+        end
 
         local function apply_treesitter(bufnr)
           -- Stop treesitter for buffers marked disabled.
@@ -66,7 +83,7 @@ return function(ctx)
           -- Auto-install missing parsers for new filetypes.
           local lang = vim.treesitter.language.get_lang(filetype) or filetype
           if not vim.treesitter.language.add(lang) then
-            if require("nvim-treesitter.parsers")[lang] then
+            if has_tree_sitter_cli and require("nvim-treesitter.parsers")[lang] then
               local ok, err = pcall(ts.install, lang)
               if not ok then
                 vim.notify(

@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-howdy,  pkgs-master, lib, inputs, ... }:
+{ config, pkgs, pkgs-howdy, pkgs-unstable,  pkgs-master, lib, inputs, ... }:
 let
   wpsoffice-cn-hidpi = pkgs.symlinkJoin {
     name = "wps-office-cn";
@@ -161,6 +161,7 @@ in
     scrcpy
     wpsoffice-cn-hidpi
     kdePackages.kate
+    neovide
     wineWowPackages.unstableFull
 
     virt-manager
@@ -198,6 +199,8 @@ in
     element-desktop
 
     kdePackages.kclock
+
+    intel-gpu-tools
   ];
 
   # services.teamviewer.enable = true;
@@ -212,13 +215,6 @@ in
       obs-gstreamer
       obs-vkcapture
     ];
-  };
-
-  services.zerotierone = {
-    enable = true;
-    joinNetworks = lib.strings.splitString "\n" (
-      builtins.readFile ./private/zerotier-network-id
-    );
   };
 
   programs.wireshark = {

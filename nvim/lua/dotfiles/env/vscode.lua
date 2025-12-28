@@ -243,7 +243,7 @@ function M.handler()
 
   -- continue
   vim.keymap.set("v", "<localleader>aa", function()
-    vscode.action("continue.focusContinueInput")
+    vscode.action("chatgpt.addToThread")
   end, { silent = true })
   vim.keymap.set("v", "<localleader>ae", function()
     vscode.action("continue.focusEdit")

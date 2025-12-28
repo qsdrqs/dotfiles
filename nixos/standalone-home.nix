@@ -27,6 +27,7 @@ in {
     tmux
     nodejs
     config.nix.package
+    tree-sitter
   ];
 
   # Mimic the default nix-ld library set that NixOS exposes at

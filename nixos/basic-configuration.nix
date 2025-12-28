@@ -46,6 +46,7 @@ in
     nodejs
     aichat
     nix-serve-ng
+    tree-sitter
   ];
 
   environment.variables = {
@@ -135,6 +136,8 @@ in
       };
     };
   };
+
+  services.tailscale.enable = true;
 
   # 3) Define a timer that triggers that service every hour
   # avoid v2ray service to create config file

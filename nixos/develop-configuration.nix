@@ -18,7 +18,6 @@
     go
     hoppscotch # http request tool
     bfg-repo-cleaner
-    tree-sitter
     act
     inotify-tools
     pkg-config

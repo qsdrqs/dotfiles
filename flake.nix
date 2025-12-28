@@ -347,7 +347,6 @@
         in
         {
           pkgs = pkgs-collect.pkgs system;
-          nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi";
           modules = minimalHomeModules;
           extraSpecialArgs = special-args system;
         };
