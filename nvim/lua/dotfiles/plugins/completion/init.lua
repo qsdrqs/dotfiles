@@ -10,6 +10,7 @@ local modules = {
   require("dotfiles.plugins.completion.copilot"),
   require("dotfiles.plugins.completion.copilot_chat"),
   require("dotfiles.plugins.completion.sidekick"),
+  require("dotfiles.plugins.completion.agentic"),
   require("dotfiles.plugins.completion.claudecode"),
 }
 

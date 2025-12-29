@@ -18,6 +18,7 @@ return function(ctx)
       dependencies = {
         "zbirenbaum/copilot.lua",
       },
+      cond = vim.g.vscode == nil,
       opts = {
         -- add any options here
         cli = {
@@ -42,68 +43,68 @@ return function(ctx)
           expr = true,
           desc = "Goto/Apply Next Edit Suggestion",
         },
-        {
-          "<c-.>",
-          function()
-            require("sidekick.cli").toggle()
-          end,
-          desc = "Sidekick Toggle",
-          mode = { "n", "t", "i", "x" },
-        },
-        {
-          "<localleader>aa",
-          function()
-            require("sidekick.cli").send({ msg = "{file}" })
-          end,
-          desc = "Send File",
-          mode = { "n", "t" },
-        },
-        {
-          "<localleader>as",
-          function()
-            require("sidekick.cli").select({ filter = { installed = true } })
-          end,
-          desc = "Select CLI",
-        },
-        {
-          "<localleader>ad",
-          function()
-            require("sidekick.cli").close()
-          end,
-          desc = "Detach a CLI Session",
-        },
-        {
-          "<localleader>aa",
-          function()
-            require("sidekick.cli").send({ msg = "{this}" })
-          end,
-          mode = { "x" },
-          desc = "Send This",
-        },
-        {
-          "<localleader>av",
-          function()
-            require("sidekick.cli").send({ msg = "{selection}" })
-          end,
-          mode = { "x" },
-          desc = "Send Visual Selection",
-        },
-        {
-          "<localleader>ap",
-          function()
-            require("sidekick.cli").prompt()
-          end,
-          mode = { "n", "x" },
-          desc = "Sidekick Select Prompt",
-        },
-        -- Example of a keybinding to open codex directly
-        {
-          "<localleader>ac",
-          function()
-            require("sidekick.cli").toggle({ name = "codex", focus = true })
-          end,
-          desc = "Sidekick Toggle Codex",
-        },
+        -- {
+        --   "<c-.>",
+        --   function()
+        --     require("sidekick.cli").toggle()
+        --   end,
+        --   desc = "Sidekick Toggle",
+        --   mode = { "n", "t", "i", "x" },
+        -- },
+        -- {
+        --   "<localleader>aa",
+        --   function()
+        --     require("sidekick.cli").send({ msg = "{file}" })
+        --   end,
+        --   desc = "Send File",
+        --   mode = { "n", "t" },
+        -- },
+        -- {
+        --   "<localleader>as",
+        --   function()
+        --     require("sidekick.cli").select({ filter = { installed = true } })
+        --   end,
+        --   desc = "Select CLI",
+        -- },
+        -- {
+        --   "<localleader>ad",
+        --   function()
+        --     require("sidekick.cli").close()
+        --   end,
+        --   desc = "Detach a CLI Session",
+        -- },
+        -- {
+        --   "<localleader>aa",
+        --   function()
+        --     require("sidekick.cli").send({ msg = "{this}" })
+        --   end,
+        --   mode = { "x" },
+        --   desc = "Send This",
+        -- },
+        -- {
+        --   "<localleader>av",
+        --   function()
+        --     require("sidekick.cli").send({ msg = "{selection}" })
+        --   end,
+        --   mode = { "x" },
+        --   desc = "Send Visual Selection",
+        -- },
+        -- {
+        --   "<localleader>ap",
+        --   function()
+        --     require("sidekick.cli").prompt()
+        --   end,
+        --   mode = { "n", "x" },
+        --   desc = "Sidekick Select Prompt",
+        -- },
+        -- -- Example of a keybinding to open codex directly
+        -- {
+        --   "<localleader>ac",
+        --   function()
+        --     require("sidekick.cli").toggle({ name = "codex", focus = true })
+        --   end,
+        --   desc = "Sidekick Toggle Codex",
+        -- },
       },
     },
 

@@ -32,18 +32,30 @@ envfile_line="set envfile=\"$envfile_grub\""
 tmp=$(mktemp)
 trap 'rm -f "$tmp"' EXIT
 
+backup="${grubcfg}.bak"
+cp -p -- "$grubcfg" "$backup" || { echo "error: failed to create backup: $backup" >&2; exit 1; }
+
 awk -v search_line="$search_line" -v envfile_line="$envfile_line" '
 function indent(line){match(line,/^[ \t]*/); return substr(line,RSTART,RLENGTH)}
-BEGIN{seen_search=0; seen_envfile=0; if_found=0; load_found=0; save_found=0; search_count=0; envfile_count=0}
+BEGIN{seen_search=0; seen_envfile=0; inserted=0; if_found=0; load_found=0; save_found=0}
 {
+  if (!inserted) {
+    if ($0 ~ /^[ \t]*#/) { print; next }
+    if ($0 ~ /^[ \t]*$/) { print; next }
+    print search_line
+    print envfile_line
+    inserted=1
+    seen_search=1
+    seen_envfile=1
+  }
   if ($0 ~ /^[ \t]*#/) { print; next }
-  if ($0 ~ /^[ \t]*search[ \t].*--set=esp([ \t]|$)/) { seen_search=1; search_count++; print indent($0) search_line; next }
-  if ($0 ~ /^[ \t]*set[ \t]+envfile=/) { seen_envfile=1; envfile_count++; print indent($0) envfile_line; next }
-  if ($0 ~ /if[ \t]+\[[^]]*-s[ \t]+"?\$prefix\/grubenv"?[^]]*\][ \t]*;[ \t]*then/ || $0 ~ /if[ \t]+\[[^]]*-s[ \t]+"?\$envfile"?[^]]*\][ \t]*;[ \t]*then/) {
+  if ($0 ~ /^[ \t]*search[ \t].*--set=esp([ \t]|$)/) { seen_search=1; print indent($0) search_line; next }
+  if ($0 ~ /^[ \t]*set[ \t]+envfile=/) { seen_envfile=1; print indent($0) envfile_line; next }
+  if ($0 ~ /^[ \t]*(if|elif)[ \t]+\[[^]]*-s[ \t]+"?\$prefix\/grubenv"?[^]]*\][ \t]*;[ \t]*then/ || $0 ~ /^[ \t]*(if|elif)[ \t]+\[[^]]*-s[ \t]+"?\$envfile"?[^]]*\][ \t]*;[ \t]*then/) {
     ind=indent($0)
-    if (!seen_search) { print ind search_line; seen_search=1 }
-    if (!seen_envfile) { print ind envfile_line; seen_envfile=1 }
-    print ind "if [ -s \"$envfile\" ]; then"
+    kw="if"
+    if ($0 ~ /^[ \t]*elif[ \t]+/) { kw="elif" }
+    print ind kw " [ -s \"$envfile\" ]; then"
     if_found++
     next
   }
@@ -59,13 +71,18 @@ BEGIN{seen_search=0; seen_envfile=0; if_found=0; load_found=0; save_found=0; sea
   print
 }
 END{
+  if (!inserted) {
+    print search_line
+    print envfile_line
+    inserted=1
+    seen_search=1
+    seen_envfile=1
+  }
   if (if_found==0) { print "error: did not find grubenv check line" >"/dev/stderr"; exit 1 }
   if (load_found==0) { print "error: did not find load_env" >"/dev/stderr"; exit 1 }
   if (save_found==0) { print "error: did not find save_env" >"/dev/stderr"; exit 1 }
   if (!seen_search) { print "error: missing esp search line" >"/dev/stderr"; exit 1 }
   if (!seen_envfile) { print "error: missing envfile line" >"/dev/stderr"; exit 1 }
-  if (search_count>1) { print "error: multiple esp search lines" >"/dev/stderr"; exit 1 }
-  if (envfile_count>1) { print "error: multiple envfile lines" >"/dev/stderr"; exit 1 }
 }
 ' "$grubcfg" > "$tmp"
 

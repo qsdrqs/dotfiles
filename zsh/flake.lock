@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1766135149,
-        "narHash": "sha256-d+/O1GAaDHYiqHlE+lJ/4XsbA/jawJtDSGs3TkUnHjQ=",
+        "lastModified": 1766406681,
+        "narHash": "sha256-cu+QEDG/Wt3PYt1w5DQMH0DU2/JdwXKU974gG65XAaY=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "95de26572e6790ea178193580c625c9109119176",
+        "rev": "0f45f82c0afdcaf71b193e349d01c069a3fb9de7",
         "type": "github"
       },
       "original": {
@@ -81,11 +81,11 @@
     "spaceship": {
       "flake": false,
       "locked": {
-        "lastModified": 1766193347,
-        "narHash": "sha256-ZoO2TI6Om7+ObWtCc82Ezipr7xSl9Y0DvP0ma+s/sFU=",
+        "lastModified": 1766578252,
+        "narHash": "sha256-6riMk22gsLhy3LmWu9TbUCl59fli54+uLo5mWUkU9wc=",
         "owner": "denysdovhan",
         "repo": "spaceship-prompt",
-        "rev": "ff0d638cf2ebeb07490b3205f853ddb8e6c13fe6",
+        "rev": "e498b1381df3a122af107b61f5cc8f3ced93ee69",
         "type": "github"
       },
       "original": {
@@ -113,11 +113,11 @@
     "z_lua": {
       "flake": false,
       "locked": {
-        "lastModified": 1754030575,
-        "narHash": "sha256-io8FQz9Pk7pwFKTUl7yHIcxpZ4zCSUpckQxWI/sAD68=",
+        "lastModified": 1766569670,
+        "narHash": "sha256-YkkzjeqmEwcSN5NGjIiCVeAj10PZQSSvSOjhzeaEGEs=",
         "owner": "skywind3000",
         "repo": "z.lua",
-        "rev": "f80e22498cf23cce7fb0f240900360f96193a5b6",
+        "rev": "1ebe5bcaa7c01bc6c05db4d14116810ee2b905bf",
         "type": "github"
       },
       "original": {
