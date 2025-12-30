@@ -305,13 +305,13 @@
           }
         ];
       };
-      wslDesktopConfig = wslConfig // guiBasicConfig // {
-        modules = wslConfig.modules ++ guiBasicConfig.modules ++ [
+      wslDesktopConfig = wslConfig // guiMinimalConfig // {
+        modules = wslConfig.modules ++ guiMinimalConfig.modules ++ [
           ./nixos/custom/wsl-desktop.nix
         ];
       };
-      wslLaptopConfig = wslConfig // guiBasicConfig // {
-        modules = wslConfig.modules ++ guiBasicConfig.modules ++ [
+      wslLaptopConfig = wslConfig // guiMinimalConfig // {
+        modules = wslConfig.modules ++ guiMinimalConfig.modules ++ [
           ./nixos/custom/wsl-laptop.nix
         ];
       };

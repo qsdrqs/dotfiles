@@ -60,8 +60,7 @@ def build_prompt(message_count: int, diff: str, recent_commits: str) -> str:
 
 **Criteria:**
 
-1. **Format:** Each commit message must follow the conventional commits format,
-which is `<type>(<scope>): <description>`.
+1. **Format:** Each commit message must follow the same commits format of previous commit messages. The commit message should be within 50 characters if possible.
 2. **Relevance:** Avoid mentioning a module name unless it's directly relevant
 to the change.
 3. **Enumeration:** List the commit messages from 1 to {message_count}.
