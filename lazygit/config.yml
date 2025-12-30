@@ -6,6 +6,6 @@ customCommands:
       - type: "menuFromCommand"
         title: "Select AI commit message"
         key: "Message"
-        command: "sh -c \"$HOME/.config/lazygit/ai_commit_message.sh\""
+        command: "sh -c \"python $HOME/.config/lazygit/ai_commit_message.py\""
     command: "git commit -m {{.Form.Message | quote}}"
     output: terminal
