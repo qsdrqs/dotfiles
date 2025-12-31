@@ -6,6 +6,11 @@ return function(ctx)
       opts = {
         -- Available by default: "claude-acp" | "gemini-acp" | "codex-acp" | "opencode-acp" | "cursor-acp"
         provider = "codex-acp", -- setting the name here is all you need to get started
+        acp_providers = {
+          codex_acp = {
+            env = vim.fn.environ()
+          }
+        }
       },
 
       -- these are just suggested keymaps; customize as desired

@@ -83,11 +83,11 @@
     "agenticDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1767016145,
-        "narHash": "sha256-2fx3/uIFfy0NJhWA0e2XIeJgTbLKvhekYbO0pn/ZV70=",
+        "lastModified": 1767097773,
+        "narHash": "sha256-eRQjzn60q6oiw6gyXEt9t44TeJQLm0yNX75sjt3jQgs=",
         "owner": "carlos-algms",
         "repo": "agentic.nvim",
-        "rev": "29ceee7275eaef38ffe978d26269a8161be5626e",
+        "rev": "44c0b24b395e8937e19adb2a6e6f3d210cdf7fdc",
         "type": "github"
       },
       "original": {

@@ -80,6 +80,22 @@
         "type": "github"
       }
     },
+    "agenticDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767097773,
+        "narHash": "sha256-eRQjzn60q6oiw6gyXEt9t44TeJQLm0yNX75sjt3jQgs=",
+        "owner": "carlos-algms",
+        "repo": "agentic.nvim",
+        "rev": "44c0b24b395e8937e19adb2a6e6f3d210cdf7fdc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "carlos-algms",
+        "repo": "agentic.nvim",
+        "type": "github"
+      }
+    },
     "alignDOTnvim": {
       "flake": false,
       "locked": {
@@ -1239,15 +1255,16 @@
     "nvim-treesitter": {
       "flake": false,
       "locked": {
-        "lastModified": 1766818605,
-        "narHash": "sha256-E3nJCBGKBUQWYAL9h9ygdtCCndi0+rwkq0hhAAq1W94=",
+        "lastModified": 1767023223,
+        "narHash": "sha256-AMEzUaVVPzHT7vpPJUFt5UbBiN9tygH5UMio/lU/baw=",
         "owner": "nvim-treesitter",
         "repo": "nvim-treesitter",
-        "rev": "36fcb4a4238928f0b627e1ab84ade0acc1facc2c",
+        "rev": "7efc1b58a8061d29786860006c7257c90a5196dc",
         "type": "github"
       },
       "original": {
         "owner": "nvim-treesitter",
+        "ref": "main",
         "repo": "nvim-treesitter",
         "type": "github"
       }
@@ -1500,6 +1517,7 @@
         "LuaSnip": "LuaSnip",
         "actions-previewDOTnvim": "actions-previewDOTnvim",
         "aerialDOTnvim": "aerialDOTnvim",
+        "agenticDOTnvim": "agenticDOTnvim",
         "alignDOTnvim": "alignDOTnvim",
         "alpha-nvim": "alpha-nvim",
         "asyncrunDOTvim": "asyncrunDOTvim",
