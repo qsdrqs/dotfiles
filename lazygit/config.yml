@@ -1,11 +1,20 @@
 customCommands:
   - key: "<c-a>"
-    description: "Pick AI commit"
+    description: "Pick AI commit (single/multi)"
     context: "files"
     prompts:
+      - type: "menuFromCommand"
+        title: "Select AI commit format"
+        key: "Mode"
+        command: "sh -c \"printf '%s\n' 'Single-line (subject only)' 'Multi-line (subject + body)'\""
       - type: "menuFromCommand"
         title: "Select AI commit message"
         key: "Message"
         command: "sh -c \"python $HOME/.config/lazygit/ai_commit_message.py\""
-    command: "git commit -m {{.Form.Message | quote}}"
+    command: >-
+      sh -c 'if [ "$1" = "Multi-line (subject + body)" ]; then
+        python $HOME/.config/lazygit/ai_commit_message.py --full --title "$2" | git commit -e -F -;
+      else
+        git commit -e -m "$2";
+      fi' -- {{.Form.Mode | quote}} {{.Form.Message | quote}}
     output: terminal
