@@ -49,7 +49,15 @@ in
   # boot.extraModulePackages = [ rtl88x2bu_module ];
 
   boot.kernelParams = [ "iomem=relaxed" ];
+  boot.extraModprobeConfig = ''
+    options rtw88_core disable_lps_deep=Y
+  '';
 
+  # Enable watchdogs for auto reboot on system hang
+  systemd.settings.Manager = {
+    RuntimeWatchdogSec = "15s";
+    RebootWatchdogSec = "15s";
+  };
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   boot.kernel.sysctl."net.ipv6.ip_forward" = 1;
