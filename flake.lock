@@ -392,6 +392,22 @@
         "url": "https://aur.archlinux.org/code-marketplace.git"
       }
     },
+    "codecompanionDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767374656,
+        "narHash": "sha256-L4G1vZJKsLzQpJkbUod3Zrrp4lndplQIVfF4YukmYjE=",
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "rev": "b6fcc25ced5628d3d960e6e4bc287ce8fc9a1710",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "type": "github"
+      }
+    },
     "colorful-menuDOTnvim": {
       "flake": false,
       "locked": {
@@ -1855,6 +1871,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-stable-old": {
+      "locked": {
+        "lastModified": 1751274312,
+        "narHash": "sha256-/bVBlRpECLVzjV19t5KMdMFWSwKLtb5RyXdjz3LJT+g=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "50ab793786d9de88ee30ec4e4c24fb4236fc2674",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-24.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1766651565,
@@ -2055,6 +2087,7 @@
         "cellular-automatonDOTnvim": "cellular-automatonDOTnvim",
         "clangd_extensionsDOTnvim": "clangd_extensionsDOTnvim",
         "claudecodeDOTnvim": "claudecodeDOTnvim",
+        "codecompanionDOTnvim": "codecompanionDOTnvim",
         "colorful-menuDOTnvim": "colorful-menuDOTnvim",
         "copilotDOTlua": "copilotDOTlua",
         "cscope_mapsDOTnvim": "cscope_mapsDOTnvim",
@@ -2789,6 +2822,7 @@
         "nixpkgs-last": "nixpkgs-last",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable",
+        "nixpkgs-stable-old": "nixpkgs-stable-old",
         "nur": "nur",
         "nvim-config": "nvim-config",
         "ranger-config": "ranger-config",

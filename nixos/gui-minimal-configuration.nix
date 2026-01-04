@@ -234,5 +234,6 @@ in
   users.extraUsers.qsdrqs.extraGroups = [ "audio" ];
   # hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";
   hardware.bluetooth.enable = true;
+  hardware.graphics.enable = true;
 
 }

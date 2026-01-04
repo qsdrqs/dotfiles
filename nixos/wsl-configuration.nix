@@ -1,4 +1,4 @@
-{ pkgs, config, modulesPath, inputs, lib, options, utils, ... }:
+{ pkgs, config, modulesPath, pkgs-stable-old, inputs, lib, options, utils, ... }:
 {
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
@@ -17,6 +17,7 @@
     };
     defaultUser = "qsdrqs";
     startMenuLaunchers = true;
+    useWindowsDriver = true;
 
     # Enable extra bin, for vscode server to work
     extraBin = with pkgs; [

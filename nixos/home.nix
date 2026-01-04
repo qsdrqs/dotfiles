@@ -13,6 +13,7 @@ let
   load_gpg_key = pkgs.writeShellScriptBin "load_gpg_key" ''
     sh ${./scripts/load_gpg_key.sh}
   '';
+  homeDir = config.home.homeDirectory;
 in
 {
   imports = [
@@ -152,6 +153,25 @@ in
           ln -s /mnt/Windows/Fonts/ ~/.local/share/fonts/Windows
         fi
       fi
+    '';
+    configs = let
+      linkConfigs = [
+        "lazygit"
+        "aichat"
+      ];
+      touchConfigs = [];
+    in ''
+      mkdir -p ~/.config
+      ${lib.concatMapStringsSep "\n" (cfg: ''
+        if [ ! -e ${homeDir}/.config/${cfg} ]; then
+          ln -s ${homeDir}/dotfiles/${cfg} ${homeDir}/.config
+        fi
+      '') linkConfigs}
+      ${lib.concatMapStringsSep "\n" (cfg: ''
+        if [ ! -e ${homeDir}/.config/${cfg} ]; then
+          touch ${homeDir}/.config/${cfg}
+        fi
+      '') touchConfigs}
     '';
   };
 }

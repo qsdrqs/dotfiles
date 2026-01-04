@@ -45,7 +45,7 @@ in
     indicator = true;
   };
 
-  home.activation.configs = let
+  home.activation.gui-configs = let
     linkConfigs = [
       "hypr"
       "waybar"

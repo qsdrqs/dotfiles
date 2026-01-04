@@ -176,16 +176,20 @@
       url = "github:carlos-algms/agentic.nvim";
       flake = false;
     };
+    nvim-treesitter = {
+      url = "github:nvim-treesitter/nvim-treesitter?ref=main";
+      flake = false;
+    };
+    codecompanionDOTnvim = {
+      url = "github:olimorris/codecompanion.nvim";
+      flake = false;
+    };
     snacksDOTnvim = {
       url = "github:folke/snacks.nvim";
       flake = false;
     };
     claudecodeDOTnvim = {
       url = "github:coder/claudecode.nvim";
-      flake = false;
-    };
-    nvim-treesitter = {
-      url = "github:nvim-treesitter/nvim-treesitter?ref=main";
       flake = false;
     };
     nvim-treesitter-textobjects = {
@@ -519,9 +523,10 @@
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
         { name = "sidekick.nvim"; dotname = "sidekickDOTnvim"; source = inputs.sidekickDOTnvim; build = false; }
         { name = "agentic.nvim"; dotname = "agenticDOTnvim"; source = inputs.agenticDOTnvim; build = false; }
+        { name = "nvim-treesitter"; dotname = "nvim-treesitter"; source = inputs.nvim-treesitter; build = true; }
+        { name = "codecompanion.nvim"; dotname = "codecompanionDOTnvim"; source = inputs.codecompanionDOTnvim; build = false; }
         { name = "snacks.nvim"; dotname = "snacksDOTnvim"; source = inputs.snacksDOTnvim; build = false; }
         { name = "claudecode.nvim"; dotname = "claudecodeDOTnvim"; source = inputs.claudecodeDOTnvim; build = false; }
-        { name = "nvim-treesitter"; dotname = "nvim-treesitter"; source = inputs.nvim-treesitter; build = true; }
         { name = "nvim-treesitter-textobjects"; dotname = "nvim-treesitter-textobjects"; source = inputs.nvim-treesitter-textobjects; build = false; }
         { name = "nvim-treesitter-context"; dotname = "nvim-treesitter-context"; source = inputs.nvim-treesitter-context; build = false; }
         { name = "nvim-ts-autotag"; dotname = "nvim-ts-autotag"; source = inputs.nvim-ts-autotag; build = false; }

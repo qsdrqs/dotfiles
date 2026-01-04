@@ -8,6 +8,7 @@
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     nixpkgs-last.url = "github:NixOS/nixpkgs/0e94c9a0c51dd426bfaa290f747c83519e3bcece";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-stable-old.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
     nixpkgs-howdy.url = "github:fufexan/nixpkgs/howdy";
@@ -142,6 +143,7 @@
         }) [
           "pkgs-master"
           "pkgs-stable"
+          "pkgs-stable-old"
           "pkgs-ghcup"
           "pkgs-intel-npu-driver"
           "pkgs-howdy"
@@ -171,6 +173,7 @@
         inherit inputs;
         pkgs-master = pkgs-collect.pkgs-master system;
         pkgs-unstable = pkgs-collect.pkgs system; # default in unstable nixpkgs
+        pkgs-stable-old = pkgs-collect.pkgs-stable-old system;
         pkgs-stable = pkgs-collect.pkgs-stable system; # default in stable nixpkgs
         pkgs-ghcup = pkgs-collect.pkgs-ghcup system;
         pkgs-intel-npu-driver = pkgs-collect.pkgs-intel-npu-driver system;

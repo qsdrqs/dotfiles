@@ -309,6 +309,22 @@
         "type": "github"
       }
     },
+    "codecompanionDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767374656,
+        "narHash": "sha256-L4G1vZJKsLzQpJkbUod3Zrrp4lndplQIVfF4YukmYjE=",
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "rev": "b6fcc25ced5628d3d960e6e4bc287ce8fc9a1710",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "type": "github"
+      }
+    },
     "colorful-menuDOTnvim": {
       "flake": false,
       "locked": {
@@ -1531,6 +1547,7 @@
         "cellular-automatonDOTnvim": "cellular-automatonDOTnvim",
         "clangd_extensionsDOTnvim": "clangd_extensionsDOTnvim",
         "claudecodeDOTnvim": "claudecodeDOTnvim",
+        "codecompanionDOTnvim": "codecompanionDOTnvim",
         "colorful-menuDOTnvim": "colorful-menuDOTnvim",
         "copilotDOTlua": "copilotDOTlua",
         "cscope_mapsDOTnvim": "cscope_mapsDOTnvim",

@@ -48,9 +48,12 @@ in
   # boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu ];
   # boot.extraModulePackages = [ rtl88x2bu_module ];
 
-  boot.kernelParams = [ "iomem=relaxed" ];
+  boot.kernelParams = [
+    # "iomem=relaxed" # for operating /dev/mem in userspace
+    "usbcore.autosuspend=-1"
+  ];
   boot.extraModprobeConfig = ''
-    options rtw88_core disable_lps_deep=Y
+    options rtw88_core disable_lps_deep=y
   '';
 
   # Enable watchdogs for auto reboot on system hang
@@ -221,14 +224,14 @@ in
       in
       {
         wantedBy = [ "multi-user.target" ];
+        after = [ "sys-subsystem-net-devices-wlu1.device" "network.target" ];
         description = "Disable wifi power save";
         path = [
           pkgs.iw
         ];
         serviceConfig = {
           ExecStart = ''${./scripts/rpi-wifi-disable-powersave.sh} ${wifi-interface}'';
-          Restart = "on-failure";
-          RestartSec = 5;
+          Type = "oneshot";
         };
       };
     eth-rebuild =
@@ -249,6 +252,21 @@ in
           RestartSec = 5;
         };
       };
+    wifi-watchdog = {
+      wantedBy = [ "multi-user.target" ];
+      description = "Wifi watchdog to monitor and restart wifi kernel module if needed";
+      path = [
+        pkgs.iproute2 # ip
+        pkgs.bash
+        pkgs.systemd # systemctl, journalctl
+        pkgs.kmod # modprobe
+      ];
+      serviceConfig = {
+        ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-wifi-watchdog.py} ${wifi-interface-internal}'';
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+    };
   };
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
