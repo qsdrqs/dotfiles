@@ -246,7 +246,7 @@ function M.handler()
     vscode.action("chatgpt.addToThread")
   end, { silent = true })
   vim.keymap.set("v", "<localleader>ae", function()
-    vscode.action("continue.focusEdit")
+    vscode.action("inlineChat.start")
   end, { silent = true })
 
   -- rewrap

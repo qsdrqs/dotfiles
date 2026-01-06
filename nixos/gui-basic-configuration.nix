@@ -35,6 +35,16 @@ let
       # sed -i "s|Exec=.*|Exec=$out/bin/wechat|" $out/share/applications/com.tencent.wechat.desktop
     '';
   };
+  google-chromium = pkgs.symlinkJoin {
+    name = "google-chromium";
+    paths = [ pkgs.chromium ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/chromium \
+      --run 'export GOOGLE_DEFAULT_CLIENT_ID=$(cat ${./private/google-default-client-id})' \
+      --run 'export GOOGLE_DEFAULT_CLIENT_SECRET=$(cat ${./private/google-default-client-secret})'
+      '';
+  };
 in
 {
   # begin howdy
@@ -154,9 +164,7 @@ in
     telegram-desktop
     slack
     snapper-gui
-    (google-chrome.override (prev: {
-      commandLineArgs = (prev.commandLineArgs or [ ]) ++ [ "--enable-wayland-ime" ];
-    }))
+    google-chromium
     zoom-us
     scrcpy
     wpsoffice-cn-hidpi

@@ -2,7 +2,7 @@
 let
   hyprlandPackages = with pkgs; [
     # Add waybar package here due to: https://github.com/Alexays/Waybar/issues/3300
-    waybar
+    # waybar
     # inputs.waybar.packages.${pkgs.system}.waybar
     qt6.qtwayland
     libsForQt5.qt5.qtwayland
@@ -143,6 +143,7 @@ in
   programs.dconf.enable = true;
 
   programs.niri.enable = true;
+  programs.waybar.enable = true;
   services.gnome.gcr-ssh-agent.enable = false;
   services.gnome.gnome-keyring.enable = false;
 
@@ -204,7 +205,7 @@ in
         ];
       };
     in
-    hyprPluginDir;
+      hyprPluginDir;
   xdg.portal = {
     config.hyprland = {
       "org.freedesktop.impl.portal.ScreenCast" = "hyprland";
