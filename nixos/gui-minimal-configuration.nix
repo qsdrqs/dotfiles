@@ -48,6 +48,7 @@ in
     pulseaudio
     alsa-utils
     rofi
+    swaybg
     networkmanagerapplet
     xdotool
     zenity # color picker
