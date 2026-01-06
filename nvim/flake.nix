@@ -172,10 +172,6 @@
       url = "github:folke/sidekick.nvim";
       flake = false;
     };
-    agenticDOTnvim = {
-      url = "github:carlos-algms/agentic.nvim";
-      flake = false;
-    };
     nvim-treesitter = {
       url = "github:nvim-treesitter/nvim-treesitter?ref=main";
       flake = false;
@@ -522,7 +518,6 @@
         { name = "copilot.lua"; dotname = "copilotDOTlua"; source = inputs.copilotDOTlua; build = false; }
         { name = "CopilotChat.nvim"; dotname = "CopilotChatDOTnvim"; source = inputs.CopilotChatDOTnvim; build = false; }
         { name = "sidekick.nvim"; dotname = "sidekickDOTnvim"; source = inputs.sidekickDOTnvim; build = false; }
-        { name = "agentic.nvim"; dotname = "agenticDOTnvim"; source = inputs.agenticDOTnvim; build = false; }
         { name = "nvim-treesitter"; dotname = "nvim-treesitter"; source = inputs.nvim-treesitter; build = true; }
         { name = "codecompanion.nvim"; dotname = "codecompanionDOTnvim"; source = inputs.codecompanionDOTnvim; build = false; }
         { name = "snacks.nvim"; dotname = "snacksDOTnvim"; source = inputs.snacksDOTnvim; build = false; }

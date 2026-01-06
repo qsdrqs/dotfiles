@@ -1,13 +1,14 @@
-local link_style = { fg = "cyan" }
-local gitstatus_dot = { fg = "white" }
-local gitstatus_check = { fg = "green" }
-local gitstatus_star = { fg = "green" }
-local gitstatus_plus = { fg = "red" }
-local gitstatus_minus = { fg = "red" }
-local gitstatus_git_dirty = { fg = "yellow" }
-local gitstatus_git_clean = { fg = "green" }
-local gitstatus_question = { fg = "cyan" }
-local gitstatus_conflict = { fg = "magenta" }
+local link_fg = "cyan"
+local link_style = ui.Style():fg(link_fg)
+local gitstatus_dot = "white"
+local gitstatus_check = "green"
+local gitstatus_star = "green"
+local gitstatus_plus = "red"
+local gitstatus_minus = "red"
+local gitstatus_git_dirty = "yellow"
+local gitstatus_git_clean = "green"
+local gitstatus_question = "cyan"
+local gitstatus_conflict = "magenta"
 
 -- custom status bar
 Status:children_remove(3, Status.LEFT) -- remove "name"
@@ -56,7 +57,7 @@ function Entity:style()
 		white_style = true
 	end
 	if file.cha.is_link then
-		s:fg(link_style.fg)
+		s:fg(link_fg)
 		white_style = false
 	end
 	if file.cha.is_exec then
@@ -68,9 +69,9 @@ function Entity:style()
 	if not file.is_hovered then
 		return s
 	elseif file.in_preview then
-		return s and s:patch(th.mgr.preview_hovered) or th.mgr.preview_hovered
+		return s and s:patch(th.indicator.preview) or th.indicator.preview
 	else
-		return s and s:patch(th.mgr.hovered) or th.mgr.hovered
+		return s and s:patch(th.indicator.current) or th.indicator.current
 	end
 end
 
@@ -125,16 +126,13 @@ function Linemode:gitstatus()
 		end
 	end
 
-	if f.is_hovered then
-		return ui.Line(display)
+	local style = ui.Style():reset()
+	local color = status_color_tbl[color_key]
+	if color then
+		style:fg(color)
 	end
 
-	local style = status_color_tbl[color_key]
-	if style then
-		return ui.Line(display):style(style)
-	end
-
-	return ui.Line(display)
+	return ui.Line(display):style(style)
 end
 
 Linemode:children_add(Linemode.gitstatus, 2000)

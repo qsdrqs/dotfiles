@@ -31,42 +31,42 @@ ueberzug_offset = [ 0, 0, 0, 0 ]
 
 [opener]
 edit = [
-	{ run = 'editor-wrapped "$@"', desc = "Edit", block = true,  for = "unix" },
-	# { run = '$EDITOR "$@"', block = true,  for = "unix" },
-	{ run = 'code "%*"',    orphan = true, for = "windows" },
+	{ run = 'editor-wrapped %s', desc = "Edit", block = true,  for = "unix" },
+	# { run = '$EDITOR %s', block = true,  for = "unix" },
+	{ run = 'code %s',    orphan = true, for = "windows" },
 ]
 open = [
-	{ run = 'xdg-open "$1"',                desc = "Open", for = "linux" },
-	{ run = 'xdg-open "$1"',                desc = "Open (Detached)", for = "linux", orphan = true },
-	{ run = 'open "$@"',                    desc = "Open", for = "macos" },
-	{ run = 'start "" "%1"', orphan = true, desc = "Open", for = "windows" },
+	{ run = 'xdg-open %s1',                desc = "Open", for = "linux" },
+	{ run = 'xdg-open %s1',                desc = "Open (Detached)", for = "linux", orphan = true },
+	{ run = 'open %s',                     desc = "Open", for = "macos" },
+	{ run = 'start "" %s1', orphan = true, desc = "Open", for = "windows" },
 ]
 open_detach = [
-	{ run = 'xdg-open "$1"',                desc = "Open (Detached)", for = "linux", orphan = true },
-	{ run = 'xdg-open "$1"',                desc = "Open", for = "linux" },
-	{ run = 'open "$@"',                    desc = "Open", for = "macos" },
-	{ run = 'start "" "%1"', orphan = true, desc = "Open", for = "windows" },
+	{ run = 'xdg-open %s1',                desc = "Open (Detached)", for = "linux", orphan = true },
+	{ run = 'xdg-open %s1',                desc = "Open", for = "linux" },
+	{ run = 'open %s',                     desc = "Open", for = "macos" },
+	{ run = 'start "" %s1', orphan = true, desc = "Open", for = "windows" },
 ]
 reveal = [
-	{ run = 'xdg-open "$(dirname "$1")"',           desc = "Reveal", for = "linux" },
-	{ run = 'open -R "$1"',                         desc = "Reveal", for = "macos" },
-	{ run = 'explorer /select,"%1"', orphan = true, desc = "Reveal", for = "windows" },
-	{ run = '''exiftool "$1"; echo "Press enter to exit"; read _''', block = true, desc = "Show EXIF", for = "unix" },
+	{ run = 'xdg-open %d1',           desc = "Reveal", for = "linux" },
+	{ run = 'open -R %s1',            desc = "Reveal", for = "macos" },
+	{ run = 'explorer /select,%s1', orphan = true, desc = "Reveal", for = "windows" },
+	{ run = '''exiftool %s1; echo "Press enter to exit"; read _''', block = true, desc = "Show EXIF", for = "unix" },
 ]
 extract = [
-	{ run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
-	{ run = 'ya pub extract --list %*',   desc = "Extract here", for = "windows" },
+	{ run = 'ya pub extract --list %s', desc = "Extract here", for = "unix" },
+	{ run = 'ya pub extract --list %s',   desc = "Extract here", for = "windows" },
 ]
 play = [
-	{ run = 'mpv --force-window "$@"', orphan = true, for = "unix" },
-	{ run = 'mpv --force-window %*', orphan = true, for = "windows" },
-	{ run = '''mediainfo "$1"; echo "Press enter to exit"; read _''', block = true, desc = "Show media info", for = "unix" },
+	{ run = 'mpv --force-window %s', orphan = true, for = "unix" },
+	{ run = 'mpv --force-window %s', orphan = true, for = "windows" },
+	{ run = '''mediainfo %s1; echo "Press enter to exit"; read _''', block = true, desc = "Show media info", for = "unix" },
 ]
 
 [open]
 rules = [
 	# Folder
-	{ name = "*/", use = [ "edit", "open", "reveal" ] },
+	{ url = "*/", use = [ "edit", "open", "reveal" ] },
 	# Text
 	{ mime = "text/*", use = [ "edit", "reveal" ] },
 	# Image
@@ -86,7 +86,7 @@ rules = [
 	# pdf
 	{ mime = "application/pdf", use = [ "open_detach", "reveal", "edit" ] },
 	# Fallback
-	{ name = "*", use = [ "open", "reveal", "edit" ] },
+	{ url = "*", use = [ "open", "reveal", "edit" ] },
 ]
 
 [tasks]
@@ -101,8 +101,10 @@ suppress_preload = true
 
 fetchers = [
 	# Mimetype
-	{ id = "mime", name = "*", run = "mime", if = "!mime", prio = "high" },
-	{ id = "dircount", name = "*/", run = "dircount" },
+	{ id = "mime", url = "*/", run = "mime.dir", prio = "high" },
+	{ id = "mime", url = "local://*", run = "mime.local", prio = "high" },
+	{ id = "mime", url = "remote://*", run = "mime.remote", prio = "high" },
+	{ id = "dircount", url = "*/", run = "dircount" },
 	{ id = "gitstatus", mime = "*", run = "gitstatus" },
 ]
 preloaders = [
@@ -118,7 +120,7 @@ preloaders = [
 	{ mime = "application/vnd.ms-opentype", run = "font" },
 ]
 previewers = [
-	{ name = "*/", run = "folder", sync = true },
+	{ url = "*/", run = "folder", sync = true },
 	# Code
 	{ mime = "text/*", run = "code" },
 	{ mime = "*/{xml,javascript,x-wine-extension-ini}", run = "code" },
@@ -140,12 +142,12 @@ previewers = [
 	# Empty file
 	{ mime = "inode/x-empty", run = "empty" },
 	# Fallback
-	{ name = "*", run = "file" },
+	{ url = "*", run = "file" },
 ]
 
 [[plugin.prepend_fetchers]]
 id   = "mime"
-name = "*"
+url = "*"
 run  = "mime-ext"
 prio = "high"
 

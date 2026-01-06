@@ -173,8 +173,8 @@ rules = [
 	{ mime = "application/vnd.*", fg = "lightred" },
 
 	# Fallback
-	# { name = "*", fg = "white" },
-	{ name = "*/", fg = "12" }
+	# { url = "*", fg = "white" },
+	{ url = "*/", fg = "12" }
 ]
 
 [icon]

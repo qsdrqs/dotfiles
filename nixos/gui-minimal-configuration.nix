@@ -144,6 +144,9 @@ in
 
   programs.niri.enable = true;
   programs.waybar.enable = true;
+
+  systemd.user.services.waybar.path = [ pkgs.swaynotificationcenter ];
+
   services.gnome.gcr-ssh-agent.enable = false;
   services.gnome.gnome-keyring.enable = false;
 

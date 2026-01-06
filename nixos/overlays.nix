@@ -103,6 +103,8 @@ in
 
         # Begin Temporary fixed version packages
         freerdp = super.freerdp.override { openh264 = null; };
+        linux-wifi-hotspot = pkgs-stable.linux-wifi-hotspot;
+        global = pkgs-stable.global;
         # End Temporary fixed version packages
 
         scaphandre = super.scaphandre.overrideAttrs (old: {

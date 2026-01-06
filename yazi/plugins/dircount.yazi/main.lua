@@ -21,7 +21,7 @@ local update_dircount = ya.sync(function(st, st_dircount)
 		end
 		return st.dircount[tostring(file.url)]
 	end
-	ya.render()
+	ui.render()
 end)
 
 local update_dircount_table = ya.sync(function(st, st_dircount)
@@ -35,7 +35,7 @@ local update_dircount_table = ya.sync(function(st, st_dircount)
 		st.dircount[k] = v
 		st.dircount_lock[k] = true
 	end
-	ya.render()
+	ui.render()
 end)
 
 local get_dircount = ya.sync(function(st)

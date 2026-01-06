@@ -61,7 +61,7 @@ local function refresh_linemode(st)
 		end
 		return " "
 	end
-	ya.render()
+	ui.render()
 end
 
 local debug_table = function(table)
