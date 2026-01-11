@@ -180,6 +180,15 @@ in
     # GBM_BACKEND = "nvidia-drm";
   };
 
+  services.sunshine = {
+    enable = true;
+    autoStart = true;
+    capSysAdmin = true;
+    openFirewall = true;
+  };
+
+  services.hardware.openrgb.enable = true;
+
   environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text = ''
   {
     "rules": [
@@ -187,6 +196,13 @@ in
         "pattern": {
           "feature": "procname",
           "matches": "niri"
+        },
+        "profile": "Limit Free Buffer Pool On Wayland Compositors"
+      },
+      {
+        "pattern": {
+          "feature": "procname",
+          "matches": ".firefox-devedition-wrapped"
         },
         "profile": "Limit Free Buffer Pool On Wayland Compositors"
       }

@@ -30,7 +30,6 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    code-cursor
     vscode
     firefox-devedition
     firefox-alias
@@ -61,6 +60,8 @@ in
     libcamera
     libcamera-qcam
     v4l-utils
+
+    moonlight-qt
   ] ++ hyprlandPackages ++ (with pkgs.kdePackages; [
     dolphin
     kdeconnect-kde
@@ -145,6 +146,22 @@ in
 
   programs.niri.enable = true;
   programs.waybar.enable = true;
+
+  systemd.user.services.waybar.serviceConfig.ExecStartPre =
+    let
+      waitForKbd = pkgs.writeShellScript "waybar-wait-kbd" ''
+        set -euo pipefail
+        for i in $(seq 1 100); do
+          if ls /dev/input/by-path/*-event-kbd >/dev/null 2>&1; then
+            exit 0
+          fi
+          sleep 0.1
+        done
+        echo "waybar: keyboard device not ready" >&2
+        exit 1
+      '';
+    in
+    "${waitForKbd}";
 
   systemd.user.services.waybar.path = [ pkgs.swaynotificationcenter ];
 

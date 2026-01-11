@@ -147,8 +147,8 @@ in
           src = super.fetchFromGitHub {
             owner = "keepassxreboot";
             repo = "keepassxc";
-            rev = "eefee1f092f5f1dc85c7f06da68637c7c5cabbc7";
-            hash = "sha256-+/0Ee3tOY51YiKlYPxE33Q+g2AuNXfO/lsnaYx9i5cI=";
+            rev = "331a2de136398f733136c51f1badae5d154878bc";
+            hash = "sha256-deIg59jSCW5e0WZ5nCTkV46ZK6cwjneA1+3nLlzekE4=";
           };
           nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [
             super.keyutils
