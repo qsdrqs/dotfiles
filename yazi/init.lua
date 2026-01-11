@@ -36,7 +36,7 @@ Status:children_add(function()
 		if user == nil then
 			user = uid
 		end
-		spans[#spans + 1] = ui.Span(user .. " " .. group .. " "):style(th.status.permissions_r)
+		spans[#spans + 1] = ui.Span(user .. " " .. group .. " "):style(th.status.perm_read)
 	end
 
 	if h.cha.mtime ~= nil then
