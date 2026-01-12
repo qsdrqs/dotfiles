@@ -6,12 +6,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/0e94c9a0c51dd426bfaa290f747c83519e3bcece";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/31926ce9afb1c915fa4190b77ca9be389ccaf18e";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-stable-old.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
     nixpkgs-howdy.url = "github:fufexan/nixpkgs/howdy";
+    nixpkgs-ckb-next.url = "github:4JX/nixpkgs/ckb-next-qt6";
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -240,7 +241,7 @@
       serverConfig = basicConfig // {
         modules = basicConfig.modules ++ [
           ./nixos/server-configuration.nix
-          ./nixos/custom/server.nix
+          ./nixos/custom/vulchi.nix
         ];
       };
       rpiConfig = basicConfig // rec {

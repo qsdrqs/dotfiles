@@ -12,6 +12,8 @@ in
     )
   ];
 
+  boot.kernelPackages = pkgs.linuxPackages; # use the LTS kernel
+
   environment.systemPackages = with pkgs; [
     matrix-synapse-unwrapped
   ];

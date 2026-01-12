@@ -44,6 +44,10 @@ let
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
+  pkgs-ckb-next = import inputs.nixpkgs-ckb-next {
+    system = pkgs.stdenv.hostPlatform.system;
+    config.allowUnfree = true;
+  };
   pkgs-last = import inputs.nixpkgs-last {
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
@@ -103,8 +107,16 @@ in
 
         # Begin Temporary fixed version packages
         freerdp = super.freerdp.override { openh264 = null; };
-        linux-wifi-hotspot = pkgs-stable.linux-wifi-hotspot;
         global = pkgs-stable.global;
+        ckb-next = pkgs-ckb-next.ckb-next.overrideAttrs (oldAttrs: {
+          version = "0.6.2-unstable-2025-12-23";
+          src = pkgs-stable.fetchFromGitHub {
+            owner = "ckb-next";
+            repo = "ckb-next";
+            rev = "5fb355df648e5c4b151403a1a4bc28f409df24e7";
+            hash = "sha256-3v4HLzTdnUQGUyzBUzm9IFxj1BEQ2v5JkBbDeHYu2z8=";
+          };
+        });
         # End Temporary fixed version packages
 
         scaphandre = super.scaphandre.overrideAttrs (old: {
