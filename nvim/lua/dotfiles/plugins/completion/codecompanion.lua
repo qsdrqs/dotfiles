@@ -73,12 +73,15 @@ return function(ctx)
             background = {
               adapter = copilot_adapter,
             },
-            chat = {
-              adapter = "codex",
-            },
+            -- chat = {
+            --   adapter = "codex",
+            -- },
             -- chat = {
             --   adapter = copilot_adapter,
             -- },
+            chat = {
+              adapter = "opencode",
+            },
             inline = {
               adapter = copilot_adapter,
             },

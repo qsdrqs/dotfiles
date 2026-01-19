@@ -281,8 +281,14 @@ in
   services.desktopManager.plasma6.enable = true;
 
   # turn on bluetooth on startup
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="bluetooth", RUN+="${pkgs.util-linux}/bin/rfkill unblock bluetooth"
-  '';
+  systemd.services.rfkill-unblock-bluetooth = {
+    description = "Unblock Bluetooth rfkill";
+    after = [ "systemd-rfkill.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.util-linux}/bin/rfkill unblock bluetooth";
+    };
+  };
 
 }

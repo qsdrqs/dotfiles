@@ -261,38 +261,11 @@ alias sem-update="sudo emerge --ask --verbose --update --deep --newuse --with-bd
 snr-switch() {
     local original_pwd=$(pwd)
     trap "cd ${original_pwd}" EXIT
-    sudo echo "building system"
     cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-    bash ./install.sh nixpre || return 1
+    # bash ./install.sh nixpre || return 1
     trap "cd ${original_pwd}" INT
 
-    if [[ $1 == "droid" ]]; then
-        nix-on-droid switch --flake path:.
-    else
-        sudo nixos-rebuild switch --flake path:.#$@
-    fi
-}
-snr-switch-remote() {
-    local original_pwd=$(pwd)
-    trap "cd ${original_pwd}" EXIT
-    sudo echo "building system"
-    cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
-
-    if [[ -L ./result ]];then
-        echo "find result link, directly use it"
-    else
-        bash ./install.sh nixpre || return 1
-        trap "cd ${original_pwd}" INT
-        nixos-rebuild build --flake path:.#$@
-    fi
-    sudo nixos-rebuild switch --flake path:.#$1
-    # sudo nix-env -p /nix/var/nix/profiles/system --set $(readlink -f result) && \
-    # (
-    #     sudo ./result/bin/switch-to-configuration switch
-    #     if [[ -L ./result ]];then
-    #         rm result
-    #     fi
-    # )
+    nixos-rebuild switch --sudo --ask-sudo-password --flake path:.#$@
 }
 hm-switch() {
     local original_pwd=$(pwd)

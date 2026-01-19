@@ -18,7 +18,7 @@ in
 
   environment.systemPackages = with pkgs; [
     appimage-run
-    nixfmt-rfc-style
+    nixfmt
     nixd # nix language server
     cscope
     global

@@ -249,6 +249,7 @@ in
   programs.nix-ld.libraries = with pkgs; [
     config.hardware.graphics.package
     gmp
+    gtk3
   ];
   environment.variables.NIX_LD_LIBRARY_PATH = lib.mkOverride 90 "/run/current-system/sw/share/nix-ld/lib:/run/opengl-driver/lib";
 
