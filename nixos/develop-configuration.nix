@@ -28,6 +28,8 @@
 
     keepassxc
     texlive.combined.scheme-full
+    distrobox
+    bun
   ];
 
   virtualisation = {
@@ -36,6 +38,7 @@
       qemu.vhostUserPackages = [ pkgs.virtiofsd ];
     };
     docker.enable = true;
+    podman.enable = true;
   };
 
 }

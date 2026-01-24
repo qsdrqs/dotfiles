@@ -140,7 +140,11 @@ echo -ne '\e[5 q'
 # fi
 
 # init zinit
-ZINIT_HOME="${XDG_DATA_HOME:-${HOME}}/zinit"
+if [[ -n "$XDG_DATA_HOME" && -f "$XDG_DATA_HOME/zinit/zinit.zsh" ]]; then
+    ZINIT_HOME="$XDG_DATA_HOME/zinit"
+else
+    ZINIT_HOME="$HOME/zinit"
+fi
 source "${ZINIT_HOME}/zinit.zsh"
 
 # load zinit plugins

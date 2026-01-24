@@ -1,4 +1,10 @@
-{ config, pkgs, inputs, lib, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}:
 let
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
   echoerr = pkgs.writeShellScriptBin "echoerr" ''
@@ -121,12 +127,13 @@ in
 
   home.sessionVariables = {
     CREDENTIALS_FILE = "${config.home.homeDirectory}/.git-credentials";
-    NIX_CONFIG = ''$(
-      github_token=$(cat /home/qsdrqs/.git-credentials 2>/dev/null | grep github.com | awk -F'[:@]' '{print $3}')
-      if [ -n "$github_token" ]; then
-        echo "access-tokens = github.com=$github_token";
-      fi
-    )'';
+    NIX_CONFIG = ''
+      $(
+        github_token=$(cat /home/qsdrqs/.git-credentials 2>/dev/null | grep github.com | awk -F'[:@]' '{print $3}')
+        if [ -n "$github_token" ]; then
+          echo "access-tokens = github.com=$github_token";
+        fi
+      )'';
     _ZO_FZF_OPTS = ''
       --no-sort
       --bind=ctrl-z:ignore,btab:up,tab:down
@@ -154,24 +161,42 @@ in
         fi
       fi
     '';
-    configs = let
-      linkConfigs = [
-        "lazygit"
-        "aichat"
-      ];
-      touchConfigs = [];
-    in ''
-      mkdir -p ~/.config
-      ${lib.concatMapStringsSep "\n" (cfg: ''
-        if [ ! -e ${homeDir}/.config/${cfg} ]; then
-          ln -s ${homeDir}/dotfiles/${cfg} ${homeDir}/.config
-        fi
-      '') linkConfigs}
-      ${lib.concatMapStringsSep "\n" (cfg: ''
-        if [ ! -e ${homeDir}/.config/${cfg} ]; then
-          touch ${homeDir}/.config/${cfg}
-        fi
-      '') touchConfigs}
-    '';
+    configs =
+      let
+        linkConfigs = [
+          "lazygit"
+          "aichat"
+        ];
+        touchConfigs = [ ];
+      in
+      ''
+        mkdir -p ~/.config
+        ${lib.concatMapStringsSep "\n" (cfg: ''
+          if [ ! -e ${homeDir}/.config/${cfg} ]; then
+            ln -s ${homeDir}/dotfiles/${cfg} ${homeDir}/.config
+          fi
+        '') linkConfigs}
+        ${lib.concatMapStringsSep "\n" (cfg: ''
+          if [ ! -e ${homeDir}/.config/${cfg} ]; then
+            touch ${homeDir}/.config/${cfg}
+          fi
+        '') touchConfigs}
+      '';
+    opencode-config =
+      let
+        files = [
+          "opencode.jsonc"
+          "oh-my-opencode.json"
+          "skill"
+        ];
+      in
+      ''
+        mkdir -p ~/.config/opencode
+        ${lib.concatMapStringsSep "\n" (cfg: ''
+          if [ ! -e ${homeDir}/.config/opencode/${cfg} ]; then
+            ln -s ${homeDir}/dotfiles/opencode/${cfg} ${homeDir}/.config/opencode
+          fi
+        '') files}
+      '';
   };
 }

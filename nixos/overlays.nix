@@ -226,12 +226,6 @@ in
           version = "2.1.1";
         });
 
-        firefox-devedition-unwrapped = super.firefox-devedition-unwrapped.override {
-          onnxruntime = (super.onnxruntime.override {
-            # prevent firefox building
-            cudaSupport = false;
-          });
-        };
         firefox-devedition = super.firefox-devedition.overrideAttrs (oldAttrs: {
           buildCommand = (oldAttrs.buildCommand or "") + ''
             mkdir -p $out/tmp/firefox-omni
