@@ -187,7 +187,7 @@ in
         files = [
           "opencode.jsonc"
           "oh-my-opencode.json"
-          "skill"
+          "skills"
         ];
       in
       ''

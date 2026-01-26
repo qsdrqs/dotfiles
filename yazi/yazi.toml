@@ -147,8 +147,14 @@ previewers = [
 
 [[plugin.prepend_fetchers]]
 id   = "mime"
-url = "*"
-run  = "mime-ext"
+url  = "local://*"
+run  = "mime-ext.local"
+prio = "high"
+
+[[plugin.prepend_fetchers]]
+id   = "mime"
+url  = "remote://*"
+run  = "mime-ext.remote"
 prio = "high"
 
 [input]

@@ -82,7 +82,7 @@ let
   yazi-plugins = pkgs.runCommand "yazi-plugins" { } ''
     cp -r ${inputs.yazi-plugins} $out
     chmod -R u+w $out
-    substituteInPlace $out/mime-ext.yazi/main.lua \
+    substituteInPlace $out/mime-ext.yazi/local.lua \
       --replace-fail 'cu = "application/cu-seeme",' 'cu = "text/x-cuda",'
   '';
 in

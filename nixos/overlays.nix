@@ -1,4 +1,4 @@
-{ pkgs, lib, inputs, ... }:
+{ pkgs, lib, inputs, config, ... }:
 let
   # Neovim Treesitter Parsers
   # The following code is taken from {github.com/neovim/neovim}/contrib/flake.nix
@@ -53,6 +53,7 @@ let
     config.allowUnfree = true;
   };
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
+  cudaSupport = config.nixpkgs.config.cudaSupport or false;
 in
 {
   nixpkgs.overlays = [
@@ -117,6 +118,9 @@ in
             hash = "sha256-3v4HLzTdnUQGUyzBUzm9IFxj1BEQ2v5JkBbDeHYu2z8=";
           };
         });
+        opencv4 = pkgs-stable.opencv4.override {
+          enableCuda = cudaSupport;
+        };
         # End Temporary fixed version packages
 
         scaphandre = super.scaphandre.overrideAttrs (old: {
@@ -263,6 +267,15 @@ in
               "x-scheme-handler/io.element.desktop"
             ];
           };
+        });
+
+        howdy = super.howdy.overrideAttrs (old: {
+          patches = old.patches ++ [
+            ./patches/howdy.patch
+          ];
+          mesonFlags = old.mesonFlags ++ [
+            "-Dextra_path=${super.kbd}/bin/"
+          ];
         });
 
       })

@@ -271,6 +271,15 @@ snr-switch() {
 
     nixos-rebuild switch --sudo --ask-sudo-password --flake path:.#$@
 }
+snr-boot() {
+    local original_pwd=$(pwd)
+    trap "cd ${original_pwd}" EXIT
+    cd $HOME/dotfiles && find -name "*sync-conflict*" -exec rm {} \;
+    # bash ./install.sh nixpre || return 1
+    trap "cd ${original_pwd}" INT
+
+    nixos-rebuild boot --sudo --ask-sudo-password --flake path:.#$@
+}
 hm-switch() {
     local original_pwd=$(pwd)
     trap "cd ${original_pwd}" EXIT

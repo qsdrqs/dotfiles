@@ -152,11 +152,12 @@ require("copy-relative-path"):setup {
 	root_files = {".git", ".root"}
 }
 
-local ok, mime_ext = pcall(require, "mime-ext")
+local ok, mime_ext = pcall(require, "mime-ext.local")
 if ok then
 	mime_ext:setup {
 		with_exts = {
 			tex = "text/x-tex",
+			cu = "text/x-cuda",
 		},
 		fallback_file1 = true,
 	}

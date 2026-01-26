@@ -48,41 +48,8 @@ let
 in
 {
   # begin howdy
-  disabledModules = [ "security/pam.nix" ];
-  imports = [
-    "${inputs.nixpkgs-howdy}/nixos/modules/security/pam.nix"
-    "${inputs.nixpkgs-howdy}/nixos/modules/services/security/howdy"
-    "${inputs.nixpkgs-howdy}/nixos/modules/services/misc/linux-enable-ir-emitter.nix"
-  ];
-  nixpkgs.overlays = [
-    (self: super: {
-      linux-enable-ir-emitter = pkgs-howdy.linux-enable-ir-emitter;
-      howdy = pkgs-howdy.howdy.overrideAttrs (old:
-      let
-        # use pkgs.python3 to allow nixpkgs configs
-        pyEnv = pkgs-howdy.python3.withPackages (p: [
-          p.dlib
-          p.elevate
-          p.face-recognition.override
-          p.keyboard
-          (p.opencv4.override { enableGtk3 = true; })
-          p.pycairo
-          p.pygobject3
-        ]);
-      in
-      {
-        patches = old.patches ++ [
-          ./patches/howdy.patch
-        ];
-        mesonFlags = old.mesonFlags ++ [
-          "-Dpython_path=${pyEnv.interpreter}"
-          "-Dextra_path=${pkgs-howdy.kbd}/bin/"
-        ];
-      });
-    })
-  ];
   services.howdy = {
-    enable = true;
+    enable = false;
     settings = {
       # you may not need these
       core.no_confirmation = true;
@@ -101,7 +68,7 @@ in
   in
   ''
     until [ -e ${video-device} ]; do
-      ${pkgs-howdy.coreutils}/bin/sleep 0.5
+      ${pkgs.coreutils}/bin/sleep 0.5
     done
   '';
   # end howdy

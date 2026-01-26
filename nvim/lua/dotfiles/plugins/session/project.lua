@@ -16,14 +16,15 @@ return function(ctx)
     {
       "DrKJeff16/project.nvim",
       config = function()
-        vim.g.project_lsp_nowarn = 1
         require("project").setup({
           silent_chdir = true,
           manual_mode = false,
-          use_lsp = true,
+          lsp = {
+            enabled = true,
+            use_pattern_matching = true,
+            ignore = { "clangd" },
+          },
           patterns = { ".git", ".hg", ".bzr", ".svn", ".root", ".project", ".exrc", "pom.xml" },
-          allow_patterns_for_lsp = true,
-          ignore_lsp = { "clangd" },
           exclude_dirs = { "~" },
           -- your configuration comes here
           -- or leave it empty to use the default settings
