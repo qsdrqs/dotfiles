@@ -3,7 +3,8 @@
   "google_auth": false,
   "agents": {
     "sisyphus": {
-      "model": "anthropic/claude-opus-4-5"
+      "model": "openai/gpt-5.2-codex",
+      "variant": "xhigh"
     },
     "oracle": {
       "model": "openai/gpt-5.2",
@@ -16,13 +17,15 @@
       "model": "anthropic/claude-haiku-4-5"
     },
     "frontend-ui-ux-engineer": {
-      "model": "google/antigravity-gemini-3-pro-high"
+      "model": "google/antigravity-gemini-3-pro",
+      "variant": "high"
     },
     "document-writer": {
       "model": "google/antigravity-gemini-3-flash"
     },
     "multimodal-looker": {
-      "model": "google/gemini-3-flash"
+      "model": "google/antigravity-gemini-3-flash",
+      "variant": "high"
     },
     "prometheus": {
       "model": "anthropic/claude-opus-4-5",
@@ -42,14 +45,14 @@
   },
   "categories": {
     "visual-engineering": {
-      "model": "google/gemini-3-pro"
+      "model": "google/antigravity-gemini-3-pro"
     },
     "artistry": {
-      "model": "google/gemini-3-pro",
-      "variant": "max"
+      "model": "google/antigravity-gemini-3-pro",
+      "variant": "high"
     },
     "writing": {
-      "model": "google/gemini-3-flash"
+      "model": "google/antigravity-gemini-3-flash"
     },
     "ultrabrain": {
       "model": "openai/gpt-5.2-codex",
@@ -64,5 +67,8 @@
     "unspecified-high": {
       "model": "anthropic/claude-sonnet-4-5"
     }
-  }
+  },
+  "disabled_hooks": [
+    "keyword-detector"
+  ]
 }
