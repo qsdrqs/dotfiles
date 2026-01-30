@@ -51,11 +51,11 @@
     "powerlevel10k": {
       "flake": false,
       "locked": {
-        "lastModified": 1769091011,
-        "narHash": "sha256-lmVBVSc+SEzDr+8z5gaMKA/uSEriaB8rxTT1smgkl1Y=",
+        "lastModified": 1769621797,
+        "narHash": "sha256-xiUNt2zomP3TNiCW/PZn6rS/3pv+uW17YjkzEPc227I=",
         "owner": "romkatv",
         "repo": "powerlevel10k",
-        "rev": "b97926675aba2d8465325d786cc69de9d9fdec84",
+        "rev": "8ed1f58e082e1cce85e1d69235d1a906cf3c643e",
         "type": "github"
       },
       "original": {

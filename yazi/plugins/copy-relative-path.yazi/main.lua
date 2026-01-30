@@ -34,7 +34,7 @@ function M.setup(st, args)
 end
 
 function string:endswith(suffix)
-    return self:sub(-#suffix) == suffix
+	return self:sub(-#suffix) == suffix
 end
 
 local function find_target_root(cwd, root_files)
@@ -78,7 +78,7 @@ local function find_target_root(cwd, root_files)
 end
 
 function M.entry()
-	ya.manager_emit("escape", { visual = true })
+	ya.emit("escape", { visual = true })
 
 	local cwd = tostring(get_cwd())
 	local root_files = get_root_files()
