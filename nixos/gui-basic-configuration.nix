@@ -49,9 +49,9 @@ in
 {
   # begin howdy
   services.howdy = {
-    enable = false;
+    enable = true;
+    control = "sufficient"; # was told to be insecure
     settings = {
-      # you may not need these
       core.no_confirmation = true;
       video.dark_threshold = 90;
       rubberstamps.enabled = false;

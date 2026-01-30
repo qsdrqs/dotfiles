@@ -413,6 +413,8 @@ binds {
     Mod+P hotkey-overlay-title="Open Browser" { spawn "firefox"; }
     Mod+T hotkey-overlay-title="Open File Explorer" { spawn "dolphin"; }
     Mod+D hotkey-overlay-title="Run an Application: rofi" { spawn-sh "rofi -combi-modi drun,run,ssh  -font 'fira code nerd font 15' -show combi -icon-theme 'Papirus' -show-icons -matching fuzzy"; }
+    Mod+Ctrl+W hotkey-overlay-title="Run an Application: rofi" { spawn-sh "rofi -show window -font 'fira code nerd font 15' -show combi -icon-theme 'Papirus' -show-icons -matching fuzzy"; }
+
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.

@@ -118,9 +118,6 @@ in
             hash = "sha256-3v4HLzTdnUQGUyzBUzm9IFxj1BEQ2v5JkBbDeHYu2z8=";
           };
         });
-        opencv4 = pkgs-stable.opencv4.override {
-          enableCuda = cudaSupport;
-        };
         # End Temporary fixed version packages
 
         scaphandre = super.scaphandre.overrideAttrs (old: {
