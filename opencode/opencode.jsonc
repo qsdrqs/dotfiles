@@ -1,11 +1,12 @@
 {
   "plugin": [
-    "oh-my-opencode@3.1.7",
-    "opencode-antigravity-auth@1.4.1"
+    "oh-my-opencode@latest",
+    "opencode-antigravity-auth@1.4.3",
+    "opencode-gemini-auth@latest"
   ],
   "$schema": "https://opencode.ai/config.json",
   "formatter": false,
-  "model": "openai/gpt-5.2-codex",
+  "model": "{env:OPENCODE_MODEL}",
   "agent": {
     "researcher": {
       "mode": "subagent",
@@ -111,6 +112,13 @@
           "limit": {
             "context": 262144,
             "output": 65536
+          }
+        },
+        "glm-4.7-flash": {
+          "name": "GLM-4.7 Flash (local)",
+          "limit": {
+            "context": 204800,
+            "output": 131072
           }
         }
       }

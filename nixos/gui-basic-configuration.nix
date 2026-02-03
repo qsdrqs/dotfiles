@@ -65,11 +65,10 @@ in
   systemd.services.linux-enable-ir-emitter.preStart =
   let
     video-device = "/dev/${config.services.linux-enable-ir-emitter.device}";
+    wait-script = ./scripts/wait-for-ir-emitter-devices.sh;
   in
   ''
-    until [ -e ${video-device} ]; do
-      ${pkgs.coreutils}/bin/sleep 0.5
-    done
+    ${wait-script} ${video-device}
   '';
   # end howdy
 
@@ -199,6 +198,9 @@ in
 
   programs.steam = {
     enable = true;
+    extraCompatPackages = with pkgs; [
+      proton-ge-bin
+    ];
   };
   programs.java.enable = true;
 

@@ -21,6 +21,7 @@ in
     raspberrypi-eeprom
     wiringpi
     (python3.withPackages python-packages)
+    cmake
   ];
   boot.kernelPackages = pkgs.linuxPackages_rpi5;
   boot.loader.raspberryPi.bootloader = "kernel";

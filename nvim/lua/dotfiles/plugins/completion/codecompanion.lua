@@ -34,7 +34,7 @@ return function(ctx)
         {
           "<localleader>aa",
           "<cmd>CodeCompanionChatAddLines<cr>",
-          mode = { "v" },
+          mode = { "n", "v" },
           desc = "Add selection to CodeCompanion Chat",
         },
         {
@@ -57,6 +57,20 @@ return function(ctx)
                   defaults = {
                     auth_method = "chatgpt",
                   },
+                })
+              end,
+              opencode_lite = function()
+                return require("codecompanion.adapters").extend("opencode", {
+                  env = {
+                    OPENCODE_MODEL = "github-copilot/claude-sonnet-4.5",
+                  }
+                })
+              end,
+              opencode = function()
+                return require("codecompanion.adapters").extend("opencode", {
+                  env = {
+                    OPENCODE_MODEL = "openai/gpt-5.2-codex",
+                  }
                 })
               end,
             },

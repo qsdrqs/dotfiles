@@ -7,62 +7,9 @@ import re
 import sys
 from pathlib import Path
 
+import yaml
+
 MAX_SKILL_NAME_LENGTH = 64
-
-
-def _parse_scalar(value):
-    value = value.strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
-        unquoted = value[1:-1]
-        if value[0] == '"':
-            unquoted = unquoted.replace('\\"', '"').replace("\\n", "\n").replace("\\t", "\t")
-        return unquoted
-    return value
-
-
-def _parse_frontmatter(frontmatter_text):
-    """
-    Parse a small YAML subset sufficient for skill validation.
-
-    Supported:
-    - Top-level `key: value` scalars (treated as strings)
-    - Top-level `key:` blocks with indented children (recorded as {} and skipped)
-
-    This intentionally does NOT implement full YAML; it avoids external deps (PyYAML).
-    """
-    frontmatter = {}
-    lines = frontmatter_text.splitlines()
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            i += 1
-            continue
-
-        # Ignore indented lines (part of nested blocks like `metadata:`).
-        if line.startswith((" ", "\t")):
-            i += 1
-            continue
-
-        if ":" not in line:
-            raise ValueError(f"Invalid frontmatter line (missing ':'): {line!r}")
-
-        key, raw_value = line.split(":", 1)
-        key = key.strip()
-        value = raw_value.strip()
-
-        if value == "":
-            frontmatter[key] = {}
-            i += 1
-            while i < len(lines) and lines[i].startswith((" ", "\t")):
-                i += 1
-            continue
-
-        frontmatter[key] = _parse_scalar(value)
-        i += 1
-
-    return frontmatter
 
 
 def validate_skill(skill_path):
@@ -84,10 +31,10 @@ def validate_skill(skill_path):
     frontmatter_text = match.group(1)
 
     try:
-        frontmatter = _parse_frontmatter(frontmatter_text)
+        frontmatter = yaml.safe_load(frontmatter_text)
         if not isinstance(frontmatter, dict):
-            return False, "Frontmatter must be a mapping"
-    except Exception as e:
+            return False, "Frontmatter must be a YAML dictionary"
+    except yaml.YAMLError as e:
         return False, f"Invalid YAML in frontmatter: {e}"
 
     allowed_properties = {"name", "description", "license", "allowed-tools", "metadata"}

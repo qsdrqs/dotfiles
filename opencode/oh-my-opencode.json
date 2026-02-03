@@ -4,7 +4,7 @@
   "agents": {
     "sisyphus": {
       "model": "openai/gpt-5.2-codex",
-      "variant": "xhigh"
+      "variant": "high"
     },
     "oracle": {
       "model": "openai/gpt-5.2",
@@ -24,7 +24,7 @@
       "model": "google/antigravity-gemini-3-flash"
     },
     "multimodal-looker": {
-      "model": "google/antigravity-gemini-3-flash",
+      "model": "google/gemini-3-flash-preview",
       "variant": "high"
     },
     "prometheus": {
@@ -40,19 +40,23 @@
       "variant": "medium"
     },
     "atlas": {
-      "model": "anthropic/claude-sonnet-4-5"
+      "model": "opencode/kimi-k2.5-free"
+    },
+    "hephaestus": {
+      "model": "openai/gpt-5.2-codex",
+      "variant": "medium"
     }
   },
   "categories": {
     "visual-engineering": {
-      "model": "google/antigravity-gemini-3-pro"
+      "model": "google/gemini-3-pro-preview"
     },
     "artistry": {
-      "model": "google/antigravity-gemini-3-pro",
-      "variant": "high"
+      "model": "google/gemini-3-pro-preview",
+      "variant": "max"
     },
     "writing": {
-      "model": "google/antigravity-gemini-3-flash"
+      "model": "google/gemini-3-flash-preview"
     },
     "ultrabrain": {
       "model": "openai/gpt-5.2-codex",
@@ -65,7 +69,12 @@
       "model": "anthropic/claude-sonnet-4-5"
     },
     "unspecified-high": {
-      "model": "anthropic/claude-sonnet-4-5"
+      "model": "anthropic/claude-sonnet-4-5",
+      "variant": "max"
+    },
+    "deep": {
+      "model": "openai/gpt-5.2-codex",
+      "variant": "medium"
     }
   },
   "disabled_hooks": [

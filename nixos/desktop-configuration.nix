@@ -102,6 +102,7 @@ in
     # NUR
     qqmusic-hidpi
     nur.repos.xddxdd.baidunetdisk
+    scanmem
   ];
 
   services.howdy.settings.core.use_cnn = true;
