@@ -19,6 +19,7 @@ in
   environment.systemPackages = with pkgs; [
     wluma
     powertop
+    config.boot.kernelPackages.turbostat
   ];
 
   hardware.firmware = with pkgs; [

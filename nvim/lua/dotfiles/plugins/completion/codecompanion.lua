@@ -69,7 +69,7 @@ return function(ctx)
               opencode = function()
                 return require("codecompanion.adapters").extend("opencode", {
                   env = {
-                    OPENCODE_MODEL = "openai/gpt-5.2-codex",
+                    OPENCODE_MODEL = "openai/gpt-5.3-codex",
                   }
                 })
               end,

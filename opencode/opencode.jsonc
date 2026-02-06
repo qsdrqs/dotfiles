@@ -1,7 +1,7 @@
 {
   "plugin": [
     "oh-my-opencode@latest",
-    "opencode-antigravity-auth@1.4.3",
+    "opencode-antigravity-auth@1.4.6",
     "opencode-gemini-auth@latest"
   ],
   "$schema": "https://opencode.ai/config.json",
@@ -10,7 +10,7 @@
   "agent": {
     "researcher": {
       "mode": "subagent",
-      "model": "openai/gpt-5.2",
+      "model": "openai/gpt-5.3-codex",
       "variant": "xhigh",
       "prompt": "{file:./skills/researcher/SKILL.md}",
       "tools": {
@@ -287,6 +287,17 @@
           }
         },
         "gpt-5.2-codex": {
+          "options": {
+            "reasoningEffort": "xhigh",
+            "reasoningSummary": "detailed",
+            "textVerbosity": "medium",
+            "include": [
+              "reasoning.encrypted_content"
+            ],
+            "store": false
+          }
+        },
+        "gpt-5.3-codex": {
           "options": {
             "reasoningEffort": "xhigh",
             "reasoningSummary": "detailed",
