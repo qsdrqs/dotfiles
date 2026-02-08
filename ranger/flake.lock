@@ -67,11 +67,11 @@
     "ranger-zjumper": {
       "flake": false,
       "locked": {
-        "lastModified": 1690706848,
-        "narHash": "sha256-VB+W9iEBstQI4yZmyB8d/Ff+N8PM2y6fI7xuJhszCBw=",
+        "lastModified": 1770382438,
+        "narHash": "sha256-7eKWe09JE7/BZx40iJ7Zw7oRklrctiL5p2AJdWgfL2U=",
         "owner": "ask1234560",
         "repo": "ranger-zjumper",
-        "rev": "217f87df69ff67077d53d8220f0e79a475fb2a8e",
+        "rev": "e53fc9788b3455b432bf853e111d3b6afa8e1608",
         "type": "github"
       },
       "original": {

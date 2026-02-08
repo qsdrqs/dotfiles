@@ -19,11 +19,11 @@
     "fzf-tab": {
       "flake": false,
       "locked": {
-        "lastModified": 1768396986,
-        "narHash": "sha256-ZekrZYQBGYQOTMojnJbQhelH4rOyzuPIP/Tu/6Tjwec=",
+        "lastModified": 1770118187,
+        "narHash": "sha256-gatFp2kjyqaqi8hu0UWPDtQAy+X2VmyYNPP4aiNDdHg=",
         "owner": "Aloxaf",
         "repo": "fzf-tab",
-        "rev": "cbdc58226a696688d08eae63d8e44f4b230fa3dd",
+        "rev": "747c15de85a38748b28c29ac65616137dbb4c8b6",
         "type": "github"
       },
       "original": {
@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1769411697,
-        "narHash": "sha256-xFXPUUTdF2B/PO5phZA/kptrhux89daB172Oj9UKMYM=",
+        "lastModified": 1770022169,
+        "narHash": "sha256-SR0Lopccq8oSKHOl5p/YMXNzds5pAqUgeXsy2mLbtS0=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "67cd8c4673512d08238461f7ce00715da01665d4",
+        "rev": "9df4ea095fe27ccd0ee95f2d34bab884c4a75585",
         "type": "github"
       },
       "original": {
@@ -129,11 +129,11 @@
     "zinit": {
       "flake": false,
       "locked": {
-        "lastModified": 1767447694,
-        "narHash": "sha256-UNNnER184WYz/5tGHPZ1POfHgPdNpoPojrPfqXZkz7I=",
+        "lastModified": 1770051529,
+        "narHash": "sha256-bjgyD9IsYiUzdUlPmypteWDFukifCefyFl8Q/hxamZU=",
         "owner": "zdharma-continuum",
         "repo": "zinit",
-        "rev": "89e1858b72a3e1b7b7b7b867509cca85271a576c",
+        "rev": "701657f71b7e61a43facddf85a5cfba728f1967a",
         "type": "github"
       },
       "original": {

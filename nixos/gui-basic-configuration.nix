@@ -123,7 +123,7 @@ in
   '';
 
   nixpkgs.config.permittedInsecurePackages = [
-    "electron-11.5.0" # baidunetdisk
+    "ventoy-1.1.10"
   ];
 
   environment.systemPackages = with pkgs; [
@@ -175,6 +175,7 @@ in
     kdePackages.kclock
 
     intel-gpu-tools
+    ventoy
   ];
 
   # services.teamviewer.enable = true;
