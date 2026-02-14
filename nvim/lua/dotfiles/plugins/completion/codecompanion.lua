@@ -34,7 +34,13 @@ return function(ctx)
         {
           "<localleader>aa",
           "<cmd>CodeCompanionChatAddLines<cr>",
-          mode = { "n", "v" },
+          mode = { "n" },
+          desc = "Add selection to CodeCompanion Chat",
+        },
+        {
+          "<localleader>aa",
+          ":<C-u>'<,'>CodeCompanionChatAddLines<CR>gv",
+          mode = { "v" },
           desc = "Add selection to CodeCompanion Chat",
         },
         {
@@ -106,7 +112,7 @@ return function(ctx)
           rules = {
             programmer = {
               description = "Codex skill for programming tasks.",
-               files = {
+              files = {
                 "~/.codex/skills/programmer/SKILL.md",
               }
             },
@@ -126,20 +132,30 @@ return function(ctx)
         }
         require("codecompanion").setup(opts)
 
-        local function add_selection_to_chat()
+        local function add_selection_to_chat(cmd_opts)
+          local origin_win = vim.api.nvim_get_current_win()
+
           -- 1. Get the current buffer path and a readable relative path.
           local bufnr = vim.api.nvim_get_current_buf()
           local file_path = vim.api.nvim_buf_get_name(bufnr)
-          local relative_path = vim.fn.fnamemodify(file_path, ":.") -- More readable.
+          local relative_path
+          if file_path == "" then
+            relative_path = "[No Name]"
+          else
+            relative_path = vim.fn.fnamemodify(file_path, ":.") -- More readable.
+          end
 
-          -- Get the visual selection range (last visual selection marks).
-          local _, start_line, _, _ = unpack(vim.fn.getpos("'<"))
-          local _, end_line, _, _ = unpack(vim.fn.getpos("'>"))
+          local has_range = cmd_opts and cmd_opts.range and cmd_opts.range > 0
+          local start_line
+          local end_line
+          if has_range then
+            start_line = cmd_opts.line1
+            end_line = cmd_opts.line2
 
-          -- Note: after leaving visual mode, getpos can be stale. For accuracy,
-          -- nvim_buf_get_mark is better, but this keeps the command simple.
-
-          local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+            if start_line and end_line and start_line > end_line then
+              start_line, end_line = end_line, start_line
+            end
+          end
 
           -- 2. Get or initialize the CodeCompanion chat instance.
           local cc = require("codecompanion")
@@ -158,10 +174,10 @@ return function(ctx)
 
           -- 3. Build the message.
           local code_block
-          if #lines == 0 then
-            code_block = string.format("Reference: %s", relative_path)
-          else
+          if has_range and start_line and end_line then
             code_block = string.format("Reference: %s:%d-%d", relative_path, start_line, end_line)
+          else
+            code_block = string.format("Reference: %s", relative_path)
           end
 
           -- 4. Append content to the chat buffer.
@@ -179,15 +195,18 @@ return function(ctx)
             for _, winid in ipairs(vim.fn.win_findbuf(chat.bufnr)) do
               vim.api.nvim_win_set_cursor(winid, { target_line, target_col })
             end
-
           else
             vim.notify("Cannot access chat buffer", vim.log.levels.ERROR)
+          end
+
+          if origin_win and vim.api.nvim_win_is_valid(origin_win) then
+            vim.api.nvim_set_current_win(origin_win)
           end
         end
 
         -- Create the :CodeCompanionChatAddLines command.
-        vim.api.nvim_create_user_command("CodeCompanionChatAddLines", function()
-          add_selection_to_chat()
+        vim.api.nvim_create_user_command("CodeCompanionChatAddLines", function(cmd_opts)
+          add_selection_to_chat(cmd_opts)
         end, { range = true })
       end
     },

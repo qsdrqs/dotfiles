@@ -21,6 +21,7 @@ return function(ctx)
           ["dap-repl"] = false,
           dapui_watches = false,
           markdown = true,
+          codecompanion = true,
         }
       end,
       config = function()

@@ -62,6 +62,9 @@ in
     enable = true;
   };
 
+  # Enable polkit-1 integration for howdy
+  security.pam.services.polkit-1.howdy.enable = false;
+
   systemd.services.linux-enable-ir-emitter.preStart =
   let
     video-device = "/dev/${config.services.linux-enable-ir-emitter.device}";

@@ -400,10 +400,6 @@
       isoMinimalConfig = isoBaseConfig // {
         modules = isoBaseConfig.modules ++ [
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-
-          ({ config, pkgs, lib, ... }: {
-            networking.wireless.enable = false; # disable wpa_supplicant for iso
-          })
         ];
       };
 

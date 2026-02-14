@@ -188,6 +188,7 @@ in
           "opencode.jsonc"
           "oh-my-opencode.json"
           "skills"
+          "AGENTS.md"
         ];
       in
       ''

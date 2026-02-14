@@ -47,6 +47,7 @@ in
     aichat
     nix-serve-ng
     tree-sitter
+    bubblewrap
   ];
 
   environment.variables = {
