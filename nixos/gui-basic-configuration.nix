@@ -205,7 +205,10 @@ in
     extraCompatPackages = with pkgs; [
       proton-ge-bin
     ];
+    gamescopeSession.enable = true;
   };
+  programs.gamescope.enable = true;
+
   programs.java.enable = true;
 
   services.dbus.packages = [ pkgs.kdePackages.kclock ];

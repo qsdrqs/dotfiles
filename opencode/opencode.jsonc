@@ -1,7 +1,7 @@
 {
   "plugin": [
-    "oh-my-opencode@latest",
-    "opencode-antigravity-auth@1.5.1"
+    "oh-my-opencode",
+    "opencode-antigravity-auth@1.6.0"
   ],
   "$schema": "https://opencode.ai/config.json",
   "formatter": false,
@@ -9,8 +9,8 @@
   "agent": {
     "researcher": {
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
-      "variant": "xhigh",
+      "model": "anthropic/claude-opus-4-6",
+      "variant": "max",
       "prompt": "{file:./skills/researcher/SKILL.md}",
       "tools": {
         "*": true
@@ -174,8 +174,8 @@
             }
           }
         },
-        "antigravity-claude-sonnet-4-5": {
-          "name": "Claude Sonnet 4.5 (Antigravity)",
+        "antigravity-claude-sonnet-4-6": {
+          "name": "Claude Sonnet 4.6 (Antigravity)",
           "limit": {
             "context": 200000,
             "output": 64000
@@ -191,8 +191,8 @@
             ]
           }
         },
-        "antigravity-claude-sonnet-4-5-thinking": {
-          "name": "Claude Sonnet 4.5 Thinking (Antigravity)",
+        "antigravity-claude-sonnet-4-6-thinking": {
+          "name": "Claude Sonnet 4.6 Thinking (Antigravity)",
           "limit": {
             "context": 200000,
             "output": 64000
