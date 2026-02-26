@@ -48,7 +48,7 @@
       "variant": "medium"
     },
     "atlas": {
-      "model": "opencode/kimi-k2.5-free"
+      "model": "opencode/glm-5-free"
     },
     "hephaestus": {
       "model": "openai/gpt-5.3-codex",

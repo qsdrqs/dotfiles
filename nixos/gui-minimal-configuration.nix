@@ -69,7 +69,7 @@ in
     gwenview
     ark
 
-    xorg.xlsclients
+    xlsclients
     xwayland-satellite
   ]);
 

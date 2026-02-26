@@ -22,31 +22,31 @@ let
       strace
       udev
       vulkan-loader
-      xorg.libX11
-      xorg.xcbutilwm
-      xorg.xcbutilimage
-      xorg.xcbutilrenderutil
-      xorg.libSM
-      xorg.libICE
-      xorg.libxcb
-      xorg.libXcomposite
-      xorg.libXcursor
-      xorg.libXdamage
-      xorg.libXext
-      xorg.libXfixes
-      xorg.libXi
-      xorg.libXrandr
-      xorg.libXrender
-      xorg.libXScrnSaver
-      xorg.libxshmfence
-      xorg.libXtst
-      xorg.xcbutilkeysyms
+      libx11
+      libxcb-wm
+      libxcb-image
+      libxcb-render-util
+      libsm
+      libice
+      libxcb
+      libxcomposite
+      libxcursor
+      libxdamage
+      libxext
+      libxfixes
+      libxi
+      libxrandr
+      libxrender
+      libxscrnsaver
+      libxshmfence
+      libxtst
+      libxcb-keysyms
     ];
   };
   qqmusic-hidpi = pkgs.symlinkJoin {
     name = "qqmusic";
     paths = [
-      pkgs.nur.repos.xddxdd.qqmusic
+      pkgs.qqmusic
       # (config.nur.repos.xddxdd.qqmusic.override {
       #   sources = {
       #     qqmusic = {
@@ -69,6 +69,9 @@ let
       sed -i "s|Exec=.*|Exec=$out/bin/qqmusic %U|" $out/share/applications/qqmusic.desktop
     '';
   };
+  baidunetdisk-modern = pkgs.nur.repos.xddxdd.baidunetdisk.override {
+    electron_11 = pkgs.electron_39;
+  };
   vscode-wrapper = (exec: cmd: pkgs.writeShellScriptBin cmd ''
     CODE_EXEC=${exec};
     CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
@@ -79,6 +82,8 @@ let
   '');
 in
 {
+  boot.kernelPackages = pkgs.linuxPackages_6_18;
+
   # boot.kernelParams = [
   #   "nvidia_drm.fbdev=1"
   #   "initcall_blacklist=simpledrm_platform_driver_init"
@@ -101,7 +106,7 @@ in
 
     # NUR
     qqmusic-hidpi
-    nur.repos.xddxdd.baidunetdisk
+    baidunetdisk-modern
     scanmem
   ];
 

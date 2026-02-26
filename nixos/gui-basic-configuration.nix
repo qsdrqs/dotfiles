@@ -139,7 +139,7 @@ in
     wpsoffice-cn-hidpi
     kdePackages.kate
     neovide
-    wineWowPackages.unstableFull
+    wineWow64Packages.unstableFull
 
     virt-manager
     linux-wifi-hotspot

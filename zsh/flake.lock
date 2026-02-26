@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1770022169,
-        "narHash": "sha256-SR0Lopccq8oSKHOl5p/YMXNzds5pAqUgeXsy2mLbtS0=",
+        "lastModified": 1771498669,
+        "narHash": "sha256-fGFPVHbJFtXvuiR0yOc9Qt1TUuIfNAYezGQtESt9REA=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "9df4ea095fe27ccd0ee95f2d34bab884c4a75585",
+        "rev": "52d93f18d61f11db69b4591d7fc7bd5578954d30",
         "type": "github"
       },
       "original": {
@@ -129,11 +129,11 @@
     "zinit": {
       "flake": false,
       "locked": {
-        "lastModified": 1770051529,
-        "narHash": "sha256-bjgyD9IsYiUzdUlPmypteWDFukifCefyFl8Q/hxamZU=",
+        "lastModified": 1771334741,
+        "narHash": "sha256-qaPqwmFyclqejKhpGVBR+wFPc7shz6m1CaSe/zy6qj0=",
         "owner": "zdharma-continuum",
         "repo": "zinit",
-        "rev": "701657f71b7e61a43facddf85a5cfba728f1967a",
+        "rev": "87a8e6b0d63aeb088bbb15b38b530e7e364296cb",
         "type": "github"
       },
       "original": {

@@ -258,19 +258,6 @@ return function(ctx)
             program = "./${relativeFileDirname}",
           },
         }
-
-        -- Dap load launch.json from vscode when avaliable
-        vim.api.nvim_create_autocmd("DirChanged", {
-          pattern = "*",
-          callback = function()
-            if vim.fn.filereadable("./.vscode/launch.json") then
-              require("dap.ext.vscode").load_launchjs(nil, { cppdbg = { "c", "cpp", "asm" }, lldb = { "rust" } })
-            end
-          end,
-        })
-        if vim.fn.filereadable("./.vscode/launch.json") then
-          require("dap.ext.vscode").load_launchjs(nil, { cppdbg = { "c", "cpp", "asm" }, lldb = { "rust" } })
-        end
       end,
     },
 
