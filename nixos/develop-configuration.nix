@@ -30,6 +30,8 @@
     texlive.combined.scheme-full
     distrobox
     bun
+
+    playwright
   ];
 
   virtualisation = {

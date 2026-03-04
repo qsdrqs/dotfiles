@@ -120,6 +120,12 @@ in
         });
         # End Temporary fixed version packages
 
+        # Fix blueman to expose root properties on D-Bus menu, which is required for the applet to work properly in waybar.
+        blueman = super.blueman.overrideAttrs (oldAttrs: {
+          patches = (oldAttrs.patches or [ ]) ++ [
+            ./patches/blueman-dbusmenu-root-properties.patch
+          ];
+        });
         scaphandre = super.scaphandre.overrideAttrs (old: {
           cargoDeps = super.runCommand "${old.pname}-${old.version}-vendor-patched" {} ''
             cp -r ${old.cargoDeps} $out

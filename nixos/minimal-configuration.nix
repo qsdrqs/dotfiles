@@ -16,8 +16,8 @@ let
 in
 {
   boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
-  # boot.kernelPackages = pkgs.linuxPackages_6_14; # TODO: temperary fix
-  # boot.kernelPackages = pkgs.linuxPackages;
+  # boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_6_14; # TODO: temperary fix
+  # boot.kernelPackages = lib.mkDefault pkgs.linuxPackages;
   boot.tmp.useTmpfs = true;
   boot.supportedFilesystems = {
     ext4 = true;

@@ -1,6 +1,5 @@
 {
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
-  "google_auth": false,
   "agents": {
     "sisyphus": {
       "model": "anthropic/claude-opus-4-6",
@@ -10,7 +9,7 @@
         "variant": "max"
       }
     },
-    "sisyphus-junior": {
+    "hephaestus": {
       "model": "openai/gpt-5.3-codex",
       "variant": "high"
     },
@@ -23,13 +22,6 @@
     },
     "explore": {
       "model": "anthropic/claude-haiku-4-5"
-    },
-    "frontend-ui-ux-engineer": {
-      "model": "google/antigravity-gemini-3-pro",
-      "variant": "high"
-    },
-    "document-writer": {
-      "model": "google/antigravity-gemini-3-flash"
     },
     "multimodal-looker": {
       "model": "google/gemini-3-flash-preview",
@@ -50,9 +42,16 @@
     "atlas": {
       "model": "opencode/glm-5-free"
     },
-    "hephaestus": {
+    "sisyphus-junior": {
       "model": "openai/gpt-5.3-codex",
-      "variant": "medium"
+      "variant": "high"
+    },
+    "frontend-ui-ux-engineer": {
+      "model": "google/antigravity-gemini-3-pro",
+      "variant": "high"
+    },
+    "document-writer": {
+      "model": "google/antigravity-gemini-3-flash"
     }
   },
   "categories": {
@@ -60,16 +59,17 @@
       "model": "google/gemini-3-pro-preview",
       "variant": "high"
     },
-    "artistry": {
-      "model": "google/gemini-3-pro-preview",
-      "variant": "high"
-    },
-    "writing": {
-      "model": "google/gemini-3-flash-preview"
-    },
     "ultrabrain": {
       "model": "openai/gpt-5.3-codex",
       "variant": "xhigh"
+    },
+    "deep": {
+      "model": "openai/gpt-5.3-codex",
+      "variant": "high"
+    },
+    "artistry": {
+      "model": "google/gemini-3-pro-preview",
+      "variant": "high"
     },
     "quick": {
       "model": "anthropic/claude-haiku-4-5"
@@ -82,11 +82,11 @@
       "model": "openai/gpt-5.3-codex",
       "variant": "high"
     },
-    "deep": {
-      "model": "openai/gpt-5.3-codex",
-      "variant": "high"
+    "writing": {
+      "model": "google/gemini-3.1-pro-preview"
     }
   },
+  "google_auth": false,
   "disabled_hooks": [
     "keyword-detector"
   ]

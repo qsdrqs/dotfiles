@@ -175,6 +175,7 @@ in
         http_port = 3000;
         domain = "localhost";
       };
+      security.secret_key = "$__file{/etc/grafana/secret_key}";
     };
   };
 

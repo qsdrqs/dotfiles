@@ -1,0 +1,28 @@
+diff --git a/blueman/main/indicators/StatusNotifierItem.py b/blueman/main/indicators/StatusNotifierItem.py
+--- a/blueman/main/indicators/StatusNotifierItem.py
++++ b/blueman/main/indicators/StatusNotifierItem.py
+@@ -24,9 +24,7 @@ class MenuService(DbusService):
+         self.add_method("Event", ("i", "s", "v", "u"), (), self._on_event)
+         self.add_method("AboutToShow", ("i",), ("b",), lambda _: self._revision > self._revision_advertised)
+ 
+-        self.add_method("GetGroupProperties", ("ai", "as"), ("a(ia{sv})",),
+-                        lambda ids, props: [(idx, self._render_item(item)) for idx, item in self._iterate_items()
+-                                            if idx in ids])
++        self.add_method("GetGroupProperties", ("ai", "as"), ("a(ia{sv})",), self._get_group_properties)
+ 
+         self.add_signal("LayoutUpdated", ("u", "i"))
+ 
+@@ -36,6 +34,13 @@ class MenuService(DbusService):
+         self._items = OrderedDict((item["id"], item) for item in items)
+         self._revision += 1
+ 
++    def _get_group_properties(self, ids: List[int], _props: List[str]) -> List[Tuple[int, Dict[str, GLib.Variant]]]:
++        result = [(idx, self._render_item(item)) for idx, item in self._iterate_items() if idx in ids]
++        if 0 in ids:
++            result.append((0, {"children-display": GLib.Variant("s", "submenu")}))
++
++        return result
++
+     def _advertise_revision(self) -> bool:
+         if self._revision != self._revision_advertised:
+             self.emit_signal("LayoutUpdated", self._revision, 0)
