@@ -448,8 +448,13 @@ binds {
     // Example brightness key mappings for brightnessctl.
     // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
     // but you need to manually put each argument in separate "" quotes.
-    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--device=intel_backlight" "set" "+10%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--device=intel_backlight" "set" "10%-"; }
+
+    // Keyboard backlight
+    XF86KbdBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--device=asus::kbd_backlight" "set" "+1"; }
+    XF86KbdBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--device=asus::kbd_backlight" "set" "1-"; }
+    XF86KbdLightOnOff allow-when-locked=true { spawn-sh "cur=$(cat /sys/class/leds/asus::kbd_backlight/brightness); max=$(cat /sys/class/leds/asus::kbd_backlight/max_brightness); next=$(( (cur + 1) % (max + 1) )); brightnessctl --device=asus::kbd_backlight set $next"; }
 
     // Open/close the Overview: a zoomed-out view of workspaces and windows.
     // You can also move the mouse into the top-left hot corner,

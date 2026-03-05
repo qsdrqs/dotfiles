@@ -1,0 +1,50 @@
+FROM docker.io/nixos/nix:latest
+
+# Configure Nix for container build environment
+RUN printf '%s\n' \
+      'experimental-features = nix-command flakes' \
+      'sandbox = false' \
+      'max-jobs = auto' \
+      'trusted-users = root' \
+    >> /etc/nix/nix.conf
+
+# Install openssh (git-minimal already in image)
+# gnused needed to unlock root account
+RUN nix-channel --update && \
+    nix-env -iA nixpkgs.openssh nixpkgs.gnused && \
+    sed -i 's/root:!:/root:*:/' /etc/shadow && \
+    nix-store --gc
+
+# SSH directories and host keys
+RUN mkdir -p /root/.ssh /var/empty /etc/ssh && chmod 700 /root/.ssh && \
+    ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N '' && \
+    ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+
+# sshd needs this user entry
+RUN grep -q '^sshd:' /etc/passwd || \
+    echo 'sshd:x:498:65534::/var/empty:/bin/false' >> /etc/passwd
+
+# sshd config — PermitUserEnvironment so nix PATH is available in non-interactive SSH
+RUN printf '%s\n' \
+      'PermitRootLogin prohibit-password' \
+      'PubkeyAuthentication yes' \
+      'PasswordAuthentication no' \
+      'PermitUserEnvironment yes' \
+      'UsePAM no' \
+    > /etc/ssh/sshd_config
+
+# Nix PATH for non-interactive SSH sessions (nix-store --serve, nix build, etc.)
+RUN printf '%s\n' \
+      "PATH=/nix/var/nix/profiles/default/bin:/root/.nix-profile/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    > /root/.ssh/environment && chmod 600 /root/.ssh/environment
+
+# Laptop SSH public key
+ARG SSH_PUB_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAdi5Yas9EWoKvW/rbHl1UVCcqXiZg+udJbR3RK06UfC qsdrqs@ZenbookDuo"
+RUN echo "${SSH_PUB_KEY}" > /root/.ssh/authorized_keys && \
+    chmod 600 /root/.ssh/authorized_keys
+
+EXPOSE 22
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

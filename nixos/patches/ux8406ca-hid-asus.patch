@@ -1,0 +1,413 @@
+diff --git a/drivers/hid/hid-asus.c b/drivers/hid/hid-asus.c
+index 8db9d4e7c3b0b2..71b3a171a8a154 100644
+--- a/drivers/hid/hid-asus.c
++++ b/drivers/hid/hid-asus.c
+@@ -30,6 +30,7 @@
+ #include <linux/input/mt.h>
+ #include <linux/usb.h> /* For to_usb_interface for T100 touchpad intf check */
+ #include <linux/power_supply.h>
++#include <linux/platform_profile.h>
+ #include <linux/leds.h>
+ 
+ #include "hid-ids.h"
+@@ -89,6 +90,8 @@ MODULE_DESCRIPTION("Asus HID Keyboard and TouchPad");
+ #define QUIRK_ROG_NKEY_KEYBOARD		BIT(11)
+ #define QUIRK_ROG_CLAYMORE_II_KEYBOARD BIT(12)
+ #define QUIRK_ROG_ALLY_XPAD		BIT(13)
++#define QUIRK_ZENBOOK_DUO_KEYBOARD	BIT(14)
++#define QUIRK_USE_KBD_FNLOCK		BIT(15)
+ 
+ #define I2C_KEYBOARD_QUIRKS			(QUIRK_FIX_NOTEBOOK_REPORT | \
+ 						 QUIRK_NO_INIT_REPORTS | \
+@@ -108,6 +111,14 @@ struct asus_kbd_leds {
+ 	bool removed;
+ };
+ 
++struct asus_kbd_fnlock {
++	struct hid_device *hdev;
++	struct work_struct work;
++	bool locked;
++	spinlock_t lock;
++	bool removed;
++};
++
+ struct asus_touchpad_info {
+ 	int max_x;
+ 	int max_y;
+@@ -125,15 +136,18 @@ struct asus_drvdata {
+ 	struct input_dev *tp_kbd_input;
+ 	struct asus_kbd_leds *kbd_backlight;
+ 	const struct asus_touchpad_info *tp;
+-	bool enable_backlight;
++	bool has_vendor_up;
+ 	struct power_supply *battery;
+ 	struct power_supply_desc battery_desc;
+ 	int battery_capacity;
+ 	int battery_stat;
+ 	bool battery_in_query;
+ 	unsigned long battery_next_query;
++	struct asus_kbd_fnlock *fnlock;
+ };
+ 
++static void asus_kbd_fnlock_set(struct asus_kbd_fnlock *fnlock, bool locked);
++static bool asus_kbd_fnlock_get(struct asus_kbd_fnlock *fnlock);
+ static int asus_report_battery(struct asus_drvdata *, u8 *, int);
+ 
+ static const struct asus_touchpad_info asus_i2c_tp = {
+@@ -319,8 +333,27 @@ static int asus_event(struct hid_device *hdev, struct hid_field *field,
+ 	if ((usage->hid & HID_USAGE_PAGE) == 0xff310000 &&
+ 	    (usage->hid & HID_USAGE) != 0x00 &&
+ 	    (usage->hid & HID_USAGE) != 0xff && !usage->type) {
+-		hid_warn(hdev, "Unmapped Asus vendor usagepage code 0x%02x\n",
+-			 usage->hid & HID_USAGE);
++
++		// Some reports do not map directly to standard keys, and need special
++		// handling.
++		switch (usage->hid & HID_USAGE) {
++			case 0x4e:
++				if (!value)
++					break;
++				struct asus_drvdata *drvdata = hid_get_drvdata(hdev);
++				if (!drvdata->fnlock)
++					break;
++				asus_kbd_fnlock_set(drvdata->fnlock, !asus_kbd_fnlock_get(drvdata->fnlock));
++				break;
++			case 0x9d:
++				if (!value)
++					break;
++				return platform_profile_cycle();
++				break;
++			default:
++				hid_warn(hdev, "Unmapped Asus vendor usagepage code 0x%02x\n",
++					 usage->hid & HID_USAGE);
++		}
+ 	}
+ 
+ 	return 0;
+@@ -457,6 +490,69 @@ static int asus_kbd_disable_oobe(struct hid_device *hdev)
+ 	return 0;
+ }
+ 
++static void asus_schedule_fnlock_work(struct asus_kbd_fnlock *fnlock)
++{
++	unsigned long flags;
++
++	spin_lock_irqsave(&fnlock->lock, flags);
++	if (!fnlock->removed)
++		schedule_work(&fnlock->work);
++	spin_unlock_irqrestore(&fnlock->lock, flags);
++}
++
++static void asus_kbd_fnlock_work(struct work_struct *work)
++{
++	struct asus_kbd_fnlock *fnlock = container_of(work, struct asus_kbd_fnlock, work);
++	u8 buf[] = { FEATURE_KBD_REPORT_ID, 0xd0, 0x4e, fnlock->locked };
++	int ret;
++	ret = asus_kbd_set_report(fnlock->hdev, buf, sizeof(buf));
++	if (ret < 0)
++		hid_err(fnlock->hdev, "Failed to set Fn-lock: %d\n", ret);
++	else
++		hid_info(fnlock->hdev, "Fn-lock %s.\n", fnlock->locked ? "enabled" : "disabled");
++}
++
++static void asus_kbd_fnlock_set(struct asus_kbd_fnlock *fnlock, bool locked)
++{
++	unsigned long flags;
++
++	spin_lock_irqsave(&fnlock->lock, flags);
++	fnlock->locked = locked;
++	spin_unlock_irqrestore(&fnlock->lock, flags);
++
++	asus_schedule_fnlock_work(fnlock);
++}
++
++static bool asus_kbd_fnlock_get(struct asus_kbd_fnlock *fnlock)
++{
++	bool locked;
++	unsigned long flags;
++
++	spin_lock_irqsave(&fnlock->lock, flags);
++	locked = fnlock->locked;
++	spin_unlock_irqrestore(&fnlock->lock, flags);
++
++	return locked;
++}
++
++static int asus_kbd_register_fnlock(struct hid_device *hdev)
++{
++	struct asus_drvdata *drvdata = hid_get_drvdata(hdev);
++	drvdata->fnlock = devm_kzalloc(&hdev->dev,
++				      sizeof(struct asus_kbd_fnlock),
++				      GFP_KERNEL);
++	if (!drvdata->fnlock)
++		return -ENOMEM;
++
++	drvdata->fnlock->removed = false;
++	drvdata->fnlock->locked = false;
++	drvdata->fnlock->hdev = hdev;
++	INIT_WORK(&drvdata->fnlock->work, asus_kbd_fnlock_work);
++	spin_lock_init(&drvdata->fnlock->lock);
++
++	return 0;
++}
++
+ static void asus_schedule_work(struct asus_kbd_leds *led)
+ {
+ 	unsigned long flags;
+@@ -524,7 +620,7 @@ static bool asus_kbd_wmi_led_control_present(struct hid_device *hdev)
+ 	if (!IS_ENABLED(CONFIG_ASUS_WMI))
+ 		return false;
+ 
+-	if (drvdata->quirks & QUIRK_ROG_NKEY_KEYBOARD &&
++	if (drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT &&
+ 			dmi_check_system(asus_use_hid_led_dmi_ids)) {
+ 		hid_info(hdev, "using HID for asus::kbd_backlight\n");
+ 		return false;
+@@ -639,7 +735,7 @@ static int asus_kbd_register_leds(struct hid_device *hdev)
+ 	int ret;
+ 
+ 	if (drvdata->quirks & QUIRK_ROG_NKEY_KEYBOARD) {
+-		/* Initialize keyboard */
++			/* Initialize keyboard */
+ 		ret = asus_kbd_init(hdev, FEATURE_KBD_REPORT_ID);
+ 		if (ret < 0)
+ 			return ret;
+@@ -923,11 +1019,17 @@ static int asus_input_configured(struct hid_device *hdev, struct hid_input *hi)
+ 
+ 	drvdata->input = input;
+ 
+-	if (drvdata->enable_backlight &&
++	if (drvdata->has_vendor_up &&
++		drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT &&
+ 	    !asus_kbd_wmi_led_control_present(hdev) &&
+ 	    asus_kbd_register_leds(hdev))
+ 		hid_warn(hdev, "Failed to initialize backlight.\n");
+ 
++	if (drvdata->has_vendor_up &&
++		drvdata->quirks & QUIRK_USE_KBD_FNLOCK && 
++	    asus_kbd_register_fnlock(hdev))
++		hid_warn(hdev, "Failed to initialize Fn-lock.\n");
++
+ 	return 0;
+ }
+ 
+@@ -969,12 +1071,12 @@ static int asus_input_mapping(struct hid_device *hdev,
+ 		case 0x6c: asus_map_key_clear(KEY_SLEEP);		break;
+ 		case 0x7c: asus_map_key_clear(KEY_MICMUTE);		break;
+ 		case 0x82: asus_map_key_clear(KEY_CAMERA);		break;
++		case 0x86: asus_map_key_clear(KEY_CONTROLPANEL);	break; /* MyASUS */
+ 		case 0x88: asus_map_key_clear(KEY_RFKILL);			break;
+ 		case 0xb5: asus_map_key_clear(KEY_CALC);			break;
+ 		case 0xc4: asus_map_key_clear(KEY_KBDILLUMUP);		break;
+ 		case 0xc5: asus_map_key_clear(KEY_KBDILLUMDOWN);		break;
+ 		case 0xc7: asus_map_key_clear(KEY_KBDILLUMTOGGLE);	break;
+-		case 0x4e: asus_map_key_clear(KEY_FN_ESC);		break;
+ 		case 0x7e: asus_map_key_clear(KEY_EMOJI_PICKER);	break;
+ 
+ 		case 0x8b: asus_map_key_clear(KEY_PROG1);	break; /* ProArt Creator Hub key */
+@@ -989,6 +1091,18 @@ static int asus_input_mapping(struct hid_device *hdev,
+ 		case 0xb3: asus_map_key_clear(KEY_PROG3);	break; /* Fn+Left next aura */
+ 		case 0x6a: asus_map_key_clear(KEY_F13);		break; /* Screenpad toggle */
+ 		case 0x4b: asus_map_key_clear(KEY_F14);		break; /* Arrows/Pg-Up/Dn toggle */
++		case 0x9c: asus_map_key_clear(KEY_F19);		break; /* Screen swap */
++
++		/* Mutually exclusive section: Special keys from different devices can
++		 * bind to the same keycodes without concern, as they will never
++		 * conflict.
++		 *
++		 * Note that devices with removable keyboards that connect over a
++		 * standard interface (e.g. Zenbook Duo UX8406 with USB/Bluetooth) do
++		 * not belong in this section, as such keyboards can be connected to
++		 * another ASUS device that also uses this driver for its own keyboard.
++		 */
++		/* ROG Ally */
+ 		case 0xa5: asus_map_key_clear(KEY_F15);		break; /* ROG Ally left back */
+ 		case 0xa6: asus_map_key_clear(KEY_F16);		break; /* ROG Ally QAM button */
+ 		case 0xa7: asus_map_key_clear(KEY_F17);		break; /* ROG Ally ROG long-press */
+@@ -1001,13 +1115,12 @@ static int asus_input_mapping(struct hid_device *hdev,
+ 		}
+ 
+ 		/*
+-		 * Check and enable backlight only on devices with UsagePage ==
++		 * Check and enable certain features only on devices with UsagePage ==
+ 		 * 0xff31 to avoid initializing the keyboard firmware multiple
+ 		 * times on devices with multiple HID descriptors but same
+ 		 * PID/VID.
+ 		 */
+-		if (drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT)
+-			drvdata->enable_backlight = true;
++		drvdata->has_vendor_up = true;
+ 
+ 		set_bit(EV_REP, hi->input->evbit);
+ 		return 1;
+@@ -1259,9 +1372,39 @@ static void asus_remove(struct hid_device *hdev)
+ 		cancel_work_sync(&drvdata->kbd_backlight->work);
+ 	}
+ 
++	if (drvdata->fnlock) {
++		spin_lock_irqsave(&drvdata->fnlock->lock, flags);
++		drvdata->fnlock->removed = true;
++		spin_unlock_irqrestore(&drvdata->fnlock->lock, flags);
++
++		cancel_work_sync(&drvdata->fnlock->work);
++	}
++
+ 	hid_hw_stop(hdev);
+ }
+ 
++// Some USB keyboards, like the Zenbook Duo UX8406MA keyboard, have a dedicated
++// USB interface for vendor-specific reports, separate to the generic HID
++// keyboard or consumer control interfaces.
++//
++// The kernel does not register these vendor-specific interfaces as keyboards,
++// or perform input mapping on them at all.
++//
++// To work around this, a fake keyboard input can be added to the
++// vendor-specific interface's report descriptor. The kernel then combines it
++// with the vendor-specific collections, and allows the interface to be used as
++// a regular keyboard with our custom mappings.
++static const __u8 asus_fake_keyboard_rdesc[] = {
++	0x05, 0x01, // Usage Page (Generic Desktop)
++	0x09, 0x06, // Usage (Keyboard)
++	0xa1, 0x01, // Collection (Application)
++	0x85, 0x01, //   Report ID (1)
++	0x75, 0x08, //   Report Size (8)
++	0x95, 0x01, //   Report Count (1)
++	0x81, 0x00, //   Input (Data,Arr,Abs)
++	0xc0,       // End Collection
++};
++
+ static const __u8 asus_g752_fixed_rdesc[] = {
+         0x19, 0x00,			/*   Usage Minimum (0x00)       */
+         0x2A, 0xFF, 0x00,		/*   Usage Maximum (0xFF)       */
+@@ -1284,35 +1427,46 @@ static const __u8 *asus_report_fixup(struct hid_device *hdev, __u8 *rdesc,
+ 		hid_info(hdev, "Fixing up Asus T100 keyb report descriptor\n");
+ 		rdesc[74] &= ~HID_MAIN_ITEM_CONSTANT;
+ 	}
+-	/* For the T100CHI/T90CHI keyboard dock */
+-	if (drvdata->quirks & (QUIRK_T100CHI | QUIRK_T90CHI)) {
++	/* For the T100CHI/T90CHI keyboard dock and Zenbook Duo 2024+ keyboards */
++	if (drvdata->quirks & (QUIRK_T100CHI | QUIRK_T90CHI | QUIRK_ZENBOOK_DUO_KEYBOARD)) {
+ 		int rsize_orig;
+ 		int offs;
+ 
+ 		if (drvdata->quirks & QUIRK_T100CHI) {
+ 			rsize_orig = 403;
+ 			offs = 388;
+-		} else {
++		} else if (drvdata->quirks & QUIRK_T90CHI) {
+ 			rsize_orig = 306;
+ 			offs = 291;
++		} else if (drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD) {
++			if (hid_is_usb(hdev)) {
++				rsize_orig = 90;
++				offs = 66;
++			} else /* Bluetooth */ {
++				rsize_orig = 257;
++				offs = 176;
++			}
+ 		}
+ 
+ 		/*
+ 		 * Change Usage (76h) to Usage Minimum (00h), Usage Maximum
+ 		 * (FFh) and clear the flags in the Input() byte.
+-		 * Note the descriptor has a bogus 0 byte at the end so we
+-		 * only need 1 extra byte.
+ 		 */
+ 		if (*rsize == rsize_orig &&
+ 			rdesc[offs] == 0x09 && rdesc[offs + 1] == 0x76) {
+-			*rsize = rsize_orig + 1;
++			// Clear bogus trailing zero bytes.
++			while (rdesc[*rsize + 1] == 0)
++				--*rsize;
++
++			*rsize += 2;
+ 			rdesc = kmemdup(rdesc, *rsize, GFP_KERNEL);
+ 			if (!rdesc)
+ 				return NULL;
+ 
+ 			hid_info(hdev, "Fixing up %s keyb report descriptor\n",
+ 				drvdata->quirks & QUIRK_T100CHI ?
+-				"T100CHI" : "T90CHI");
++				"T100CHI" : drvdata->quirks & QUIRK_T90CHI ?
++				"T90CHI" : "ZENBOOK DUO");
+ 			memmove(rdesc + offs + 4, rdesc + offs + 2, 12);
+ 			rdesc[offs] = 0x19;
+ 			rdesc[offs + 1] = 0x00;
+@@ -1322,6 +1476,26 @@ static const __u8 *asus_report_fixup(struct hid_device *hdev, __u8 *rdesc,
+ 		}
+ 	}
+ 
++	if ((drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD) &&
++	    hid_is_usb(hdev) &&
++	    to_usb_interface(hdev->dev.parent)->altsetting->desc.bInterfaceNumber == 4) {
++
++		__u8 *new_rdesc;
++		size_t new_size = *rsize + sizeof(asus_fake_keyboard_rdesc);
++
++		new_rdesc = devm_kzalloc(&hdev->dev, new_size, GFP_KERNEL);
++		if (new_rdesc == NULL)
++			return rdesc;
++
++		hid_info(hdev, "Injecting virtual Zenbook Duo keyboard usage page\n");
++
++		memcpy(new_rdesc, asus_fake_keyboard_rdesc, sizeof(asus_fake_keyboard_rdesc));
++		memcpy(new_rdesc + sizeof(asus_fake_keyboard_rdesc), rdesc, *rsize);
++
++		*rsize = new_size;
++		rdesc = new_rdesc;
++	}
++
+ 	if (drvdata->quirks & QUIRK_G752_KEYBOARD &&
+ 		 *rsize == 75 && rdesc[61] == 0x15 && rdesc[62] == 0x00) {
+ 		/* report is missing usage minimum and maximum */
+@@ -1393,6 +1567,18 @@ static const struct hid_device_id asus_devices[] = {
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
+ 	    USB_DEVICE_ID_ASUSTEK_ROG_Z13_LIGHTBAR),
+ 	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_ROG_NKEY_KEYBOARD },
++	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	    USB_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_KEYBOARD),
++	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_USE_KBD_FNLOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
++	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	    BT_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_KEYBOARD),
++	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_USE_KBD_FNLOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
++	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	    USB_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_CA_KEYBOARD),
++	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_USE_KBD_FNLOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
++	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	    BT_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_CA_KEYBOARD),
++	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_USE_KBD_FNLOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
+ 	    USB_DEVICE_ID_ASUSTEK_ROG_NKEY_ALLY),
+ 	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_ROG_NKEY_KEYBOARD | QUIRK_ROG_ALLY_XPAD},
+diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
+index 149798754570d3..5101cb55ce7f37 100644
+--- a/drivers/hid/hid-ids.h
++++ b/drivers/hid/hid-ids.h
+@@ -224,6 +224,10 @@
+ #define USB_DEVICE_ID_ASUSTEK_ROG_NKEY_KEYBOARD	0x1866
+ #define USB_DEVICE_ID_ASUSTEK_ROG_NKEY_KEYBOARD2	0x19b6
+ #define USB_DEVICE_ID_ASUSTEK_ROG_Z13_FOLIO		0x1a30
++#define USB_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_KEYBOARD	0x1b2c
++#define BT_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_KEYBOARD 0x1b2d
++#define USB_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_CA_KEYBOARD	0x1bf2
++#define BT_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_CA_KEYBOARD 0x1bf3
+ #define USB_DEVICE_ID_ASUSTEK_ROG_Z13_LIGHTBAR		0x18c6
+ #define USB_DEVICE_ID_ASUSTEK_ROG_NKEY_ALLY		0x1abe
+ #define USB_DEVICE_ID_ASUSTEK_ROG_NKEY_ALLY_X		0x1b4c
+diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
+index 8a515179113dad..d956d9a89f92fe 100644
+--- a/include/linux/platform_data/x86/asus-wmi.h
++++ b/include/linux/platform_data/x86/asus-wmi.h
+@@ -223,6 +223,11 @@ static const struct dmi_system_id asus_use_hid_led_dmi_ids[] = {
+ 			DMI_MATCH(DMI_BOARD_NAME, "RC71L"),
+ 		},
+ 	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "UX8406"),
++		},
++	},
+ 	{ },
+ };
+ 

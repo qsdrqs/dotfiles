@@ -36,7 +36,7 @@ Modify `~/dotfiles` NixOS + Home Manager configuration safely: make minimal, str
        - `rg -n "services\\.foo\\." "$NIXPKGS_SRC/nixos/modules"`
    - Prefer **evaluation** when it’s faster/clearer:
      - Check that an option exists (and inspect its type/default):
-       - `nix eval ~/dotfiles#nixosConfigurations.<name>.options.services.foo.enable`
+       - `nix eval path:$HOME/dotfiles#nixosConfigurations.<name>.options.services.foo.enable`
      - If evaluation fails, retry with `--show-trace` and fix the root cause before editing more files.
 
 4. Implement a minimal, structural-preserving change
@@ -46,13 +46,16 @@ Modify `~/dotfiles` NixOS + Home Manager configuration safely: make minimal, str
    - If the change is host-specific, prefer `~/dotfiles/nixos/custom/<host>.nix` over global modules.
 
 5. Validate (build first; switch only when asked)
+   - **CRITICAL**: Always use the `path:` flake URI prefix (e.g. `path:$HOME/dotfiles` or `path:.` from within `~/dotfiles`). The repo contains git-ignored files required for build; without `path:`, Nix uses the git-tracked tree and the build will fail.
    - NixOS build (fast, no activation):
-     - `nix build ~/dotfiles#nixosConfigurations.<name>.config.system.build.toplevel`
+     - `nix build path:$HOME/dotfiles#nixosConfigurations.<name>.config.system.build.toplevel`
    - Home Manager build:
-     - `nix build ~/dotfiles#homeConfigurations.<name>.activationPackage`
-   - If switching is requested, use the flake target explicitly:
-     - `sudo nixos-rebuild switch --flake ~/dotfiles#<name>`
-     - `home-manager switch --flake ~/dotfiles#<name>`
+     - `nix build path:$HOME/dotfiles#homeConfigurations.<name>.activationPackage`
+   - If switching is requested, use the user's `snr-switch` shell function:
+     - `snr-switch <device>` (e.g. `snr-switch desktop`, `snr-switch laptop`)
+     - This runs from `~/dotfiles`: cleans syncthing conflict files, then executes `nixos-rebuild switch --sudo --ask-sudo-password --flake path:.#<device>`.
+     - Manual switch: `nixos-rebuild switch --sudo --ask-sudo-password --flake path:$HOME/dotfiles#<name>`
+   - Home Manager standalone switch: `home-manager switch --flake path:$HOME/dotfiles#<name>`
    - When something breaks, keep traces visible (`--show-trace`) and fix the first failure, not the last symptom.
 
 6. Provide rollback guidance when you change active state

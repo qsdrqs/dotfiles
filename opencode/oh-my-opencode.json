@@ -3,11 +3,7 @@
   "agents": {
     "sisyphus": {
       "model": "anthropic/claude-opus-4-6",
-      "variant": "max",
-      "ultrawork": {
-        "model": "anthropic/claude-opus-4-6",
-        "variant": "max"
-      }
+      "variant": "max"
     },
     "hephaestus": {
       "model": "openai/gpt-5.3-codex",
@@ -40,11 +36,7 @@
       "variant": "medium"
     },
     "atlas": {
-      "model": "opencode/glm-5-free"
-    },
-    "sisyphus-junior": {
-      "model": "openai/gpt-5.3-codex",
-      "variant": "high"
+      "model": "anthropic/claude-sonnet-4-6"
     },
     "frontend-ui-ux-engineer": {
       "model": "google/antigravity-gemini-3-pro",
@@ -86,7 +78,6 @@
       "model": "google/gemini-3.1-pro-preview"
     }
   },
-  "google_auth": false,
   "disabled_hooks": [
     "keyword-detector"
   ]

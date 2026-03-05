@@ -17,6 +17,7 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
+    brightnessctl
     wluma
     powertop
     config.boot.kernelPackages.turbostat
