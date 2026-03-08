@@ -298,7 +298,7 @@ spawn-at-startup "blueman-applet"
 // spawn-at-startup "hyprpaper"
 
 spawn-at-startup "keepassxc"
-spawn-at-startup "hypridle"
+// spawn-at-startup "hypridle"  // disabled -- DPMS off triggers GPU hard lock on defective iGPU
 spawn-at-startup "hyprlock"
 spawn-at-startup "wluma"
 // spawn-at-startup "flameshot"

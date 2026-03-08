@@ -49,6 +49,12 @@ return function(ctx)
           mode = { "n", "v" },
           desc = "CodeCompanion Inline Actions",
         },
+        {
+          "<localleader>as",
+          "<cmd>CodeCompanionChatSessionList<cr>",
+          mode = { "n" },
+          desc = "List and load ACP sessions",
+        },
       },
       config = function()
         local copilot_adapter = {
@@ -75,7 +81,7 @@ return function(ctx)
               opencode = function()
                 return require("codecompanion.adapters").extend("opencode", {
                   env = {
-                    OPENCODE_MODEL = "openai/gpt-5.3-codex",
+                    OPENCODE_MODEL = "openai/gpt-5.4",
                   }
                 })
               end,
@@ -208,6 +214,232 @@ return function(ctx)
         vim.api.nvim_create_user_command("CodeCompanionChatAddLines", function(cmd_opts)
           add_selection_to_chat(cmd_opts)
         end, { range = true })
+
+        ----------------------Begin ACP Session Resume---------------------------
+        -- Allows listing and loading past opencode ACP sessions so that
+        -- conversation context is preserved across reconnects / restarts.
+        --
+        -- Original workaround by @alexghergh:
+        --   https://github.com/olimorris/codecompanion.nvim/discussions/2782
+
+        --- Extract displayable text from ACP content blocks.
+        --- Handles text, resource_link, resource, image, audio, and arrays.
+        --- @param content any ACP content (string | table | nil)
+        --- @return string|nil
+        local function acp_render_content(content)
+          if type(content) == "string" then return content end
+          if type(content) ~= "table" then return nil end
+          if content.type == "text" and type(content.text) == "string" then
+            return content.text
+          end
+          if content.type == "resource_link" and type(content.uri) == "string" then
+            return ("[resource: %s]"):format(content.uri)
+          end
+          if content.type == "resource" and content.resource then
+            if type(content.resource.text) == "string" then return content.resource.text end
+            if type(content.resource.uri) == "string" then
+              return ("[resource: %s]"):format(content.resource.uri)
+            end
+          end
+          if content.type == "image" then return "[image]" end
+          if content.type == "audio" then return "[audio]" end
+          -- Array of content blocks
+          if content[1] ~= nil then
+            local parts = {}
+            for _, item in ipairs(content) do
+              local text = acp_render_content(item)
+              if text and text ~= "" then table.insert(parts, text) end
+            end
+            return table.concat(parts, "")
+          end
+          return nil
+        end
+
+        --- Ensure an ACP chat with a live connection exists, then call `fn(chat)`.
+        --- If no chat is open, one is created automatically (which unavoidably
+        --- creates a throwaway session; session/load switches away immediately).
+        --- @param fn fun(chat: table)
+        local function with_acp_chat(fn)
+          local cc = require("codecompanion")
+          local chat = cc.last_chat()
+
+          -- Fast path: connection already up
+          if chat and chat.acp_connection and chat.acp_connection:is_connected() then
+            fn(chat)
+            return
+          end
+
+          -- Auto-create a chat if needed
+          if not chat then
+            vim.cmd("CodeCompanionChat")
+          end
+
+          -- The chat's ACP connection is established inside vim.schedule,
+          -- so defer our callback to run after it.
+          vim.schedule(function()
+            chat = cc.last_chat()
+            if not chat then
+              vim.notify("Failed to create CodeCompanion chat", vim.log.levels.ERROR)
+              return
+            end
+
+            -- Safety net: wait up to 15 s for the connection
+            if not (chat.acp_connection and chat.acp_connection:is_connected()) then
+              local ok = vim.wait(15000, function()
+                return chat.acp_connection ~= nil and chat.acp_connection:is_connected()
+              end, 100)
+              if not ok then
+                vim.notify("ACP connection timeout", vim.log.levels.ERROR)
+                return
+              end
+            end
+
+            fn(chat)
+          end)
+        end
+
+        --- Load a specific ACP session by ID into the given chat.
+        --- Based on @alexghergh's workaround from Discussion #2782.
+        --- @param chat table   CodeCompanion.Chat with a live acp_connection
+        --- @param session_id string
+        local function load_acp_session(chat, session_id)
+          local conn = chat.acp_connection
+          if conn._active_prompt then
+            vim.notify("ACP prompt in progress; wait for it to finish", vim.log.levels.WARN)
+            return
+          end
+
+          local ACP_METHODS = require("codecompanion.acp.methods")
+          local cc_config = require("codecompanion.config")
+
+          -- Install a temporary handler that renders replayed messages
+          -- into the chat buffer.  The server sends one sessionUpdate
+          -- notification per historical message during session/load.
+          local prev_prompt = conn._active_prompt
+          conn._active_prompt = {
+            handle_session_update = function(_, update)
+              if type(update) ~= "table" then return end
+              local text = acp_render_content(update.content)
+              if not text or text == "" then return end
+
+              if update.sessionUpdate == "user_message_chunk" then
+                chat:add_buf_message(
+                  { role = cc_config.constants.USER_ROLE, content = text },
+                  { type = chat.MESSAGE_TYPES.USER_MESSAGE }
+                )
+              elseif update.sessionUpdate == "agent_message_chunk" then
+                chat:add_buf_message(
+                  { role = cc_config.constants.LLM_ROLE, content = text },
+                  { type = chat.MESSAGE_TYPES.LLM_MESSAGE }
+                )
+              elseif update.sessionUpdate == "agent_thought_chunk" then
+                chat:add_buf_message(
+                  { role = cc_config.constants.LLM_ROLE, content = text },
+                  { type = chat.MESSAGE_TYPES.REASONING_MESSAGE }
+                )
+              end
+            end,
+            handle_permission_request = function() end,
+            handle_error = function() end,
+          }
+
+          -- Switch session ID *before* the RPC so incoming notifications
+          -- with the new ID pass the Connection's session-ID guard.
+          conn.session_id = session_id
+
+          -- Resolve mcpServers from the adapter
+          local mcp_servers = {}
+          if conn.adapter_modified and conn.adapter_modified.defaults then
+            mcp_servers = conn.adapter_modified.defaults.mcpServers or {}
+            if mcp_servers == "inherit_from_config" then
+              local mcp_ok, mcp_mod = pcall(require, "codecompanion.mcp")
+              local cc_cfg = require("codecompanion.config")
+              if mcp_ok and cc_cfg.mcp and cc_cfg.mcp.opts and cc_cfg.mcp.opts.acp_enabled then
+                mcp_servers = mcp_mod.transform_to_acp()
+              else
+                mcp_servers = {}
+              end
+            end
+          end
+
+          local result = conn:send_rpc_request(ACP_METHODS.SESSION_LOAD, {
+            sessionId = session_id,
+            cwd = vim.fn.getcwd(),
+            mcpServers = mcp_servers,
+          })
+
+          conn._active_prompt = prev_prompt
+
+          if not result then
+            vim.notify("session/load failed for: " .. session_id, vim.log.levels.ERROR)
+            return
+          end
+
+          -- Re-link buffer for ACP commands/completions
+          pcall(function()
+            require("codecompanion.interactions.chat.acp.commands")
+              .link_buffer_to_session(chat.bufnr, session_id)
+          end)
+          pcall(function() chat:update_metadata() end)
+
+          -- Ensure a fresh user-prompt header is ready
+          pcall(function()
+            local cc_cfg = require("codecompanion.config")
+            if chat._last_role ~= cc_cfg.constants.USER_ROLE then
+              chat.cycle = chat.cycle + 1
+              chat:add_buf_message({ role = cc_cfg.constants.USER_ROLE, content = "" })
+              chat.header_line = vim.api.nvim_buf_line_count(chat.bufnr) - 2
+            end
+          end)
+
+          vim.notify("ACP session loaded: " .. session_id, vim.log.levels.INFO)
+        end
+
+        --- Fetch the session list from the ACP server, show a picker,
+        --- and load the selected session.
+        --- @param chat table   CodeCompanion.Chat with a live acp_connection
+        local function pick_and_load_acp_session(chat)
+          local conn = chat.acp_connection
+
+          -- opencode advertises sessionCapabilities.list
+          local result = conn:send_rpc_request("session/list", {
+            cwd = vim.fn.getcwd(),
+          })
+
+          if not result or not result.sessions or #result.sessions == 0 then
+            vim.notify("No sessions found (session/list may not be supported)", vim.log.levels.WARN)
+            return
+          end
+
+          vim.ui.select(result.sessions, {
+            prompt = "Load ACP session:",
+            format_item = function(s)
+              local title = s.title or "Untitled"
+              local id_short = s.sessionId and s.sessionId:sub(1, 8) or "?"
+              local updated = s.updatedAt or ""
+              if #updated > 10 then updated = updated:sub(1, 10) end
+              return string.format("[%s] %s  (%s)", id_short, title, updated)
+            end,
+          }, function(selected)
+            if not selected then return end
+            load_acp_session(chat, selected.sessionId)
+          end)
+        end
+
+        vim.api.nvim_create_user_command("CodeCompanionChatSessionList", function()
+          with_acp_chat(pick_and_load_acp_session)
+        end, { desc = "List and load ACP sessions" })
+
+        vim.api.nvim_create_user_command("CodeCompanionChatSessionLoad", function(cmd_opts)
+          if cmd_opts.args and cmd_opts.args ~= "" then
+            with_acp_chat(function(chat) load_acp_session(chat, cmd_opts.args) end)
+          else
+            -- No ID given: fall back to listing
+            with_acp_chat(pick_and_load_acp_session)
+          end
+        end, { nargs = "?", desc = "Load ACP session by ID, or list if no ID given" })
+        ----------------------End ACP Session Resume---------------------------
+
       end
     },
 

@@ -452,8 +452,12 @@
       url = "github:okuuva/auto-save.nvim";
       flake = false;
     };
+    live-serverDOTnvim = {
+      url = "github:selimacerbas/live-server.nvim";
+      flake = false;
+    };
     markdown-previewDOTnvim = {
-      url = "github:iamcco/markdown-preview.nvim";
+      url = "github:selimacerbas/markdown-preview.nvim";
       flake = false;
     };
     vim-interestingwords = {
@@ -588,7 +592,8 @@
         { name = "vim-gutentags"; dotname = "vim-gutentags"; source = inputs.vim-gutentags; build = false; }
         { name = "gutentags_plus"; dotname = "gutentags_plus"; source = inputs.gutentags_plus; build = false; }
         { name = "auto-save.nvim"; dotname = "auto-saveDOTnvim"; source = inputs.auto-saveDOTnvim; build = false; }
-        { name = "markdown-preview.nvim"; dotname = "markdown-previewDOTnvim"; source = inputs.markdown-previewDOTnvim; build = true; }
+        { name = "live-server.nvim"; dotname = "live-serverDOTnvim"; source = inputs.live-serverDOTnvim; build = false; }
+        { name = "markdown-preview.nvim"; dotname = "markdown-previewDOTnvim"; source = inputs.markdown-previewDOTnvim; build = false; }
         { name = "vim-interestingwords"; dotname = "vim-interestingwords"; source = inputs.vim-interestingwords; build = false; }
         { name = "vim-sleuth"; dotname = "vim-sleuth"; source = inputs.vim-sleuth; build = false; }
         { name = "pantran.nvim"; dotname = "pantranDOTnvim"; source = inputs.pantranDOTnvim; build = false; }

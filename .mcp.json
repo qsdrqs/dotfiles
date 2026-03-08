@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "mcp-server-playwright",
+      "args": [
+        "--executable-path",
+        "/run/current-system/sw/bin/chromium"
+      ]
+    }
+  }
+}

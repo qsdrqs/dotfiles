@@ -251,6 +251,7 @@ alias ls='lsd'
 alias ll="ls -l"
 alias la="ls -la"
 alias load_key_env="source $HOME/dotfiles/nixos/scripts/load_key_env.sh"
+alias kitty-ssh="kitty +kitten ssh"
 
 # Arch
 alias sp="sudo pacman"
@@ -580,4 +581,4 @@ else
     # Try to discover an existing agent or start one if needed
     _bootstrap_local_agent
 fi
- 
+

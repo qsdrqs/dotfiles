@@ -50,7 +50,10 @@ in
 
       PCIE_ASPM_ON_AC = "default";
       # PCIE_ASPM_ON_BAT = "powersave";
-      PCIE_ASPM_ON_BAT = "powersupersave"; # more aggressive
+      #### Begin GPU temporary workaround (defective Arrow Lake-P iGPU) ####
+      # Original: PCIE_ASPM_ON_BAT = "powersupersave";
+      PCIE_ASPM_ON_BAT = "default";
+      #### End GPU temporary workaround (PCIE_ASPM) ####
 
       DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE = "bluetooth"; # disable bluetooth when not connected
 
@@ -107,23 +110,31 @@ in
           ExecStart = "${niriMonitorPower}/bin/niri-monitor-power";
           Restart = "always";
           RestartSec = 5;
+          #### Begin GPU temporary workaround (defective Arrow Lake-P iGPU) ####
+          # Original: AC_REFRESH defaults to 120Hz; switching 60->120Hz triggers display pipeline freeze.
+          Environment = "NIRI_POWER_REFRESH_AC=60.001";
+          #### End GPU temporary workaround (niri-monitor-power AC refresh) ####
         };
       };
     };
   };
 
+  #### Begin GPU temporary workaround (defective Arrow Lake-P iGPU) ####
+  # Disabled VA-API hardware video accel to reduce load on defective iGPU.
+  # Video conferencing will fall back to CPU software decode.
+  # Original:
+  #   extraPackages = with pkgs; [
+  #     intel-media-driver  libva-vdpau-driver  intel-vaapi-driver  libvdpau-va-gl
+  #   ];
+  #   LIBVA_DRIVER_NAME = "iHD";
   hardware.graphics = {
     enable = true;
-    extraPackages = with pkgs; [
-      intel-media-driver # LIBVA_DRIVER_NAME=iHD
-      libva-vdpau-driver
-      intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
-      libvdpau-va-gl
-    ];
   };
   environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "iHD";
-  }; # Force intel-media-driver
+    LIBVA_DRIVER_NAME = "";
+    CHROMIUM_FLAGS = "--disable-gpu-compositing --disable-accelerated-video-decode";
+  };
+  #### End GPU temporary workaround (VA-API / hardware accel) ####
   boot.kernelModules = [ "intel_rapl_common" ];
 
   # battery monitoring

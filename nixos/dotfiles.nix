@@ -96,6 +96,7 @@ in
     ".zshrc"
     ".vim"
     ".editorconfig"
+    ".mcp.json"
   ] //
   symbfileTarget [
     { name = ".vim"; target = ".config/nvim"; }

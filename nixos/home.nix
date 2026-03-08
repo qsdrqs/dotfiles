@@ -199,5 +199,11 @@ in
           fi
         '') files}
       '';
+    agent-browser-config = ''
+      mkdir -p ~/.agent-browser
+      if [ ! -e ${homeDir}/.agent-browser/config.json ]; then
+        ln -s ${homeDir}/dotfiles/.agent-browser/config.json ${homeDir}/.agent-browser/config.json
+      fi
+    '';
   };
 }

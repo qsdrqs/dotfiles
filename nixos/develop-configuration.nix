@@ -32,6 +32,7 @@
     bun
 
     playwright
+    playwright-mcp
   ];
 
   virtualisation = {
