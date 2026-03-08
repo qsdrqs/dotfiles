@@ -23,13 +23,6 @@ let
       installPhase = commonInstallPhase;
     };
     firenvim = trivialDerivation "firenvim" inputs.nvim-config.inputs.firenvim;
-    markdown-previewDOTnvim = pkgs.stdenv.mkDerivation {
-      name = "markdown-preview.nvim";
-      src = inputs.nvim-config.inputs.markdown-previewDOTnvim;
-      installPhase = commonInstallPhase + ''
-        ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/markdown-preview.nvim/app/bin $out/app/bin
-      '';
-    };
     nvim-fundo = trivialDerivation "nvim-fundo" inputs.nvim-config.inputs.nvim-fundo;
     nvim-treesitter = trivialDerivation "nvim-treesitter" inputs.nvim-config.inputs.nvim-treesitter;
     LuaSnip = pkgs.stdenv.mkDerivation {

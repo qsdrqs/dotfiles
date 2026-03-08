@@ -14,30 +14,17 @@ return function(ctx)
   return {
 
     {
-      "iamcco/markdown-preview.nvim",
+      "selimacerbas/markdown-preview.nvim",
       lazy = true,
-      build = function()
-        vim.fn["mkdp#util#install"]()
-      end,
-      cmd = { "MarkdownPreview", "MarkdownPreviewInstall" },
+      dependencies = { "selimacerbas/live-server.nvim" },
+      cmd = { "MarkdownPreview" },
       config = function()
-        vim.api.nvim_create_user_command("MarkdownPreview", "echo 'Not a markdown file!'", { nargs = 0 })
-        vim.api.nvim_create_user_command("MarkdownPreviewInstall", function()
-          vim.fn["mkdp#util#install"]()
-        end, { nargs = 0 })
-        vim.api.nvim_exec_autocmds("BufEnter", {
-          group = "mkdp_init",
+        require("markdown_preview").setup({
+          -- all optional; sane defaults shown
+          port = 8421,
+          open_browser = true,
+          debounce_ms = 300,
         })
-        vim.g.mkdp_open_to_the_world = 1
-        vim.g.mkdp_echo_preview_url = 1
-
-        vim.cmd([[
-        function! Mkdp_handler(url)
-          exec "silent !firefox -new-window " . a:url
-        endfunction
-        ]])
-
-        vim.g.mkdp_browserfunc = "Mkdp_handler"
       end,
     },
 

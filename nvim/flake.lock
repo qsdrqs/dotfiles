@@ -772,6 +772,22 @@
         "type": "github"
       }
     },
+    "live-serverDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771158814,
+        "narHash": "sha256-CCZMRY0ZTT1bHVFZ3y7WmHixpPB2S8R0+LhKrQCq7Ls=",
+        "owner": "selimacerbas",
+        "repo": "live-server.nvim",
+        "rev": "6897c94950e05d5b22440c6db8fa24c5c51d8d12",
+        "type": "github"
+      },
+      "original": {
+        "owner": "selimacerbas",
+        "repo": "live-server.nvim",
+        "type": "github"
+      }
+    },
     "lsp_linesDOTnvim": {
       "flake": false,
       "locked": {
@@ -839,15 +855,15 @@
     "markdown-previewDOTnvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1697511247,
-        "narHash": "sha256-TBXdG/Ih5DusAYZJyn37zVqHcMD85VkjrCoLyTo/KBg=",
-        "owner": "iamcco",
+        "lastModified": 1771682535,
+        "narHash": "sha256-Dr0MDU9Z1IQMLQ45yQbsiU+djWAEkJw9k4ZUpzzRM3w=",
+        "owner": "selimacerbas",
         "repo": "markdown-preview.nvim",
-        "rev": "a923f5fc5ba36a3b17e289dc35dc17f66d0548ee",
+        "rev": "858391a1d01dc0daa5233184b4600e1cc0d8d9fc",
         "type": "github"
       },
       "original": {
-        "owner": "iamcco",
+        "owner": "selimacerbas",
         "repo": "markdown-preview.nvim",
         "type": "github"
       }
@@ -1559,6 +1575,7 @@
         "lazydevDOTnvim": "lazydevDOTnvim",
         "litee-calltreeDOTnvim": "litee-calltreeDOTnvim",
         "liteeDOTnvim": "liteeDOTnvim",
+        "live-serverDOTnvim": "live-serverDOTnvim",
         "lsp_linesDOTnvim": "lsp_linesDOTnvim",
         "lsp_signatureDOTnvim": "lsp_signatureDOTnvim",
         "lualineDOTnvim": "lualineDOTnvim",
