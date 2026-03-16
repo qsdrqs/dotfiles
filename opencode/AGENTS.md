@@ -1,5 +1,20 @@
 # Global Agent Instructions
 
+## Data Analysis
+
+### Numeric Statistics
+
+**ALWAYS use the Python interpreter for numeric/statistical tasks.**
+
+For any task involving numeric counts, statistics, aggregation, or calculation:
+
+1. **MUST** use the Python interpreter to compute the result
+2. **MUST NOT** rely on mental math, manual counting, or direct eyeballing
+3. **MUST** report Python-computed results even when the answer seems obvious
+
+**BLOCKING VIOLATION**: Manually computing or counting numeric/statistical results without using Python.
+
+
 ## Dependency Management
 
 ### Version Verification (MANDATORY)
@@ -119,3 +134,8 @@ When the user asks for links/sources from Google Search results:
 1. Use `mcp_webfetch` to follow the redirect URL and obtain the real destination URL
 2. Present only the resolved real URL to the user
 3. **NEVER** construct or guess a URL based on the content summary - always resolve from the actual redirect URL
+
+#### Exa Web Search
+
+The Exa web search tool has rate limits. If you encounter rate limits, simply wait for 1 second by using `sleep 1` and then retry the search.
+Do not use google search only for the further searching steps when encountering rate limits with Exa web search. Always use all available search tools to gather information.

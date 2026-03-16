@@ -154,6 +154,10 @@ in
     livekitUrl = "wss://qsdrqs.site/livekit/sfu";
   };
   systemd.services.lk-jwt-service = {
-    environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = "qsdrqs.site";
+    environment = {
+      LIVEKIT_FULL_ACCESS_HOMESERVERS = "qsdrqs.site";
+      LIVEKIT_JWT_BIND = "127.0.0.1:4000";
+    };
+    serviceConfig.UnsetEnvironment = "LIVEKIT_JWT_PORT";
   };
 }

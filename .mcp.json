@@ -6,6 +6,13 @@
         "--executable-path",
         "/run/current-system/sw/bin/chromium"
       ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest",
+        "--autoConnect"
+      ]
     }
   }
 }

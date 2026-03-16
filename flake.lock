@@ -2849,6 +2849,7 @@
         "rtl88x2bu-dkms": "rtl88x2bu-dkms",
         "tmux-continuum": "tmux-continuum",
         "tmux-resurrect": "tmux-resurrect",
+        "tree-sitter-grub": "tree-sitter-grub",
         "vscode-server": "vscode-server",
         "waybar": "waybar",
         "yazi": "yazi",
@@ -3208,6 +3209,22 @@
       "original": {
         "owner": "akinsho",
         "repo": "toggleterm.nvim",
+        "type": "github"
+      }
+    },
+    "tree-sitter-grub": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773348967,
+        "narHash": "sha256-10CfiH48igv7+ufAa63HQfQQ1PAKaVPzGUTatcODIJg=",
+        "owner": "qsdrqs",
+        "repo": "tree-sitter-grub",
+        "rev": "f8b7f3ca91aad8e380601c65a31920a5bc8a6656",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qsdrqs",
+        "repo": "tree-sitter-grub",
         "type": "github"
       }
     },

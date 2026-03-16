@@ -1,5 +1,24 @@
 { config, pkgs, pkgs-howdy, pkgs-unstable,  pkgs-master, lib, inputs, ... }:
 let
+  treeSitterGrub = pkgs.stdenv.mkDerivation {
+    name = "tree-sitter-grub";
+    src = inputs.tree-sitter-grub;
+    nativeBuildInputs = [ pkgs.tree-sitter ];
+    buildPhase = ''
+      HOME=$TMPDIR
+      tree-sitter build -o grub.so .
+    '';
+    installPhase = ''
+      mkdir -p $out/lib
+      cp grub.so $out/lib/
+    '';
+  };
+  grubPatchPythonEnv = pkgs.python3.withPackages (ps: [ ps.tree-sitter ]);
+  installGrubPatch = pkgs.writeShellScript "install-grub-patch" ''
+    export PATH="${pkgs.grub2}/bin:$PATH"
+    exec ${grubPatchPythonEnv}/bin/python3 ${./scripts/patch_grub_cfg}/install_grub_patch.py \
+      --grammar-lib "${treeSitterGrub}/lib/grub.so" "$@"
+  '';
   wpsoffice-cn-hidpi = pkgs.symlinkJoin {
     name = "wps-office-cn";
     paths = [ pkgs.wpsoffice-cn ];
@@ -118,11 +137,8 @@ in
       done
     fi
 
-    # patch grub.cfg to use custom grubenv location
-    if [ ! -f ${config.boot.loader.efi.efiSysMountPoint}/grubenv ]; then
-      cp /boot/grub/grubenv ${config.boot.loader.efi.efiSysMountPoint}/grubenv
-    fi
-    ${./scripts/patch-grubcfg.sh} /boot/grub/grub.cfg ${lib.escapeShellArg config.boot.loader.efi.efiSysMountPoint}
+    # patch grub.cfg to use custom grubenv location (AST-based)
+    ${installGrubPatch} --efi-mount ${lib.escapeShellArg config.boot.loader.efi.efiSysMountPoint} --grub-dir /boot/grub
   '';
 
   nixpkgs.config.permittedInsecurePackages = [

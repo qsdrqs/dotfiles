@@ -38,6 +38,11 @@
     #   flake = false;
     # };
 
+    tree-sitter-grub = {
+      url = "github:qsdrqs/tree-sitter-grub";
+      flake = false;
+    };
+
     ranger-config.url = "path:ranger";
     zsh-config.url = "path:zsh";
     nvim-config.url = "path:nvim";

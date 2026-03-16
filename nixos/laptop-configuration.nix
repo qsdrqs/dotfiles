@@ -119,22 +119,18 @@ in
     };
   };
 
-  #### Begin GPU temporary workaround (defective Arrow Lake-P iGPU) ####
-  # Disabled VA-API hardware video accel to reduce load on defective iGPU.
-  # Video conferencing will fall back to CPU software decode.
-  # Original:
-  #   extraPackages = with pkgs; [
-  #     intel-media-driver  libva-vdpau-driver  intel-vaapi-driver  libvdpau-va-gl
-  #   ];
-  #   LIBVA_DRIVER_NAME = "iHD";
   hardware.graphics = {
     enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+      libva-vdpau-driver
+      intel-vaapi-driver
+      libvdpau-va-gl
+    ];
   };
   environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "";
-    CHROMIUM_FLAGS = "--disable-gpu-compositing --disable-accelerated-video-decode";
+    LIBVA_DRIVER_NAME = "iHD";
   };
-  #### End GPU temporary workaround (VA-API / hardware accel) ####
   boot.kernelModules = [ "intel_rapl_common" ];
 
   # battery monitoring
