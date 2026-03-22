@@ -25,36 +25,36 @@ return function(ctx)
         "CodeCompanionCmd",
       },
       keys = {
-        {
-          "<C-.>",
-          "<cmd>CodeCompanionChat Toggle<cr>",
-          mode = { "n", "v", "i" },
-          desc = "Toggle CodeCompanion Chat",
-        },
-        {
-          "<localleader>aa",
-          "<cmd>CodeCompanionChatAddLines<cr>",
-          mode = { "n" },
-          desc = "Add selection to CodeCompanion Chat",
-        },
-        {
-          "<localleader>aa",
-          ":<C-u>'<,'>CodeCompanionChatAddLines<CR>gv",
-          mode = { "v" },
-          desc = "Add selection to CodeCompanion Chat",
-        },
+        -- {
+        --   "<C-.>",
+        --   "<cmd>CodeCompanionChat Toggle<cr>",
+        --   mode = { "n", "v", "i" },
+        --   desc = "Toggle CodeCompanion Chat",
+        -- },
+        -- {
+        --   "<localleader>aa",
+        --   "<cmd>CodeCompanionChatAddLines<cr>",
+        --   mode = { "n" },
+        --   desc = "Add selection to CodeCompanion Chat",
+        -- },
+        -- {
+        --   "<localleader>aa",
+        --   ":<C-u>'<,'>CodeCompanionChatAddLines<CR>gv",
+        --   mode = { "v" },
+        --   desc = "Add selection to CodeCompanion Chat",
+        -- },
         {
           "<localleader>ae",
           "<cmd>CodeCompanion<cr>",
           mode = { "n", "v" },
           desc = "CodeCompanion Inline Actions",
         },
-        {
-          "<localleader>as",
-          "<cmd>CodeCompanionChatSessionList<cr>",
-          mode = { "n" },
-          desc = "List and load ACP sessions",
-        },
+        -- {
+        --   "<localleader>as",
+        --   "<cmd>CodeCompanionChatSessionList<cr>",
+        --   mode = { "n" },
+        --   desc = "List and load ACP sessions",
+        -- },
       },
       config = function()
         local copilot_adapter = {

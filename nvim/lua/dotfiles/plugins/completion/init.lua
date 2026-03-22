@@ -13,6 +13,7 @@ local modules = {
   -- require("dotfiles.plugins.completion.agentic"),
   require("dotfiles.plugins.completion.codecompanion"),
   require("dotfiles.plugins.completion.claudecode"),
+  require("dotfiles.plugins.completion.opencode"),
 }
 
 function M.setup(ctx)

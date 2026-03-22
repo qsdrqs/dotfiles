@@ -14,7 +14,7 @@ return function(ctx)
   return {
 
     {
-      "sindrets/diffview.nvim",
+      "dlyongemallo/diffview.nvim",
       lazy = true,
       cmd = { "DiffviewOpen", "DiffviewFileHistory" },
       opts = {

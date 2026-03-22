@@ -1369,6 +1369,22 @@
         "type": "github"
       }
     },
+    "opencodeDOTnvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773339883,
+        "narHash": "sha256-N80LTAsWds4cmnHJkn18boo+zcBRj3jNPHABOyczoBM=",
+        "owner": "nickjvandyke",
+        "repo": "opencode.nvim",
+        "rev": "8804ffb81f9784dcd0e9af43a2068fb55282c4dd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nickjvandyke",
+        "repo": "opencode.nvim",
+        "type": "github"
+      }
+    },
     "pantranDOTnvim": {
       "flake": false,
       "locked": {
@@ -1608,6 +1624,7 @@
         "nvim-ts-autotag": "nvim-ts-autotag",
         "nvim-ufo": "nvim-ufo",
         "nvim-web-devicons": "nvim-web-devicons",
+        "opencodeDOTnvim": "opencodeDOTnvim",
         "pantranDOTnvim": "pantranDOTnvim",
         "persistent-breakpointsDOTnvim": "persistent-breakpointsDOTnvim",
         "plenaryDOTnvim": "plenaryDOTnvim",
