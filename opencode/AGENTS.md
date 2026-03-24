@@ -123,19 +123,18 @@ lines.append(f"Line 3: {value3}")
 
 ### Search Tools
 
-When using search tools, make sure to use all available search tools. E.g. You may have access to both `exa_web_search` and `google_search`. Use both to get a comprehensive set of results. Do not rely on just one search tool if multiple are available.
+When using search tools, make sure to use all available search tools. E.g. You may have access to both `exa_web_search` and `brave_web_search`. Use both to get a comprehensive set of results. Do not rely on just one search tool if multiple are available.
 
-#### Google Search Tool - URL and Source Integrity
+#### Brave Search
 
-The Google Search tool (`mcp_google_search`) returns redirect URLs (e.g., `vertexaisearch.cloud.google.com/grounding-api-redirect/...`) instead of direct URLs. These redirect URLs are valid and will redirect to the real page.
+Brave Search (`mcp_brave-search_brave_web_search`) returns clean results with direct URLs. Use it as the primary search tool for factual lookups and authoritative sources.
 
-When the user asks for links/sources from Google Search results:
-
-1. Use `mcp_webfetch` to follow the redirect URL and obtain the real destination URL
-2. Present only the resolved real URL to the user
-3. **NEVER** construct or guess a URL based on the content summary - always resolve from the actual redirect URL
+For specialized searches, also use:
+- `brave_news_search` for recent news and current events
+- `brave_image_search` for image lookups
+- `brave_video_search` for video content
 
 #### Exa Web Search
 
 The Exa web search tool has rate limits. If you encounter rate limits, simply wait for 1 second by using `sleep 1` and then retry the search.
-Do not use google search only for the further searching steps when encountering rate limits with Exa web search. Always use all available search tools to gather information.
+Always use all available search tools to gather information.

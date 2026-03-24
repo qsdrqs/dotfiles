@@ -106,7 +106,6 @@ with pkgs; {
       neovim
       lazygit
       fastfetch
-      neofetch
     ];
     LD_LIBRARY_PATH = lib.makeLibraryPath [ openssl ];
   };

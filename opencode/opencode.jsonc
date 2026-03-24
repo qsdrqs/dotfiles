@@ -1,7 +1,7 @@
 {
   "plugin": [
     "oh-my-opencode",
-    "opencode-antigravity-auth@1.6.0",
+    // "opencode-gemini-auth@latest",
     "opencode-claude-auth"
   ],
   "$schema": "https://opencode.ai/config.json",

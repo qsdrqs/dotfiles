@@ -23,7 +23,6 @@ in {
     ripgrep
     grc
     fastfetch
-    neofetch
     tmux
     nodejs
     config.nix.package

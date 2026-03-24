@@ -13,6 +13,15 @@
         "chrome-devtools-mcp@latest",
         "--autoConnect"
       ]
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@brave/brave-search-mcp-server",
+        "--transport",
+        "stdio"
+      ]
     }
   }
 }

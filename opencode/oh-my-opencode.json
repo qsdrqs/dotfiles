@@ -39,11 +39,11 @@
       "model": "anthropic/claude-sonnet-4-6"
     },
     "frontend-ui-ux-engineer": {
-      "model": "google/antigravity-gemini-3-pro",
+      "model": "google/gemini-3.1-pro-preview",
       "variant": "high"
     },
     "document-writer": {
-      "model": "google/antigravity-gemini-3-flash"
+      "model": "google/gemini-3-flash-preview"
     }
   },
   "categories": {

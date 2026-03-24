@@ -50,10 +50,7 @@ in
 
       PCIE_ASPM_ON_AC = "default";
       # PCIE_ASPM_ON_BAT = "powersave";
-      #### Begin GPU temporary workaround (defective Arrow Lake-P iGPU) ####
-      # Original: PCIE_ASPM_ON_BAT = "powersupersave";
-      PCIE_ASPM_ON_BAT = "default";
-      #### End GPU temporary workaround (PCIE_ASPM) ####
+      PCIE_ASPM_ON_BAT = "powersupersave";
 
       DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE = "bluetooth"; # disable bluetooth when not connected
 
@@ -68,10 +65,9 @@ in
     HandleLidSwitchExternalPower = "ignore";
   };
 
-  systemd.sleep.extraConfig = ''
-    [Sleep]
-    HibernateDelaySec=3h
-  '';
+  systemd.sleep.settings.Sleep = {
+    HibernateDelaySec = "3h";
+  };
 
   systemd = {
     user.services = {
@@ -110,10 +106,7 @@ in
           ExecStart = "${niriMonitorPower}/bin/niri-monitor-power";
           Restart = "always";
           RestartSec = 5;
-          #### Begin GPU temporary workaround (defective Arrow Lake-P iGPU) ####
-          # Original: AC_REFRESH defaults to 120Hz; switching 60->120Hz triggers display pipeline freeze.
-          Environment = "NIRI_POWER_REFRESH_AC=60.001";
-          #### End GPU temporary workaround (niri-monitor-power AC refresh) ####
+          Environment = "NIRI_POWER_REFRESH_AC=120.000";
         };
       };
     };

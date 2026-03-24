@@ -12,7 +12,6 @@
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
     nixpkgs-howdy.url = "github:fufexan/nixpkgs/howdy";
-    nixpkgs-ckb-next.url = "github:4JX/nixpkgs/ckb-next-qt6";
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";

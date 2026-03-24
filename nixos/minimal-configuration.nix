@@ -169,7 +169,6 @@ in
     tmux
     perl # for tmux to work
     fastfetch
-    neofetch
     grc
     git
     git-lfs

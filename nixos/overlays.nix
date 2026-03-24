@@ -44,10 +44,6 @@ let
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
-  pkgs-ckb-next = import inputs.nixpkgs-ckb-next {
-    system = pkgs.stdenv.hostPlatform.system;
-    config.allowUnfree = true;
-  };
   pkgs-last = import inputs.nixpkgs-last {
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
@@ -107,17 +103,8 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
-        freerdp = super.freerdp.override { openh264 = null; };
+        # freerdp = super.freerdp.override { openh264 = null; };
         global = pkgs-stable.global;
-        ckb-next = pkgs-ckb-next.ckb-next.overrideAttrs (oldAttrs: {
-          version = "0.6.2-unstable-2025-12-23";
-          src = pkgs-stable.fetchFromGitHub {
-            owner = "ckb-next";
-            repo = "ckb-next";
-            rev = "5fb355df648e5c4b151403a1a4bc28f409df24e7";
-            hash = "sha256-3v4HLzTdnUQGUyzBUzm9IFxj1BEQ2v5JkBbDeHYu2z8=";
-          };
-        });
         # End Temporary fixed version packages
 
         # Fix blueman to expose root properties on D-Bus menu, which is required for the applet to work properly in waybar.
@@ -162,21 +149,17 @@ in
         }));
         neovide = pkgs-unstable.neovide; # use neovide directly from unstable pkgs to avoid build
 
-        keepassxc = super.keepassxc.overrideAttrs (oldAttrs: {
-          src = super.fetchFromGitHub {
-            owner = "keepassxreboot";
-            repo = "keepassxc";
-            rev = "331a2de136398f733136c51f1badae5d154878bc";
-            hash = "sha256-deIg59jSCW5e0WZ5nCTkV46ZK6cwjneA1+3nLlzekE4=";
-          };
-          nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [
-            super.keyutils
-          ];
-          patches = [
-            (builtins.elemAt oldAttrs.patches 0)
-          ];
-          doCheck = false;
-        });
+        # keepassxc = super.keepassxc.overrideAttrs (oldAttrs: {
+        #   src = super.fetchFromGitHub {
+        #     owner = "keepassxreboot";
+        #     repo = "keepassxc";
+        #     rev = "331a2de136398f733136c51f1badae5d154878bc";
+        #     hash = "sha256-deIg59jSCW5e0WZ5nCTkV46ZK6cwjneA1+3nLlzekE4=";
+        #   };
+        #   nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [
+        #     super.keyutils
+        #   ];
+        # });
 
         ranger = super.ranger.overrideAttrs (oldAttrs: {
           src = inputs.ranger-config.ranger;

@@ -24,7 +24,7 @@ in
     cmake
   ];
   boot.kernelPackages = pkgs.linuxPackages_rpi5;
-  boot.loader.raspberryPi.bootloader = "kernel";
+  boot.loader.raspberry-pi.bootloader = "kernel";
 
   # Create gpio group
   users.groups.gpio = { };
@@ -139,10 +139,10 @@ in
     # };
     radios."${wifi-interface-internal}" = {
       countryCode = "US";
-      # channel = 36;
-      channel = 6;
-      # band = "5g";
-      band = "2g";
+      channel = 36;
+      # channel = 6;
+      band = "5g";
+      # band = "2g";
       wifi4 = {
         enable = true;
         capabilities = [
@@ -151,16 +151,16 @@ in
           "SHORT-GI-40"
         ];
       };
-      # wifi5 = {
-      #   enable = true;
-      #   operatingChannelWidth = "80";
-      #   capabilities = [
-      #     "SHORT-GI-80"
-      #   ];
-      # };
-      # settings = {
-      #   vht_oper_centr_freq_seg0_idx = 42; # for wifi5 to work
-      # };
+      wifi5 = {
+        enable = true;
+        operatingChannelWidth = "80";
+        capabilities = [
+          "SHORT-GI-80"
+        ];
+      };
+      settings = {
+        vht_oper_centr_freq_seg0_idx = 42; # for wifi5 to work
+      };
       networks = {
         "${wifi-interface-internal}" = {
           ssid = "RaspNix";

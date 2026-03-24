@@ -195,8 +195,10 @@ in
 
     intel-gpu-tools
     ventoy
+    protonup-qt
   ];
 
+  services.flatpak.enable = true;
   # services.teamviewer.enable = true;
 
   programs.obs-studio = {
