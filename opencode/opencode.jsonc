@@ -23,6 +23,26 @@
     }
   },
   "share": "disabled",
+  "mcp": {
+    "chrome-devtools": {
+      "type": "local",
+      "command": [
+        "npx",
+        "chrome-devtools-mcp@latest",
+        "--autoConnect"
+      ]
+    },
+    "brave-search": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@brave/brave-search-mcp-server",
+        "--transport",
+        "stdio"
+      ]
+    }
+  },
   "provider": {
     "openrouter": {
       "models": {
