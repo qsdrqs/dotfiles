@@ -132,22 +132,4 @@
       sudo systemctl stop interception-tools-ctrl2esc.service
       sudo systemctl start interception-tools-caps2esc.service
     '';
-  zenbook-kb-backlight =
-    {
-      writeShellScriptBin,
-      python3,
-      libusb1,
-    }:
-    let
-      python_usb = python3.withPackages (
-        ps: with ps; [
-          pyusb
-        ]
-      );
-    in
-    writeShellScriptBin "kb-backlight" ''
-      export LD_LIBRARY_PATH=${libusb1}/lib:$LD_LIBRARY_PATH
-      ${python_usb}/bin/python ${./scripts/kb.py} "$@"
-    '';
-
 }

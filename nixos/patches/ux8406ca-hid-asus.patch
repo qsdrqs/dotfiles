@@ -2,7 +2,7 @@ diff --git a/drivers/hid/hid-asus.c b/drivers/hid/hid-asus.c
 index 8db9d4e7c3b0b2..71b3a171a8a154 100644
 --- a/drivers/hid/hid-asus.c
 +++ b/drivers/hid/hid-asus.c
-@@ -30,6 +30,7 @@
+@@ -31,6 +31,7 @@
  #include <linux/input/mt.h>
  #include <linux/usb.h> /* For to_usb_interface for T100 touchpad intf check */
  #include <linux/power_supply.h>
@@ -10,7 +10,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  #include <linux/leds.h>
  
  #include "hid-ids.h"
-@@ -89,6 +90,8 @@ MODULE_DESCRIPTION("Asus HID Keyboard and TouchPad");
+@@ -90,6 +91,8 @@ MODULE_DESCRIPTION("Asus HID Keyboard and TouchPad");
  #define QUIRK_ROG_NKEY_KEYBOARD		BIT(11)
  #define QUIRK_ROG_CLAYMORE_II_KEYBOARD BIT(12)
  #define QUIRK_ROG_ALLY_XPAD		BIT(13)
@@ -19,7 +19,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  
  #define I2C_KEYBOARD_QUIRKS			(QUIRK_FIX_NOTEBOOK_REPORT | \
  						 QUIRK_NO_INIT_REPORTS | \
-@@ -108,6 +111,14 @@ struct asus_kbd_leds {
+@@ -109,6 +112,14 @@ struct asus_kbd_leds {
  	bool removed;
  };
  
@@ -34,7 +34,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  struct asus_touchpad_info {
  	int max_x;
  	int max_y;
-@@ -125,15 +136,18 @@ struct asus_drvdata {
+@@ -126,15 +137,18 @@ struct asus_drvdata {
  	struct input_dev *tp_kbd_input;
  	struct asus_kbd_leds *kbd_backlight;
  	const struct asus_touchpad_info *tp;
@@ -54,7 +54,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  static int asus_report_battery(struct asus_drvdata *, u8 *, int);
  
  static const struct asus_touchpad_info asus_i2c_tp = {
-@@ -319,8 +333,27 @@ static int asus_event(struct hid_device *hdev, struct hid_field *field,
+@@ -320,8 +334,27 @@ static int asus_event(struct hid_device *hdev, struct hid_field *field,
  	if ((usage->hid & HID_USAGE_PAGE) == 0xff310000 &&
  	    (usage->hid & HID_USAGE) != 0x00 &&
  	    (usage->hid & HID_USAGE) != 0xff && !usage->type) {
@@ -84,7 +84,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  	}
  
  	return 0;
-@@ -457,6 +490,69 @@ static int asus_kbd_disable_oobe(struct hid_device *hdev)
+@@ -458,6 +491,69 @@ static int asus_kbd_disable_oobe(struct hid_device *hdev)
  	return 0;
  }
  
@@ -154,7 +154,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  static void asus_schedule_work(struct asus_kbd_leds *led)
  {
  	unsigned long flags;
-@@ -524,7 +620,7 @@ static bool asus_kbd_wmi_led_control_present(struct hid_device *hdev)
+@@ -525,7 +621,7 @@ static bool asus_kbd_wmi_led_control_present(struct hid_device *hdev)
  	if (!IS_ENABLED(CONFIG_ASUS_WMI))
  		return false;
  
@@ -163,7 +163,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  			dmi_check_system(asus_use_hid_led_dmi_ids)) {
  		hid_info(hdev, "using HID for asus::kbd_backlight\n");
  		return false;
-@@ -639,7 +735,7 @@ static int asus_kbd_register_leds(struct hid_device *hdev)
+@@ -640,7 +736,7 @@ static int asus_kbd_register_leds(struct hid_device *hdev)
  	int ret;
  
  	if (drvdata->quirks & QUIRK_ROG_NKEY_KEYBOARD) {
@@ -172,7 +172,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  		ret = asus_kbd_init(hdev, FEATURE_KBD_REPORT_ID);
  		if (ret < 0)
  			return ret;
-@@ -923,11 +1019,17 @@ static int asus_input_configured(struct hid_device *hdev, struct hid_input *hi)
+@@ -924,11 +1020,17 @@ static int asus_input_configured(struct hid_device *hdev, struct hid_input *hi)
  
  	drvdata->input = input;
  
@@ -191,7 +191,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  	return 0;
  }
  
-@@ -969,12 +1071,12 @@ static int asus_input_mapping(struct hid_device *hdev,
+@@ -970,12 +1072,12 @@ static int asus_input_mapping(struct hid_device *hdev,
  		case 0x6c: asus_map_key_clear(KEY_SLEEP);		break;
  		case 0x7c: asus_map_key_clear(KEY_MICMUTE);		break;
  		case 0x82: asus_map_key_clear(KEY_CAMERA);		break;
@@ -205,7 +205,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  		case 0x7e: asus_map_key_clear(KEY_EMOJI_PICKER);	break;
  
  		case 0x8b: asus_map_key_clear(KEY_PROG1);	break; /* ProArt Creator Hub key */
-@@ -989,6 +1091,18 @@ static int asus_input_mapping(struct hid_device *hdev,
+@@ -990,6 +1092,18 @@ static int asus_input_mapping(struct hid_device *hdev,
  		case 0xb3: asus_map_key_clear(KEY_PROG3);	break; /* Fn+Left next aura */
  		case 0x6a: asus_map_key_clear(KEY_F13);		break; /* Screenpad toggle */
  		case 0x4b: asus_map_key_clear(KEY_F14);		break; /* Arrows/Pg-Up/Dn toggle */
@@ -224,7 +224,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  		case 0xa5: asus_map_key_clear(KEY_F15);		break; /* ROG Ally left back */
  		case 0xa6: asus_map_key_clear(KEY_F16);		break; /* ROG Ally QAM button */
  		case 0xa7: asus_map_key_clear(KEY_F17);		break; /* ROG Ally ROG long-press */
-@@ -1001,13 +1115,12 @@ static int asus_input_mapping(struct hid_device *hdev,
+@@ -1002,13 +1116,12 @@ static int asus_input_mapping(struct hid_device *hdev,
  		}
  
  		/*
@@ -240,7 +240,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  
  		set_bit(EV_REP, hi->input->evbit);
  		return 1;
-@@ -1259,9 +1372,39 @@ static void asus_remove(struct hid_device *hdev)
+@@ -1260,9 +1373,39 @@ static void asus_remove(struct hid_device *hdev)
  		cancel_work_sync(&drvdata->kbd_backlight->work);
  	}
  
@@ -280,7 +280,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  static const __u8 asus_g752_fixed_rdesc[] = {
          0x19, 0x00,			/*   Usage Minimum (0x00)       */
          0x2A, 0xFF, 0x00,		/*   Usage Maximum (0xFF)       */
-@@ -1284,35 +1427,46 @@ static const __u8 *asus_report_fixup(struct hid_device *hdev, __u8 *rdesc,
+@@ -1285,35 +1428,46 @@ static const __u8 *asus_report_fixup(struct hid_device *hdev, __u8 *rdesc,
  		hid_info(hdev, "Fixing up Asus T100 keyb report descriptor\n");
  		rdesc[74] &= ~HID_MAIN_ITEM_CONSTANT;
  	}
@@ -334,7 +334,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  			memmove(rdesc + offs + 4, rdesc + offs + 2, 12);
  			rdesc[offs] = 0x19;
  			rdesc[offs + 1] = 0x00;
-@@ -1322,6 +1476,26 @@ static const __u8 *asus_report_fixup(struct hid_device *hdev, __u8 *rdesc,
+@@ -1323,6 +1477,26 @@ static const __u8 *asus_report_fixup(struct hid_device *hdev, __u8 *rdesc,
  		}
  	}
  
@@ -361,7 +361,7 @@ index 8db9d4e7c3b0b2..71b3a171a8a154 100644
  	if (drvdata->quirks & QUIRK_G752_KEYBOARD &&
  		 *rsize == 75 && rdesc[61] == 0x15 && rdesc[62] == 0x00) {
  		/* report is missing usage minimum and maximum */
-@@ -1393,6 +1567,18 @@ static const struct hid_device_id asus_devices[] = {
+@@ -1391,6 +1565,18 @@ static const struct hid_device_id asus_devices[] = {
  	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
  	    USB_DEVICE_ID_ASUSTEK_ROG_Z13_LIGHTBAR),
  	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_ROG_NKEY_KEYBOARD },
@@ -395,11 +395,10 @@ index 149798754570d3..5101cb55ce7f37 100644
  #define USB_DEVICE_ID_ASUSTEK_ROG_Z13_LIGHTBAR		0x18c6
  #define USB_DEVICE_ID_ASUSTEK_ROG_NKEY_ALLY		0x1abe
  #define USB_DEVICE_ID_ASUSTEK_ROG_NKEY_ALLY_X		0x1b4c
-diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
-index 8a515179113dad..d956d9a89f92fe 100644
---- a/include/linux/platform_data/x86/asus-wmi.h
-+++ b/include/linux/platform_data/x86/asus-wmi.h
-@@ -223,6 +223,11 @@ static const struct dmi_system_id asus_use_hid_led_dmi_ids[] = {
+diff --git a/include/linux/platform_data/x86/asus-wmi-leds-ids.h b/include/linux/platform_data/x86/asus-wmi-leds-ids.h
+--- a/include/linux/platform_data/x86/asus-wmi-leds-ids.h
++++ b/include/linux/platform_data/x86/asus-wmi-leds-ids.h
+@@ -43,6 +43,11 @@ static const struct dmi_system_id asus_use_hid_led_dmi_ids[] = {
  			DMI_MATCH(DMI_BOARD_NAME, "RC71L"),
  		},
  	},

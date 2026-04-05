@@ -57,6 +57,11 @@
       url = "github:NixOS/nixos-hardware";
     };
 
+    jovian-nixos = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # brostrend rtl88x2bu wifi dkms
     rtl88x2bu-dkms = {
       url = "https://linux.brostrend.com/rtl88x2bu-dkms.deb";
@@ -135,9 +140,9 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { self, nixpkgs, home-manager, vscode-server, nur, dev-shell, nixos-raspberrypi, ... }@inputs:
+  outputs = { nixpkgs, home-manager, vscode-server, nur, dev-shell, nixos-raspberrypi, ... }@inputs:
     rec {
-      pkgs-collect = builtins.listToAttrs (builtins.map
+      pkgs-collect = builtins.listToAttrs (map
         (pkg: {
           name = pkg;
           value = (system: import inputs."nix${pkg}" {
@@ -221,7 +226,7 @@
 
           # vscode-server
           vscode-server.nixosModules.default
-          ({ config, pkgs, ... }: {
+          ({ ... }: {
             services.vscode-server.enable = true;
             services.vscode-server.installPath = "$HOME/.vscode-server";
           })
@@ -232,7 +237,7 @@
           # nix index database
           inputs.nix-index-database.nixosModules.nix-index
 
-          # nvim plugins
+          # home-manager override for basic profile
           home-manager.nixosModules.home-manager
           {
             home-manager.users.qsdrqs = {
@@ -261,7 +266,7 @@
           home-manager.nixosModules.home-manager
           {
             home-manager.users.qsdrqs = {
-              imports = basicHomeModules;
+              imports = minimalHomeModules;
             };
             home-manager.extraSpecialArgs = special-args system;
           }
@@ -275,8 +280,13 @@
           ./nixos/rpi-cross-compile.nix
         ];
       };
-      guiMinimalConfig = minimalConfig // {
+      guiBaseConfig = minimalConfig // {
         modules = minimalConfig.modules ++ [
+          ./nixos/gui-base-configuration.nix
+        ];
+      };
+      guiMinimalConfig = guiBaseConfig // {
+        modules = guiBaseConfig.modules ++ [
           ./nixos/gui-minimal-configuration.nix
 
           home-manager.nixosModules.home-manager
@@ -297,6 +307,21 @@
       developConfig = basicConfig // {
         modules = basicConfig.modules ++ [
           ./nixos/develop-configuration.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.qsdrqs = {
+              imports = basicHomeModules;
+            };
+            home-manager.extraSpecialArgs = special-args minimalConfig.system;
+          }
+        ];
+      };
+      handheldConfig = basicConfig // guiBaseConfig // {
+        modules = basicConfig.modules ++ guiBaseConfig.modules ++ [
+          inputs.jovian-nixos.nixosModules.default
+          ./nixos/handheld-configuration.nix
+          ./nixos/custom/rogxbox.nix
         ];
       };
 
@@ -390,7 +415,7 @@
             home-manager.users.qsdrqs = import ./nixos/isohome.nix;
           }
 
-          ({ config, pkgs, lib, ... }: {
+          ({ lib, ... }: {
             services.getty.autologinUser = nixpkgs.lib.mkForce "qsdrqs";
             users.users.qsdrqs.password = ""; # empty passwd
             programs.hyprlock.enable = lib.mkForce false; # disable hyprlock for iso
@@ -415,11 +440,12 @@
           }
 
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"
+          ./nixos/gui-base-configuration.nix
           ./nixos/gui-minimal-configuration.nix
         ];
       };
 
-      archSpecConfig = func: archs: builtins.listToAttrs (builtins.map
+      archSpecConfig = func: archs: builtins.listToAttrs (map
         (system: {
           name = system;
           value = func system;
@@ -437,6 +463,7 @@
       nixosConfigurations.rpi-cross = nixos-raspberrypi.lib.nixosSystem rpiCrossConfig;
       nixosConfigurations.gui-minimal = nixpkgs.lib.nixosSystem guiMinimalConfig;
       nixosConfigurations.gui-basic = nixpkgs.lib.nixosSystem guiBasicConfig;
+      nixosConfigurations.handheld = nixpkgs.lib.nixosSystem handheldConfig;
       # nixosConfigurations.wsl = nixpkgs.lib.nixosSystem wslConfig;
       nixosConfigurations.wsl-desktop = nixpkgs.lib.nixosSystem wslDesktopConfig;
       nixosConfigurations.wsl-laptop = nixpkgs.lib.nixosSystem wslLaptopConfig;
@@ -467,7 +494,7 @@
           rpi = (nixpkgs.lib.nixosSystem (removeCustom rpiConfig // {
             modules = rpiConfig.modules ++ [
               "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
-              ({ config, pkgs, ... }: {
+              ({ ... }: {
                 # empty passwd
                 users.users.qsdrqs.password = "";
               })

@@ -1,0 +1,11 @@
+--- a/backend/decky_loader/localplatform/localplatformlinux.py
++++ b/backend/decky_loader/localplatform/localplatformlinux.py
+@@ -11,7 +11,8 @@ logger = logging.getLogger("localplatform")
+ ENV = Mapping[str, str]
+ ProcessIO = int | IO[Any] | None
+ async def run(args: list[str], stdin: ProcessIO = DEVNULL, stdout: ProcessIO = PIPE, stderr: ProcessIO = PIPE, env: ENV | None = {"LD_LIBRARY_PATH": ""}) -> tuple[Process, bytes | None, bytes | None]:
+-    proc = await create_subprocess_exec(args[0], *(args[1:]), stdin=stdin, stdout=stdout, stderr=stderr, env=env)
++    merged_env = {**os.environ, **env} if env is not None else None
++    proc = await create_subprocess_exec(args[0], *(args[1:]), stdin=stdin, stdout=stdout, stderr=stderr, env=merged_env)
+     proc_stdout, proc_stderr = await proc.communicate()
+     return (proc, proc_stdout, proc_stderr)

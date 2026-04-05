@@ -82,13 +82,6 @@ let
   '');
 in
 {
-  boot.kernelPackages = pkgs.linuxPackages_6_18;
-
-  # boot.kernelParams = [
-  #   "nvidia_drm.fbdev=1"
-  #   "initcall_blacklist=simpledrm_platform_driver_init"
-  # ];
-
   environment.systemPackages = with pkgs; [
     ida64-fhs
     libreoffice

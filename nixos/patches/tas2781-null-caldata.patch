@@ -1,0 +1,20 @@
+--- a/sound/soc/codecs/tas2781-fmwlib.c	2026-03-29 00:17:37.532745087 -0500
++++ b/sound/soc/codecs/tas2781-fmwlib.c	2026-03-29 00:17:37.535874558 -0500
+@@ -2551,8 +2551,16 @@
+ 	struct calidata *cali_data = &priv->cali_data;
+ 	struct cali_reg *p = &cali_data->cali_reg_array;
+ 	unsigned char *data = cali_data->data;
+-	int k = i * (cali_data->cali_dat_sz_per_dev + 1);
+ 	int rc;
++	int k;
++
++	if (!data) {
++		dev_dbg(priv->dev, "%s: no calibration data, skipping dev %d\n",
++			__func__, i);
++		return;
++	}
++
++	k = i * (cali_data->cali_dat_sz_per_dev + 1);
+ 
+ 	if (data[k] != i) {
+ 		dev_err(priv->dev, "%s: no cal-data for dev %d from usr-spc\n",

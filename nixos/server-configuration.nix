@@ -17,6 +17,7 @@ in
   environment.systemPackages = with pkgs; [
     matrix-synapse-unwrapped
   ];
+  virtualisation.podman.enable = true;
 
   systemd = {
     services.frps = {

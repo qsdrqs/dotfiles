@@ -1,0 +1,122 @@
+--- a/src/hhd/plugins/powerbutton/base.py	2026-04-02 02:13:30.745589261 -0500
++++ b/src/hhd/plugins/powerbutton/base.py	2026-04-02 02:15:27.863393142 -0500
+@@ -1,6 +1,10 @@
+ import logging
+ import os
++import base64
++import json
++import socket
+ import select
++import struct
+ import subprocess
+ from threading import Event
+ from time import perf_counter, sleep
+@@ -18,6 +22,7 @@
+ STEAM_WAIT_DELAY = 0.5
+ LONG_PRESS_DELAY = 2.0
+ DEBOUNCE_DELAY = 1
++DEVTOOLS_PORT = 8080
+ SLEEP_MIN = 2
+ 
+ def B(b: str):
+@@ -69,6 +74,83 @@
+ _supports_sleep = None
+ 
+ 
++def _call_devtools(expr: str) -> bool:
++    """Evaluate a JS expression in Steam's SharedJSContext via Chrome DevTools."""
++    try:
++        import urllib.request
++
++        resp = urllib.request.urlopen(
++            f"http://127.0.0.1:{DEVTOOLS_PORT}/json", timeout=2
++        )
++        targets = json.loads(resp.read())
++        ws_url = None
++        for t in targets:
++            if t.get("title") == "SharedJSContext":
++                ws_url = t.get("webSocketDebuggerUrl")
++                break
++        if not ws_url:
++            logger.error("DevTools: SharedJSContext not found")
++            return False
++
++        # Parse ws://host:port/path
++        url = ws_url.replace("ws://", "")
++        hp, path = url.split("/", 1)
++        host, port = hp.split(":")
++
++        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++        sock.settimeout(5)
++        sock.connect((host, int(port)))
++
++        key = base64.b64encode(os.urandom(16)).decode()
++        sock.sendall(
++            f"GET /{path} HTTP/1.1\r\nHost: {host}:{port}\r\n"
++            f"Upgrade: websocket\r\nConnection: Upgrade\r\n"
++            f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n"
++            .encode()
++        )
++        r = b""
++        while b"\r\n\r\n" not in r:
++            chunk = sock.recv(4096)
++            if not chunk:
++                sock.close()
++                return False
++            r += chunk
++
++        # Send as masked WebSocket text frame
++        payload = json.dumps(
++            {"id": 1, "method": "Runtime.evaluate",
++             "params": {"expression": expr}}
++        ).encode()
++        frame = bytearray([0x81])
++        mask_key = os.urandom(4)
++        plen = len(payload)
++        if plen < 126:
++            frame.append(0x80 | plen)
++        elif plen < 65536:
++            frame.append(0x80 | 126)
++            frame.extend(struct.pack(">H", plen))
++        else:
++            frame.append(0x80 | 127)
++            frame.extend(struct.pack(">Q", plen))
++        frame.extend(mask_key)
++        frame.extend(
++            bytearray(b ^ mask_key[i % 4] for i, b in enumerate(payload))
++        )
++        sock.sendall(frame)
++
++        try:
++            sock.settimeout(2)
++            sock.recv(4096)
++        except socket.timeout:
++            pass
++        sock.close()
++        logger.info(f"DevTools: evaluated '{expr}'")
++        return True
++    except Exception as e:
++        logger.error(f"DevTools call failed: {e}")
++        return False
++
++
+ def run_steam_shortpress():
+     global _supports_sleep
+     # FIXME: This should be patched in systemd instead
+@@ -76,14 +158,14 @@
+         _supports_sleep = supports_sleep()
+ 
+     if _supports_sleep:
+-        return run_steam_command("steam://shortpowerpress")
++        return _call_devtools("SuspendResumeStore.InitiateSleep()")
+     else:
+         emergency_hibernate(shutdown=False)
+         return True
+ 
+ 
+ def run_steam_longpress():
+-    return run_steam_command("steam://longpowerpress")
++    return _call_devtools("SuspendResumeStore.OnShowPowerMenu()")
+ 
+ 
+ def power_button_run(cfg: PowerButtonConfig, should_exit: Event, emit):

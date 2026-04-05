@@ -33,6 +33,7 @@
 
     playwright
     playwright-mcp
+    uv
   ];
 
   virtualisation = {

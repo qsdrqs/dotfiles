@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-master, pkgs-stable, pkgs-last, inputs, options, ... }:
+{ config, pkgs, lib, ... }:
 let
   hyprlandPackages = with pkgs; [
     # Add waybar package here due to: https://github.com/Alexays/Waybar/issues/3300
@@ -18,10 +18,6 @@ let
     grimblast
     wayvnc
   ];
-  firefox-alias = pkgs.writeShellScriptBin "firefox" ''
-    ${pkgs.firefox-devedition}/bin/firefox-devedition "$@"
-  '';
-  homeDir = config.users.users.qsdrqs.home;
 in
 {
   nix.settings = {
@@ -31,31 +27,20 @@ in
 
   environment.systemPackages = with pkgs; [
     vscode
-    firefox-devedition
-    firefox-alias
-    kitty
     xclip
     wl-clipboard
     wdisplays # show connected monitors
-    pavucontrol
     libnotify
     mpv
     graphviz
 
     zathura
     swaynotificationcenter
-    pulseaudio
-    alsa-utils
     rofi
     swaybg
     networkmanagerapplet
     xdotool
     zenity # color picker
-    chntpw # Windows registry editor
-
-    playerctl
-    libsecret
-    keepassxc
 
     libcamera
     libcamera-qcam
@@ -75,19 +60,6 @@ in
 
   qt.platformTheme = "kde";
 
-  services.pipewire = {
-    enable = true;
-    audio.enable = true;
-    pulse.enable = true;
-    alsa = {
-      enable = true;
-      support32Bit = true;
-    };
-    jack.enable = true;
-    # wireplumber.package = pkgs-stable.wireplumber;
-  };
-  security.rtkit.enable = true; # For realtime scheduling of PipeWire
-
   services.mpd = {
     enable = true;
     user = "qsdrqs";
@@ -98,7 +70,6 @@ in
       }];
     };
   };
-  services.blueman.enable = true;
 
   systemd = {
     services = {
@@ -121,7 +92,6 @@ in
     user.services = {
       kdeconnect-cli-autorefresh =
       let
-        kdeconnect-cli-path = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnect-cli";
         interval_seconds = 10;
       in
       {
@@ -136,13 +106,11 @@ in
           pkgs.procps
         ];
         serviceConfig = {
-          ExecStart = "${pkgs.python3}/bin/python ${./scripts/kdeconnect-cli-autorefresh.py} ${builtins.toString interval_seconds}";
+          ExecStart = "${pkgs.python3}/bin/python ${./scripts/kdeconnect-cli-autorefresh.py} ${toString interval_seconds}";
         };
       };
     };
   };
-
-  programs.dconf.enable = true;
 
   programs.niri.enable = true;
   programs.waybar.enable = true;
@@ -164,7 +132,10 @@ in
     "${waitForKbd}";
 
   systemd.user.services.waybar.path = [ pkgs.swaynotificationcenter ];
-  systemd.user.services.hypridle.path = [ pkgs.niri ];
+  systemd.user.services.hypridle.path = [
+    pkgs.niri
+    pkgs.bash
+  ];
 
   services.gnome.gcr-ssh-agent.enable = false;
   services.gnome.gnome-keyring.enable = false;
@@ -172,12 +143,6 @@ in
   # provide org.freedesktop.secrets
   # services.gnome.gnome-keyring.enable = true;
   # security.pam.services.login.enableGnomeKeyring = true;
-
-  fonts.packages = with pkgs; [
-    nerd-fonts.hack
-    nerd-fonts.fira-code
-    wqy_zenhei
-  ];
 
   services.desktopManager.plasma6.enable = true;
 
@@ -256,9 +221,6 @@ in
   environment.variables.NIX_LD_LIBRARY_PATH = lib.mkOverride 90 "/run/current-system/sw/share/nix-ld/lib:/run/opengl-driver/lib";
 
   # hardware.pulseaudio.enable = true;
-  users.extraUsers.qsdrqs.extraGroups = [ "audio" ];
   # hardware.pulseaudio.extraConfig = "load-module module-combine-sink module-equalizer-sink module-dbus-protocol";
-  hardware.bluetooth.enable = true;
-  hardware.graphics.enable = true;
 
 }
