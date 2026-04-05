@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Team"
+  short_description: "Orchestrate a swarm of AI agents for parallel task execution"
+  default_prompt: "Spin up an agent team to work on this task in parallel"

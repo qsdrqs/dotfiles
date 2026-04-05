@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nix Dev Environment"
+  short_description: "Nix flake-based dev environment management"
+  default_prompt: "Use $nix to set up the development environment from flake.nix"

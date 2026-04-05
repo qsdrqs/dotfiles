@@ -64,7 +64,7 @@
       "variant": "high"
     },
     "quick": {
-      "model": "anthropic/claude-haiku-4-5"
+      "model": "anthropic/claude-sonnet-4-6"
     },
     "unspecified-low": {
       "model": "anthropic/claude-sonnet-4-6",
