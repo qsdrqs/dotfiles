@@ -16,29 +16,15 @@ return function(ctx)
     {
       "neovim/nvim-lspconfig",
       config = function()
-        -- vim.lsp.set_log_level('DEBUG')
-        vim.lsp.set_log_level("OFF")
+        -- vim.lsp.log.set_level('DEBUG')
+        vim.lsp.log.set_level("OFF")
 
         function common_on_attach(client, bufnr)
           -- Enable completion triggered by <c-x><c-o>
           vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
 
           -- codelens
-          vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged", "BufEnter" }, {
-            pattern = "*",
-            callback = function()
-              vim.lsp.codelens.refresh()
-            end,
-          })
-          -- refresh on start
-          vim.lsp.codelens.refresh()
-
-          -- rust_analyzer needs to be defered refresh
-          if client.name == "rust_analyzer" then
-            vim.defer_fn(function()
-              vim.lsp.codelens.refresh()
-            end, 500)
-          end
+          vim.lsp.codelens.enable(true, { bufnr = bufnr })
 
           -- inlay hints
           vim.lsp.inlay_hint.enable()
@@ -133,13 +119,6 @@ return function(ctx)
             capabilities = capabilities,
             flags = {
               debounce_text_changes = 150,
-            },
-            handlers = {
-              ["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-                signs = true,
-                underline = true,
-                update_in_insert = false,
-              }),
             },
           }
           return config
