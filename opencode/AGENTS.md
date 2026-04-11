@@ -14,7 +14,6 @@ For any task involving numeric counts, statistics, aggregation, or calculation:
 
 **BLOCKING VIOLATION**: Manually computing or counting numeric/statistical results without using Python.
 
-
 ## Dependency Management
 
 ### Version Verification (MANDATORY)

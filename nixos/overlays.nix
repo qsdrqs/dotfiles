@@ -117,7 +117,7 @@ in
           cargoDeps = super.runCommand "${old.pname}-${old.version}-vendor-patched" {} ''
             cp -r ${old.cargoDeps} $out
             chmod -R u+w $out
-            patch -p1 -d $out < ${./patches/riemann-client-rustfmt.patch}
+            patch -p1 -d $out/source-registry-0 < ${./patches/riemann-client-rustfmt.patch}
           '';
           meta.broken = false;
         });

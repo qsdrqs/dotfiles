@@ -187,7 +187,7 @@ in
         files = [
           "opencode.jsonc"
           ".mcp.json"
-          "oh-my-opencode.json"
+          "oh-my-openagent.json"
           "skills"
           "AGENTS.md"
         ];
