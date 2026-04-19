@@ -84,18 +84,29 @@ in
   # Patch: use Chrome DevTools WebSocket instead of steam binary for power
   # button actions. The steam binary (32-bit ELF) cannot execute on NixOS
   # outside the bwrap sandbox, so steam://shortpowerpress never works.
-  services.handheld-daemon = {
-    enable = true;
-    user = "qsdrqs";
-    package = pkgs.handheld-daemon.overridePythonAttrs (old: {
-      patches = (old.patches or [ ]) ++ [
-        ./patches/hhd-devtools-powerbutton.patch
-      ];
-    });
-  };
+  # services.handheld-daemon = {
+  #   enable = true;
+  #   user = "qsdrqs";
+  #   package = pkgs.handheld-daemon.overridePythonAttrs (old: {
+  #     patches = (old.patches or [ ]) ++ [
+  #       ./patches/hhd-devtools-powerbutton.patch
+  #     ];
+  #   });
+  # };
 
   # ASUS hardware daemon
   services.asusd.enable = true;
+
+  # Disable interception-tools (caps2esc/ctrl2esc) on handheld:
+  # intercept -g GRABs the keyboard evdev device exclusively and the
+  # caps2esc/ctrl2esc pipeline silently drops non-standard key events.
+  # ROG Ally back buttons (M1/M2) are sent by the MCU as keyboard HID
+  # reports (KEY_F17/KEY_F18) on the N-KEY keyboard interface, so they
+  # never reach InputPlumber or Steam when interception is active.
+  systemd.services = {
+    interception-tools-caps2esc.wantedBy = lib.mkForce [ ];
+    interception-tools-ctrl2esc.wantedBy = lib.mkForce [ ];
+  };
 
   # udev rules for input device access (HHD needs rw on hidraw + evdev)
   services.udev.extraRules = ''

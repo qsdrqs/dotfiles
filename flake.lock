@@ -310,6 +310,22 @@
         "type": "github"
       }
     },
+    "ckb-next": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774354520,
+        "narHash": "sha256-Gd9dZeDlWb+PWpRgpoiVckPWPQsxZD3pfQWl8MuqYSc=",
+        "owner": "ckb-next",
+        "repo": "ckb-next",
+        "rev": "7cc4df0d158ac2622249c81171d916c416a5c72a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ckb-next",
+        "repo": "ckb-next",
+        "type": "github"
+      }
+    },
     "clangd_extensionsDOTnvim": {
       "flake": false,
       "locked": {
@@ -2867,6 +2883,7 @@
     },
     "root": {
       "inputs": {
+        "ckb-next": "ckb-next",
         "code-features": "code-features",
         "code-marketplace": "code-marketplace",
         "ctrl2esc": "ctrl2esc",

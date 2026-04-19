@@ -14,7 +14,6 @@ local M = {}
 function M.setup(opts)
   local _, use_nix = bootstrap.ensure_lazy(opts)
   state.ensure_defaults()
-
   return {
     use_nix = use_nix,
     helpers = helpers,

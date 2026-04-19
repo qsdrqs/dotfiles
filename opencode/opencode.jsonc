@@ -1,6 +1,7 @@
 {
   "plugin": [
-    "oh-my-openagent@3.15.3",
+    "superpowers@git+https://github.com/obra/superpowers.git",
+    "oh-my-openagent",
     "opencode-claude-auth",
     "opencode-gemini-auth@latest",
     "opencode-websearch-cited@1.2.0"
@@ -45,6 +46,72 @@
     }
   },
   "provider": {
+    "NRP": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "NRP",
+      "options": {
+        "baseURL": "https://ellm.nrp-nautilus.io/v1",
+        "apiKey": "{env:NRP_API_KEY}"
+      },
+      "models": {
+        "minimax-m2": {
+          "name": "MiniMaxAI/MiniMax-M2.7",
+          "limit": {
+            "context": 204800,
+            "output": 131072
+          }
+        },
+        "qwen3-27b": {
+          "name": "Qwen/Qwen3.5-27B",
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          }
+        },
+        "qwen3": {
+          "name": "Qwen/Qwen3.5-397B-A17B-FP8"
+        },
+        "olmo": {
+          "name": "allenai/Olmo-3.1-32B-Instruct",
+          "limit": {
+            "context": 65536,
+            "output": 32768
+          }
+        },
+        "gemma-4-e4b": {
+          "name": "gemma-4-e4b-it",
+        },
+        "gemma": {
+          "name": "google/gemma-4-31B-it",
+          "limit": {
+            "context": 262144,
+            "output": 131072
+          }
+        },
+        "kimi": {
+          "name": "moonshotai/Kimi-K2.5",
+          "limit": {
+            "context": 262144,
+            "output": 262144
+          }
+        },
+        "gpt-oss": {
+          "name": "openai/gpt-oss-120b",
+          "limit": {
+            "context": 128000,
+            "input": 128000,
+            "output": 16384
+          }
+        },
+        "glm-4.7": {
+          "name": "zai-org/GLM-4.7-FP8",
+          "limit": {
+            "context": 202752,
+            "output": 65535
+          }
+        }
+      }
+    },
     "openrouter": {
       "models": {
         "z-ai/glm-5": {
@@ -141,17 +208,10 @@
         "apiKey": "{env:DEEPSEEK_API_KEY}"
       }
     },
-    "openai": {
-      "options": {
-        "websearch_cited": {
-          "model": "gpt-5.4"
-        }
-      }
-    },
     "google": {
       "options": {
         "websearch_cited": {
-          "model": "gemini-3.1-flash"
+          "model": "gemini-3.1-pro-preview"
         }
       }
     }

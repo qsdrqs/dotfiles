@@ -99,6 +99,9 @@ export GPG_TTY=$(tty)
 # disable ranger load default rc
 export RANGER_LOAD_DEFAULT_RC=false
 
+# opencode TUI char width issue
+export OPENTUI_FORCE_WCWIDTH=1
+
 source $HOME/theme.zsh
 if [ -e $HOME/extra.zsh ]; then
     source $HOME/extra.zsh

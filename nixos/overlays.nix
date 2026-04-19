@@ -103,9 +103,16 @@ in
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
-        # freerdp = super.freerdp.override { openh264 = null; };
+        freerdp = super.freerdp.override { openh264 = null; };
         global = pkgs-stable.global;
         # End Temporary fixed version packages
+
+        ckb-next = super.ckb-next.overrideAttrs (oldAttrs: {
+          src = inputs.ckb-next;
+          patches = (oldAttrs.patches or [ ]) ++ [
+            ./patches/ckb-next-k70-pro-mech.patch
+          ];
+        });
 
         # Fix blueman to expose root properties on D-Bus menu, which is required for the applet to work properly in waybar.
         blueman = super.blueman.overrideAttrs (oldAttrs: {

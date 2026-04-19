@@ -15,6 +15,10 @@ end
 --@return table
 function M.build_options(use_nix)
   local pattern = resolve_pattern(use_nix)
+  local helptag_paths = {}
+  if use_nix then
+    helptag_paths = require("dotfiles.core.helptags").generate()
+  end
   return {
     defaults = {
       lazy = true,
@@ -26,6 +30,11 @@ function M.build_options(use_nix)
     },
     install = {
       missing = false,
+    },
+    performance = {
+      rtp = {
+        paths = helptag_paths,
+      },
     },
   }
 end

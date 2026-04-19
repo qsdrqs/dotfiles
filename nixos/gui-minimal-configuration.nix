@@ -119,9 +119,14 @@ in
     let
       waitForKbd = pkgs.writeShellScript "waybar-wait-kbd" ''
         set -euo pipefail
-        for i in $(seq 1 100); do
-          if ls /dev/input/by-path/*-event-kbd >/dev/null 2>&1; then
-            exit 0
+        stable=0
+        for i in $(seq 1 200); do
+          if ls /dev/input/by-path/*-event-kbd >/dev/null 2>&1 \
+             || grep -q 'Handlers=.*kbd.*leds' /proc/bus/input/devices 2>/dev/null; then
+            stable=$((stable+1))
+            [ "$stable" -ge 10 ] && exit 0
+          else
+            stable=0
           fi
           sleep 0.1
         done

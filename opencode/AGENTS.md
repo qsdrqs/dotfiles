@@ -71,6 +71,17 @@ When modifying documentation files:
 
 **Rationale**: Preserves existing structure, formatting, and unrelated content. Minimizes diff noise and accidental loss of information.
 
+## OpenCode Skills
+
+**Persist skill create/update changes in the dotfiles repo.**
+
+When creating or updating OpenCode skills for this setup:
+
+1. **MUST** write the skill files under `/home/qsdrqs/dotfiles/opencode/skills`
+2. **MUST NOT** treat `~/.config/opencode/skills` as the source of truth
+
+**Rationale**: `~/.config/opencode/skills` is activation output assembled from dotfiles and external symlinks, so direct edits there will drift from the managed source.
+
 ## Language-Specific Conventions
 
 ### Python

@@ -121,6 +121,11 @@
       flake = false;
     };
 
+    ckb-next = {
+      url = "github:ckb-next/ckb-next";
+      flake = false;
+    };
+
     # yazi
     yazi-searchjump = {
       url = "git+https://gitee.com/DreamMaoMao/searchjump.yazi";

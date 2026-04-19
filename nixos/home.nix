@@ -129,7 +129,7 @@ in
     CREDENTIALS_FILE = "${config.home.homeDirectory}/.git-credentials";
     NIX_CONFIG = ''
       $(
-        github_token=$(cat /home/qsdrqs/.git-credentials 2>/dev/null | grep github.com | awk -F'[:@]' '{print $3}')
+        github_token=$(${pkgs.coreutils}/bin/cat ${config.home.homeDirectory}/.git-credentials 2>/dev/null | ${pkgs.gnugrep}/bin/grep github.com | ${pkgs.gawk}/bin/awk -F'[:@]' '{print $3}')
         if [ -n "$github_token" ]; then
           echo "access-tokens = github.com=$github_token";
         fi
@@ -188,9 +188,11 @@ in
           "opencode.jsonc"
           ".mcp.json"
           "oh-my-openagent.json"
-          "skills"
           "AGENTS.md"
+          "tui.json"
         ];
+        localSkillsDir = "${homeDir}/dotfiles/opencode/skills";
+        superpowersSkillsDir = "${homeDir}/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills";
       in
       ''
         mkdir -p ~/.config/opencode
@@ -199,6 +201,34 @@ in
             ln -s ${homeDir}/dotfiles/opencode/${cfg} ${homeDir}/.config/opencode
           fi
         '') files}
+        if [ -L "${homeDir}/.config/opencode/skills" ]; then
+          rm "${homeDir}/.config/opencode/skills"
+        fi
+        mkdir -p "${homeDir}/.config/opencode/skills"
+
+        linkSkillDirs() {
+          local sourceDir="$1"
+          local skillDir=""
+          local skillName=""
+          local target=""
+
+          if [ ! -d "''${sourceDir}" ]; then
+            return
+          fi
+
+          for skillDir in "''${sourceDir}"/* "''${sourceDir}"/.[!.]* "''${sourceDir}"/..?*; do
+            if [ -d "''${skillDir}" ]; then
+              skillName="$(basename "''${skillDir}")"
+              target="${homeDir}/.config/opencode/skills/''${skillName}"
+              if [ ! -e "''${target}" ]; then
+                ln -s "''${skillDir}" "''${target}"
+              fi
+            fi
+          done
+        }
+
+        linkSkillDirs "${localSkillsDir}"
+        linkSkillDirs "${superpowersSkillsDir}"
       '';
     agent-browser-config = ''
       mkdir -p ~/.agent-browser

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "keybinds": {
+    "messages_half_page_up": "ctrl+u",
+    "messages_half_page_down": "ctrl+d",
+    "messages_page_up": "ctrl+b",
+    "messages_page_down": "ctrl+f",
+    "input_move_left": "left,ctrl+h",
+    "input_move_down": "down,ctrl+j",
+    "input_move_up": "up,ctrl+k",
+    "input_move_right": "right,ctrl+l",
+    "input_delete_to_line_end": "none"
+  }
+}
