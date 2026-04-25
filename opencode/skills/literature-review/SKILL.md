@@ -1,17 +1,17 @@
 ---
 name: literature-review
-description: "Academic literature review workflow for Related Work sections, project feasibility reports, and surveys. Multi-source paper discovery (brave + exa + cited + arXiv + Semantic Scholar), lightweight triage, arXiv HTML deep reading, and generation of a comparison matrix and a Related Work draft. Use when the user asks for 文献调研 / literature review / 综述 / survey / related work / paper survey / 论文调研 / 文献综述. Stage A supports end-to-end arXiv-centric workflow; Zotero import and MinerU PDF extraction come in Stage B; paywall fallback and citation chasing come in Stage C."
+description: "Academic literature review workflow for Related Work sections, project feasibility reports, and surveys. Multi-source paper discovery (brave + exa + cited + arXiv + Semantic Scholar), lightweight triage, arXiv HTML deep reading, and generation of a comparison matrix and a Related Work draft. Use when the user asks for literature review / survey / related work / paper survey. Stage A supports end-to-end arXiv-centric workflow; Zotero import and MinerU PDF extraction come in Stage B; paywall fallback and citation chasing come in Stage C."
 ---
 
 # Literature Review Skill
 
 ## When to use
 
-- "帮我做文献调研" / "文献综述"
+- "help me do a literature review on X"
 - "literature review on X"
-- "survey of X" / "综述 X 方向"
-- "写一下 related work 草稿"
-- "调研这个方向的论文"
+- "survey of X"
+- "write a related work draft on X"
+- "survey papers in this research area"
 
 ## When NOT to use
 
