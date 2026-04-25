@@ -1,0 +1,4 @@
+interface:
+  display_name: "Opencode Session Trajectory Dump"
+  short_description: "Dump opencode chat sessions to readable markdown."
+  default_prompt: "Use $opencode-session-trajectory-dump to dump session ses_xxx to markdown."

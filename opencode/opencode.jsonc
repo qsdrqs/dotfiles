@@ -4,7 +4,7 @@
     "oh-my-openagent",
     "opencode-claude-auth",
     "opencode-gemini-auth@latest",
-    "opencode-websearch-cited@1.2.0"
+    // "opencode-websearch-cited@1.2.0"
   ],
   "$schema": "https://opencode.ai/config.json",
   "formatter": false,
@@ -89,7 +89,7 @@
           }
         },
         "kimi": {
-          "name": "moonshotai/Kimi-K2.5",
+          "name": "moonshotai/Kimi-K2.6",
           "limit": {
             "context": 262144,
             "output": 262144
@@ -164,20 +164,13 @@
               "allow_fallbacks": false
             }
           }
-        },
-        "moonshotai/kimi-k2.5": {
-          "options": {
-            "provider": {
-              "order": [
-                "moonshotai"
-              ],
-              "allow_fallbacks": false
-            }
-          }
         }
       },
       "options": {
-        "apiKey": "{env:OPENROUTER_API_KEY}"
+        "apiKey": "{env:OPENROUTER_API_KEY}",
+        "websearch_cited": {
+          "model": "google/gemini-3.1-pro-preview"
+        }
       }
     },
     "llama.cpp": {
@@ -206,13 +199,6 @@
     "deepseek": {
       "options": {
         "apiKey": "{env:DEEPSEEK_API_KEY}"
-      }
-    },
-    "google": {
-      "options": {
-        "websearch_cited": {
-          "model": "gemini-3.1-pro-preview"
-        }
       }
     }
   }

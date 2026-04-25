@@ -1,6 +1,19 @@
 ---
 name: nix
-description: MUST USE for ANY Nix-related content - DO NOT skip this skill. Nix flake-based dev environment management. Triggers on ANY mention of: nix commands (nix develop/build/shell/run/flake/profile, nix-shell, nix-build, nix-env, nix-store), .nix files (flake.nix, shell.nix, default.nix, ANY *.nix), Nix language/syntax/expressions, nixpkgs, derivations, overlays, devShells, flakes, flake.lock, NIX_LD, missing shared libraries (libstdc++.so, libGL.so, ANY *.so cannot open errors), Nix store paths (/nix/store/...), home-manager dev shells, or package management where Nix is available. ALWAYS load when (1) project has flake.nix/shell.nix/*.nix, (2) user mentions ANY nix command/concept/file/error, (3) installing dev dependencies on a Nix-capable system, (4) shared library errors appear, (5) temporary tools needed via nix shell, (6) ANY uncertainty about whether Nix is involved - default to LOADING. Err aggressively on the side of loading.
+description: >-
+  MUST USE for ANY Nix-related content - DO NOT skip this skill. Nix flake-based
+  dev environment management. Triggers on ANY mention of: nix commands (nix
+  develop/build/shell/run/flake/profile, nix-shell, nix-build, nix-env,
+  nix-store), .nix files (flake.nix, shell.nix, default.nix, ANY *.nix), Nix
+  language/syntax/expressions, nixpkgs, derivations, overlays, devShells,
+  flakes, flake.lock, NIX_LD, missing shared libraries (libstdc++.so,
+  libGL.so, ANY *.so cannot open errors), Nix store paths (/nix/store/...),
+  home-manager dev shells, or package management where Nix is available. ALWAYS
+  load when (1) project has flake.nix/shell.nix/*.nix, (2) user mentions ANY nix
+  command/concept/file/error, (3) installing dev dependencies on a Nix-capable
+  system, (4) shared library errors appear, (5) temporary tools needed via nix
+  shell, (6) ANY uncertainty about whether Nix is involved - default to LOADING.
+  Err aggressively on the side of loading.
 ---
 
 # Nix Dev Environment
