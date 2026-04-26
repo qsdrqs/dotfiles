@@ -274,5 +274,57 @@ in
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
   services.syncthing.guiAddress = "127.0.0.1:8384";
+
+  services.mosquitto = {
+    enable = true;
+    listeners = [
+      {
+        address = "127.0.0.1";
+        port = 1883;
+        users.zigbee2mqtt = {
+          passwordFile = "/home/qsdrqs/mqtt_pwd";
+          acl = [ "readwrite #" ];
+        };
+      }
+    ];
+  };
+
+  services.zigbee2mqtt = {
+    enable = true;
+    settings = {
+      homeassistant.enabled = true;
+      permit_join = false;
+      mqtt = {
+        server = "mqtt://127.0.0.1:1883";
+        user = "zigbee2mqtt";
+        password = "!secret mqtt_password";
+      };
+      frontend = {
+        enabled = true;
+        host = "127.0.0.1";
+        port = 8080;
+      };
+    };
+  };
+
+  services.home-assistant = {
+    enable = true;
+    extraComponents = [
+      "default_config"
+      "esphome"
+      "google_translate"
+      "met"
+      "mqtt"
+      "radio_browser"
+      "rpi_power"
+      "zha"
+    ];
+    config = {
+      http = {
+        server_port = 8123;
+      };
+    };
+  };
+
   systemd.services.frpc.enable = lib.mkForce true;
 }
