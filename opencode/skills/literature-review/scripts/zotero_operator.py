@@ -215,7 +215,21 @@ def find_by_identifier(doi=None, arxiv=None, title_hint=None):
 
 
 def _normalize_translator_item(item):
-    drop = {"id", "key", "version", "attachments", "notes", "tags", "seeAlso"}
+    # Zotero's POST /items rejects unknown fields with HTTP 400. Drop:
+    #   - Translator scaffolding (id, key, version, attachments, notes, tags,
+    #     seeAlso) - these are response-side fields, not request-side.
+    #   - Citation enrichment fields injected by crossref_client / s2_client /
+    #     citation_enricher (citation_count, influential_citation_count,
+    #     cite_velocity, citation_source) - useful internally for Phase 2
+    #     triage and Phase 3 chasing, but not part of the Zotero schema.
+    #   - arxiv-only fields (arxiv_id, journal_ref) that are folded into
+    #     'extra' upstream by _arxiv_to_zotero; if they leak through here
+    #     (e.g. via direct CLI input), drop them silently.
+    drop = {
+        "id", "key", "version", "attachments", "notes", "tags", "seeAlso",
+        "citation_count", "influential_citation_count", "cite_velocity",
+        "citation_source", "arxiv_id", "journal_ref",
+    }
     cleaned = {k: v for k, v in item.items() if k not in drop and v not in (None, "", [])}
     cleaned.setdefault("itemType", item.get("itemType", "journalArticle"))
     return cleaned
@@ -303,10 +317,240 @@ def add_note(parent_key, html):
     return resp["successful"]["0"]["key"]
 
 
-def import_paper(meta, collection_key, pdf_path=None, contribution=None):
+UNVERIFIED_WARNING = "[UNVERIFIED METADATA: manually constructed, not API-fetched]"
+UNVERIFIED_TAG = "literature-review-unverified-metadata"
+NO_PDF_TAG = "literature-review-no-pdf"
+SKILL_SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+ARXIV_FETCH = os.path.join(SKILL_SCRIPTS_DIR, "arxiv_fetch.py")
+CROSSREF_CLIENT = os.path.join(SKILL_SCRIPTS_DIR, "crossref_client.py")
+S2_CLIENT = os.path.join(SKILL_SCRIPTS_DIR, "s2_client.py")
+OPENREVIEW_CLIENT = os.path.join(SKILL_SCRIPTS_DIR, "openreview_client.py")
+
+
+def _add_tag(item_key, tag):
+    _, _, item = _request("GET", f"/items/{item_key}")
+    data = item["data"]
+    tags = list(data.get("tags") or [])
+    if any(t.get("tag") == tag for t in tags):
+        return False
+    tags.append({"tag": tag})
+    version = data["version"]
+    _request("PATCH", f"/items/{item_key}",
+             body={"tags": tags},
+             headers={"If-Unmodified-Since-Version": str(version)})
+    return True
+
+
+def _names_to_creators(names):
+    creators = []
+    for name in (names or []):
+        name = (name or "").strip()
+        if not name:
+            continue
+        parts = name.rsplit(" ", 1)
+        if len(parts) == 2:
+            creators.append({"creatorType": "author",
+                             "firstName": parts[0], "lastName": parts[1]})
+        else:
+            creators.append({"creatorType": "author", "name": name})
+    return creators
+
+
+def _drop_empty(d):
+    return {k: v for k, v in d.items() if v not in (None, "", [])}
+
+
+def _arxiv_to_zotero(arxiv_meta):
+    aid = arxiv_meta.get("arxiv_id") or ""
+    out = {
+        "itemType": "preprint",
+        "title": arxiv_meta.get("title") or "",
+        "creators": _names_to_creators(arxiv_meta.get("authors")),
+        "date": (arxiv_meta.get("published")
+                 or (str(arxiv_meta["year"]) if arxiv_meta.get("year") else "")),
+        "url": arxiv_meta.get("url"),
+        "abstractNote": arxiv_meta.get("abstract") or "",
+        "extra": f"arXiv:{aid}" if aid else "",
+        "arxiv_id": aid or None,
+    }
+    return _drop_empty(out)
+
+
+def _s2_pick_item_type(s2_meta):
+    # Priority order:
+    #   T1: publicationVenue.type (venue-level signal, most reliable for
+    #       conference vs journal because it comes from the venue record
+    #       itself - "conference" / "journal").
+    #   T2: publicationTypes (paper-level S2 classifier; can mis-tag e.g.
+    #       NeurIPS proceedings as "JournalArticle"). Conference wins over
+    #       JournalArticle when both present.
+    #   T3: default conferencePaper (most ML/CS venues without DOIs are
+    #       conferences; journals usually have DOIs and never reach this
+    #       cascade tier).
+    venue_type = (s2_meta.get("venue_type") or "").lower()
+    if venue_type == "conference":
+        return "conferencePaper", "proceedingsTitle"
+    if venue_type == "journal":
+        return "journalArticle", "publicationTitle"
+    pub_types = s2_meta.get("publication_types") or []
+    if "Conference" in pub_types:
+        return "conferencePaper", "proceedingsTitle"
+    if "JournalArticle" in pub_types:
+        return "journalArticle", "publicationTitle"
+    return "conferencePaper", "proceedingsTitle"
+
+
+def _s2_to_zotero(s2_meta):
+    venue = s2_meta.get("venue")
+    if not venue:
+        return None
+    item_type, venue_field = _s2_pick_item_type(s2_meta)
+    aid = s2_meta.get("arxiv_id") or ""
+    year = s2_meta.get("year")
+    out = {
+        "itemType": item_type,
+        "title": s2_meta.get("title") or "",
+        "creators": _names_to_creators(s2_meta.get("authors")),
+        "date": s2_meta.get("published") or (str(year) if year else ""),
+        venue_field: venue,
+        "abstractNote": s2_meta.get("abstract") or "",
+        "url": s2_meta.get("url") or "",
+        "extra": f"arXiv:{aid}" if aid else "",
+    }
+    return _drop_empty(out)
+
+
+def _venue_id_to_display(venue_id):
+    parts = [p for p in (venue_id or "").split("/") if p]
+    if not parts:
+        return venue_id or ""
+    name = parts[0].replace(".cc", "")
+    year = next((p for p in parts if p.isdigit() and len(p) == 4), "")
+    return f"{name} {year}".strip()
+
+
+def _openreview_to_zotero(or_meta):
+    venue_display = or_meta.get("venue_display") or ""
+    venue_id = or_meta.get("venue_id") or ""
+    proceedings = venue_display or _venue_id_to_display(venue_id)
+    forum_id = or_meta.get("forum_id") or ""
+    year = or_meta.get("year")
+    out = {
+        "itemType": "conferencePaper",
+        "title": or_meta.get("title") or "",
+        "creators": _names_to_creators(or_meta.get("authors")),
+        "date": str(year) if year else "",
+        "proceedingsTitle": proceedings,
+        "abstractNote": or_meta.get("abstract") or "",
+        "url": or_meta.get("url") or "",
+        "extra": f"OpenReview: {forum_id}" if forum_id else "",
+    }
+    return _drop_empty(out)
+
+
+def _run_subprocess_json(cmd, client_name, timeout=600):
+    import subprocess
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"{client_name} failed (rc={proc.returncode}): {proc.stderr.strip()[:500]}"
+        )
+    if not proc.stdout.strip():
+        raise RuntimeError(f"{client_name} returned empty stdout")
+    return json.loads(proc.stdout)
+
+
+def _try_crossref(doi, source_label):
+    cmd = [sys.executable, CROSSREF_CLIENT, "fetch", "--doi", doi]
+    cr_meta = _run_subprocess_json(cmd, "crossref_client.py")
+    print(f"[zotero_operator] {source_label} -> CrossRef {doi}", file=sys.stderr)
+    return cr_meta
+
+
+def _try_s2(arxiv_id):
+    cmd = [sys.executable, S2_CLIENT, "fetch", f"ARXIV:{arxiv_id}"]
+    return _run_subprocess_json(cmd, "s2_client.py")
+
+
+def _resolve_metadata_via_api(doi=None, arxiv_id=None, openreview_id=None):
+    # Cascade for the arxiv-id branch (each tier falls through on failure):
+    #   T1: arxiv:doi populated -> CrossRef (formally published)
+    #   T2: S2 lookup by ARXIV:<id>
+    #     T2a: S2 returns DOI       -> CrossRef
+    #     T2b: S2 returns venue      -> conferencePaper / journalArticle
+    #   T3: arxiv preprint fallback (always succeeds, last resort)
+    if doi:
+        return _try_crossref(doi, "direct DOI")
+    if openreview_id:
+        cmd = [sys.executable, OPENREVIEW_CLIENT, "fetch", "--id", openreview_id]
+        or_meta = _run_subprocess_json(cmd, "openreview_client.py")
+        zotero_meta = _openreview_to_zotero(or_meta)
+        print(f"[zotero_operator] openreview {openreview_id} -> "
+              f"conferencePaper ({or_meta.get('venue_display') or 'unknown venue'})",
+              file=sys.stderr)
+        return zotero_meta
+    if arxiv_id:
+        cmd = [sys.executable, ARXIV_FETCH, "fetch", arxiv_id]
+        arxiv_meta = _run_subprocess_json(cmd, "arxiv_fetch.py")
+        published_doi = arxiv_meta.get("doi")
+        if published_doi:
+            try:
+                cr_meta = _try_crossref(published_doi,
+                                        f"arxiv {arxiv_id} (arxiv:doi)")
+                jref = arxiv_meta.get("journal_ref") or "unknown venue"
+                print(f"[zotero_operator]   formally published: {jref}",
+                      file=sys.stderr)
+                return cr_meta
+            except Exception as e:
+                print(f"[zotero_operator] CrossRef upgrade failed for arxiv "
+                      f"{arxiv_id} (doi={published_doi}): {e}; trying S2 fallback",
+                      file=sys.stderr)
+        try:
+            s2_meta = _try_s2(arxiv_id)
+            s2_doi = s2_meta.get("doi")
+            if s2_doi:
+                try:
+                    return _try_crossref(s2_doi, f"arxiv {arxiv_id} (S2 doi)")
+                except Exception as e:
+                    print(f"[zotero_operator] S2-routed CrossRef failed: {e}",
+                          file=sys.stderr)
+            zotero_meta = _s2_to_zotero(s2_meta)
+            if zotero_meta:
+                print(f"[zotero_operator] arxiv {arxiv_id} -> S2 venue "
+                      f"'{s2_meta.get('venue')}' -> {zotero_meta['itemType']}",
+                      file=sys.stderr)
+                return zotero_meta
+        except Exception as e:
+            print(f"[zotero_operator] S2 lookup failed for arxiv {arxiv_id}: "
+                  f"{e}; falling back to preprint metadata", file=sys.stderr)
+        print(f"[zotero_operator] arxiv {arxiv_id} -> preprint fallback "
+              f"(no DOI / venue resolved)", file=sys.stderr)
+        return _arxiv_to_zotero(arxiv_meta)
+    raise ValueError("must supply --doi, --arxiv-id, or --openreview")
+
+
+def _mark_unverified(meta):
+    meta = dict(meta)
+    existing_extra = meta.get("extra") or ""
+    if UNVERIFIED_WARNING not in existing_extra:
+        meta["extra"] = (
+            (existing_extra + "\n" + UNVERIFIED_WARNING) if existing_extra
+            else UNVERIFIED_WARNING
+        )
+    return meta
+
+
+def import_paper(meta, collection_key, pdf_path=None, contribution=None,
+                 unverified=False):
+    if unverified:
+        meta = _mark_unverified(meta)
+        if contribution and not contribution.startswith("[UNVERIFIED"):
+            contribution = f"[UNVERIFIED METADATA] {contribution}"
+
     doi = meta.get("DOI") or meta.get("doi")
     arxiv = meta.get("arxiv_id")
     title_hint = meta.get("title")
+    pdf_attached = False
     existing = find_by_identifier(doi=doi, arxiv=arxiv, title_hint=title_hint)
     if existing:
         item_key = existing[0]["key"]
@@ -319,6 +563,27 @@ def import_paper(meta, collection_key, pdf_path=None, contribution=None):
         result = {"status": "created", "item_key": item_key}
         if pdf_path and os.path.isfile(pdf_path):
             result["attachment"] = attach_pdf(item_key, pdf_path)
+            pdf_attached = True
+
+    if unverified:
+        try:
+            _add_tag(item_key, UNVERIFIED_TAG)
+            result["unverified"] = True
+        except Exception as e:
+            print(f"WARNING: failed to add unverified tag: {e}", file=sys.stderr)
+
+    if not pdf_attached and result.get("status") == "created":
+        try:
+            _add_tag(item_key, NO_PDF_TAG)
+            result["no_pdf"] = True
+            print(
+                f"[zotero_operator] no PDF attached for {item_key}; tagged "
+                f"'{NO_PDF_TAG}'. Filter in Zotero with tag:{NO_PDF_TAG} "
+                f"to find papers needing PDF backfill.",
+                file=sys.stderr,
+            )
+        except Exception as e:
+            print(f"WARNING: failed to add no-pdf tag: {e}", file=sys.stderr)
 
     if contribution:
         html = f"<p><strong>Contribution:</strong> {contribution}</p>"
@@ -333,11 +598,36 @@ def main():
     pc = sub.add_parser("resolve-collection")
     pc.add_argument("--path", required=True)
 
-    pi = sub.add_parser("import")
-    pi.add_argument("--meta", required=True, help="JSON file: translation-server item OR list[item]")
+    pi = sub.add_parser("import",
+                        help="DISCOURAGED: manual JSON import. Prefer 'import-by-id'. "
+                             "Caller MUST self-attest provenance via --unverified.")
+    pi.add_argument("--meta", required=True,
+                    help="JSON file with paper metadata.")
+    pi.add_argument("--unverified", required=True, choices=["true", "false"],
+                    help="Provenance attestation (LLM signature). 'true' = some/any "
+                         "field was constructed by LLM rather than fetched from a "
+                         "deterministic API; the Zotero item will be tagged "
+                         f"'{UNVERIFIED_TAG}' and the contribution prefixed. "
+                         "'false' = caller GUARANTEES every field came from a "
+                         "deterministic API parse (e.g. cached arxiv_meta.json "
+                         "from Phase 1, exported BibTeX from a verified pipeline). "
+                         "There is no default - the caller must consciously sign.")
     pi.add_argument("--pdf", default=None)
     pi.add_argument("--collection", required=True)
     pi.add_argument("--contribution", default=None)
+
+    pid = sub.add_parser("import-by-id",
+                         help="Preferred path: resolves metadata via deterministic "
+                              "API subprocess (arxiv/CrossRef/S2/OpenReview). "
+                              "LLM-supplied metadata cannot reach Zotero.")
+    pid_grp = pid.add_mutually_exclusive_group(required=True)
+    pid_grp.add_argument("--doi")
+    pid_grp.add_argument("--arxiv-id", dest="arxiv_id")
+    pid_grp.add_argument("--openreview", dest="openreview_id",
+                         help="OpenReview forum_id, e.g. rhgIgTSSxW")
+    pid.add_argument("--pdf", default=None)
+    pid.add_argument("--collection", required=True)
+    pid.add_argument("--contribution", default=None)
 
     pf = sub.add_parser("find")
     pf.add_argument("--doi", default=None)
@@ -351,7 +641,36 @@ def main():
         out = resolve_collection(args.path)
     elif args.cmd == "find":
         out = find_by_identifier(doi=args.doi, arxiv=args.arxiv, title_hint=args.title)
+    elif args.cmd == "import-by-id":
+        try:
+            meta = _resolve_metadata_via_api(
+                doi=args.doi,
+                arxiv_id=args.arxiv_id,
+                openreview_id=args.openreview_id,
+            )
+        except Exception as e:
+            print(f"ERROR: API metadata resolution failed: {e}", file=sys.stderr)
+            print("HINT: rate limits clear after a few minutes. Defer this paper "
+                  "or retry later. DO NOT manually construct metadata - that "
+                  "produces unverifiable Zotero entries.", file=sys.stderr)
+            sys.exit(4)
+        coll = resolve_collection(args.collection)
+        out = import_paper(meta, coll["key"], pdf_path=args.pdf,
+                           contribution=args.contribution, unverified=False)
+        out["collection"] = coll
     else:
+        unverified = (args.unverified == "true")
+        if unverified:
+            print(f"WARNING: --unverified=true (LLM signature). Item will be "
+                  f"tagged '{UNVERIFIED_TAG}' and contribution prefixed "
+                  f"[UNVERIFIED METADATA]. Prefer 'import-by-id' when possible.",
+                  file=sys.stderr)
+        else:
+            print(f"NOTE: --unverified=false (LLM signature). Caller attests "
+                  f"every metadata field came from a deterministic API parse. "
+                  f"If this is wrong, the resulting Zotero entry will be "
+                  f"silently fabricated - re-import via 'import-by-id'.",
+                  file=sys.stderr)
         with open(args.meta) as f:
             meta = json.load(f)
         if isinstance(meta, list):
@@ -360,8 +679,8 @@ def main():
                 sys.exit(2)
             meta = meta[0]
         coll = resolve_collection(args.collection)
-        out = import_paper(meta, coll["key"],
-                           pdf_path=args.pdf, contribution=args.contribution)
+        out = import_paper(meta, coll["key"], pdf_path=args.pdf,
+                           contribution=args.contribution, unverified=unverified)
         out["collection"] = coll
 
     json.dump(out, sys.stdout, indent=2, ensure_ascii=False)

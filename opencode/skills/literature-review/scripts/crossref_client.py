@@ -188,6 +188,15 @@ def to_zotero(work):
     if subjects:
         out["extra"] = "Subjects: " + "; ".join(subjects[:5])
 
+    # CrossRef "is-referenced-by-count" is CrossRef-only graph cite count.
+    # Lower fidelity than S2 (no influential subset, no cross-source reconciliation),
+    # but useful as a fallback signal for non-arXiv non-S2 papers. dedupe.py
+    # max-merges with S2 so this gets overridden when S2 also surfaces the paper.
+    cc = work.get("is-referenced-by-count")
+    if cc is not None:
+        out["citation_count"] = int(cc)
+        out["citation_source"] = "crossref"
+
     return out
 
 

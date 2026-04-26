@@ -47,15 +47,20 @@ Exit codes:
     2 partial (some cores failed, but pool has >= 1 candidate)
 """
 import argparse
+import datetime
 import json
 import math
 import os
-import subprocess
 import sys
 
 
 SKILL_SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
-S2_CLIENT = os.path.join(SKILL_SCRIPTS_DIR, "s2_client.py")
+if SKILL_SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SKILL_SCRIPTS_DIR)
+
+import s2_client
+
+CURRENT_YEAR = datetime.date.today().year
 
 
 def _s2_identifier(entry):
@@ -77,29 +82,45 @@ def _canonical_id(entry):
     return f"title:{t}" if t else None
 
 
-def _run_s2_subcommand(identifier, subcmd, max_results):
-    cmd = [
-        sys.executable, S2_CLIENT, subcmd, identifier,
-        "--max", str(max_results),
-    ]
-    try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(
-            f"[chase] s2 {subcmd} failed for {identifier}: {e.stderr.strip()}",
-            file=sys.stderr,
-        )
-        return []
-    results = []
-    for line in proc.stdout.splitlines():
-        line = line.strip()
-        if not line:
-            continue
+def _neighbor_cache_path(workdir):
+    if workdir and os.path.isdir(workdir):
+        return os.path.join(workdir, ".s2_neighbor_cache.json")
+    return None
+
+
+def _load_neighbor_cache(path):
+    if path and os.path.exists(path):
         try:
-            results.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return results
+            with open(path) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            print(f"[chase] neighbor cache at {path} unreadable, starting fresh",
+                  file=sys.stderr)
+    return {}
+
+
+def _save_neighbor_cache(path, cache):
+    if not path:
+        return
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(cache, f, ensure_ascii=False)
+    os.replace(tmp, path)
+
+
+def _run_s2(identifier, kind, max_results, cache):
+    cache_key = f"{identifier}:{kind}:{max_results}"
+    if cache_key in cache:
+        return cache[cache_key], "cached"
+    fn = s2_client.refs if kind == "refs" else s2_client.cites
+    try:
+        results = fn(identifier, max_results=max_results)
+    except Exception as e:
+        print(f"[chase] s2 {kind} failed for {identifier}: {e}",
+              file=sys.stderr)
+        return [], "error"
+    cache[cache_key] = results
+    return results, "fetched"
 
 
 def _scope_keywords(scope):
@@ -118,8 +139,14 @@ def _priority_score(entry, scope_keywords, time_window, median_cites):
         lo, hi = time_window
         if (lo is None or entry["year"] >= lo) and (hi is None or entry["year"] <= hi):
             score += 1
-    cc = entry.get("citation_count") or 0
-    if median_cites is not None and cc >= median_cites:
+    ic = entry.get("influential_citation_count")
+    if ic is not None and ic >= 5:
+        score += 2
+    velocity = entry.get("cite_velocity")
+    if velocity is not None and velocity >= 10:
+        score += 1
+    cc = entry.get("citation_count")
+    if cc is not None and median_cites is not None and cc >= median_cites:
         score += 1
     ab = (entry.get("abstract") or "").lower()
     hits = sum(1 for k in scope_keywords if k and k in ab)
@@ -168,12 +195,15 @@ def chase(args):
     candidates_path = os.path.join(args.workdir, "citation_candidates.jsonl")
     edges_path = os.path.join(args.workdir, "provenance_edges.jsonl")
     batches_path = os.path.join(args.workdir, "dispatch_batches.json")
+    cache_path = _neighbor_cache_path(args.workdir)
+    cache = _load_neighbor_cache(cache_path)
 
     core_ids = {_canonical_id(c) for c in cores if _canonical_id(c)}
     pool = {}
     edges = []
     cores_ok = 0
     cores_failed = 0
+    cache_stats = {"cached": 0, "fetched": 0, "error": 0}
 
     for core in cores:
         s2id = _s2_identifier(core)
@@ -184,8 +214,11 @@ def chase(args):
             cores_failed += 1
             continue
 
-        refs = _run_s2_subcommand(s2id, "refs", args.per_core_refs)
-        cites = _run_s2_subcommand(s2id, "cites", args.per_core_cites)
+        refs, refs_status = _run_s2(s2id, "refs", args.per_core_refs, cache)
+        cites, cites_status = _run_s2(s2id, "cites", args.per_core_cites, cache)
+        cache_stats[refs_status] += 1
+        cache_stats[cites_status] += 1
+        _save_neighbor_cache(cache_path, cache)
         if not refs and not cites:
             cores_failed += 1
             continue
@@ -222,6 +255,9 @@ def chase(args):
     median_cites = sorted(cite_counts)[len(cite_counts) // 2] if cite_counts else None
 
     for e in pool.values():
+        if e.get("cite_velocity") is None and e.get("citation_count") is not None and e.get("year"):
+            age = max(1, CURRENT_YEAR - e["year"] + 1)
+            e["cite_velocity"] = round(e["citation_count"] / age, 2)
         e["priority_score"] = _priority_score(
             e, scope_keywords, time_window, median_cites,
         )
@@ -248,9 +284,11 @@ def chase(args):
         "pool_before_cap": len(pool),
         "pool_after_cap": len(capped),
         "num_batches": len(batches),
+        "s2_calls": cache_stats,
         "candidates_path": candidates_path,
         "edges_path": edges_path,
         "batches_path": batches_path,
+        "cache_path": cache_path,
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     if cores_failed and cores_ok == 0:

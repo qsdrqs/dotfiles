@@ -107,13 +107,77 @@ SKIP_MINERU=1 bash scripts/setup_containers.sh
 
 ## 2. Metadata resolution
 
-### 2.1 arXiv papers
+**Preference order: DOI > OpenReview forum_id > arXiv id.** The DOI route
+gives a formally-published Zotero entry (journalArticle / conferencePaper,
+with venue / pages / issue). OpenReview gives an exact conferencePaper for
+ICLR / NeurIPS / ICML / COLM and similar venues that do not issue DOIs.
+arXiv id is the fallback - even so, the operator's internal cascade tries
+hard to upgrade an arxiv-only input to conferencePaper or journalArticle
+before settling on preprint.
 
-Reuse the metadata captured in Phase 1 by `arxiv_fetch.py`. Build a minimal
-Zotero JSON (`itemType=preprint`, `title`, `creators`, `date`, `abstractNote`,
-`url`, `extra: "arXiv:<id>"`). No extra API call.
+Internal cascade for `import-by-id --arxiv-id <id>`:
 
-### 2.2 DOI-indexed papers (journals, conferences, books)
+```
+T1: arxiv API
+    arxiv:doi populated?  yes -> CrossRef           -> done (published)
+                          no  -> continue
+T2: S2 lookup ARXIV:<id>
+    S2 doi populated?     yes -> CrossRef           -> done (published)
+                          no  -> continue
+    S2 venue populated?   yes -> conferencePaper or journalArticle
+                                  (proceedingsTitle/publicationTitle = venue)
+                                                    -> done (venue)
+                          no  -> continue
+T3: arxiv preprint fallback                          -> done (preprint)
+```
+
+Each tier silently falls through on failure (404, rate-limit, network),
+so a single transient upstream issue never blocks the import. The whole
+cascade exits 4 only if all tiers raise, which means the orchestrator
+should defer the paper to the next session.
+
+### 2.1 arXiv papers (preprint-only fallback)
+
+Reach this path only when arXiv has no `<arxiv:doi>` for the paper - i.e.
+it is genuinely a preprint that has not been formally published, or the
+authors have not yet deposited the published-version DOI back to arXiv.
+
+`zotero_operator.py` calls `arxiv_fetch.py fetch <id>` as a subprocess and
+gets the parsed Atom entry, including:
+
+- `arxiv_id`, `title`, `authors`, `abstract`, `published`, `categories`,
+  `url`, `pdf_url`, `html_url`
+- `doi` - populated from `<arxiv:doi>` when present
+- `journal_ref` - populated from `<arxiv:journal_ref>` when present
+  (free-text venue+pages, e.g. "Nature 596 (2021) 583-589")
+
+If `doi` is null, the operator builds a minimal Zotero JSON
+(`itemType=preprint`, `title`, `creators`, `date`, `abstractNote`, `url`,
+`extra: "arXiv:<id>"`). If `doi` is non-null, the operator transparently
+routes to CrossRef (see 2.2) - the caller does not have to know.
+
+### 2.2 OpenReview-indexed papers (ICLR / NeurIPS 2021+ / ICML / COLM / ...)
+
+Most modern ML conferences do not issue DOIs and are not on CrossRef. They
+do, however, expose stable forum IDs through the OpenReview API. When a
+paper is discovered via Phase 1 OpenReview search (`openreview_client.py
+search`), the resulting JSONL already includes `forum_id`. Pass it in
+Phase 5.2:
+
+```bash
+python scripts/zotero_operator.py import-by-id \
+    --openreview rhgIgTSSxW \
+    --collection "AI/Tabular/2024" \
+    --contribution "..."
+```
+
+The operator subprocess-calls `openreview_client.py fetch --id <forum_id>`,
+gets the normalized submission record (title, authors, abstract, year,
+venue_display), and converts it to `itemType=conferencePaper` with
+`proceedingsTitle` set from `venue_display` (e.g. "ICLR 2024 poster") and
+`extra: "OpenReview: <forum_id>"`.
+
+### 2.3 DOI-indexed papers (journals, conferences, books)
 
 ```bash
 python scripts/crossref_client.py fetch --doi 10.1038/s41586-021-03819-2
@@ -141,7 +205,7 @@ client): `journal-article` -> `journalArticle`, `proceedings-article` ->
 `conferencePaper`, `book-chapter` -> `bookSection`, `posted-content` ->
 `preprint`, and so on.
 
-### 2.3 Neither arXiv id nor DOI
+### 2.4 Neither arXiv id nor DOI nor OpenReview forum_id
 
 Dropped from the import loop. The user can add such papers manually in the
 Zotero UI. We do not scrape publisher landing pages.
@@ -162,24 +226,81 @@ python scripts/zotero_operator.py resolve-collection --path "AI/RAG/Survey"
 
 ## 4. Importing a paper
 
-End-to-end:
+The preferred entry point is `import-by-id`. It re-resolves metadata inside
+`zotero_operator.py` via `arxiv_fetch` (for `--arxiv-id`) or `crossref_client`
+(for `--doi`) as a subprocess. **No LLM-supplied metadata can reach the
+Zotero Web API along this path.** If the upstream API is rate-limited, the
+command exits 4 and the caller defers; this is by design - hand-constructed
+metadata bypasses the deterministic API parsing chain and produces
+unverifiable Zotero entries.
+
+When called with `--arxiv-id`, the operator runs the full 3-tier cascade
+described in section 2: arxiv:doi -> CrossRef, then S2-routed CrossRef or
+S2-venue conferencePaper, then preprint fallback. Each tier silently falls
+through on transient API failures (404 / 429 / network), so the import is
+never blocked by a single rate-limited upstream.
+
+End-to-end examples:
 
 ```bash
-# 1. Resolve metadata
-python scripts/crossref_client.py fetch \
-    --doi 10.1038/s41586-021-03819-2 > meta.json
-
-# 2. Fetch PDF (arXiv -> direct -> Unpaywall fallback)
+# 1. DOI-first (formally published paper)
 echo '{"doi":"10.1038/s41586-021-03819-2"}' | \
     python scripts/pdf_fetch.py --out /tmp/lr/alphafold
-
-# 3. Import into Zotero
-python scripts/zotero_operator.py import \
-    --meta meta.json \
+python scripts/zotero_operator.py import-by-id \
+    --doi 10.1038/s41586-021-03819-2 \
     --pdf /tmp/lr/alphafold/paper.pdf \
     --collection "AI/Bio/AlphaFold" \
-    --contribution "End-to-end neural structure prediction with attention over MSA + pair repr."
+    --contribution "End-to-end neural structure prediction."
+
+# 2. arXiv-only (cascade auto-upgrades when possible)
+python scripts/zotero_operator.py import-by-id \
+    --arxiv-id 2006.11239 \
+    --pdf /tmp/lr/ddpm/paper.pdf \
+    --collection "AI/Diffusion/Foundations" \
+    --contribution "Denoising diffusion via predictive variational lower bound."
+# stderr: arxiv 2006.11239 -> S2 venue 'Neural Information Processing Systems'
+#         -> conferencePaper
+
+# 3. OpenReview forum_id (exact ICLR / NeurIPS conferencePaper)
+python scripts/zotero_operator.py import-by-id \
+    --openreview rhgIgTSSxW \
+    --pdf /tmp/lr/tabr/paper.pdf \
+    --collection "AI/Tabular/2024" \
+    --contribution "Retrieval-augmented tabular DL with kNN attention component."
+# stderr: openreview rhgIgTSSxW -> conferencePaper (ICLR 2024 poster)
 ```
+
+The `--pdf` flag is optional only when the PDF is genuinely unreachable
+(`pdf_fetch.py` status `paywalled` or `no_identifier`); metadata-only
+entries are auto-tagged `literature-review-no-pdf`.
+
+### 4.1 Legacy `import --meta` path (REQUIRES --unverified signature)
+
+The `import --meta` subcommand exists for emergency use (testing, manual
+migration from another tool, manual fix-up). It now **requires** an
+explicit `--unverified true|false` flag - there is no default. The flag
+is the LLM's provenance attestation:
+
+| `--unverified value` | Caller is attesting | Resulting Zotero entry |
+|---|---|---|
+| `false` | Every metadata field came from a deterministic API parse (cached `arxiv_meta.json` from Phase 1, exported BibTeX from a verified pipeline, etc.). The JSON is just being re-imported from disk. | Clean. No tag, no warning. Treated identically to `import-by-id`. |
+| `true` | Some/any field was constructed by the LLM (guessed, paraphrased, completed from memory). | Tagged `literature-review-unverified-metadata`, contribution prefixed `[UNVERIFIED METADATA]`, `extra` appended with `[UNVERIFIED METADATA: manually constructed, not API-fetched]`. |
+
+Filter the false-attest items in the Zotero UI with
+`tag:literature-review-unverified-metadata`.
+
+The signature mechanism shifts the responsibility model: previously the
+operator unconditionally tagged every `import --meta` call, which meant
+legitimate cached-JSON re-imports were also polluted with the tag. Now
+the LLM consciously chooses. **Falsely signing `--unverified false` when
+metadata was actually fabricated is a stronger breach than the old
+unverified path** - the operator has no way to detect this; the only
+defense is the LLM's own discipline.
+
+Stage A/B/C orchestration should still never go through `import --meta` -
+the SKILL.md anti-patterns explicitly forbid it. The cascade in
+`import-by-id` (DOI -> arxiv:doi -> S2 -> preprint) is the right answer
+for almost every Phase 5 use case.
 
 Idempotency: `import_paper` first calls `find_by_identifier(doi=..., arxiv=...)`
 on the user's library. If a match exists, it skips creation and only:
@@ -188,7 +309,32 @@ on the user's library. If a match exists, it skips creation and only:
 - Appends the contribution note (current logic always appends; manual cleanup
   required if re-running with a different note).
 
-## 5. PDF attachment flow (hybrid local+metadata)
+## 5. PDF policy and the `literature-review-no-pdf` tag
+
+**Default**: every paper that enters the Phase 5 import loop must come
+with a PDF. Calling `import-by-id` without `--pdf` is allowed only for
+papers whose `manifest.json` reports `status = paywalled` or
+`status = no_identifier` from `pdf_fetch.py` (and where any Phase 4
+chrome-devtools fallback also failed).
+
+When `import-by-id` runs without an attached PDF (either because `--pdf`
+was omitted or the path did not exist on disk), the operator auto-tags
+the freshly created Zotero item with `literature-review-no-pdf`. This
+matches the existing `literature-review-unverified-metadata` namespace
+pattern and is trivially filterable in the Zotero UI:
+
+```
+tag:literature-review-no-pdf
+```
+
+The user can use this tag to drive a backfill workflow (e.g. fetch the
+PDF via institutional VPN, drop it into the attachment directory, then
+remove the tag manually). The tag is added only on `status: created` -
+existing items are never re-tagged, since they may already have a PDF
+from a previous session or manual upload that we cannot see without an
+extra round-trip.
+
+## 6. PDF attachment flow (hybrid local+metadata)
 
 Instead of Zotero's standard 3-step S3 upload, `attach_pdf` does:
 
@@ -219,7 +365,7 @@ the library is unreliable: the server accepts the reference but the client
 cannot always resolve it back to a file, causing "attached file could not
 be found" errors. Skipping the S3 flow sidesteps the entire class of bug.
 
-## 6. Error handling
+## 7. Error handling
 
 | HTTP | Cause | Operator behavior |
 |------|-------|-------------------|
@@ -232,7 +378,7 @@ be found" errors. Skipping the S3 flow sidesteps the entire class of bug.
 `import_paper` does not catch these; the orchestrator (SKILL.md Phase 5)
 collects per-paper errors and continues with the next paper.
 
-## 7. Limitations
+## 8. Limitations
 
 - Group libraries: not implemented. Add `--library group:<id>` support if needed.
 - Non-DOI, non-arXiv papers are dropped (workshop PDFs on personal sites, etc.).
@@ -241,7 +387,7 @@ collects per-paper errors and continues with the next paper.
   the full text for papers where the abstract is critical.
 - Notes are append-only; no de-dup of contribution text.
 
-## 8. Why not `zotero/translation-server`?
+## 9. Why not `zotero/translation-server`?
 
 An earlier revision used `zotero/translation-server` (a local Node.js
 container that maps any URL to Zotero metadata via 700+ community-maintained

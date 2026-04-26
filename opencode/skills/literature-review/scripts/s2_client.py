@@ -32,7 +32,14 @@ Normalized JSON fields:
     url, pdf_url              links
     title, abstract, tldr     strings
     year, published           int / "YYYY-MM-DD"
-    venue, publication_types  strings
+    venue                     string (from publicationVenue.name or venue)
+    venue_type                "conference" | "journal" | null - from
+                              publicationVenue.type, the most reliable
+                              conference-vs-journal signal (lowercase)
+    publication_types         [string, ...] - paper-level S2 classification
+                              ("Conference", "JournalArticle", ...). Less
+                              reliable than venue_type because S2 sometimes
+                              tags NeurIPS proceedings as "JournalArticle".
     authors                   [string, ...]
     citation_count, influential_citation_count, reference_count
     open_access               bool
@@ -63,6 +70,13 @@ USER_AGENT = "literature-review-skill/0.1"
 MIN_INTERVAL_WITH_KEY = 1.1
 MIN_INTERVAL_NO_KEY = 3.1
 _last_request_at = 0.0
+_warned_no_key = False
+
+# Default short backoff (5/15/30/60 = 110s total). Set
+# S2_BACKOFF_TOLERANT=1 to use the long schedule (30/60/90/120 = 300s)
+# when the network is flaky and short retries aren't clearing 429.
+BACKOFF_SHORT = (5, 15, 30, 60)
+BACKOFF_LONG = (30, 60, 90, 120)
 
 
 def _throttle():
@@ -74,7 +88,21 @@ def _throttle():
     _last_request_at = time.monotonic()
 
 
+def _warn_no_key_once():
+    global _warned_no_key
+    if _warned_no_key or os.environ.get("S2_API_KEY"):
+        return
+    _warned_no_key = True
+    print(
+        "[s2] WARNING: S2_API_KEY not set. Quota limited to ~100 req/5min "
+        "and 429s will be common.\n"
+        "      Free key: https://www.semanticscholar.org/product/api",
+        file=sys.stderr,
+    )
+
+
 def _request(url, params=None, retries=4):
+    _warn_no_key_once()
     if params:
         url = f"{url}?{urllib.parse.urlencode(params)}"
     headers = {"User-Agent": USER_AGENT}
@@ -82,6 +110,7 @@ def _request(url, params=None, retries=4):
     if key:
         headers["x-api-key"] = key
 
+    schedule = BACKOFF_LONG if os.environ.get("S2_BACKOFF_TOLERANT") else BACKOFF_SHORT
     last_err = None
     for attempt in range(retries):
         _throttle()
@@ -92,7 +121,7 @@ def _request(url, params=None, retries=4):
         except urllib.error.HTTPError as e:
             last_err = e
             if e.code in (429, 503) and attempt < retries - 1:
-                wait = 30 * (attempt + 1)
+                wait = schedule[min(attempt, len(schedule) - 1)]
                 print(
                     f"[s2] HTTP {e.code}, sleeping {wait}s "
                     f"(attempt {attempt + 1}/{retries})",
@@ -107,6 +136,7 @@ def _request(url, params=None, retries=4):
 
 def _normalize(paper, query=None):
     ext = paper.get("externalIds") or {}
+    pub_venue = paper.get("publicationVenue") or {}
     result = {
         "source": "s2_api",
         "s2_id": paper.get("paperId"),
@@ -117,7 +147,8 @@ def _normalize(paper, query=None):
         "abstract": paper.get("abstract"),
         "year": paper.get("year"),
         "published": paper.get("publicationDate"),
-        "venue": (paper.get("publicationVenue") or {}).get("name") or paper.get("venue"),
+        "venue": pub_venue.get("name") or paper.get("venue"),
+        "venue_type": (pub_venue.get("type") or "").lower() or None,
         "publication_types": paper.get("publicationTypes"),
         "authors": [
             a.get("name") for a in (paper.get("authors") or []) if a.get("name")

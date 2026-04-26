@@ -206,6 +206,29 @@ python "$SKILL_DIR/scripts/dedupe.py" \
 
 Stderr reports: `[dedupe] merged N unique entries, key-kind breakdown: {...}`.
 
+### 1.5 Enrich citation counts
+
+ArXiv hits and most web-search hits arrive with `citation_count = null`.
+Run the enricher to backfill via Semantic Scholar (lookup by `arxiv_id`
+then `doi`). Cached in `$LITREV_WORKDIR/.citation_cache.json`, so re-runs
+are free.
+
+```bash
+python "$SKILL_DIR/scripts/citation_enricher.py" \
+    --in "$LITREV_WORKDIR/candidates.jsonl" \
+    > "$LITREV_WORKDIR/candidates.enriched.jsonl"
+mv "$LITREV_WORKDIR/candidates.enriched.jsonl" \
+   "$LITREV_WORKDIR/candidates.jsonl"
+```
+
+Adds three fields per entry:
+- `citation_count`, `influential_citation_count` (filled if missing)
+- `cite_velocity` = cites / max(1, current_year - year + 1)
+- `citation_lookup` = "hit" | "cached" | "not_found" | "skipped_no_id" | "already_present"
+
+See `references/citation-criteria.md` for what these signals mean and
+how to use them at Phase 2.
+
 ---
 
 ## Phase 2: Layer 2 Lightweight Triage
@@ -221,13 +244,33 @@ Process candidates in batches of ~20:
 2. Otherwise, call `webfetch(url, format="markdown")` to get the landing page
    content, extract the abstract / TL;DR / lead paragraph.
 
-3. Score each candidate on a 0-3 scale:
-   - 3 = central to topic, strong signal (high citation, top venue, abstract matches).
-   - 2 = relevant but tangential.
-   - 1 = weak match, include only if the paper budget allows.
+3. Classify the **citation signal** as high / medium / low using the
+   age-bucketed thresholds (see `references/citation-criteria.md` for
+   sources and caveats):
+
+   | Age bucket | High | Medium | Low |
+   |------------|------|--------|-----|
+   | `>= 5y`    | raw >= 100 OR influential >= 5 | raw 30-99 OR influential 2-4 | else |
+   | `2-5y`     | raw >= 30  OR influential >= 3 | raw 10-29 OR influential 1-2 | else |
+   | `< 2y`     | velocity >= 10 OR influential >= 1 | velocity 3-9 | velocity < 3 |
+
+   Where `velocity = round(citation_count / max(1, current_year - year + 1), 2)`,
+   already populated by the Phase 1.5 enricher.
+
+4. Score each candidate on a 0-3 scale (topic match dominates; citation
+   signal modifies):
+   - 3 = central to topic AND citation signal not low.
+   - 2 = relevant but tangential, OR central to topic with low cites
+         (recent paper or under-served subdomain).
+   - 1 = weak match, include only if the paper budget allows AND
+         citation signal is medium+.
    - 0 = reject (off-topic, wrong modality, etc.).
 
-4. Annotate with `{"triage_score": N, "triage_reason": "..."}`.
+   "Topic match outranks citation signal." A perfect-match low-citation
+   paper beats an off-topic high-citation one.
+
+5. Annotate with
+   `{"triage_score": N, "citation_bucket": "high|medium|low", "triage_reason": "..."}`.
 
 Write entries with score >= 2 to `$LITREV_WORKDIR/shortlist.jsonl`.
 
@@ -464,7 +507,9 @@ python "$SKILL_DIR/scripts/section_splitter.py" \
 
    `verify` rewrites `manifest.json` to `status: ok, source: chrome-devtools`
    so the rest of Phase 4 / Phase 5 treats the paper normally. If `verify`
-   fails (non-PDF, too small), log `paywalled_no_access` and move on.
+   fails (non-PDF, too small), the manifest stays at `status: paywalled` -
+   Phase 5.2 will then route the paper into the metadata-only import path
+   with the `literature-review-no-pdf` tag.
 
 ### Extract a comparison-matrix row per paper
 
@@ -508,41 +553,87 @@ For each paper with a `row.json`:
 
 ```bash
 PAPER_DIR="$LITREV_WORKDIR/papers/$PAPER_ID"
-META="$PAPER_DIR/zotero_meta.json"
 PDF="$PAPER_DIR/paper.pdf"
+PDF_STATUS="$(jq -r '.status // "ok"' "$PAPER_DIR/manifest.json" 2>/dev/null || echo "ok")"
+CONTRIBUTION="$(jq -r .one_line_contribution "$PAPER_DIR/row.json")"
 
-# (a) Resolve metadata. arXiv papers reuse the API metadata captured at Phase 1.
-#     Non-arXiv: hit CrossRef by DOI (Zotero-compatible JSON out of the box).
-if [ -f "$PAPER_DIR/arxiv_meta.json" ]; then
-    cp "$PAPER_DIR/arxiv_meta.json" "$META"
-elif [ -n "$PAPER_DOI" ]; then
-    python "$SKILL_DIR/scripts/crossref_client.py" fetch \
-        --doi "$PAPER_DOI" > "$META"
+# (a) Pick identifier. Priority: DOI > OpenReview forum_id > arXiv id.
+#     - DOI: points at formally published version, gives journalArticle /
+#       conferencePaper with venue/pages/issue.
+#     - OpenReview forum_id (when discovered via Phase 1 OpenReview search):
+#       gives conferencePaper with proceedingsTitle from venue_display.
+#     - arXiv id: triggers the auto-cascade inside zotero_operator
+#       (arxiv:doi -> CrossRef; else S2 venue -> conferencePaper; else
+#       preprint). Even arxiv-only papers usually upgrade to
+#       conferencePaper through the S2 venue augmentation.
+if [ -n "$PAPER_DOI" ]; then
+    ID_ARG=(--doi "$PAPER_DOI")
+elif [ -n "$PAPER_OPENREVIEW_ID" ]; then
+    ID_ARG=(--openreview "$PAPER_OPENREVIEW_ID")
+elif [ -n "$PAPER_ARXIV_ID" ]; then
+    ID_ARG=(--arxiv-id "$PAPER_ARXIV_ID")
 else
-    echo "[skip] $PAPER_ID has no arXiv id / DOI - drop from import" >&2
+    echo "[skip] $PAPER_ID has no arxiv/openreview/doi - drop from import" >&2
     continue
 fi
 
-# (b) Import (idempotent: dedup by DOI / arXiv id within the user library).
-CONTRIBUTION="$(jq -r .one_line_contribution "$PAPER_DIR/row.json")"
-python "$SKILL_DIR/scripts/zotero_operator.py" import \
-    --meta "$META" \
-    ${PDF:+--pdf "$PDF"} \
+# (b) Decide PDF mode. Policy: PDF mandatory unless pdf_fetch (and any
+#     Phase 4 paywall fallback) genuinely could not retrieve it. The two
+#     terminal "PDF unreachable" manifest states are:
+#       - paywalled       : pdf_fetch tried arxiv/direct/Unpaywall, all
+#                           failed; if paywall_browser ran and succeeded
+#                           it would have rewritten status to "ok".
+#       - no_identifier   : pdf_fetch had no arxiv_id / direct pdf_url /
+#                           DOI to even attempt a fetch.
+#     Both fall to metadata-only with the 'literature-review-no-pdf' tag.
+if [ -f "$PDF" ] && [ "$PDF_STATUS" = "ok" ]; then
+    PDF_ARG=(--pdf "$PDF")
+elif [ "$PDF_STATUS" = "paywalled" ] || [ "$PDF_STATUS" = "no_identifier" ]; then
+    PDF_ARG=()
+    echo "[no-pdf] $PAPER_ID status=$PDF_STATUS, importing metadata only" >&2
+else
+    echo "[skip] $PAPER_ID PDF status=$PDF_STATUS unexpected, defer" >&2
+    continue
+fi
+
+# (c) Import via the API-verified path. `import-by-id` re-fetches metadata
+#     from arXiv/CrossRef inside zotero_operator (subprocess), so any
+#     LLM-supplied metadata cannot reach Zotero. If the API is rate-limited,
+#     this exits 4; defer the paper and continue, do NOT fall back to manual
+#     metadata construction (the legacy `import --meta` path tags items as
+#     unverified and is for emergency use only).
+python "$SKILL_DIR/scripts/zotero_operator.py" import-by-id \
+    "${ID_ARG[@]}" \
+    "${PDF_ARG[@]}" \
     --collection "$ZOTERO_COLLECTION_PATH" \
     --contribution "$CONTRIBUTION" \
-    >> "$LITREV_WORKDIR/zotero_import.jsonl"
+    >> "$LITREV_WORKDIR/zotero_import.jsonl" \
+    || echo "[defer] $PAPER_ID API-resolve failed, will retry next session" >&2
 ```
 
 Notes:
 
-- arXiv papers: skip CrossRef entirely. Build a minimal Zotero JSON from the
-  arXiv API record already captured at Phase 1 (`itemType=preprint`, `title`,
-  `creators`, `date`, `abstractNote`, `url`, `extra: arXiv:<id>`).
+- **DOI-first preference** (Phase 5.2 step a): when both arxiv id and DOI
+  are known, the DOI path wins. The Zotero entry then has the canonical
+  citation form (`itemType=journalArticle` or `conferencePaper`) instead
+  of `itemType=preprint`. For arxiv-only inputs, `import-by-id --arxiv-id`
+  cascades through 3 fallback tiers (arxiv:doi -> CrossRef; S2 lookup ->
+  CrossRef-by-S2-DOI or S2-venue -> conferencePaper; preprint last
+  resort). For papers discovered via OpenReview (Phase 1 search), pass
+  `--openreview <forum_id>` to bypass the cascade and get an exact
+  conferencePaper with proceedingsTitle from OpenReview's venue_display.
+- **PDF policy** (Phase 5.2 step b): PDFs are mandatory by default. The
+  only acceptable reasons to enter the metadata-only path are pdf_fetch
+  status `paywalled_no_access` or `no_identifier`. Such entries are
+  auto-tagged `literature-review-no-pdf` and can be backfilled later
+  (e.g. via institutional VPN). Use `tag:literature-review-no-pdf` in
+  the Zotero UI to find them.
 - Non-DOI, non-arXiv papers (workshop PDFs on personal sites, etc.) are dropped
   from Phase 5. The user can add them by hand in Zotero; we do not attempt a
   best-effort scrape.
-- The operator returns `{status: "created"|"existed", item_key, ...}`. Append
-  per-paper outcomes to `zotero_import.jsonl` for the session log.
+- The operator returns `{status: "created"|"existed", item_key, ...}` plus
+  optional `no_pdf: true` and `unverified: true` flags. Append per-paper
+  outcomes to `zotero_import.jsonl` for the session log.
 - On `RuntimeError` (HTTP 4xx/5xx), record the failure and continue with the
   next paper. Do not abort the whole import loop.
 
@@ -602,6 +693,37 @@ Include the workdir path so the user can open them directly.
 - DO NOT write to `~/.config/opencode/skills/literature-review` directly.
   That is symlinked output from dotfiles. Edits go in
   `/home/qsdrqs/dotfiles/opencode/skills/literature-review/`.
+- **DO NOT manually construct Zotero metadata when an API is rate-limited
+  or unavailable.** Always use `zotero_operator.py import-by-id`. The
+  resolver cascades through 4 deterministic API tiers before giving up:
+    1. Direct DOI -> CrossRef
+    2. arXiv id -> arxiv:doi field -> CrossRef (formally published path)
+    3. arXiv id -> S2 lookup -> S2 DOI -> CrossRef, OR S2 venue ->
+       conferencePaper / journalArticle (covers ICLR / NeurIPS / ICML
+       gap where conferences do not issue DOIs)
+    4. arXiv preprint fallback (last resort, itemType=preprint)
+  Plus `--openreview <forum_id>` for explicit conferencePaper imports
+  when an OpenReview id is known (Phase 1 OpenReview discovery).
+  If all tiers fail (rate-limit, network), the operator exits 4 - the
+  correct response is to defer to the next session, NOT to hand-write
+  a `meta.json` and call `import --meta`.
+
+- **DO NOT call `import --meta` without consciously signing the
+  `--unverified` flag.** The legacy `import --meta` path now REQUIRES
+  `--unverified true|false` (no default). Semantics:
+    - `--unverified false` = caller (LLM) attests every metadata field
+      came from a deterministic API parse (cached `arxiv_meta.json` from
+      Phase 1, exported BibTeX from a verified pipeline, etc.). Item is
+      imported clean. **If you sign false but actually fabricated, you
+      have committed to a false provenance claim** - this is a stronger
+      breach than the unverified path.
+    - `--unverified true` = caller acknowledges some/any field was
+      LLM-constructed. Item gets tagged
+      `literature-review-unverified-metadata`, contribution prefixed
+      `[UNVERIFIED METADATA]`, and `[UNVERIFIED METADATA: ...]` appended
+      to the `extra` field. Use only for emergency / manual fix-up.
+  In Phase 5 orchestration, `import --meta` is never the right call -
+  always prefer `import-by-id`.
 
 ## Stop conditions
 
@@ -620,8 +742,9 @@ All scripts accept `--help` and write errors to stderr.
 | `dedupe.py` | Merge multi-source search results | A |
 | `arxiv_fetch.py` | arXiv API + HTML fetcher | A |
 | `s2_client.py` | Semantic Scholar Graph API | A |
+| `citation_enricher.py` | Backfill citation_count via S2 (Phase 1.5) | A |
 | `section_splitter.py` | HTML -> canonical sections JSON | A |
-| `openreview_client.py` | OpenReview forum API | C |
+| `openreview_client.py` | OpenReview forum API (search, fetch single, full thread) | A/B/C |
 | `pdf_fetch.py` | arXiv -> direct -> Unpaywall PDF resolver | B |
 | `mineru_client.py` | MinerU HTTP client for PDF extraction | B |
 | `crossref_client.py` | CrossRef REST (DOI -> Zotero metadata) | B |
@@ -633,5 +756,8 @@ All scripts accept `--help` and write errors to stderr.
 
 - `references/data-sources.md` - per-source API details, rate limits, and auth.
 - `references/output-templates.md` - template selection and rendering rules.
+- `references/citation-criteria.md` - citation count sources, signals, and age-bucketed thresholds.
+- `references/citation-chasing.md` - Stage C 1-hop snowball workflow (Stage C).
+- `references/paywall-fallback.md` - chrome-devtools MCP fallback strategy (Stage C).
 - `references/zotero-integration.md` - Zotero API + CrossRef pipeline (Stage B).
 - `references/mineru-integration.md` - MinerU container + decision rules (Stage B).

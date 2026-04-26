@@ -161,9 +161,15 @@ base        = 0
 +2 per core connection in related_to
 +1 if both reference and citation relations exist
 +1 if year within user's time_window (from scope.json)
-+1 if citation_count >= median of citation_candidates
++2 if influential_citation_count >= 5         (S2 curated impact)
++1 if cite_velocity >= 10                     (cites/year, age-normalized)
++1 if citation_count >= median of citation_candidates (raw fallback)
 +1 if abstract contains >= 2 scope keywords
 ```
+
+`cite_velocity` is computed inline from `citation_count / max(1,
+current_year - year + 1)` if the enricher has not already filled it.
+See `references/citation-criteria.md` for thresholds and rationale.
 
 Sort descending by priority, keep top `--total-cap`.
 

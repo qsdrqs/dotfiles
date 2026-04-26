@@ -10,6 +10,8 @@ Subcommands:
     venues    List known recent venue IDs (hardcoded index).
     search    Fetch accepted submissions for a venue; emit JSONL.
               Optional client-side keyword filter over title + keywords.
+    fetch     Fetch a single submission's normalized metadata by forum_id.
+              Output is suitable for downstream Zotero import.
     forum     Fetch the full forum thread for one submission; emit JSON.
 
 Notes:
@@ -17,8 +19,12 @@ Notes:
       after fetching all accepted submissions.
     - Observed practical rate limit: ~60 req/min unauthenticated. We throttle
       at 1 req / 1.1 s.
-    - Venues from 2024+ use API v2 (api2.openreview.net). Older venues are on
-      api.openreview.net (API v1); this client targets v2 only.
+    - Venues from late 2022+ live on API v2 (api2.openreview.net). Older
+      venues (ICLR 2022 and before, NeurIPS 2022 and before, ICML 2022 and
+      before) live on API v1 (api.openreview.net). The 'fetch' subcommand
+      tries v2 first and transparently falls back to v1 if no match. The
+      'search' subcommand still targets v2 only - to enumerate v1 venues,
+      query api.openreview.net directly.
 
 Usage:
     python openreview_client.py venues
@@ -53,7 +59,9 @@ import urllib.parse
 import urllib.request
 
 
-API_BASE = "https://api2.openreview.net"
+API_BASE_V2 = "https://api2.openreview.net"
+API_BASE_V1 = "https://api.openreview.net"
+API_BASE = API_BASE_V2
 USER_AGENT = "literature-review-skill/0.1"
 
 MIN_INTERVAL_SEC = 1.1
@@ -80,8 +88,8 @@ def _throttle():
     _last_request_at = time.monotonic()
 
 
-def _request(path, params=None, retries=4):
-    url = f"{API_BASE}{path}"
+def _request(path, params=None, retries=4, base=None):
+    url = f"{base or API_BASE}{path}"
     if params:
         url = f"{url}?{urllib.parse.urlencode(params, doseq=True)}"
     headers = {"User-Agent": USER_AGENT}
@@ -193,6 +201,35 @@ def fetch_submissions(venue_id, max_results=500, keyword=None):
     return results
 
 
+def fetch_submission(forum_id):
+    # Cascade: v2 first (current venues), v1 fallback (ICLR/NeurIPS/ICML
+    # 2022 and earlier). v1 schema has flat content fields (content.title is
+    # a string), v2 wraps them ({"value": "..."}). _content_value handles
+    # both transparently.
+    last_err = None
+    for api_version, base in [("v2", API_BASE_V2), ("v1", API_BASE_V1)]:
+        try:
+            data = _request("/notes", {"forum": forum_id}, base=base)
+        except urllib.error.HTTPError as e:
+            last_err = e
+            if e.code == 404:
+                print(f"[openreview_client] {api_version} 404 for forum_id="
+                      f"{forum_id}; trying older API", file=sys.stderr)
+                continue
+            raise
+        notes = data.get("notes", [])
+        for note in notes:
+            if note.get("id") == forum_id:
+                venue_id = _content_value(note.get("content") or {}, "venueid") or ""
+                return _normalize_submission(note, venue_id)
+        print(f"[openreview_client] {api_version} returned no matching note for "
+              f"forum_id={forum_id}; trying older API", file=sys.stderr)
+    raise SystemExit(
+        f"[openreview_client] forum_id={forum_id} not found in v2 or v1 API. "
+        f"For very old venues the submission may not be on OpenReview at all."
+    )
+
+
 def fetch_forum(forum_id):
     data = _request("/notes", {"forum": forum_id, "details": "replies"})
     notes = data.get("notes", [])
@@ -251,6 +288,12 @@ def main():
     p_search.add_argument("--keyword", help="Client-side filter over title+keywords+abstract")
     p_search.add_argument("--max", type=int, default=500)
 
+    p_fetch = sub.add_parser("fetch",
+                             help="Fetch a single submission's normalized metadata "
+                                  "by forum_id (no reviews/replies). Output suitable "
+                                  "for downstream Zotero import.")
+    p_fetch.add_argument("--id", required=True, help="Forum/note id")
+
     p_forum = sub.add_parser("forum", help="Fetch full thread for one forum_id")
     p_forum.add_argument("--id", required=True, help="Forum/note id")
 
@@ -269,6 +312,11 @@ def main():
             f"{len(entries)} entries",
             file=sys.stderr,
         )
+        return
+    if args.cmd == "fetch":
+        out = fetch_submission(args.id)
+        json.dump(out, sys.stdout, ensure_ascii=False, indent=2)
+        sys.stdout.write("\n")
         return
     if args.cmd == "forum":
         out = fetch_forum(args.id)

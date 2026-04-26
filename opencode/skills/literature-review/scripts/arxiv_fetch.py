@@ -27,9 +27,14 @@ Emitted JSON fields:
     year        int | null
     published   "YYYY-MM-DD" | null
     categories  [string, ...]   e.g. ["cs.LG", "cs.AI"]
+    doi         string | null   arxiv:doi - present when authors deposited
+                                a published-version DOI back to arXiv
+    journal_ref string | null   arxiv:journal_ref - venue / pages free-text,
+                                e.g. "Nature 596 (2021) 583-589"
 """
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -40,6 +45,7 @@ import xml.etree.ElementTree as ET
 
 
 ATOM_NS = "{http://www.w3.org/2005/Atom}"
+ARXIV_NS = "{http://arxiv.org/schemas/atom}"
 
 API_ENDPOINT = "http://export.arxiv.org/api/query"
 ABS_ENDPOINT = "https://arxiv.org/abs/"
@@ -60,7 +66,12 @@ def _throttle():
     _last_request_at = time.monotonic()
 
 
+BACKOFF_SHORT = (5, 15, 30, 60)
+BACKOFF_LONG = (30, 60, 90, 120)
+
+
 def _request(url, timeout=30, retries=4):
+    schedule = BACKOFF_LONG if os.environ.get("LITREV_BACKOFF_TOLERANT") else BACKOFF_SHORT
     last_err = None
     for attempt in range(retries):
         _throttle()
@@ -71,7 +82,7 @@ def _request(url, timeout=30, retries=4):
         except urllib.error.HTTPError as e:
             last_err = e
             if e.code in (429, 503) and attempt < retries - 1:
-                wait = 30 * (attempt + 1)
+                wait = schedule[min(attempt, len(schedule) - 1)]
                 print(
                     f"[arxiv] HTTP {e.code}, sleeping {wait}s "
                     f"(attempt {attempt + 1}/{retries})",
@@ -121,6 +132,17 @@ def _parse_entry(entry):
             pdf_link = link.get("href")
             break
 
+    # arxiv:doi and arxiv:journal_ref are namespaced fields populated when
+    # the paper authors deposit published-version metadata back to arXiv.
+    # When present, the published version takes precedence over the preprint
+    # downstream (zotero_operator import-by-id auto-upgrades to CrossRef).
+    doi_el = entry.find(ARXIV_NS + "doi")
+    doi = (doi_el.text.strip() if doi_el is not None and doi_el.text else "") or None
+    jref_el = entry.find(ARXIV_NS + "journal_ref")
+    journal_ref = (jref_el.text.strip() if jref_el is not None and jref_el.text else "") or None
+    if journal_ref:
+        journal_ref = re.sub(r"\s+", " ", journal_ref)
+
     return {
         "source": "arxiv_api",
         "arxiv_id": arxiv_id,
@@ -133,6 +155,8 @@ def _parse_entry(entry):
         "year": year,
         "published": published[:10] if published else None,
         "categories": categories,
+        "doi": doi,
+        "journal_ref": journal_ref,
     }
 
 

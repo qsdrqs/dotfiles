@@ -37,7 +37,7 @@ One JSONL line per result, written to `$LITREV_WORKDIR/raw_search.jsonl`:
 |--------|--------|----------|
 | arXiv API | `scripts/arxiv_fetch.py search` | Fresh preprints, CS / ML / Physics |
 | Semantic Scholar | `scripts/s2_client.py search` | Cross-venue metadata, citation counts, TL;DR |
-| OpenReview | `scripts/openreview_client.py` (Stage C) | ICLR / NeurIPS review traces |
+| OpenReview | `scripts/openreview_client.py` (Stage A/B/C) | ICLR / NeurIPS / ICML import + reviews; v1 + v2 |
 
 Call style (SEQUENTIAL, not backgrounded with `&`):
 
@@ -90,9 +90,31 @@ rate-limit thresholds.
   - For discovery of paywalled venues, search S2 FIRST rather than trying to scrape GS/IEEE directly.
 - Script emits normalized JSONL with source tag `s2_api` and all identifiers.
 
-#### OpenReview (Stage C)
+#### OpenReview (Stage C discovery + Stage B import)
 
-Deferred to Stage C. Relevant for NeurIPS / ICLR / etc.
+Relevant for NeurIPS / ICLR / ICML / COLM and similar venues that do not
+issue DOIs. The client (`scripts/openreview_client.py`) covers two API
+versions to span the venue's lifetime:
+
+- **API v2** (`api2.openreview.net`): late-2022+ venues. ICLR 2023+,
+  NeurIPS 2023+, ICML 2023+, COLM, RLC, etc.
+- **API v1** (`api.openreview.net`): legacy venues. ICLR 2022 and earlier,
+  NeurIPS 2022 and earlier, ICML 2022 and earlier.
+
+Subcommands:
+
+- `search --venue <id>`: lists accepted submissions; v2 only (deliberate -
+  v1 venue listing is slower and rarely needed for current literature
+  reviews).
+- `fetch --id <forum_id>`: single-paper normalized record. Tries v2 first,
+  transparently falls back to v1 on no-match. Use for `import-by-id
+  --openreview <forum_id>` in Phase 5.
+- `forum --id <forum_id>`: full thread (reviews, rebuttals, decisions);
+  v2 only.
+
+Both v1 and v2 normalize through the same `_normalize_submission()` because
+`_content_value()` transparently handles both schemas (v1 flat strings vs
+v2 wrapped `{"value": ...}`).
 
 ### C. Google Scholar / IEEE / ACM
 
