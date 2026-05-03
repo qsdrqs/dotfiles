@@ -11,10 +11,10 @@ Generates or edits images for the current project (for example website assets, g
 
 This skill has exactly two top-level modes:
 
-- **Default built-in tool mode (preferred):** built-in `image_gen` tool for normal image generation, editing, and simple transparent-image requests. Does not require `OPENAI_API_KEY`.
-- **Fallback CLI mode:** `scripts/image_gen.py` CLI. Use when the user explicitly asks for the CLI/API/model path, or after the user explicitly confirms a true model-native transparency fallback with `gpt-image-1.5`. Requires `OPENAI_API_KEY`.
+- **Default built-in tool mode (preferred in Codex):** built-in `image_gen` tool for normal image generation, editing, and simple transparent-image requests. Does not require `OPENAI_API_KEY`.
+- **CLI mode (preferred in non-Codex environments):** `scripts/image_gen.py` CLI. Use as the default when the built-in `image_gen` tool is unavailable (e.g., OpenCode, Gemini CLI). Also use when the user explicitly asks for CLI/API/model path, or after the user explicitly confirms a true model-native transparency fallback with `gpt-image-1.5`. Requires `OPENAI_API_KEY`.
 
-Within CLI fallback, the CLI exposes three subcommands:
+Within CLI mode, the CLI exposes three subcommands:
 
 - `generate`
 - `edit`
@@ -22,12 +22,13 @@ Within CLI fallback, the CLI exposes three subcommands:
 
 Rules:
 - Use the built-in `image_gen` tool by default for normal image generation and editing requests.
-- Do not switch to CLI fallback for ordinary quality, size, or file-path control.
+- **In non-Codex environments** (OpenCode, Gemini CLI, etc.) where the built-in `image_gen` tool is unavailable, use CLI mode as the default automatically. Confirm parameters with the user before generating, then proceed without waiting for an explicit CLI request.
+- Do not switch to CLI mode for ordinary quality, size, or file-path control when the built-in tool is available.
 - If the user explicitly asks for a transparent image/background, stay on built-in `image_gen` first: prompt for a flat removable chroma-key background, then remove it locally with the installed helper at `$CODEX_HOME/skills/.system/imagegen/scripts/remove_chroma_key.py`.
 - Never silently switch from built-in `image_gen` or CLI `gpt-image-2` to CLI `gpt-image-1.5`. Treat this as a model/path downgrade and ask the user before doing it, unless the user has already explicitly requested `gpt-image-1.5`, `scripts/image_gen.py`, or CLI fallback.
 - If a transparent request appears too complex for clean chroma-key removal, asks for true/native transparency, or local removal fails validation, explain that true transparency requires CLI `gpt-image-1.5 --background transparent --output-format png` because `gpt-image-2` does not support `background=transparent`, then ask whether to proceed. Run the CLI fallback only after the user confirms.
-- The word `batch` by itself does not mean CLI fallback. If the user asks for many assets or says to batch-generate assets without explicitly asking for CLI/API/model controls, stay on the built-in path and issue one built-in call per requested asset or variant.
-- If the built-in tool fails or is unavailable, tell the user the CLI fallback exists and that it requires `OPENAI_API_KEY`. Proceed only if the user explicitly asks for that fallback.
+- The word `batch` by itself does not mean CLI mode. If the user asks for many assets or says to batch-generate assets without explicitly asking for CLI/API/model controls, stay on the built-in path and issue one built-in call per requested asset or variant.
+- If the built-in tool fails or is unavailable in a Codex environment, tell the user the CLI mode exists and that it requires `OPENAI_API_KEY`. Proceed only if the user explicitly asks for that fallback.
 - If the user explicitly asks for CLI mode, use the bundled `scripts/image_gen.py` workflow. Do not create one-off SDK runners.
 - Never modify `scripts/image_gen.py`. If something is missing, ask the user before doing anything else.
 
@@ -92,7 +93,7 @@ Execution strategy:
 Assume the user wants a new image unless they clearly ask to change an existing one.
 
 ## Workflow
-1. Decide the top-level mode: built-in by default, including simple transparent-output requests; fallback CLI only if explicitly requested or after the user explicitly confirms a transparent-output fallback.
+1. Decide the top-level mode: attempt built-in `image_gen` first. If the built-in tool is unavailable (non-Codex environment such as OpenCode or Gemini CLI), switch to CLI mode automatically - confirm parameters with the user, then proceed. In Codex, use CLI only if explicitly requested or the user confirms a transparent-output fallback.
 2. Decide the intent: `generate` or `edit`.
 3. Decide whether the output is preview-only or meant to be consumed by the current project.
 4. Decide the execution strategy: single asset vs repeated built-in calls vs CLI `generate-batch`.
@@ -313,21 +314,26 @@ These conventions apply only to the CLI fallback. They do not describe built-in 
 - Use `--out` or `--out-dir` to control output paths; keep filenames stable and descriptive.
 
 ### Dependencies
-Prefer `uv` for dependency management in this repo.
 
-Required Python package:
+Create a temporary virtual environment in `/tmp` to avoid system-level conflicts (e.g., NixOS, managed Python environments):
+
 ```bash
-uv pip install openai
+# Create venv only if it does not already exist
+test -d /tmp/imagegen-env || uv venv /tmp/imagegen-env
+
+# Install required packages into the venv
+uv pip install --python /tmp/imagegen-env/bin/python openai pillow
 ```
 
-Required for local chroma-key removal and optional downscaling:
+Then invoke the script using the venv Python:
+
 ```bash
-uv pip install pillow
+/tmp/imagegen-env/bin/python /path/to/scripts/image_gen.py generate ...
 ```
 
 Portability note:
-- If you are using the installed skill outside this repo, install dependencies into that environment with its package manager.
-- In uv-managed environments, `uv pip install ...` remains the preferred path.
+- The `/tmp/imagegen-env` venv persists for the session. Reuse it across multiple calls if it already exists.
+- If `uv` is unavailable, fall back to: `python -m venv /tmp/imagegen-env && /tmp/imagegen-env/bin/pip install openai pillow`.
 
 ### Environment
 - `OPENAI_API_KEY` must be set for live API calls.

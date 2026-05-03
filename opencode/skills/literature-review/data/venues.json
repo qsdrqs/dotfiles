@@ -1,0 +1,95 @@
+{
+  "_schema": {
+    "version": "1.0",
+    "purpose": "Authoritative venue name lookup. Used by zotero_operator.py to (a) resolve OpenReview content.venue.value display strings (which include track suffixes like 'ICLR 2024 poster') to canonical proceedings titles for Zotero proceedingsTitle (Bug 1 fix); and (b) cross-check S2 publicationTypes mistags when publicationVenue.type is missing and pub_types says JournalArticle for an actual conference (Bug 2b fix).",
+    "review_protocol": "Every entry MUST cite at least 2 authoritative sources (DBLP, official venue website, Wikipedia, S2 publicationVenue record). Update 'verified_date' when revising. NEVER add an entry from memory - always verify against an authoritative source. If you find a venue not in this file during literature review, do NOT auto-add - leave the venue unhandled (will fall through to track-suffix-strip fallback) and submit the entry for review.",
+    "lookup_semantics": {
+      "openreview_id_globs": "fnmatch-style glob patterns matched against OpenReview content.venueid.value (e.g. 'ICLR.cc/*/Conference'). First match wins.",
+      "s2_venue_aliases": "case-insensitive EXACT match against S2 publicationVenue.name and publicationVenue.alternate_names. NO substring matching - prevents over-matching workshop venues that contain a parent conference name."
+    },
+    "no_hardcoding_constraint": "This file IS the venue lookup table - it is data, not code. Code (zotero_operator.py) MUST NOT contain venue-specific if/elif chains. Code MUST NOT pattern-match against venue names to derive type/canonical_name; only this file (or a future external authority) is permitted to assert canonical mappings."
+  },
+  "venues": [
+    {
+      "canonical_name": "International Conference on Learning Representations",
+      "short_name": "ICLR",
+      "type": "conference",
+      "openreview_id_globs": [
+        "ICLR.cc/*/Conference"
+      ],
+      "s2_venue_aliases": [
+        "International Conference on Learning Representations",
+        "ICLR"
+      ],
+      "verified_sources": [
+        "DBLP venue stream: https://dblp.org/streams/conf/iclr (DBLP venue title: 'International Conference on Learning Representations (ICLR)'; per-year proceedings titled 'The {Nth} International Conference on Learning Representations, ICLR YYYY, {city}, {dates}')",
+        "Official: https://iclr.cc/",
+        "OpenReview venue ID format confirmed via openreview_client.py KNOWN_VENUES + live API fetch of forum_id rhgIgTSSxW (TabR ICLR 2024) returning content.venueid.value='ICLR.cc/2024/Conference'"
+      ],
+      "verified_date": "2026-04-26"
+    },
+    {
+      "canonical_name": "Advances in Neural Information Processing Systems",
+      "short_name": "NeurIPS",
+      "historical_short_names": ["NIPS"],
+      "type": "conference",
+      "openreview_id_globs": [
+        "NeurIPS.cc/*/Conference"
+      ],
+      "s2_venue_aliases": [
+        "Advances in Neural Information Processing Systems",
+        "Neural Information Processing Systems",
+        "Conference on Neural Information Processing Systems",
+        "NeurIPS",
+        "NIPS"
+      ],
+      "verified_sources": [
+        "DBLP venue stream: https://dblp.org/streams/conf/nips (DBLP venue title: 'Conference on Neural Information Processing Systems (NeurIPS)'; historical alias 'Conference on Neural Information Processing Systems (NIPS)' for pre-2018 editions)",
+        "Official proceedings: https://proceedings.neurips.cc/ (page titles: 'Advances in Neural Information Processing Systems 35' for 2022, 'Advances in Neural Information Processing Systems 34' for 2021, etc. - this is the canonical BibTeX booktitle convention)",
+        "OpenReview venue ID format from openreview_client.py KNOWN_VENUES (NeurIPS.cc/2023..2025/Conference)",
+        "Note: NIPS was renamed to NeurIPS effective 2018 NeurIPS edition. S2 records for pre-2018 papers may use 'NIPS' or 'Conference on Neural Information Processing Systems' in publicationVenue.name."
+      ],
+      "verified_date": "2026-04-26"
+    },
+    {
+      "canonical_name": "International Conference on Machine Learning",
+      "short_name": "ICML",
+      "type": "conference",
+      "openreview_id_globs": [
+        "ICML.cc/*/Conference"
+      ],
+      "s2_venue_aliases": [
+        "International Conference on Machine Learning",
+        "ICML"
+      ],
+      "verified_sources": [
+        "DBLP venue stream: https://dblp.org/streams/conf/icml (DBLP venue title: 'International Conference on Machine Learning (ICML)'; per-year proceedings titled 'Forty-{Nth} International Conference on Machine Learning, ICML YYYY, {city}, {dates}, Proceedings of Machine Learning Research {volume}, PMLR / OpenReview.net')",
+        "Official: https://icml.cc/",
+        "OpenReview venue ID format from openreview_client.py KNOWN_VENUES (ICML.cc/2024..2025/Conference)",
+        "Note: ICML proceedings are published in PMLR (Proceedings of Machine Learning Research) volumes; S2 may sometimes report venue as 'PMLR' instead of 'International Conference on Machine Learning'. Cross-check via DOI (10.5555/...) if name match fails."
+      ],
+      "verified_date": "2026-04-26"
+    },
+    {
+      "canonical_name": "Conference on Language Modeling",
+      "short_name": "COLM",
+      "type": "conference",
+      "openreview_id_globs": [
+        "COLM/*/Conference",
+        "colmweb.org/COLM/*/Conference"
+      ],
+      "s2_venue_aliases": [
+        "Conference on Language Modeling",
+        "COLM"
+      ],
+      "verified_sources": [
+        "Official: https://colmweb.org/ (homepage banner: 'CONFERENCE ON LANGUAGE MODELING'; about-section: 'COLM is an academic venue focused on the study of language modeling, broadly defined')",
+        "Official 2025 archive: https://colmweb.org/2025/ (banner: 'CONFERENCE ON LANGUAGE MODELING')",
+        "Call for Papers 2026: https://colmweb.org/cfp.html (text: 'We invite submissions to the 3rd Conference on Language Modeling (COLM)'; OpenReview submission group: 'colmweb.org/COLM/2026/Conference')",
+        "OpenReview venue ID format from openreview_client.py KNOWN_VENUES (COLM/2024/Conference). Note: actual OpenReview content.venueid.value may include 'colmweb.org/' prefix - both globs included to handle either case.",
+        "Note: First edition 2024; no DBLP stream as of 2026-04-26. May need re-verification when DBLP adds the venue."
+      ],
+      "verified_date": "2026-04-26"
+    }
+  ]
+}

@@ -1,5 +1,16 @@
 # Global Agent Instructions
 
+## Communication Protocol
+
+**Default to Chinese for user-facing conversation; default to English for written artifacts.**
+
+| Surface | Default Language | Override |
+|---------|------------------|----------|
+| Chat replies to the user | Chinese (Simplified) | User explicitly requests another language |
+| Documentation, code comments, commit messages, file content | English (ASCII) | User explicitly requests another language, or existing artifact uses another language consistently |
+
+**Rationale**: Conversations stay in the user's preferred working language for fluency, while written artifacts stay in English for cross-tool, cross-collaborator portability and consistency with the existing codebase.
+
 ## Data Analysis
 
 ### Numeric Statistics
@@ -70,6 +81,47 @@ When modifying documentation files:
 **Priority**: `edit` operations > `delete + add` operations
 
 **Rationale**: Preserves existing structure, formatting, and unrelated content. Minimizes diff noise and accidental loss of information.
+
+## Reviewing Delegated Code
+
+> *(OhMyOpenCode/Oh-my-openagent) plugin-specific: applies to Task-based subagent delegation.)*
+
+**Design-rationale comments in subagent output are red flags. Verify the rationale before accepting the code.**
+
+Subagents are stateless: they see only the task handed at delegation time, not the plan evolution before or after. Comments like "in order to X" / "so that X" / "to ensure X" / "to keep X clean" encode the subagent's task-time understanding, which can drift after the main session revises the plan or invariants. The main session is the only place where plan-evolution context lives, so it is solely responsible for catching rationale drift.
+
+**Trigger phrases to grep for in any subagent diff:**
+
+- "in order to" / "so that" / "to ensure" / "to satisfy"
+- "to keep ... clean" / "to avoid" / "to prevent"
+- "for X invariant" / "for X to hold"
+
+**Required check for every such comment:**
+
+1. Is rationale X still a current requirement under the latest plan / invariant set?
+2. If X has been revised or replaced, the code added "for X" is likely **dead code that may silently break an unrelated mechanism** (a short-circuit, a guard clause, a special-case branch).
+3. Remove stale-rationale code immediately, even if it appears harmless.
+
+**Failure cost is asymmetric:** catching stale rationale at review time is seconds (one grep). Catching it at expensive verification stages (experiment runs, integration tests, production) is hours and dollars.
+
+**BLOCKING VIOLATION**: Merging subagent code containing a design-rationale comment without verifying the rationale against the current plan.
+
+## Delegation Constraints
+
+> *(OhMyOpenCode plugin-specific: requires Task delegation with category routing.)*
+
+**`quick` and `unspecified-low` categories must NEVER be used for code modifications. Unless it's a one-line change that is trivial and low-risk, all code modifications must be delegated to a higher-capability category.**
+
+Both categories run on Claude Sonnet (Sisyphus-Junior) and are restricted to read-only or analysis work.
+
+- Search, grep, code reading, explanation, summarization
+- Verification or sanity checks that do not edit files
+- Q&A on existing code or documentation
+- One-line changes that are trivial and low-risk (e.g., fixing a typo in a comment, adding a missing import, correcting a variable name in a single line)
+
+Any task that **writes or modifies code** (edits, refactors, bugfixes, new code) must go to a higher-capability category matched to the domain: `deep`, `ultrabrain`, `unspecified-high`.
+
+**Rationale**: Claude Sonnet's task-time reasoning is not rigorous enough for code modifications. It tends to add justification-driven side mechanisms (short-circuits, guard clauses, special-case branches) that survive past their original rationale and silently break unrelated systems. The cost of routing a code change through a stronger category is small; the cost of debugging a Claude Sonnet implementation oversight at experiment / integration time is large.
 
 ## OpenCode Skills
 

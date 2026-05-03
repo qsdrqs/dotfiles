@@ -26,6 +26,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+    wtype
     vscode
     xclip
     wl-clipboard
@@ -113,6 +114,7 @@ in
   };
 
   programs.niri.enable = true;
+  programs.ydotool.enable = true;
   programs.waybar.enable = true;
 
   systemd.user.services.waybar.serviceConfig.ExecStartPre =

@@ -561,11 +561,15 @@ CONTRIBUTION="$(jq -r .one_line_contribution "$PAPER_DIR/row.json")"
 #     - DOI: points at formally published version, gives journalArticle /
 #       conferencePaper with venue/pages/issue.
 #     - OpenReview forum_id (when discovered via Phase 1 OpenReview search):
-#       gives conferencePaper with proceedingsTitle from venue_display.
+#       gives conferencePaper with proceedingsTitle resolved through
+#       data/venues.json (canonical name like "International Conference on
+#       Learning Representations"). v1 fallback handles ICLR/NeurIPS/ICML
+#       2022 and earlier transparently.
 #     - arXiv id: triggers the auto-cascade inside zotero_operator
-#       (arxiv:doi -> CrossRef; else S2 venue -> conferencePaper; else
-#       preprint). Even arxiv-only papers usually upgrade to
-#       conferencePaper through the S2 venue augmentation.
+#       (arxiv:doi -> CrossRef; else S2 venue -> conferencePaper or
+#       journalArticle; else arxiv-only -> preprint). For S2 hits where
+#       the venue is on data/venues.json, the canonical name overrides
+#       any S2 publicationTypes mistag (Bug 2b mitigation).
 if [ -n "$PAPER_DOI" ]; then
     ID_ARG=(--doi "$PAPER_DOI")
 elif [ -n "$PAPER_OPENREVIEW_ID" ]; then
@@ -617,11 +621,14 @@ Notes:
   are known, the DOI path wins. The Zotero entry then has the canonical
   citation form (`itemType=journalArticle` or `conferencePaper`) instead
   of `itemType=preprint`. For arxiv-only inputs, `import-by-id --arxiv-id`
-  cascades through 3 fallback tiers (arxiv:doi -> CrossRef; S2 lookup ->
-  CrossRef-by-S2-DOI or S2-venue -> conferencePaper; preprint last
-  resort). For papers discovered via OpenReview (Phase 1 search), pass
-  `--openreview <forum_id>` to bypass the cascade and get an exact
-  conferencePaper with proceedingsTitle from OpenReview's venue_display.
+  cascades through 4 fallback tiers (T0 arxiv-only signal `venue=arXiv.org`
+  -> preprint; T1 arxiv:doi -> CrossRef; T2 S2 lookup -> CrossRef-by-S2-DOI
+  or S2-venue -> conferencePaper; preprint last resort). For papers
+  discovered via OpenReview (Phase 1 search), pass `--openreview
+  <forum_id>` to bypass the cascade and get an exact conferencePaper
+  with proceedingsTitle resolved via `data/venues.json` (e.g.
+  "International Conference on Learning Representations" rather than the
+  raw "ICLR 2024 Poster" track-suffixed display string).
 - **PDF policy** (Phase 5.2 step b): PDFs are mandatory by default. The
   only acceptable reasons to enter the metadata-only path are pdf_fetch
   status `paywalled_no_access` or `no_identifier`. Such entries are
@@ -698,15 +705,29 @@ Include the workdir path so the user can open them directly.
   resolver cascades through 4 deterministic API tiers before giving up:
     1. Direct DOI -> CrossRef
     2. arXiv id -> arxiv:doi field -> CrossRef (formally published path)
-    3. arXiv id -> S2 lookup -> S2 DOI -> CrossRef, OR S2 venue ->
-       conferencePaper / journalArticle (covers ICLR / NeurIPS / ICML
-       gap where conferences do not issue DOIs)
+    3. arXiv id -> S2 lookup. T0: venue == "arXiv.org" -> preprint;
+       T1/T2: S2 DOI -> CrossRef, OR S2 venue -> conferencePaper /
+       journalArticle, with canonical name from `data/venues.json` when
+       known (covers ICLR / NeurIPS / ICML / COLM gap where conferences
+       do not issue DOIs and S2 may mistag publicationTypes).
     4. arXiv preprint fallback (last resort, itemType=preprint)
   Plus `--openreview <forum_id>` for explicit conferencePaper imports
-  when an OpenReview id is known (Phase 1 OpenReview discovery).
+  when an OpenReview id is known (Phase 1 OpenReview discovery). The
+  OpenReview path also consults `data/venues.json` to map venue_id to
+  canonical proceedings title.
   If all tiers fail (rate-limit, network), the operator exits 4 - the
   correct response is to defer to the next session, NOT to hand-write
   a `meta.json` and call `import --meta`.
+
+- **DO NOT add venue-name pattern matching to `zotero_operator.py`.**
+  Canonical proceedings titles MUST come from `data/venues.json` (an
+  audited data file with cited sources), never from `if "ICLR" in venue:`
+  / `elif "NeurIPS" in venue:` chains in code. The single allowed
+  in-code name-pattern operation is the closed `_TRACK_KEYWORDS` strip
+  (Poster / Oral / Spotlight / Findings / Demo / Industry / Tutorial /
+  Long / Short / Main / Track) used as last-resort fallback when
+  venues.json has no entry. Extend that closed set ONLY for new
+  acceptance-track suffix tokens, never for venue identification.
 
 - **DO NOT call `import --meta` without consciously signing the
   `--unverified` flag.** The legacy `import --meta` path now REQUIRES
@@ -748,9 +769,15 @@ All scripts accept `--help` and write errors to stderr.
 | `pdf_fetch.py` | arXiv -> direct -> Unpaywall PDF resolver | B |
 | `mineru_client.py` | MinerU HTTP client for PDF extraction | B |
 | `crossref_client.py` | CrossRef REST (DOI -> Zotero metadata) | B |
-| `zotero_operator.py` | Zotero Web API (CRUD + collection + attach + note) | B |
+| `zotero_operator.py` | Zotero Web API (CRUD + collection + attach + note + 4-tier metadata cascade + venues.json resolver) | B |
 | `setup_containers.sh` / `teardown_containers.sh` | Deploy mineru | B |
 | `paywall_browser.py` | chrome-devtools fallback for IEEE/ACM | C |
+
+Data files (not scripts):
+
+| File | Purpose |
+|------|---------|
+| `data/venues.json` | Authoritative venue lookup. Maps OpenReview venue_id globs and S2 publicationVenue names to canonical proceedings titles + venue type. Used by `zotero_operator.py` to (a) resolve OpenReview track-suffixed display strings (Bug 1: e.g. "ICLR 2024 Poster" -> "International Conference on Learning Representations") and (b) cross-check S2 publicationTypes mistags (Bug 2b: when S2 reports `JournalArticle` for an actual conference, override to `conferencePaper`). Initial seed covers ICLR / NeurIPS / ICML / COLM. Each entry MUST cite at least 2 authoritative sources (DBLP + official site). See `references/zotero-integration.md` §2.5. |
 
 ## Further reading
 

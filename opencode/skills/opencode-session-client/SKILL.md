@@ -50,10 +50,13 @@ as `oc`.
 Every subcommand accepts these globals (most are optional, sensible defaults):
 
 | Flag | Default | Notes |
-|---|---|---|
+|---|---|---|---|
 | `--port` | `4096` | Override with env `OPENCODE_PORT` |
 | `--host` | `127.0.0.1` | Override with env `OPENCODE_HOST` |
 | `--json` | off | Emit machine-readable JSON instead of text |
+| `--dir` | none | Filter sessions by directory (for `list-sessions`); working directory context |
+| `--agent` | none | Agent type for prompt processing: `build`, `explore`, `oracle`, etc. (for `send`/`send-and-wait`) |
+| `--model` | none | Model in `providerID/modelID` format, e.g. `openai/gpt-4o` (for `send`/`send-and-wait`) |
 
 Subcommands that target a specific session also accept `--session SES_ID`
 (or env `OPENCODE_SESSION`).
@@ -76,6 +79,14 @@ oc health --port 4096
 oc list-sessions --port 4096
 # session_id                     | slug          | title              | directory
 # ses_26279da23ffeR5gUrvp7A9OBq6 | quick-falcon  | Some session title | /path/to/project
+```
+
+Filter by directory to find sessions for a specific project:
+
+```bash
+oc list-sessions --port 4096 --dir /home/user/my-project
+# session_id                     | slug          | title              | directory
+# ses_26279da23ffeR5gUrvp7A9OBq6 | quick-falcon  | My project session | /home/user/my-project
 ```
 
 ### 3. Talk to a session and wait for the reply
@@ -107,6 +118,42 @@ oc send-and-wait \
 `--timeout 600` allows up to 10 minutes for the assistant to finish.
 `--interval 3` polls every 3s.
 
+### Specify an agent type for a prompt
+
+Use `--agent` to route the prompt through a specific subagent type:
+
+```bash
+oc send-and-wait \
+  --session ses_xxx \
+  --agent explore \
+  --message "Find all files that reference the PaymentService class."
+```
+
+Available agents typically include `build`, `explore`, `oracle`, `plan`, `general`,
+and others configured on the server. Omitting `--agent` uses the session's default.
+
+### Specify a model for a prompt
+
+Use `--model` to override the model used for processing. Format is
+`providerID/modelID`:
+
+```bash
+oc send-and-wait \
+  --session ses_xxx \
+  --model openai/gpt-4o \
+  --message "Refactor the authentication middleware."
+```
+
+Agent and model can be combined:
+
+```bash
+oc send-and-wait \
+  --session ses_xxx \
+  --agent explore \
+  --model anthropic/claude-sonnet-4 \
+  --message "Audit the codebase for hardcoded secrets."
+```
+
 By default only assistant messages are returned. Add `--all-messages` to
 include the user echo and any tool messages too.
 
@@ -122,6 +169,12 @@ oc send --session ses_xxx --message "Run pytest and report results."
 
 The `send` command returns immediately after the server accepts the prompt
 (HTTP 204). Use `wait` or `poll` later to retrieve the reply.
+
+Agent and model flags also apply to async sends:
+
+```bash
+oc send --session ses_xxx --agent oracle --model openai/gpt-4o --message "Analyze the test output."
+```
 
 ### Poll for new messages without sending
 
@@ -195,10 +248,53 @@ oc delete-session --session ses_xxx
 # -> deleted=True session=ses_xxx
 ```
 
+### List available agent types
+
+```bash
+oc list-agents
+# agent                | model                    |
+# ---------------------+--------------------------+
+# build                |                          | (hidden)
+# explore              | anthropic/claude-haiku-4-5 |
+# oracle               | openai/gpt-5.5           |
+```
+
+Use the `--agent` flag with `send` or `send-and-wait` to route a prompt
+through a specific agent. Hidden agents are internal and marked as such.
+
+### List available providers and their models
+
+```bash
+oc list-providers
+# provider       | source   | models
+# ---------------+----------+-------
+# openai         | [env]    | 15
+# anthropic      | [env]    | 24
+# deepseek       | [config] | 4
+```
+
+List models for a specific provider:
+
+```bash
+oc list-models-by-provider --provider openai
+# openai (env)
+#   active (15):
+#     gpt-5.5
+#     gpt-5.1-codex-max
+#     gpt-5.2
+#     ...
+```
+
+Use the `--model` flag with `providerID/modelID` format (e.g.
+`openai/gpt-5.5`) to override the model for a prompt.
+
 ### JSON output for piping into jq / another script
 
 ```bash
 oc list-sessions --port 4096 --json | jq '.[].id'
+oc list-agents --json | jq '.[].name'
+oc list-providers --json | jq '.all[].id'
+oc list-models-by-provider --json --provider openai | jq '.all[0].models | keys'
 oc read --session ses_xxx --last 1 --role assistant --json \
   | jq -r '.[0].parts[0].text'
 ```
@@ -232,31 +328,46 @@ For reference (and for debugging), the script uses these opencode endpoints:
 |---|---|---|
 | GET | `/global/health` | `health` |
 | GET | `/session` | `list-sessions` |
+| GET | `/agent` | `list-agents` |
+| GET | `/provider` | `list-providers`, `list-models-by-provider` |
 | POST | `/session` (body `{}`) | `create-session` |
 | DELETE | `/session/{id}` | `delete-session` |
 | GET | `/session/{id}/message` | `read`, `poll`, `send-and-wait` |
 | GET | `/session/status` | `wait`, `poll`, `send-and-wait` |
 | POST | `/session/{id}/prompt_async` | `send`, `send-and-wait` |
 
-The `prompt_async` body shape is `{"parts": [{"type": "text", "text": "..."}]}`.
-A successful enqueue returns HTTP 204 with no body.
+The `prompt_async` body shape is:
+```json
+{
+  "parts": [{"type": "text", "text": "..."}],
+  "agent": "explore",
+  "model": {"providerID": "openai", "modelID": "gpt-4o"}
+}
+```
+Both `agent` and `model` are optional. A successful enqueue returns HTTP 204
+with no body.
 
 ## Subcommand Cheat Sheet
 
 ```text
 oc health
-oc list-sessions
+oc list-sessions                              [--dir DIR]
+oc list-agents
+oc list-providers
+oc list-models-by-provider    --provider PID
 oc create-session
 oc delete-session   --session SES_ID
 oc send             --session SES_ID --message "..." [--from NAME]
+                                            [--agent AGENT] [--model MODEL]
 oc read             --session SES_ID [--last N] [--role all|user|assistant]
 oc wait             --session SES_ID [--timeout 300] [--interval 2]
 oc poll             --session SES_ID [--baseline N] [--timeout 300] [--interval 2]
 oc send-and-wait    --session SES_ID --message "..." [--from NAME] [--all-messages]
-                    [--timeout 300] [--interval 2]
+                    [--timeout 300] [--interval 2] [--agent AGENT] [--model MODEL]
 ```
 
-All subcommands accept `--port`, `--host`, and `--json`.
+All subcommands accept `--port`, `--host`, `--json`, `--dir`, `--agent`, and `--model`.
+Flags that are not relevant for a subcommand are silently ignored.
 
 ## Failure Modes and Exit Codes
 

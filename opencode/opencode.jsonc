@@ -4,10 +4,11 @@
     "oh-my-openagent",
     "opencode-claude-auth",
     "opencode-gemini-auth@latest",
-    // "opencode-websearch-cited@1.2.0"
+    "opencode-websearch-cited@1.2.0"
   ],
   "$schema": "https://opencode.ai/config.json",
   "formatter": false,
+  "autoupdate": false,
   "model": "{env:OPENCODE_MODEL}",
   "compaction": {
     "auto": false

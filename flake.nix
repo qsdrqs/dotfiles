@@ -11,7 +11,6 @@
     nixpkgs-stable-old.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
     nixpkgs-ghcup.url = "github:qxrein/nixpkgs/patch-1";
-    nixpkgs-howdy.url = "github:fufexan/nixpkgs/howdy";
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -36,6 +35,11 @@
     #   url = "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-aarch64-unknown-linux-gnu.zip";
     #   flake = false;
     # };
+
+    handy = {
+      url = "github:cjpais/Handy";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     tree-sitter-grub = {
       url = "github:qsdrqs/tree-sitter-grub";
@@ -145,7 +149,7 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { nixpkgs, home-manager, vscode-server, nur, dev-shell, nixos-raspberrypi, ... }@inputs:
+  outputs = { nixpkgs, home-manager, handy, vscode-server, nur, dev-shell, nixos-raspberrypi, ... }@inputs:
     rec {
       pkgs-collect = builtins.listToAttrs (map
         (pkg: {
@@ -161,7 +165,6 @@
           "pkgs-stable-old"
           "pkgs-ghcup"
           "pkgs-intel-npu-driver"
-          "pkgs-howdy"
           "pkgs-last"
           "pkgs"
         ]
@@ -192,7 +195,6 @@
         pkgs-stable = pkgs-collect.pkgs-stable system; # default in stable nixpkgs
         pkgs-ghcup = pkgs-collect.pkgs-ghcup system;
         pkgs-intel-npu-driver = pkgs-collect.pkgs-intel-npu-driver system;
-        pkgs-howdy = pkgs-collect.pkgs-howdy system;
         pkgs-last = pkgs-collect.pkgs-last system;
       };
 
@@ -305,6 +307,7 @@
       };
       guiBasicConfig = guiMinimalConfig // {
         modules = guiMinimalConfig.modules ++ [
+          handy.nixosModules.default
           ./nixos/gui-basic-configuration.nix
         ];
       };
@@ -356,17 +359,7 @@
 
       desktopConfig = developConfig // guiBasicConfig // rec {
         system = developConfig.system;
-        specialArgs = developConfig.specialArgs // {
-          pkgs-howdy = import inputs.nixpkgs-howdy {
-            inherit system;
-            config = {
-              allowUnfree = true;
-              cudaSupport = true;
-            };
-            overlays =
-              (nixpkgs.legacyPackages.${system}.callPackage ./nixos/overlays.nix { inputs = inputs; }).nixpkgs.overlays;
-          };
-        };
+        specialArgs = developConfig.specialArgs;
         modules = developConfig.modules ++ guiBasicConfig.modules ++ [
           ./nixos/desktop-configuration.nix
           ./nixos/custom/desktop.nix

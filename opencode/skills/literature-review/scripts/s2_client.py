@@ -36,6 +36,14 @@ Normalized JSON fields:
     venue_type                "conference" | "journal" | null - from
                               publicationVenue.type, the most reliable
                               conference-vs-journal signal (lowercase)
+    venue_alt_names           [string, ...] - publicationVenue.alternate_names
+                              (e.g. ["NeurIPS", "NIPS"] for NeurIPS papers).
+                              Useful to cross-check venue identity against a
+                              venues.json lookup table when venue_type is
+                              missing.
+    venue_url                 string - publicationVenue.url (e.g.
+                              "https://iclr.cc"). Tertiary venue identity
+                              signal.
     publication_types         [string, ...] - paper-level S2 classification
                               ("Conference", "JournalArticle", ...). Less
                               reliable than venue_type because S2 sometimes
@@ -149,6 +157,8 @@ def _normalize(paper, query=None):
         "published": paper.get("publicationDate"),
         "venue": pub_venue.get("name") or paper.get("venue"),
         "venue_type": (pub_venue.get("type") or "").lower() or None,
+        "venue_alt_names": pub_venue.get("alternate_names") or [],
+        "venue_url": pub_venue.get("url"),
         "publication_types": paper.get("publicationTypes"),
         "authors": [
             a.get("name") for a in (paper.get("authors") or []) if a.get("name")

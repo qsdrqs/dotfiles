@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-howdy, pkgs-unstable, pkgs-master, lib, ... }:
+{ config, pkgs, pkgs-unstable, pkgs-master, lib, ... }:
 let
   wpsoffice-cn-hidpi = pkgs.symlinkJoin {
     name = "wps-office-cn";
@@ -65,6 +65,10 @@ in
     ${wait-script} ${video-device}
   '';
   # end howdy
+
+  # begin handy (speech-to-text)
+  programs.handy.enable = true;
+  # end handy
 
   boot.kernelModules = [
     # "v4l2loopback"
@@ -166,6 +170,7 @@ in
     "wireshark"
     "libvirtd"
     "docker"
+    "input"
   ];
 
   services.printing = {

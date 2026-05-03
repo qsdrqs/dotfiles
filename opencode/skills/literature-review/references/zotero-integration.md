@@ -119,15 +119,25 @@ Internal cascade for `import-by-id --arxiv-id <id>`:
 
 ```
 T1: arxiv API
-    arxiv:doi populated?  yes -> CrossRef           -> done (published)
-                          no  -> continue
+    arxiv:doi populated?    yes -> CrossRef          -> done (published)
+                            no  -> continue
 T2: S2 lookup ARXIV:<id>
-    S2 doi populated?     yes -> CrossRef           -> done (published)
-                          no  -> continue
-    S2 venue populated?   yes -> conferencePaper or journalArticle
-                                  (proceedingsTitle/publicationTitle = venue)
-                                                    -> done (venue)
-                          no  -> continue
+    S2 doi populated?       yes -> CrossRef          -> done (published)
+                            no  -> continue
+    venue == "arXiv.org"?   yes -> preprint          -> done (T0 in
+                                                       _s2_pick_item_type)
+    venue populated?        yes -> conferencePaper / journalArticle, with
+                                   canonical proceedingsTitle/
+                                   publicationTitle from data/venues.json
+                                   when the S2 venue name matches a
+                                   known entry; otherwise the raw S2
+                                   venue value is used. JournalArticle
+                                   mistags get auto-corrected to
+                                   conferencePaper when venues.json
+                                   asserts the venue is a conference
+                                   (Bug 2b mitigation).
+                                                     -> done (venue)
+                            no  -> continue
 T3: arxiv preprint fallback                          -> done (preprint)
 ```
 
@@ -171,11 +181,29 @@ python scripts/zotero_operator.py import-by-id \
     --contribution "..."
 ```
 
-The operator subprocess-calls `openreview_client.py fetch --id <forum_id>`,
-gets the normalized submission record (title, authors, abstract, year,
-venue_display), and converts it to `itemType=conferencePaper` with
-`proceedingsTitle` set from `venue_display` (e.g. "ICLR 2024 poster") and
-`extra: "OpenReview: <forum_id>"`.
+The operator subprocess-calls `openreview_client.py fetch --id <forum_id>`
+(which transparently cascades v2 -> v1 to handle ICLR / NeurIPS / ICML
+2022 and earlier), gets the normalized submission record (title, authors,
+abstract, year, venue_display, venue_id), and converts it to
+`itemType=conferencePaper`. The `proceedingsTitle` is resolved via a
+3-tier resolver:
+
+```
+T1: data/venues.json lookup by venue_id (fnmatch glob,
+    e.g. "ICLR.cc/*/Conference") -> canonical_name
+    (e.g. "International Conference on Learning Representations")
+    -- ONLY tier that produces a canonical proceedings title
+T2: closed track-keyword strip on venue.value (Poster, Oral,
+    Spotlight, Findings, Demo, Industry, Tutorial, Long, Short,
+    Main, Track) -- e.g. "ICLR 2024 poster" -> "ICLR 2024".
+    Yields a short form, not canonical. Used when venues.json has
+    no entry for this venue.
+T3: structural parse of venue_id (e.g. "ICLR.cc/2024/Conference"
+    -> "ICLR 2024") -- final fallback when venue.value is empty.
+```
+
+`extra` is set to `"OpenReview: <forum_id>"`. See section 2.5 below for
+the venues.json schema and how to add a new venue.
 
 ### 2.3 DOI-indexed papers (journals, conferences, books)
 
@@ -209,6 +237,46 @@ client): `journal-article` -> `journalArticle`, `proceedings-article` ->
 
 Dropped from the import loop. The user can add such papers manually in the
 Zotero UI. We do not scrape publisher landing pages.
+
+### 2.5 `data/venues.json` (canonical venue lookup)
+
+`zotero_operator.py` consults `data/venues.json` in two places:
+
+1. **OpenReview path (Bug 1 fix)**: maps venue_id glob to the canonical
+   proceedings title. Without this, raw `content.venue.value` strings like
+   `"ICLR 2024 poster"` (which include acceptance track suffix) would land
+   verbatim in Zotero `proceedingsTitle`, rendering bibliography entries
+   like *"In ICLR 2024 poster, 2024."*.
+
+2. **S2 path (Bug 2b mitigation)**: when S2 `publicationVenue.type` is
+   missing AND `publicationTypes` contains only `"JournalArticle"` for an
+   actually-conference paper (S2 mistag, common for older proceedings),
+   the operator looks up the S2 `publicationVenue.name` (and any
+   `alternate_names`) against `s2_venue_aliases`. If the venue is on file
+   as a conference, the itemType is overridden to `conferencePaper`.
+
+Each entry MUST cite at least 2 authoritative sources (DBLP, official
+venue website, S2 publicationVenue record). Lookup semantics:
+
+- `openreview_id_globs`: fnmatch-style glob matched against OpenReview
+  `content.venueid.value` (first match wins).
+- `s2_venue_aliases`: case-insensitive **EXACT** match against
+  S2 `publicationVenue.name` and any `alternate_names`. No substring
+  match, to avoid over-matching workshops (`"NeurIPS Workshop on X"`
+  must NOT hit the NeurIPS conference entry).
+
+Initial seed (2026-04-26): ICLR, NeurIPS, ICML, COLM. To add a venue,
+verify the canonical name against DBLP `https://dblp.org/streams/conf/<id>`
+plus the official venue website, then PR. Do NOT add entries from memory
+- the constraint `_schema.review_protocol` in venues.json forbids it.
+
+When venues.json has no entry for the venue:
+
+- **OpenReview path**: falls through to closed track-keyword strip on the
+  raw venue display (e.g. `"EMNLP 2024 Findings" -> "EMNLP 2024"`).
+- **S2 path**: T2 trusts the S2 `publicationTypes` mistag; result may be
+  `journalArticle` for conference papers if S2 mis-tags. Adding the venue
+  to venues.json is the fix.
 
 ## 3. Collection paths
 
@@ -268,6 +336,19 @@ python scripts/zotero_operator.py import-by-id \
     --collection "AI/Tabular/2024" \
     --contribution "Retrieval-augmented tabular DL with kNN attention component."
 # stderr: openreview rhgIgTSSxW -> conferencePaper (ICLR 2024 poster)
+# Zotero entry: proceedingsTitle = "International Conference on Learning
+# Representations" (canonical from venues.json), NOT "ICLR 2024 poster".
+
+# 4. OpenReview forum_id, pre-2024 venue (uses v1 fallback transparently)
+python scripts/zotero_operator.py import-by-id \
+    --openreview KmtVD97J43e \
+    --collection "AI/CodeGen/2022" \
+    --contribution "Constrained semantic decoding for code generation."
+# stderr: [openreview_client] v2 returned no matching note for forum_id=
+#         KmtVD97J43e; trying older API
+# stderr: openreview KmtVD97J43e -> conferencePaper (ICLR 2022 Poster)
+# Zotero entry: proceedingsTitle = "International Conference on Learning
+# Representations".
 ```
 
 The `--pdf` flag is optional only when the PDF is genuinely unreachable

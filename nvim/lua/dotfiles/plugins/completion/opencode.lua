@@ -178,9 +178,14 @@ return function(ctx)
           expr = true,
         },
       },
+      cmd = { "OpencodeToggle" },
       config = function()
         vim.g.opencode_opts = {}
         vim.o.autoread = true
+        -- create OpencodeToggle command
+        vim.api.nvim_create_user_command("OpencodeToggle", function()
+          require("opencode").toggle()
+        end, { desc = "Toggle opencode" })
       end,
     },
 

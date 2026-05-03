@@ -30,6 +30,7 @@ Notes:
       POST /file (register with uploadKey).
 """
 import argparse
+import fnmatch
 import hashlib
 import json
 import os
@@ -321,10 +322,96 @@ UNVERIFIED_WARNING = "[UNVERIFIED METADATA: manually constructed, not API-fetche
 UNVERIFIED_TAG = "literature-review-unverified-metadata"
 NO_PDF_TAG = "literature-review-no-pdf"
 SKILL_SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+SKILL_ROOT_DIR = os.path.dirname(SKILL_SCRIPTS_DIR)
 ARXIV_FETCH = os.path.join(SKILL_SCRIPTS_DIR, "arxiv_fetch.py")
 CROSSREF_CLIENT = os.path.join(SKILL_SCRIPTS_DIR, "crossref_client.py")
 S2_CLIENT = os.path.join(SKILL_SCRIPTS_DIR, "s2_client.py")
 OPENREVIEW_CLIENT = os.path.join(SKILL_SCRIPTS_DIR, "openreview_client.py")
+VENUES_JSON_PATH = os.path.join(SKILL_ROOT_DIR, "data", "venues.json")
+
+# Closed track-keyword list. Used ONLY as a last-resort cleanup pass on
+# OpenReview venue display strings when venues.json has no matching entry.
+# Strips trailing acceptance-track tokens like "Poster" / "Oral" so that
+# "ICLR 2024 Poster" becomes "ICLR 2024" rather than landing verbatim in
+# Zotero proceedingsTitle. Does NOT translate to canonical name - that
+# requires a venues.json hit. Keep this set narrow to avoid stripping real
+# venue tokens (e.g. "Workshop" in "EMNLP Workshop on X").
+_TRACK_KEYWORDS = frozenset({
+    "poster", "oral", "spotlight", "findings", "demo", "industry",
+    "tutorial", "long", "short", "main", "track",
+})
+
+
+class _VenuesLookup:
+    """Loads data/venues.json and provides two lookup interfaces:
+    by_openreview_id and by_s2_name. See venues.json _schema for semantics.
+    """
+
+    def __init__(self, path):
+        self._venues = []
+        self._loaded = False
+        self._error = None
+        try:
+            with open(path) as f:
+                data = json.load(f)
+            self._venues = data.get("venues") or []
+            self._loaded = True
+        except FileNotFoundError as e:
+            self._error = e
+        except json.JSONDecodeError as e:
+            self._error = e
+
+    @property
+    def loaded(self):
+        return self._loaded
+
+    @property
+    def error(self):
+        return self._error
+
+    def by_openreview_id(self, venue_id):
+        if not venue_id:
+            return None
+        for v in self._venues:
+            for glob in (v.get("openreview_id_globs") or []):
+                if fnmatch.fnmatchcase(venue_id, glob):
+                    return v
+        return None
+
+    def by_s2_name(self, name, alt_names=None):
+        # Case-insensitive EXACT match against s2_venue_aliases. No
+        # substring matching - prevents over-matching workshop venues that
+        # contain a parent conference name (e.g. "NeurIPS Workshop on X"
+        # must not match the NeurIPS entry).
+        candidates = [name] + list(alt_names or [])
+        normalized = [c.strip().lower() for c in candidates if c]
+        if not normalized:
+            return None
+        for v in self._venues:
+            aliases = (v.get("s2_venue_aliases") or [])
+            for alias in aliases:
+                if alias.strip().lower() in normalized:
+                    return v
+        return None
+
+
+_VENUES_LOOKUP = _VenuesLookup(VENUES_JSON_PATH)
+if not _VENUES_LOOKUP.loaded:
+    print(f"[zotero_operator] WARNING: venues.json not loaded "
+          f"({VENUES_JSON_PATH}): {_VENUES_LOOKUP.error}. Falling back to "
+          f"track-keyword strip for OpenReview venues.", file=sys.stderr)
+
+
+def _strip_track_suffix(s):
+    # Last-resort cleanup for OpenReview venue display strings. Removes
+    # trailing track-keyword tokens (closed _TRACK_KEYWORDS list) so that
+    # e.g. "ICLR 2024 poster" -> "ICLR 2024". Used ONLY when venues.json
+    # lookup misses. Does not translate to canonical proceedings title -
+    # callers should prefer the venues.json result whenever available.
+    words = (s or "").strip().split()
+    while words and words[-1].rstrip(",.").lower() in _TRACK_KEYWORDS:
+        words.pop()
+    return " ".join(words)
 
 
 def _add_tag(item_key, tag):
@@ -377,34 +464,66 @@ def _arxiv_to_zotero(arxiv_meta):
 
 
 def _s2_pick_item_type(s2_meta):
-    # Priority order:
-    #   T1: publicationVenue.type (venue-level signal, most reliable for
-    #       conference vs journal because it comes from the venue record
-    #       itself - "conference" / "journal").
-    #   T2: publicationTypes (paper-level S2 classifier; can mis-tag e.g.
-    #       NeurIPS proceedings as "JournalArticle"). Conference wins over
-    #       JournalArticle when both present.
+    # Cascade priority for itemType inference from S2 metadata:
+    #   T0: arxiv-only signal (venue == "arXiv.org" / empty) -> preprint.
+    #       S2 records arxiv-hosted papers with venue="arXiv.org"; these
+    #       are not conference proceedings and must not get a venue field.
+    #   T1: publicationVenue.type (venue-record signal, most reliable).
+    #   T2: publicationTypes (paper-level S2 classifier, can mis-tag e.g.
+    #       NeurIPS proceedings as "JournalArticle"). Conference wins.
+    #   T2.5 (Bug 2b mitigation): when only "JournalArticle" is in
+    #       publicationTypes AND venue_type is missing, cross-check the
+    #       S2 venue name against venues.json. If venues.json asserts the
+    #       venue is a conference, override the misclassification. Uses
+    #       publicationVenue.alternate_names as additional lookup keys.
     #   T3: default conferencePaper (most ML/CS venues without DOIs are
     #       conferences; journals usually have DOIs and never reach this
     #       cascade tier).
+    venue_raw = (s2_meta.get("venue") or "").strip()
+    if not venue_raw or venue_raw.lower() in ("arxiv.org", "arxiv",
+                                               "arxiv preprint"):
+        return "preprint", None
+
     venue_type = (s2_meta.get("venue_type") or "").lower()
     if venue_type == "conference":
         return "conferencePaper", "proceedingsTitle"
     if venue_type == "journal":
         return "journalArticle", "publicationTitle"
+
     pub_types = s2_meta.get("publication_types") or []
     if "Conference" in pub_types:
         return "conferencePaper", "proceedingsTitle"
     if "JournalArticle" in pub_types:
+        record = _VENUES_LOOKUP.by_s2_name(
+            venue_raw, alt_names=s2_meta.get("venue_alt_names"),
+        )
+        if record and record.get("type") == "conference":
+            return "conferencePaper", "proceedingsTitle"
         return "journalArticle", "publicationTitle"
+
     return "conferencePaper", "proceedingsTitle"
 
 
 def _s2_to_zotero(s2_meta):
-    venue = s2_meta.get("venue")
-    if not venue:
-        return None
     item_type, venue_field = _s2_pick_item_type(s2_meta)
+
+    if item_type == "preprint":
+        return _arxiv_to_zotero({
+            "arxiv_id": s2_meta.get("arxiv_id"),
+            "title": s2_meta.get("title"),
+            "authors": s2_meta.get("authors"),
+            "year": s2_meta.get("year"),
+            "published": s2_meta.get("published"),
+            "url": s2_meta.get("url"),
+            "abstract": s2_meta.get("abstract"),
+        })
+
+    venue_raw = s2_meta.get("venue") or ""
+    record = _VENUES_LOOKUP.by_s2_name(
+        venue_raw, alt_names=s2_meta.get("venue_alt_names"),
+    )
+    venue_display = record["canonical_name"] if record else venue_raw
+
     aid = s2_meta.get("arxiv_id") or ""
     year = s2_meta.get("year")
     out = {
@@ -412,7 +531,7 @@ def _s2_to_zotero(s2_meta):
         "title": s2_meta.get("title") or "",
         "creators": _names_to_creators(s2_meta.get("authors")),
         "date": s2_meta.get("published") or (str(year) if year else ""),
-        venue_field: venue,
+        venue_field: venue_display,
         "abstractNote": s2_meta.get("abstract") or "",
         "url": s2_meta.get("url") or "",
         "extra": f"arXiv:{aid}" if aid else "",
@@ -430,9 +549,25 @@ def _venue_id_to_display(venue_id):
 
 
 def _openreview_to_zotero(or_meta):
-    venue_display = or_meta.get("venue_display") or ""
+    # Proceedings title resolver cascade (Bug 1 fix):
+    #   T1: venues.json lookup by venue_id glob -> canonical_name.
+    #       This is the ONLY tier that produces a canonical proceedings
+    #       title (e.g. "Advances in Neural Information Processing Systems").
+    #   T2: strip closed track keywords from venue.value (e.g.
+    #       "ICLR 2024 poster" -> "ICLR 2024"). Used when venues.json has
+    #       no entry for this venue. Yields a short form, not canonical.
+    #   T3: parse venue_id structurally (e.g. "ICLR.cc/2024/Conference"
+    #       -> "ICLR 2024"). Final fallback when no venue.value present.
     venue_id = or_meta.get("venue_id") or ""
-    proceedings = venue_display or _venue_id_to_display(venue_id)
+    venue_display_raw = or_meta.get("venue_display") or ""
+
+    record = _VENUES_LOOKUP.by_openreview_id(venue_id)
+    if record:
+        proceedings = record["canonical_name"]
+    else:
+        stripped = _strip_track_suffix(venue_display_raw)
+        proceedings = stripped or _venue_id_to_display(venue_id)
+
     forum_id = or_meta.get("forum_id") or ""
     year = or_meta.get("year")
     out = {

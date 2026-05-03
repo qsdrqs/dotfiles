@@ -19,6 +19,7 @@ import os
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -90,8 +91,27 @@ def get_health(host: str, port: int) -> dict[str, Any]:
     return payload
 
 
-def list_sessions(host: str, port: int) -> list[dict[str, Any]]:
-    payload = http_json(host, port, "GET", "/session")
+def list_agents(host: str, port: int) -> list[dict[str, Any]]:
+    payload = http_json(host, port, "GET", "/agent")
+    if not isinstance(payload, list):
+        raise OcError("unexpected payload from GET /agent")
+    return [item for item in payload if isinstance(item, dict)]
+
+
+def list_providers(host: str, port: int) -> dict[str, Any]:
+    payload = http_json(host, port, "GET", "/provider")
+    if not isinstance(payload, dict):
+        raise OcError("unexpected payload from GET /provider")
+    return payload
+
+
+def list_sessions(
+    host: str, port: int, directory: str | None = None
+) -> list[dict[str, Any]]:
+    path = "/session"
+    if directory:
+        path += f"?directory={urllib.parse.quote(directory)}"
+    payload = http_json(host, port, "GET", path)
     if not isinstance(payload, list):
         raise OcError("unexpected payload from GET /session")
     return [item for item in payload if isinstance(item, dict)]
@@ -129,13 +149,38 @@ def session_is_busy(host: str, port: int, session_id: str) -> bool:
     return isinstance(status, dict) and status.get("type") == "busy"
 
 
-def async_send(host: str, port: int, session_id: str, message: str) -> None:
+def parse_model(model_str: str | None) -> dict[str, str] | None:
+    if not model_str:
+        return None
+    parts = model_str.split("/", 1)
+    if len(parts) != 2 or not parts[0] or not parts[1]:
+        raise OcError(
+            f"invalid model format: '{model_str}' -- expected 'providerID/modelID' "
+            f"(e.g. 'openai/gpt-4o' or 'anthropic/claude-sonnet-4')"
+        )
+    return {"providerID": parts[0], "modelID": parts[1]}
+
+
+def async_send(
+    host: str,
+    port: int,
+    session_id: str,
+    message: str,
+    agent: str | None = None,
+    model: str | None = None,
+) -> None:
+    payload: dict[str, Any] = {"parts": [{"type": "text", "text": message}]}
+    if agent is not None:
+        payload["agent"] = agent
+    parsed_model = parse_model(model)
+    if parsed_model is not None:
+        payload["model"] = parsed_model
     http_json(
         host,
         port,
         "POST",
         f"/session/{session_id}/prompt_async",
-        payload={"parts": [{"type": "text", "text": message}]},
+        payload=payload,
         expected_status=204,
     )
 
@@ -302,7 +347,7 @@ def cmd_health(args: argparse.Namespace) -> int:
 
 
 def cmd_list_sessions(args: argparse.Namespace) -> int:
-    sessions = list_sessions(args.host, args.port)
+    sessions = list_sessions(args.host, args.port, directory=args.dir)
     if args.json:
         emit(args, sessions)
         return 0
@@ -319,6 +364,87 @@ def cmd_list_sessions(args: argparse.Namespace) -> int:
         for s in sessions
     ]
     print(format_table(["session_id", "slug", "title", "directory"], rows))
+    return 0
+
+
+def cmd_list_agents(args: argparse.Namespace) -> int:
+    agents = list_agents(args.host, args.port)
+    if args.json:
+        emit(args, agents)
+        return 0
+    if not agents:
+        print("(no agents)")
+        return 0
+    visible = [a for a in agents if not a.get("hidden", False)]
+    rows = []
+    for a in agents:
+        name = a.get("name", "?")
+        hidden = "(hidden)" if a.get("hidden", False) else ""
+        model = a.get("model") or {}
+        model_str = ""
+        if model.get("providerID") and model.get("modelID"):
+            model_str = f"{model['providerID']}/{model['modelID']}"
+        rows.append([name, model_str, hidden])
+    print(format_table(["agent", "model", ""], rows))
+    return 0
+
+
+def cmd_list_providers(args: argparse.Namespace) -> int:
+    providers = list_providers(args.host, args.port)
+    if args.json:
+        emit(args, providers)
+        return 0
+    all_providers = providers.get("all", [])
+    if not all_providers:
+        print("(no providers)")
+        return 0
+    rows = []
+    for p in all_providers:
+        pid = p.get("id", "?")
+        source = p.get("source", "")
+        models = p.get("models", {})
+        count = len(models)
+        tag = f"[{source}]" if source else ""
+        rows.append([pid, tag, str(count)])
+    print(format_table(["provider", "source", "models"], rows))
+    return 0
+
+
+def cmd_list_models_by_provider(args: argparse.Namespace) -> int:
+    providers = list_providers(args.host, args.port)
+    if args.json:
+        emit(args, providers)
+        return 0
+    all_providers = providers.get("all", [])
+    target = args.provider
+    matched = [p for p in all_providers if p.get("id") == target]
+    if not matched:
+        available = ", ".join(p.get("id", "?") for p in all_providers)
+        print(f"provider '{target}' not found. Available providers: {available}")
+        return 1
+    p = matched[0]
+    models = p.get("models", {})
+    if not models:
+        print(f"no models for provider '{target}'")
+        return 0
+    active: list[str] = []
+    inactive: list[str] = []
+    for mid, info in models.items():
+        if isinstance(info, dict) and info.get("status") == "active":
+            active.append(mid)
+        else:
+            inactive.append(mid)
+    lines: list[str] = []
+    lines.append(f"{target} ({p.get('source', '?')})")
+    if active:
+        lines.append(f"  active ({len(active)}):")
+        for m in active:
+            lines.append(f"    {m}")
+    if inactive:
+        lines.append(f"  inactive ({len(inactive)}):")
+        for m in inactive:
+            lines.append(f"    {m}")
+    print("\n".join(lines))
     return 0
 
 
@@ -342,7 +468,7 @@ def cmd_delete_session(args: argparse.Namespace) -> int:
 
 def cmd_send(args: argparse.Namespace) -> int:
     text = prefixed(args.sender, args.message)
-    async_send(args.host, args.port, args.session, text)
+    async_send(args.host, args.port, args.session, text, agent=args.agent, model=args.model)
     if args.json:
         emit(args, {"queued": True, "session": args.session, "bytes": len(text.encode("utf-8"))})
     else:
@@ -395,7 +521,7 @@ def cmd_poll(args: argparse.Namespace) -> int:
 def cmd_send_and_wait(args: argparse.Namespace) -> int:
     text = prefixed(args.sender, args.message)
     baseline = len(read_messages(args.host, args.port, args.session))
-    async_send(args.host, args.port, args.session, text)
+    async_send(args.host, args.port, args.session, text, agent=args.agent, model=args.model)
     new_messages = poll_for_response(
         args.host, args.port, args.session, baseline, args.timeout, args.interval
     )
@@ -428,6 +554,23 @@ def add_global(parser: argparse.ArgumentParser) -> None:
         help=f"OpenCode server host (default: {DEFAULT_HOST}, env: OPENCODE_HOST)",
     )
     parser.add_argument("--json", action="store_true", help="Emit JSON output")
+    parser.add_argument(
+        "--dir",
+        default=None,
+        help="Filter sessions by directory (for list-sessions); sets working directory context",
+    )
+    parser.add_argument(
+        "--agent",
+        default=None,
+        help="Agent type to use for prompt processing (e.g. 'build', 'explore', 'oracle'). "
+        "Sets the subagent_type for send/send-and-wait commands",
+    )
+    parser.add_argument(
+        "--model",
+        default=None,
+        help="Model to use in 'providerID/modelID' format (e.g. 'openai/gpt-4o'). "
+        "Sets the model for send/send-and-wait commands",
+    )
 
 
 def add_session_arg(parser: argparse.ArgumentParser, required: bool = True) -> None:
@@ -470,6 +613,19 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("list-sessions", parents=[common], help="List all sessions on the server")
     p.set_defaults(func=cmd_list_sessions)
+
+    p = sub.add_parser("list-agents", parents=[common], help="List all available agent types")
+    p.set_defaults(func=cmd_list_agents)
+
+    p = sub.add_parser("list-providers", parents=[common], help="List all providers (model sources)")
+    p.set_defaults(func=cmd_list_providers)
+
+    p = sub.add_parser(
+        "list-models-by-provider", parents=[common],
+        help="List models for a specific provider (use --provider <ID>)",
+    )
+    p.add_argument("--provider", required=True, help="Provider ID (e.g. 'openai', 'anthropic')")
+    p.set_defaults(func=cmd_list_models_by_provider)
 
     p = sub.add_parser("create-session", parents=[common], help="Create a new session")
     p.set_defaults(func=cmd_create_session)
