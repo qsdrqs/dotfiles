@@ -71,6 +71,27 @@
       "verified_date": "2026-04-26"
     },
     {
+      "canonical_name": "Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks",
+      "short_name": "NeurIPS Datasets and Benchmarks Track",
+      "type": "conference",
+      "openreview_id_globs": [],
+      "s2_venue_aliases": [
+        "NeurIPS Datasets and Benchmarks",
+        "NeurIPS Datasets and Benchmarks Track",
+        "Neural Information Processing Systems Track on Datasets and Benchmarks",
+        "Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks"
+      ],
+      "verified_sources": [
+        "Official NeurIPS Call for Datasets and Benchmarks (https://neurips.cc/Conferences/2021/CallForDatasetsBenchmarks): 'The official name will be Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks ... separate from the NeurIPS proceedings.' Establishes that D&B Track is a co-located but separately published proceedings, NOT the main NeurIPS volume.",
+        "Official D&B proceedings landing page (https://datasets-benchmarks-proceedings.neurips.cc/): page title 'Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks 1 (NeurIPS Datasets and Benchmarks 2021)'.",
+        "DBLP sub-stream: https://dblp.org/db/conf/nips/neurips2021db (and per-year successors). DBLP groups D&B under conf/nips but uses a distinct event key 'neurips{YYYY}db', confirming that publishers/aggregators treat it as a sibling track of main NeurIPS rather than identical proceedings.",
+        "Curran/proceedings.com record (https://www.proceedings.com/68432.html): ISBN 9781713871095, 'NeurIPS Datasets and Benchmarks 2021', Editors Vanschoren and Yeung, Publisher 'Neural Information Processing Systems Foundation, Inc.'",
+        "S2 publicationVenue.name observed value: 'NeurIPS Datasets and Benchmarks' (verified via arxiv 2105.12655 / Project CodeNet during literature-review session 2026-05-03).",
+        "Note: NeurIPS Workshops are intentionally NOT covered by this entry; workshop proceedings have venue-specific titles and are non-archival, so misclassifying them as 'NeurIPS' main conference would be incorrect. Workshop papers fall through to S2 default behavior."
+      ],
+      "verified_date": "2026-05-03"
+    },
+    {
       "canonical_name": "Conference on Language Modeling",
       "short_name": "COLM",
       "type": "conference",

@@ -72,6 +72,19 @@ def _landing_url(doi):
     return f"https://doi.org/{urllib.parse.quote(doi, safe='/')}"
 
 
+def _user_instructions(landing_url, expected_output, manifest_path):
+    return [
+        f"1. Open the landing URL in a browser (chrome-devtools window or your own):",
+        f"     {landing_url}",
+        f"2. Locate the PDF (look for 'Download PDF', 'Full Text', 'Open Access', or similar). "
+        f"Resolve any login / captcha / cookie banner manually if prompted.",
+        f"3. Save the PDF to this exact path:",
+        f"     {expected_output}",
+        f"4. Confirm completion to the agent. The agent will run:",
+        f"     python paywall_browser.py verify --manifest {manifest_path} --pdf {expected_output}",
+    ]
+
+
 def prepare(args):
     with open(args.manifest) as f:
         manifest = json.load(f)
@@ -81,21 +94,56 @@ def prepare(args):
         return 0
     meta = manifest.get("input_meta") or {}
     doi = meta.get("doi")
+    paper_dir = os.path.dirname(os.path.abspath(args.manifest))
+    expected_output = os.path.join(paper_dir, "paper.pdf")
+    landing_url = _landing_url(doi) if doi else (meta.get("url") or meta.get("landing_url"))
+
+    if args.user_mode:
+        if not landing_url:
+            print(f"[paywall] --user-mode requires either DOI or input_meta.url "
+                  f"in {args.manifest}; nothing to navigate to.", file=sys.stderr)
+            return 1
+        recipe = {
+            "doi": doi,
+            "landing_url": landing_url,
+            "publisher": "user-driven",
+            "strategy": "user-driven",
+            "hint": ("Hand off navigation to the user via chrome-devtools or "
+                     "their own browser. Agent should open the landing URL "
+                     "via mcp_chrome-devtools_new_page, then use mcp_Question "
+                     "to guide download. See references/paywall-fallback.md "
+                     "section 'User-driven Fallback (Mode B)'."),
+            "paper_dir": paper_dir,
+            "expected_output": expected_output,
+            "manifest": os.path.abspath(args.manifest),
+            "user_instructions": _user_instructions(landing_url, expected_output,
+                                                     os.path.abspath(args.manifest)),
+            "arxiv_id_if_any": meta.get("arxiv_id"),
+            "title": meta.get("title"),
+        }
+        json.dump(recipe, sys.stdout, ensure_ascii=False, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
     if not doi:
-        print(f"[paywall] {args.manifest} has no DOI; paywall fallback not applicable",
-              file=sys.stderr)
+        print(f"[paywall] {args.manifest} has no DOI; paywall fallback not "
+              f"applicable in auto mode. Retry with --user-mode if input_meta.url "
+              f"points at a landing page worth manual download.", file=sys.stderr)
         return 1
     publisher, strategy_id, hint = match_strategy(doi)
+    if strategy_id == "generic":
+        print(f"[paywall] DOI {doi} maps to unknown publisher; auto strategy is "
+              f"generic and likely to fail. Consider re-running with --user-mode "
+              f"to hand off to the user via chrome-devtools.", file=sys.stderr)
     recipe = {
         "doi": doi,
-        "landing_url": _landing_url(doi),
+        "landing_url": landing_url,
         "publisher": publisher,
         "strategy": strategy_id,
         "hint": hint,
-        "paper_dir": os.path.dirname(os.path.abspath(args.manifest)),
-        "expected_output": os.path.join(
-            os.path.dirname(os.path.abspath(args.manifest)), "paper.pdf"
-        ),
+        "paper_dir": paper_dir,
+        "expected_output": expected_output,
+        "manifest": os.path.abspath(args.manifest),
         "arxiv_id_if_any": meta.get("arxiv_id"),
         "title": meta.get("title"),
     }
@@ -123,14 +171,15 @@ def verify(args):
     with open(args.manifest) as f:
         manifest = json.load(f)
     manifest["status"] = "ok"
-    manifest["source"] = "chrome-devtools"
+    manifest["source"] = args.source
     manifest["via"] = "paywall_fallback"
     manifest["bytes"] = size
     manifest["pdf_path"] = os.path.abspath(args.pdf)
     with open(args.manifest, "w") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     json.dump(
-        {"status": "ok", "pdf_path": manifest["pdf_path"], "bytes": size},
+        {"status": "ok", "pdf_path": manifest["pdf_path"], "bytes": size,
+         "source": args.source},
         sys.stdout, ensure_ascii=False, indent=2,
     )
     sys.stdout.write("\n")
@@ -143,11 +192,24 @@ def main():
 
     p_prep = sub.add_parser("prepare", help="Emit a navigation recipe for chrome-devtools")
     p_prep.add_argument("--manifest", required=True)
+    p_prep.add_argument("--user-mode", action="store_true",
+                        help="Emit a user-driven recipe (hand off to a human "
+                             "via chrome-devtools or own browser) instead of "
+                             "the auto publisher-strategy recipe. Use when "
+                             "publisher is unknown, login wall is involved, "
+                             "or auto attempts have failed. See "
+                             "references/paywall-fallback.md.")
     p_prep.set_defaults(fn=prepare)
 
     p_ver = sub.add_parser("verify", help="Verify a downloaded PDF and update manifest")
     p_ver.add_argument("--manifest", required=True)
     p_ver.add_argument("--pdf", required=True)
+    p_ver.add_argument("--source", default="chrome-devtools",
+                       help="Attribution string written to manifest.source. "
+                            "Use 'chrome-devtools' (default) for agent-driven "
+                            "auto downloads, 'user-driven' for user-mode "
+                            "manual downloads, or another publisher-specific "
+                            "label.")
     p_ver.set_defaults(fn=verify)
 
     args = parser.parse_args()

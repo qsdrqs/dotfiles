@@ -20,11 +20,21 @@ Subcommands:
 Environment (REQUIRED):
     ZOTERO_API_KEY    Personal API key from https://www.zotero.org/settings/keys
     ZOTERO_USER_ID    Numeric user ID (shown on the same settings page)
+                      Used by default unless ZOTERO_LIBRARY_TYPE=groups is set.
 Environment (optional):
     ZOTERO_API_BASE   default https://api.zotero.org
+    ZOTERO_LIBRARY_TYPE  "users" (default) or "groups". Selects which library
+                         the operator targets.
+    ZOTERO_LIBRARY_ID    Numeric library id. For groups: the group id from
+                         https://www.zotero.org/groups/<id>. For users: defaults
+                         to ZOTERO_USER_ID. The API key MUST grant the
+                         appropriate access (read+write) to this library.
 
 Notes:
-    - Group libraries are NOT supported in this minimal client; user libraries only.
+    - Both user and group libraries are supported. The combination of
+      ZOTERO_LIBRARY_TYPE + ZOTERO_LIBRARY_ID determines the API path
+      (/users/<id> vs /groups/<id>). When ZOTERO_LIBRARY_TYPE is unset or
+      equals "users", behaviour is identical to the legacy single-user path.
     - Attachment upload uses Zotero's standard authorization flow:
       POST /file (claim) -> POST to S3 URL with prefix/suffix wrapping ->
       POST /file (register with uploadKey).
@@ -44,14 +54,29 @@ import urllib.request
 API_BASE = os.environ.get("ZOTERO_API_BASE", "https://api.zotero.org").rstrip("/")
 API_KEY = os.environ.get("ZOTERO_API_KEY")
 USER_ID = os.environ.get("ZOTERO_USER_ID")
+LIBRARY_TYPE = os.environ.get("ZOTERO_LIBRARY_TYPE", "users").strip().lower()
+if LIBRARY_TYPE == "users":
+    LIBRARY_ID = os.environ.get("ZOTERO_LIBRARY_ID") or USER_ID
+else:
+    LIBRARY_ID = os.environ.get("ZOTERO_LIBRARY_ID")
 USER_AGENT = "literature-review-skill/0.1"
 MIN_INTERVAL_SEC = 0.4
 _last_request_at = 0.0
 
 
 def _need_creds():
-    if not API_KEY or not USER_ID:
-        print("ERROR: set ZOTERO_API_KEY and ZOTERO_USER_ID", file=sys.stderr)
+    if not API_KEY:
+        print("ERROR: set ZOTERO_API_KEY", file=sys.stderr)
+        sys.exit(2)
+    if LIBRARY_TYPE not in ("users", "groups"):
+        print(f"ERROR: ZOTERO_LIBRARY_TYPE must be 'users' or 'groups' (got {LIBRARY_TYPE!r})",
+              file=sys.stderr)
+        sys.exit(2)
+    if not LIBRARY_ID:
+        if LIBRARY_TYPE == "groups":
+            print("ERROR: set ZOTERO_LIBRARY_ID for group libraries", file=sys.stderr)
+        else:
+            print("ERROR: set ZOTERO_USER_ID (or ZOTERO_LIBRARY_ID)", file=sys.stderr)
         sys.exit(2)
 
 
@@ -79,7 +104,7 @@ def _request(method, path_or_url, *, params=None, body=None, headers=None,
     if raw_url:
         url = path_or_url
     else:
-        url = f"{API_BASE}/users/{USER_ID}{path_or_url}"
+        url = f"{API_BASE}/{LIBRARY_TYPE}/{LIBRARY_ID}{path_or_url}"
     if params:
         url = f"{url}?{urllib.parse.urlencode(params)}"
     if isinstance(body, (dict, list)):
@@ -428,6 +453,29 @@ def _add_tag(item_key, tag):
     return True
 
 
+def _remove_tag(item_key, tag):
+    _, _, item = _request("GET", f"/items/{item_key}")
+    data = item["data"]
+    tags = list(data.get("tags") or [])
+    new_tags = [t for t in tags if t.get("tag") != tag]
+    if len(new_tags) == len(tags):
+        return False
+    version = data["version"]
+    _request("PATCH", f"/items/{item_key}",
+             body={"tags": new_tags},
+             headers={"If-Unmodified-Since-Version": str(version)})
+    return True
+
+
+def _get_pdf_attachments(item_key):
+    _, _, children = _request("GET", f"/items/{item_key}/children")
+    return [
+        c for c in (children or [])
+        if (c.get("data") or {}).get("itemType") == "attachment"
+        and (c.get("data") or {}).get("contentType") == "application/pdf"
+    ]
+
+
 def _names_to_creators(names):
     creators = []
     for name in (names or []):
@@ -692,6 +740,31 @@ def import_paper(meta, collection_key, pdf_path=None, contribution=None,
         coll_result = add_to_collection(item_key, collection_key)
         result = {"status": "existed", "item_key": item_key,
                   "collection": coll_result}
+        if pdf_path and os.path.isfile(pdf_path):
+            existing_pdfs = _get_pdf_attachments(item_key)
+            if existing_pdfs:
+                print(
+                    f"[zotero_operator] {item_key} already has "
+                    f"{len(existing_pdfs)} PDF attachment(s); skipping "
+                    f"--pdf to avoid duplicates. Detach existing in Zotero "
+                    f"first if you want to replace.",
+                    file=sys.stderr,
+                )
+            else:
+                result["attachment"] = attach_pdf(item_key, pdf_path)
+                pdf_attached = True
+                result["pdf_backfilled"] = True
+                try:
+                    if _remove_tag(item_key, NO_PDF_TAG):
+                        result["no_pdf_tag_removed"] = True
+                except Exception as e:
+                    print(f"WARNING: failed to remove no-pdf tag from "
+                          f"{item_key}: {e}", file=sys.stderr)
+                print(
+                    f"[zotero_operator] backfilled PDF for existing item "
+                    f"{item_key}",
+                    file=sys.stderr,
+                )
     else:
         created = create_item(meta, collection_key=collection_key)
         item_key = created["key"]

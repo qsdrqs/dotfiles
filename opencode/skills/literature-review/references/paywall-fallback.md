@@ -4,8 +4,16 @@ Trigger: `pdf_fetch.py` exits 3 with `status: paywalled` in its manifest. The
 Stage A/B chain (arxiv -> direct pdf_url -> Unpaywall) failed for a paper the
 main agent has decided is worth deep reading.
 
-Stage C adds a **chrome-devtools MCP** fallback that drives a real Chrome
-instance to exercise cookie / institutional / publisher-embargo workarounds.
+Stage C has two sub-modes:
+
+- **Mode A: agent-driven (`prepare`)** - the agent uses chrome-devtools MCP
+  to follow a publisher-specific strategy (IEEE / ACM / Springer / ...).
+  Pure automation, no human in the loop. See "Per-publisher strategy" below.
+- **Mode B: user-driven (`prepare --user-mode`)** - the agent hands off
+  navigation to the user, who downloads the PDF in a real browser
+  (chrome-devtools window or their own Chrome). Used when Mode A is
+  unsuitable (login wall, captcha, unknown publisher, repeated failure,
+  or non-DOI landing pages). See "User-driven Fallback (Mode B)" below.
 
 ## When to invoke
 
@@ -94,19 +102,113 @@ Each strategy is encoded in `paywall_browser.py` as a stub the main agent reads.
 The main agent still does the actual click/evaluate; the script only names the
 next action.
 
+## User-driven Fallback (Mode B)
+
+When Mode A is the wrong tool (login wall, captcha, unknown publisher, two
+strategy attempts already failed, or no DOI exists at all), hand off to the
+human. The agent stops automating clicks and instead opens a browser the user
+can drive.
+
+### When to invoke Mode B
+
+Trigger Mode B when ANY of:
+
+- `paywall_browser.py prepare` (default mode) emits `publisher: unknown`
+  / `strategy: generic` (it will print a stderr hint suggesting `--user-mode`).
+- Mode A automated attempts fail twice on the same paper (hard limit per
+  "Failure handling" below).
+- Landing page presents a login form, captcha, cookie consent banner, or
+  similar interactive gate that is awkward to script and the user has
+  institutional access.
+- Manifest has no DOI but does have `input_meta.url` pointing at an
+  open-access PDF behind a paywall-shaped landing page (preprint server,
+  workshop site, dataset webpage).
+- User explicitly requests manual handoff.
+
+### Flow
+
+```
+pdf_fetch.py status=paywalled
+    |
+    v
+paywall_browser.py prepare --user-mode --manifest papers/<id>/manifest.json
+    - emits a recipe with strategy="user-driven" and a user_instructions list
+    - hint points the agent at chrome-devtools navigation
+    |
+    v
+Main agent reads recipe and:
+    1. mcp_chrome-devtools_new_page(url=recipe.landing_url)
+       (creates a Chrome window the user can see and click in)
+    2. mcp_Question to the user, e.g.:
+       "I opened the publisher landing page. Please:
+        - log in / accept cookies / solve captcha if asked
+        - find the PDF download link and save the file to:
+          <recipe.expected_output>
+        Or, open <recipe.landing_url> in your own browser instead.
+        Reply 'done' when the PDF is at the expected path,
+        or 'skip' to abandon this paper."
+    3. wait for user reply (the agent's turn ends; user response wakes it).
+    |
+    v
+Main agent verifies:
+    - reply='skip' -> record status=user_skipped in manifest, continue.
+    - reply='done' -> stat the expected_output:
+        if file exists and starts with %PDF -> next step
+        else mcp_Question again ("file missing or not a PDF, retry or skip?")
+    |
+    v
+paywall_browser.py verify --manifest <...> --pdf <expected_output> \
+                          --source user-driven
+    - confirms PDF magic bytes + size sanity check
+    - writes manifest.status=ok, manifest.source=user-driven
+    |
+    v
+Phase 4 deep-read resumes (MinerU, section split, row.json, Zotero import)
+```
+
+### Hard rules (Mode B)
+
+Same do-no-harm constraints as Mode A, plus:
+
+- Maximum ONE user-driven attempt per paper per session. If the user replies
+  'skip' or the file does not appear, mark `status=user_skipped` and move on.
+  Do not re-prompt within the same session.
+- Never auto-fill credentials in the chrome-devtools session on behalf of the
+  user. The user enters their own credentials, or declines.
+- Do not exfiltrate or persist any login form contents from the
+  chrome-devtools session beyond what the user explicitly asks (e.g. saving
+  the downloaded PDF). Cookies remain in the MCP session and are not
+  serialized to disk.
+- The agent's `mcp_Question` MUST surface the exact `expected_output` path so
+  the user can save the PDF without ambiguity. Relative paths are forbidden.
+
+### When Mode B is preferred over Mode A from the start
+
+For these publishers, default to Mode B without trying Mode A:
+
+- Elsevier / ScienceDirect (`10.1016/...`): Mode A almost always lands on a
+  consent dialog the agent cannot reliably dismiss; user-driven is faster.
+- Wiley (`10.1002/...`) for non-OA papers: same rationale.
+- Personal author pages, institutional repositories, workshop PDFs hosted
+  outside the major publishers: Mode A's `PUBLISHER_MAP` has no entry, so
+  Mode B is the natural path.
+
+For IEEE / ACM / Springer Mode A is still preferred (they have stable URL
+patterns); fall back to Mode B only on Mode A failure.
+
 ## Failure handling
 
 | Failure | Action |
 |---------|--------|
 | Landing page returns 404 / deleted DOI | Record in session_log, status=doi_dead, continue |
-| Publisher requires institution login we do not have | Record status=paywalled_no_access, continue |
-| PDF download starts but file is corrupted / non-PDF | Retry once; if still bad, record status=paywall_failed |
-| chrome-devtools MCP unavailable on this host | Skip Stage C paywall fallback entirely; log to user |
+| Publisher requires institution login we do not have | Switch to Mode B (user-driven) and let the user log in; if user skips, record status=paywalled_no_access |
+| PDF download starts but file is corrupted / non-PDF | Retry once; if still bad, switch to Mode B; if Mode B also fails, record status=paywall_failed |
+| chrome-devtools MCP unavailable on this host | Skip Mode A. Mode B can still work via "open this URL in your own browser" prompt - the agent does not strictly need chrome-devtools to drive a user-driven flow. |
 | Sci-Hub / mirror policy requires explicit user consent | Do NOT auto-scrape; require user opt-in flag `--allow-mirrors` |
 
 **Hard rule:** never attempt >= 3 paywall bypasses on the same paper in one
-session. Two strategy attempts max, then record and move on. Stage C must not
-loop.
+session. Mode A: two strategy attempts max. Mode B: one user-driven attempt
+max. Total Stage C attempts per paper <= 3. Stage C must not loop.
 
 ## Do-no-harm constraints
 

@@ -485,7 +485,9 @@ python "$SKILL_DIR/scripts/section_splitter.py" \
 3. If `pdf_fetch` reported `paywalled` (exit 3), invoke the Stage C paywall
    fallback. See `references/paywall-fallback.md`. Do NOT block the deep-read
    loop; queue paywalled papers and handle them in a single sweep at the end
-   of Phase 4:
+   of Phase 4. Stage C has two modes:
+
+   **Mode A (auto, publisher-strategy):**
 
    ```bash
    python "$SKILL_DIR/scripts/paywall_browser.py" prepare \
@@ -497,15 +499,38 @@ python "$SKILL_DIR/scripts/section_splitter.py" \
    `chrome-devtools_new_page` -> `chrome-devtools_wait_for` -> extract PDF url
    -> navigate/download -> save bytes to `$PAPER_DIR/paper.pdf`. Hard rule:
    max 2 strategy attempts per paper, 1 req / 5 s per publisher host.
-   Finalize with:
+
+   **Mode B (user-driven, hand off to human):**
+
+   Use when Mode A is the wrong tool: unknown publisher (`prepare` will print
+   a stderr hint), login wall, captcha, two Mode A attempts already failed,
+   no DOI but a usable landing URL, or user explicitly requests handoff.
+
+   ```bash
+   python "$SKILL_DIR/scripts/paywall_browser.py" prepare --user-mode \
+       --manifest "$PAPER_DIR/manifest.json"
+   # -> emits user-driven recipe with explicit user_instructions list
+   ```
+
+   YOU (main agent) then:
+   - `mcp_chrome-devtools_new_page(url=recipe.landing_url)` to open the
+     landing page in a window the user can see and interact with.
+   - `mcp_Question` to the user with the exact `expected_output` path the
+     PDF must be saved to. Offer "open in your own browser" as an
+     alternative to chrome-devtools.
+   - Wait for user reply ('done' or 'skip'). Hard rule: ONE user-driven
+     attempt per paper per session. Do not re-prompt.
+
+   **Both modes finalize with:**
 
    ```bash
    python "$SKILL_DIR/scripts/paywall_browser.py" verify \
        --manifest "$PAPER_DIR/manifest.json" \
-       --pdf      "$PAPER_DIR/paper.pdf"
+       --pdf      "$PAPER_DIR/paper.pdf" \
+       --source   chrome-devtools          # Mode A; or 'user-driven' for Mode B
    ```
 
-   `verify` rewrites `manifest.json` to `status: ok, source: chrome-devtools`
+   `verify` rewrites `manifest.json` to `status: ok, source: <attribution>`
    so the rest of Phase 4 / Phase 5 treats the paper normally. If `verify`
    fails (non-PDF, too small), the manifest stays at `status: paywalled` -
    Phase 5.2 will then route the paper into the metadata-only import path
@@ -771,7 +796,7 @@ All scripts accept `--help` and write errors to stderr.
 | `crossref_client.py` | CrossRef REST (DOI -> Zotero metadata) | B |
 | `zotero_operator.py` | Zotero Web API (CRUD + collection + attach + note + 4-tier metadata cascade + venues.json resolver) | B |
 | `setup_containers.sh` / `teardown_containers.sh` | Deploy mineru | B |
-| `paywall_browser.py` | chrome-devtools fallback for IEEE/ACM | C |
+| `paywall_browser.py` | chrome-devtools fallback for paywalled papers (Mode A: publisher-strategy auto, Mode B: user-driven via `--user-mode`) | C |
 
 Data files (not scripts):
 
