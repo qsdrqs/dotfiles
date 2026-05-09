@@ -57,7 +57,7 @@
       flake = false;
     };
     registersDOTnvim = {
-      url = "github:tversteeg/registers.nvim";
+      url = "git+https://codeberg.org/fosk/registers.nvim";
       flake = false;
     };
     yaziDOTnvim = {

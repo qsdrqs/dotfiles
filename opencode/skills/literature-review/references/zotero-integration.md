@@ -100,9 +100,9 @@ The same email is:
 Only needed if you will extract text from non-arXiv PDFs at Phase 4:
 
 ```bash
-bash scripts/setup_containers.sh
+bash "$HOME/.config/opencode/skills/mineru-converter/scripts/setup_containers.sh"
 # Skip entirely on CPU-only hosts:
-SKIP_MINERU=1 bash scripts/setup_containers.sh
+SKIP_MINERU=1 bash "$HOME/.config/opencode/skills/mineru-converter/scripts/setup_containers.sh"
 ```
 
 ## 2. Metadata resolution

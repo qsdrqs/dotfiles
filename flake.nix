@@ -6,7 +6,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-last.url = "github:NixOS/nixpkgs/3e20095fe3c6cbb1ddcef89b26969a69a1570776";
+    nixpkgs-last.url = "github:NixOS/nixpkgs/0c88e1f2bdb93d5999019e99cb0e61e1fe2af4c5";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-stable-old.url = "github:NixOS/nixpkgs/nixos-24.11";
     # Specific commits to fix the version of some packages.
@@ -18,6 +18,10 @@
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    home-manager-stable = {
+      url = "github:nix-community/home-manager/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
@@ -149,7 +153,7 @@
   # Work-in-progress: refer to parent/sibling flakes in the same repository
   # inputs.c-hello.url = "path:../c-hello";
 
-  outputs = { nixpkgs, home-manager, handy, vscode-server, nur, dev-shell, nixos-raspberrypi, ... }@inputs:
+  outputs = { nixpkgs, home-manager, home-manager-stable, handy, vscode-server, nur, dev-shell, nixos-raspberrypi, ... }@inputs:
     rec {
       pkgs-collect = builtins.listToAttrs (map
         (pkg: {
@@ -196,6 +200,15 @@
         pkgs-ghcup = pkgs-collect.pkgs-ghcup system;
         pkgs-intel-npu-driver = pkgs-collect.pkgs-intel-npu-driver system;
         pkgs-last = pkgs-collect.pkgs-last system;
+      };
+
+      stableHomeManagerModule = {
+        disabledModules = [
+          home-manager.nixosModules.home-manager
+        ];
+        imports = [
+          home-manager-stable.nixosModules.home-manager
+        ];
       };
 
       minimalConfig = rec {
@@ -256,6 +269,7 @@
       };
       serverConfig = basicConfig // {
         modules = basicConfig.modules ++ [
+          stableHomeManagerModule
           ./nixos/server-configuration.nix
           ./nixos/custom/vulchi.nix
         ];
@@ -266,6 +280,7 @@
           nixos-raspberrypi = inputs.nixos-raspberrypi;
         };
         modules = basicConfig.modules ++ [
+          stableHomeManagerModule
           ./nixos/rpi-configuration.nix
           ./nixos/custom/rpi.nix
 

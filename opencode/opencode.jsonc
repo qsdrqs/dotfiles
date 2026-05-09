@@ -1,7 +1,7 @@
 {
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
-    "oh-my-openagent",
+    // "oh-my-openagent",
     "opencode-claude-auth",
     "opencode-gemini-auth@latest",
     "opencode-websearch-cited@1.2.0"
@@ -20,6 +20,11 @@
       "model": "anthropic/claude-opus-4-6",
       "variant": "max",
       "prompt": "{file:./skills/researcher/SKILL.md}",
+      "tools": {
+        "*": true
+      }
+    },
+    "build": {
       "tools": {
         "*": true
       }
@@ -44,6 +49,17 @@
         "--transport",
         "stdio"
       ]
+    },
+    "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp"
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${env:CONTEXT7_API_KEY}"
+      }
     }
   },
   "provider": {

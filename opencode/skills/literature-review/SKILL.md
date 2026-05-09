@@ -16,7 +16,7 @@ description: "Academic literature review workflow for Related Work sections, pro
 ## When NOT to use
 
 - General web research -> use the `researcher` skill.
-- Single-paper deep reading -> use `webfetch` + `arxiv_fetch.py html` directly.
+- Single-paper deep reading -> use `webfetch` + `arxiv_fetch.py html`, or the `mineru-converter` skill for PDF extraction.
 - Quick factual Q&A about a known paper -> use direct MCP tools.
 
 ---
@@ -59,6 +59,7 @@ export LITREV_WORKDIR="/tmp/literature-review/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$LITREV_WORKDIR"
 
 export SKILL_DIR="$HOME/.config/opencode/skills/literature-review"
+export MINERU_SKILL_DIR="$HOME/.config/opencode/skills/mineru-converter"
 
 # Optional: Semantic Scholar API key avoids 429 rate-limits
 export S2_API_KEY="${S2_API_KEY:-}"
@@ -75,29 +76,16 @@ Print the workdir path to the user so they can inspect artifacts.
 
 ## Phase 0.1: Container Setup (one-time per machine)
 
-Stage B runs **one optional container** (MinerU, GPU). Metadata resolution
-uses external REST APIs (CrossRef + arXiv) with no container.
+PDF -> Markdown extraction uses the `mineru-converter` skill. Load it for
+setup and health checks:
 
 ```bash
-bash "$SKILL_DIR/scripts/setup_containers.sh"
+bash "$MINERU_SKILL_DIR/scripts/setup_containers.sh"
 # CPU-only host: SKIP_MINERU=1 bash setup_containers.sh
+python "$MINERU_SKILL_DIR/scripts/mineru_client.py" health
 ```
 
-This brings up:
-
-- `mineru` (GPU) on `:8000` - PDF -> Markdown extraction.
-
-Runs with `--restart unless-stopped`. Tear down with
-`bash "$SKILL_DIR/scripts/teardown_containers.sh"`.
-
-Verify before running Phases 4-5:
-
-```bash
-python "$SKILL_DIR/scripts/crossref_client.py" health
-python "$SKILL_DIR/scripts/mineru_client.py" health
-```
-
-If `mineru` health is false, Phase 4 deep-read still works via the arXiv HTML
+If MinerU is unavailable, Phase 4 deep-read still works via the arXiv HTML
 path; non-arXiv PDFs will be metadata-only at Phase 5 (no extracted text).
 
 Pre-flight checklist before Phase 5:
@@ -112,8 +100,7 @@ Pre-flight checklist before Phase 5:
 - [ ] CrossRef health = true (public API, normally reachable).
 - [ ] User has named a target Zotero collection path.
 
-See `references/zotero-integration.md` and `references/mineru-integration.md`
-for deeper details.
+See `references/zotero-integration.md` for deeper details.
 
 ---
 
@@ -475,7 +462,7 @@ python "$SKILL_DIR/scripts/section_splitter.py" \
      publisher landing page already gives enough signal for the matrix row.
 
    ```bash
-   python "$SKILL_DIR/scripts/mineru_client.py" convert \
+   python "$MINERU_SKILL_DIR/scripts/mineru_client.py" convert \
        --pdf "$LITREV_WORKDIR/papers/$PAPER_ID/paper.pdf" \
        --out "$LITREV_WORKDIR/papers/$PAPER_ID/mineru"
    ```
@@ -792,10 +779,8 @@ All scripts accept `--help` and write errors to stderr.
 | `section_splitter.py` | HTML -> canonical sections JSON | A |
 | `openreview_client.py` | OpenReview forum API (search, fetch single, full thread) | A/B/C |
 | `pdf_fetch.py` | arXiv -> direct -> Unpaywall PDF resolver | B |
-| `mineru_client.py` | MinerU HTTP client for PDF extraction | B |
 | `crossref_client.py` | CrossRef REST (DOI -> Zotero metadata) | B |
 | `zotero_operator.py` | Zotero Web API (CRUD + collection + attach + note + 4-tier metadata cascade + venues.json resolver) | B |
-| `setup_containers.sh` / `teardown_containers.sh` | Deploy mineru | B |
 | `paywall_browser.py` | chrome-devtools fallback for paywalled papers (Mode A: publisher-strategy auto, Mode B: user-driven via `--user-mode`) | C |
 
 Data files (not scripts):
@@ -812,4 +797,3 @@ Data files (not scripts):
 - `references/citation-chasing.md` - Stage C 1-hop snowball workflow (Stage C).
 - `references/paywall-fallback.md` - chrome-devtools MCP fallback strategy (Stage C).
 - `references/zotero-integration.md` - Zotero API + CrossRef pipeline (Stage B).
-- `references/mineru-integration.md` - MinerU container + decision rules (Stage B).

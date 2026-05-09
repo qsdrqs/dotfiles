@@ -16,6 +16,7 @@ in
 
   environment.systemPackages = with pkgs; [
     matrix-synapse-unwrapped
+    chromium
   ];
   virtualisation.podman.enable = true;
 

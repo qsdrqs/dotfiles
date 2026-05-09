@@ -9,8 +9,13 @@ API endpoints used:
                                          or application/zip when response_format_zip=true
     GET  /docs         OpenAPI docs page (used as health probe)
 
+Default output (one API call, ZIP mode):
+    <name>.md               - Markdown with tables (HTML) and formulas (LaTeX)
+    images/                 - extracted figures and charts
+    <name>_content_list.json - structured content by reading order
+
 Subcommands:
-    convert   Run synchronous parse of a single PDF; write content.md.
+    convert   Run synchronous parse of a single PDF; write content.md + images + content_list.
     health    Probe the server; exit 0 if reachable.
 
 Environment:
@@ -23,7 +28,7 @@ Environment:
 
 Usage:
     python mineru_client.py convert --pdf paper.pdf --out ./out
-    python mineru_client.py convert --pdf paper.pdf --out ./out --backend pipeline --lang en
+    python mineru_client.py convert --pdf paper.pdf --out ./out --no-images --no-content-list
     python mineru_client.py health
 """
 import argparse
@@ -42,12 +47,12 @@ import zipfile
 BASE_URL = os.environ.get("MINERU_URL", "http://localhost:8000").rstrip("/")
 DEFAULT_BACKEND = os.environ.get("MINERU_BACKEND", "pipeline")
 DEFAULT_LANG = os.environ.get("MINERU_LANG", "en")
-USER_AGENT = "literature-review-skill/0.1"
+USER_AGENT = "mineru-converter-skill/0.2"
 DEFAULT_TIMEOUT = 1800
 
 
 def _multipart_body(fields, files):
-    boundary = f"----LRBoundary{uuid.uuid4().hex}"
+    boundary = f"----MineruBoundary{uuid.uuid4().hex}"
     buf = io.BytesIO()
     for name, value in fields:
         buf.write(f"--{boundary}\r\n".encode())
@@ -66,13 +71,11 @@ def _multipart_body(fields, files):
     return buf.getvalue(), f"multipart/form-data; boundary={boundary}"
 
 
-def _post_parse(pdf_path, backend, lang, zip_mode, start_page, end_page, timeout):
+def _post_parse(pdf_path, backend, lang, zip_mode, want_content_list,
+                start_page, end_page, timeout):
     with open(pdf_path, "rb") as f:
         pdf_bytes = f.read()
     ctype, _ = mimetypes.guess_type(pdf_path)
-    # MinerU /file_parse takes repeated form parts. Encode both "lang_list"
-    # and "files" as ordered multipart entries so the server sees them as
-    # lists even with a single element.
     fields = [
         ("lang_list", lang),
         ("backend", backend),
@@ -80,7 +83,7 @@ def _post_parse(pdf_path, backend, lang, zip_mode, start_page, end_page, timeout
         ("formula_enable", "true"),
         ("table_enable", "true"),
         ("return_md", "true"),
-        ("return_content_list", "true"),
+        ("return_content_list", "true" if want_content_list else "false"),
         ("return_images", "true" if zip_mode else "false"),
         ("response_format_zip", "true" if zip_mode else "false"),
         ("start_page_id", str(start_page)),
@@ -99,25 +102,32 @@ def _post_parse(pdf_path, backend, lang, zip_mode, start_page, end_page, timeout
 
 
 def convert(pdf_path, out_dir, backend=None, lang=None, start_page=0, end_page=99999,
-            zip_mode=False, timeout=DEFAULT_TIMEOUT):
+            zip_mode=True, want_content_list=True, timeout=DEFAULT_TIMEOUT):
     backend = backend or DEFAULT_BACKEND
     lang = lang or DEFAULT_LANG
     os.makedirs(out_dir, exist_ok=True)
-    data, ctype, _ = _post_parse(pdf_path, backend, lang, zip_mode, start_page, end_page, timeout)
+    data, ctype, _ = _post_parse(pdf_path, backend, lang, zip_mode,
+                                 want_content_list, start_page, end_page, timeout)
 
     result = {"backend": backend, "lang": lang, "out_dir": out_dir}
 
     if zip_mode or "zip" in ctype.lower():
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
             zf.extractall(out_dir)
-        md_files = sorted(p for p in _walk(out_dir) if p.lower().endswith(".md"))
+        all_files = sorted(_walk(out_dir))
+        md_files = sorted(p for p in all_files if p.lower().endswith(".md"))
+        img_files = sorted(p for p in all_files if _is_image(p))
+        json_files = sorted(p for p in all_files if p.lower().endswith(".json"))
         result["markdown_files"] = md_files
-        result["files"] = sorted(_walk(out_dir))
+        result["image_files"] = img_files
+        result["content_files"] = json_files
+        result["files"] = all_files
         return result
 
     payload = json.loads(data)
     results = payload.get("results") or {}
     md_paths = []
+    cl_paths = []
     for name, info in results.items():
         md = info.get("md_content")
         if md:
@@ -125,12 +135,15 @@ def convert(pdf_path, out_dir, backend=None, lang=None, start_page=0, end_page=9
             with open(md_path, "w", encoding="utf-8") as f:
                 f.write(md)
             md_paths.append(md_path)
-        cl = info.get("content_list")
-        if cl:
-            with open(os.path.join(out_dir, f"{name}_content_list.json"), "w",
-                      encoding="utf-8") as f:
-                f.write(cl if isinstance(cl, str) else json.dumps(cl, ensure_ascii=False))
+        if want_content_list:
+            cl = info.get("content_list")
+            if cl:
+                cl_path = os.path.join(out_dir, f"{name}_content_list.json")
+                with open(cl_path, "w", encoding="utf-8") as f:
+                    f.write(cl if isinstance(cl, str) else json.dumps(cl, ensure_ascii=False))
+                cl_paths.append(cl_path)
     result["markdown_files"] = md_paths
+    result["content_files"] = cl_paths
     result["mineru_version"] = payload.get("version")
     return result
 
@@ -142,6 +155,11 @@ def _walk(root):
             full = os.path.join(dirpath, fn)
             out.append(os.path.relpath(full, root))
     return out
+
+
+def _is_image(path):
+    ext = os.path.splitext(path)[1].lower()
+    return ext in (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp")
 
 
 def health():
@@ -165,8 +183,12 @@ def main():
     pc.add_argument("--lang", default=None, help="default: $MINERU_LANG or en")
     pc.add_argument("--start", type=int, default=0)
     pc.add_argument("--end", type=int, default=99999)
-    pc.add_argument("--zip", action="store_true",
-                    help="Request response_format_zip=true (saves images too).")
+    pc.add_argument("--no-images", action="store_true",
+                    help="Skip image extraction (switches to JSON mode, no images/ dir).")
+    pc.add_argument("--no-content-list", action="store_true",
+                    help="Skip content_list.json output.")
+    pc.add_argument("--zip", action="store_true", dest="_zip_flag",
+                    help=argparse.SUPPRESS)
 
     sub.add_parser("health")
 
@@ -181,12 +203,15 @@ def main():
         print(f"ERROR: pdf not found: {args.pdf}", file=sys.stderr)
         sys.exit(2)
 
+    zip_mode = not args.no_images
+    want_cl = not args.no_content_list
+
     t0 = time.monotonic()
     try:
         result = convert(args.pdf, args.out,
                          backend=args.backend, lang=args.lang,
                          start_page=args.start, end_page=args.end,
-                         zip_mode=args.zip)
+                         zip_mode=zip_mode, want_content_list=want_cl)
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", errors="replace")[:500]
         print(json.dumps({"status": "http_error", "code": e.code, "reason": e.reason,

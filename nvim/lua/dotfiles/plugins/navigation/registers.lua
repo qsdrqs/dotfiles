@@ -1,4 +1,4 @@
--- Plugin: tversteeg/registers.nvim
+-- Plugin: https://codeberg.org/fosk/registers.nvim
 return function(ctx)
   local load_plugin = ctx.load_plugin
   local load_plugins = ctx.load_plugins
@@ -14,7 +14,7 @@ return function(ctx)
   return {
 
     {
-      "tversteeg/registers.nvim",
+      url = "https://codeberg.org/fosk/registers.nvim",
       keys = {
         { '"', mode = { "v", "n" } },
         { "<C-r>", mode = { "i" } },
@@ -26,6 +26,5 @@ return function(ctx)
         },
       },
     },
-
   }
 end
