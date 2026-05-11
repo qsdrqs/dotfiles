@@ -54,12 +54,20 @@
       };
     };
 
-  # Patched hid-asus kernel module for ASUS Zenbook Duo UX8406CA.
+  # Patched hid-asus kernel module for ASUS Zenbook Duo UX8406 (incl. UX8406CA).
   #
-  # Adds keyboard backlight, Fn keys, Fn-lock support for the detachable
-  # Zenbook Duo keyboard. Source of the patch:
-  #   https://github.com/hacker1024/linux/tree/ux8406-hid-6.17
-  # Modified to include UX8406CA device IDs (0x1bf2/0x1bf3).
+  # Adds keyboard backlight, Fn keys, Fn-lock support, hotkey mappings, and
+  # report descriptor fixups for the detachable Zenbook Duo keyboard
+  # (USB and Bluetooth, both UX8406MA and UX8406CA variants).
+  #
+  # Source of the patch series:
+  #   https://github.com/hacker1024/linux/tree/ux8406-hid-6.19
+  # Forward-ported to mainline 7.0+: by 7.0 the upstream hid-asus driver had
+  # already absorbed the QUIRK_HID_FN_LOCK plumbing and the asus-wmi listener
+  # API, and dropped the asus-wmi-leds-ids.h header. Only the device-specific
+  # bits (PIDs, quirk, report descriptor fixups, fake-keyboard injection on
+  # the dedicated vendor USB interface, and 0x86/0x9c/0x9d hotkey handling)
+  # remain in this patch.
   #
   # Built as an out-of-tree module so that using it does NOT invalidate the
   # stock NixOS kernel binary cache. The resulting hid-asus.ko is placed in
@@ -94,25 +102,14 @@
         runHook preBuild
 
         # Assemble a minimal out-of-tree source directory containing only the
-        # files we need from the (now-patched) kernel tree. hid-asus.c directly
-        # includes hid-ids.h (same dir) and
-        # <linux/platform_data/x86/asus-wmi-leds-ids.h>.
-        mkdir -p build/include/linux/platform_data/x86
+        # files we need from the (now-patched) kernel tree. hid-asus.c only
+        # needs hid-ids.h from the same drivers/hid directory.
+        mkdir -p build
         cp drivers/hid/hid-asus.c build/
         cp drivers/hid/hid-ids.h  build/
-        cp include/linux/platform_data/x86/asus-wmi-leds-ids.h \
-           build/include/linux/platform_data/x86/
 
-        # The kernel build system places its own -I$(srctree)/include BEFORE
-        # any ccflags-y -I directives, so we cannot simply override the header
-        # via an additional -I. Instead, use -include to force-include our
-        # patched copy at the top of every translation unit: our file sets the
-        # header guard, so when hid-asus.c later does
-        # #include <linux/platform_data/x86/...> the kernel's unpatched copy
-        # is skipped entirely.
         cat > build/Kbuild <<'EOF'
         obj-m := hid-asus.o
-        ccflags-y += -include $(src)/include/linux/platform_data/x86/asus-wmi-leds-ids.h
         EOF
 
         make -C ${kernel.dev}/lib/modules/${kernel.modDirVersion}/build \
@@ -132,7 +129,7 @@
       '';
 
       meta = {
-        description = "Patched hid-asus kernel module for ASUS Zenbook Duo UX8406CA";
+        description = "Patched hid-asus kernel module for ASUS Zenbook Duo (UX8406)";
         license = lib.licenses.gpl2Only;
         platforms = [ "x86_64-linux" ];
       };

@@ -205,6 +205,12 @@ in
           rm "${homeDir}/.config/opencode/skills"
         fi
         mkdir -p "${homeDir}/.config/opencode/skills"
+        if [ -L "${homeDir}/.config/opencode/agents" ]; then
+          rm "${homeDir}/.config/opencode/agents"
+        fi
+        if [ ! -e "${homeDir}/.config/opencode/agents" ]; then
+          ln -s "${homeDir}/dotfiles/opencode/agents" "${homeDir}/.config/opencode/agents"
+        fi
 
         linkSkillDirs() {
           local sourceDir="$1"
