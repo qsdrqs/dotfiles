@@ -67,6 +67,7 @@ in
 
   systemd.sleep.settings.Sleep = {
     HibernateDelaySec = "3h";
+    HibernateMode = "shutdown";
   };
 
   systemd = {

@@ -7,67 +7,7 @@ permission:
   task: deny
   todowrite: deny
   bash:
-    "*": ask
-    "git *": allow
-    "gh *": allow
-    "curl *": allow
-    "wget *": allow
-    "aria2c *": allow
-    "pwd": allow
-    "ls": allow
-    "file *": allow
-    "ls *": allow
-    "du *": allow
-    "find *": allow
-    "mkdir *": allow
-    "rg *": allow
-    "jq *": allow
-    "wc *": allow
-    "strings *": allow
-    "cat *": allow
-    "head *": allow
-    "tail *": allow
-    "grep *": allow
-    "sed *": allow
-    "awk *": allow
-    "sort *": allow
-    "uniq *": allow
-    "cut *": allow
-    "tr *": allow
-    "xargs *": allow
-    "stat *": allow
-    "readlink *": allow
-    "realpath *": allow
-    "basename *": allow
-    "dirname *": allow
-    "sha256sum *": allow
-    "sha1sum *": allow
-    "md5sum *": allow
-    "unzip -l *": allow
-    "unzip *": allow
-    "tar *": allow
-    "bsdtar *": allow
-    "lynx -dump *": allow
-    "w3m -dump *": allow
-    "pandoc *": allow
-    "pdfinfo *": allow
-    "pdftotext *": allow
-    "pdfimages *": allow
-    "pdfseparate *": allow
-    "pdfunite *": allow
-    "qpdf *": allow
-    "mutool *": allow
-    "ocrmypdf *": allow
-    "tesseract *": allow
-    "magick *": allow
-    "python -m json.tool *": allow
-    "python3 -m json.tool *": allow
-    "python -c *": allow
-    "python3 -c *": allow
-    "python *mineru_client.py *": allow
-    "python3 *mineru_client.py *": allow
-    "bash *setup_containers.sh": allow
-    "bash *teardown_containers.sh": allow
+    "*": allow
   external_directory:
     "/tmp/**": allow
     "/var/tmp/**": allow

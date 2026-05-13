@@ -28,6 +28,8 @@ in
   ];
   home.packages = with pkgs; [
     gcc
+    opencode
+    claude-code
   ];
   home.sessionVariables = {
     TZDIR = "${pkgs.tzdata}/share/zoneinfo";
