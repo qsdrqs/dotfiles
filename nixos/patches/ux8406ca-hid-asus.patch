@@ -8,14 +8,26 @@
  #include <linux/leds.h>
  
  #include "hid-ids.h"
-@@ -102,6 +103,7 @@
+@@ -102,6 +103,10 @@
  #define QUIRK_ROG_ALLY_XPAD		BIT(13)
  #define QUIRK_HID_FN_LOCK		BIT(14)
  #define QUIRK_ROG_NKEY_ID1ID2_INIT	BIT(15)
 +#define QUIRK_ZENBOOK_DUO_KEYBOARD	BIT(16)
++
++#define ZENBOOK_DUO_KBD_INIT_RETRIES 5
++#define ZENBOOK_DUO_KBD_INIT_RETRY_DELAY_MS 1000
  
  #define I2C_KEYBOARD_QUIRKS			(QUIRK_FIX_NOTEBOOK_REPORT | \
  						 QUIRK_NO_INIT_REPORTS | \
+@@ -139,6 +144,8 @@ struct asus_drvdata {
+ 	struct asus_kbd_leds *kbd_backlight;
+ 	const struct asus_touchpad_info *tp;
+ 	struct power_supply *battery;
++	struct delayed_work kbd_backlight_init_work;
++	unsigned int kbd_backlight_init_retries;
+ 	struct power_supply_desc battery_desc;
+ 	int battery_capacity;
+ 	int battery_stat;
 @@ -358,8 +360,19 @@
  	if ((usage->hid & HID_USAGE_PAGE) == HID_UP_ASUSVENDOR &&
  	    (usage->hid & HID_USAGE) != 0x00 &&
@@ -38,7 +50,70 @@
  	}
  
  	if (usage->type == EV_KEY && value) {
-@@ -1046,6 +1059,7 @@
+@@ -781,7 +799,62 @@ static int asus_kbd_register_leds(struct hid_device *hdev)
+ 	}
+ 
+ 	return ret;
+ }
++
++static bool asus_kbd_backlight_init_retryable(int ret)
++{
++	return ret == -EPIPE || ret == -ETIMEDOUT || ret == -EIO;
++}
++
++static void asus_kbd_schedule_backlight_retry(struct hid_device *hdev, int ret)
++{
++	struct asus_drvdata *drvdata = hid_get_drvdata(hdev);
++
++	if (!(drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD) ||
++	    !asus_kbd_backlight_init_retryable(ret)) {
++		hid_warn(hdev, "Failed to initialize backlight: %d\n", ret);
++		return;
++	}
++
++	if (drvdata->kbd_backlight_init_retries >= ZENBOOK_DUO_KBD_INIT_RETRIES) {
++		hid_warn(hdev, "Failed to initialize backlight after %u retries: %d\n",
++			 drvdata->kbd_backlight_init_retries, ret);
++		return;
++	}
++
++	drvdata->kbd_backlight_init_retries++;
++	hid_warn(hdev, "Failed to initialize backlight (%d), retry %u/%u scheduled\n",
++		 ret, drvdata->kbd_backlight_init_retries,
++		 ZENBOOK_DUO_KBD_INIT_RETRIES);
++	schedule_delayed_work(&drvdata->kbd_backlight_init_work,
++			      msecs_to_jiffies(ZENBOOK_DUO_KBD_INIT_RETRY_DELAY_MS));
++}
++
++static void asus_kbd_backlight_init_work(struct work_struct *work)
++{
++	struct asus_drvdata *drvdata = container_of(to_delayed_work(work),
++					       struct asus_drvdata,
++					       kbd_backlight_init_work);
++	struct hid_device *hdev = drvdata->hdev;
++	int ret;
++
++	if (drvdata->kbd_backlight)
++		return;
++
++	ret = asus_kbd_register_leds(hdev);
++	if (ret < 0) {
++		asus_kbd_schedule_backlight_retry(hdev, ret);
++		return;
++	}
++
++	hid_info(hdev, "Initialized keyboard backlight after retry\n");
++
++	if (drvdata->quirks & QUIRK_HID_FN_LOCK) {
++		ret = asus_kbd_set_fn_lock(hdev, drvdata->fn_lock);
++		if (ret < 0)
++			hid_warn(hdev, "Failed to resync Fn lock after retry: %d\n", ret);
++	}
++}
+ 
+ /*
+  * [0]       REPORT_ID (same value defined in report descriptor)
+@@ -1046,6 +1119,7 @@
  		case 0x6c: asus_map_key_clear(KEY_SLEEP);		break;
  		case 0x7c: asus_map_key_clear(KEY_MICMUTE);		break;
  		case 0x82: asus_map_key_clear(KEY_CAMERA);		break;
@@ -54,7 +129,43 @@
  		case 0xa5: asus_map_key_clear(KEY_F15);		break; /* ROG Ally left back */
  		case 0xa6: asus_map_key_clear(KEY_F16);		break; /* ROG Ally QAM button */
  		case 0xa7: asus_map_key_clear(KEY_F17);		break; /* ROG Ally ROG long-press */
-@@ -1356,6 +1371,30 @@
+@@ -1267,6 +1342,10 @@ static int asus_probe(struct hid_device *hdev, const struct hid_device_id *id)
+ 
+ 	drvdata->hdev = hdev;
+ 
++	if (drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD)
++		INIT_DELAYED_WORK(&drvdata->kbd_backlight_init_work,
++				  asus_kbd_backlight_init_work);
++
+ 	if (drvdata->quirks & (QUIRK_T100CHI | QUIRK_T90CHI)) {
+ 		ret = asus_battery_probe(hdev);
+ 		if (ret) {
+@@ -1297,9 +1375,11 @@ static int asus_probe(struct hid_device *hdev, const struct hid_device_id *id)
+ 		return ret;
+ 	}
+ 
+-	if (is_vendor && (drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT) &&
+-	    asus_kbd_register_leds(hdev))
+-		hid_warn(hdev, "Failed to initialize backlight.\n");
++	if (is_vendor && (drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT)) {
++		ret = asus_kbd_register_leds(hdev);
++		if (ret < 0)
++			asus_kbd_schedule_backlight_retry(hdev, ret);
++	}
+ 
+ 	/*
+ 	 * For ROG keyboards, skip rename for consistency and ->input check as
+@@ -1340,6 +1420,9 @@ static void asus_remove(struct hid_device *hdev)
+ 	struct asus_drvdata *drvdata = hid_get_drvdata(hdev);
+ 	unsigned long flags;
+ 
++	if (drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD)
++		cancel_delayed_work_sync(&drvdata->kbd_backlight_init_work);
++
+ 	if (drvdata->kbd_backlight) {
+ 		asus_hid_unregister_listener(&drvdata->kbd_backlight->listener);
+ 
+@@ -1356,6 +1439,30 @@
  	hid_hw_stop(hdev);
  }
  
@@ -186,16 +297,17 @@
 @@ -1492,6 +1571,18 @@
  	    USB_DEVICE_ID_ASUSTEK_ROG_Z13_LIGHTBAR),
  	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_ROG_NKEY_KEYBOARD },
- 	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
+-	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	{ HID_DEVICE(BUS_USB, HID_GROUP_GENERIC, USB_VENDOR_ID_ASUSTEK,
 +	    USB_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_KEYBOARD),
 +	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_HID_FN_LOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
-+	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	{ HID_DEVICE(BUS_BLUETOOTH, HID_GROUP_GENERIC, USB_VENDOR_ID_ASUSTEK,
 +	    BT_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_KEYBOARD),
 +	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_HID_FN_LOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
-+	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	{ HID_DEVICE(BUS_USB, HID_GROUP_GENERIC, USB_VENDOR_ID_ASUSTEK,
 +	    USB_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_CA_KEYBOARD),
 +	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_HID_FN_LOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
-+	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_ASUSTEK,
++	{ HID_DEVICE(BUS_BLUETOOTH, HID_GROUP_GENERIC, USB_VENDOR_ID_ASUSTEK,
 +	    BT_DEVICE_ID_ASUSTEK_ZENBOOK_DUO_CA_KEYBOARD),
 +	  QUIRK_USE_KBD_BACKLIGHT | QUIRK_HID_FN_LOCK | QUIRK_ZENBOOK_DUO_KEYBOARD },
 +	{ HID_USB_DEVICE(USB_VENDOR_ID_ASUSTEK,

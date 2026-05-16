@@ -80,6 +80,10 @@ in
       enable = true;
       settingsFile = "/etc/xray/config.jsonc";
     };
+    cloudflare-warp = {
+      enable = true;
+      # enable = pkgs.stdenv.hostPlatform.system == "x86_64-linux";
+    };
   };
 
   virtualisation = {
@@ -110,23 +114,6 @@ in
         RestartSec = 5;
       };
     };
-    services.warp-svc = {
-      enable = pkgs.stdenv.hostPlatform.system == "x86_64-linux";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "pre-network.target" ];
-      description = "CloudflareWARP daemon";
-      serviceConfig =
-        if pkgs.stdenv.hostPlatform.system == "x86_64-linux" then
-          {
-            ExecStart = ''${pkgs.cloudflare-warp}/bin/warp-svc'';
-            CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SYS_PTRACE";
-            AmbientCapabilities = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SYS_PTRACE";
-            Restart = "always";
-            DynamicUser = "no";
-          }
-        else
-          { };
-    };
     services."chown-ssh" = {
       wantedBy = [ "multi-user.target" ];
       before = [ "home-manager-${userName}.service" ];
@@ -139,6 +126,7 @@ in
   };
 
   services.tailscale.enable = true;
+  services.resolved.enable = true;
 
   # 3) Define a timer that triggers that service every hour
   # avoid v2ray service to create config file

@@ -188,6 +188,7 @@ in
           "opencode.jsonc"
           ".mcp.json"
           "oh-my-openagent.json"
+          "oh-my-opencode-slim.json"
           "AGENTS.md"
           "tui.json"
         ];

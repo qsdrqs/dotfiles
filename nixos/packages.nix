@@ -66,8 +66,8 @@
   # already absorbed the QUIRK_HID_FN_LOCK plumbing and the asus-wmi listener
   # API, and dropped the asus-wmi-leds-ids.h header. Only the device-specific
   # bits (PIDs, quirk, report descriptor fixups, fake-keyboard injection on
-  # the dedicated vendor USB interface, and 0x86/0x9c/0x9d hotkey handling)
-  # remain in this patch.
+  # the dedicated vendor USB interface, vendor init retry, and 0x86/0x9c/0x9d
+  # hotkey handling) remain in this patch.
   #
   # Built as an out-of-tree module so that using it does NOT invalidate the
   # stock NixOS kernel binary cache. The resulting hid-asus.ko is placed in

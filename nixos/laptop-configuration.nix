@@ -61,7 +61,7 @@ in
   services.power-profiles-daemon.enable = false;
 
   services.logind.settings.Login = {
-    HandleLidSwitch = "suspend-then-hibernate";
+    # HandleLidSwitch = "suspend-then-hibernate"; # default is "suspend"
     HandleLidSwitchExternalPower = "ignore";
   };
 
