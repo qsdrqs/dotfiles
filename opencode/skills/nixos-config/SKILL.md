@@ -45,17 +45,19 @@ Modify `~/dotfiles` NixOS + Home Manager configuration safely: make minimal, str
    - Follow existing patterns (`lib.mkDefault`, `lib.mkIf`, `lib.mkForce`) already used in nearby code.
    - If the change is host-specific, prefer `~/dotfiles/nixos/custom/<host>.nix` over global modules.
 
-5. Validate (build first; switch only when asked)
+5. Validate (eval first; resource-gate builds)
    - **CRITICAL**: Always use the `path:` flake URI prefix (e.g. `path:$HOME/dotfiles` or `path:.` from within `~/dotfiles`). The repo contains git-ignored files required for build; without `path:`, Nix uses the git-tracked tree and the build will fail.
-   - NixOS build (fast, no activation):
-     - `nix build path:$HOME/dotfiles#nixosConfigurations.<name>.config.system.build.toplevel`
-   - Home Manager build:
-     - `nix build path:$HOME/dotfiles#homeConfigurations.<name>.activationPackage`
-   - If switching is requested, use the user's `snr-switch` shell function:
+   - Default validation should start with eval-level checks such as:
+     - `nix eval path:$HOME/dotfiles#nixosConfigurations.<name>.config.system.build.toplevel.drvPath`
+     - `nix eval path:$HOME/dotfiles#homeConfigurations.<name>.activationPackage.drvPath`
+   - Before any `nix build` command, inspect local resources with Python: logical CPU count, MemAvailable GiB, and 1-minute load average.
+   - If logical CPUs are fewer than 4, MemAvailable is below 8 GiB, load average is higher than logical CPUs, or resource detection fails, use the `question` tool to ask for user consent before running `nix build`. The approval is per-command and does not carry over to later builds.
+   - If logical CPUs are at least 4, MemAvailable is at least 8 GiB, and load average is not higher than logical CPUs, `nix build` may run without asking.
+   - If switching is explicitly requested and approved, use the user's `snr-switch` shell function:
      - `snr-switch <device>` (e.g. `snr-switch desktop`, `snr-switch laptop`)
      - This runs from `~/dotfiles`: cleans syncthing conflict files, then executes `nixos-rebuild switch --sudo --ask-sudo-password --flake path:.#<device>`.
      - Manual switch: `nixos-rebuild switch --sudo --ask-sudo-password --flake path:$HOME/dotfiles#<name>`
-   - Home Manager standalone switch: `home-manager switch --flake path:$HOME/dotfiles#<name>`
+   - Home Manager standalone switch, only if explicitly requested and approved: `home-manager switch --flake path:$HOME/dotfiles#<name>`
    - When something breaks, keep traces visible (`--show-trace`) and fix the first failure, not the last symptom.
 
 6. Provide rollback guidance when you change active state

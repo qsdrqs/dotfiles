@@ -4,8 +4,6 @@ let
     # Add waybar package here due to: https://github.com/Alexays/Waybar/issues/3300
     # waybar
     # inputs.waybar.packages.${pkgs.system}.waybar
-    qt6.qtwayland
-    libsForQt5.qt5.qtwayland
     kdePackages.qtwayland
     hyprpaper
     hyprpicker

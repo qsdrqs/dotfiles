@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-stable, lib, inputs, options, ... }:
+{ config, pkgs, pkgs-stable, pkgs-unstable, lib, inputs, options, ... }:
 let
   homeDir = config.users.users.qsdrqs.home;
 in
@@ -146,6 +146,7 @@ in
       turn.tls_port = 5349;
       room.auto_create = false;
     };
+    package = pkgs-unstable.livekit;
     keyFile = "/etc/livekit/livekit-server.key";
   };
 

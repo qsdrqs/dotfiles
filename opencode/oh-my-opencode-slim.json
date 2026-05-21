@@ -10,7 +10,6 @@
         ],
         "mcps": [
           "*",
-          "!context7"
         ]
       },
       "oracle": {
@@ -25,9 +24,7 @@
         "model": "anthropic/claude-sonnet-4-6",
         "skills": [],
         "mcps": [
-          "websearch",
-          "context7",
-          "grep_app"
+          "*",
         ]
       },
       "explorer": {
@@ -49,7 +46,9 @@
       "fixer": {
         "model": "openai/gpt-5.5-fast",
         "variant": "medium",
-        "skills": [],
+        "skills": [
+          "debugger"
+        ],
         "mcps": []
       }
     },

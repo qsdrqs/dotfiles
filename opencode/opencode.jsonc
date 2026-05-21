@@ -15,6 +15,9 @@
   "snapshot": true,
   "agent": {
     "build": {
+      "disable": true
+    },
+    "orchestrator": {
       "permission": {
         "*": "allow"
       }

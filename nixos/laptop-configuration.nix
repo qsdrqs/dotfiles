@@ -52,8 +52,6 @@ in
       # PCIE_ASPM_ON_BAT = "powersave";
       PCIE_ASPM_ON_BAT = "powersupersave";
 
-      DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE = "bluetooth"; # disable bluetooth when not connected
-
       START_CHARGE_THRESH_BAT0 = 75;
       STOP_CHARGE_THRESH_BAT0 = 80;
     };

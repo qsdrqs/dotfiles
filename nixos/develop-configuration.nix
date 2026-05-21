@@ -3,7 +3,7 @@
   environment.systemPackages = with pkgs; [
     inferno # flamegraph
     cmake
-    extra-cmake-modules
+    kdePackages.extra-cmake-modules
     gnumake
     gcc
     (gcc.cc // { meta.priority = 10; }) # set a lower priority for gcc.cc (higher number means lower priority)
