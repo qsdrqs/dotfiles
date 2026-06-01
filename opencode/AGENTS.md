@@ -17,6 +17,8 @@
 
 When the user states a concrete requirement, keep the work anchored to that requirement. Do not introduce alternate goals, substitute solutions, or workaround paths unless the user asks for them or explicitly approves exploring alternatives.
 
+If an action, edit, command, file change, service change, lockfile change, or external-state change is not explicitly required by the user's instruction, stop before doing it and ask for clarification.
+
 If the requested path appears blocked:
 
 1. State the observed blocker as a fact with evidence.

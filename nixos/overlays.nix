@@ -100,6 +100,20 @@ in
           cargoHash = "sha256-96lD0Sc2hdhNKeIS4zkiG4J0dxEFt6/Np7HHMSoF8j4=";
           meta = super.tzupdate.meta;
         };
+
+        # Temporary Decky Loader hotfix until Jovian updates past v3.2.3.
+        decky-loader = super.decky-loader.overridePythonAttrs (old: rec {
+          version = "3.2.4";
+          src = old.src.override {
+            rev = "v${version}";
+            hash = "sha256-QC1vmosEY+gQGMskA+y3yz3zpHJjXNjoYk3TA93ffJw=";
+          };
+          pnpmDeps = old.pnpmDeps.overrideAttrs (_: {
+            inherit version src;
+            sourceRoot = "source/frontend";
+            outputHash = "sha256-rjou5KDHlF0MWAMzIKjc9UiIKk8t626SOM1Nw7WQzy4=";
+          });
+        });
         # End Temporary self updated packages
 
         # Begin Temporary fixed version packages
