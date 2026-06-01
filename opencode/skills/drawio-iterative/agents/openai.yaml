@@ -1,0 +1,4 @@
+interface:
+  display_name: "Drawio Iterative Refinement"
+  short_description: "Refine drawio diagrams by image comparison"
+  default_prompt: "I have a reference image I want to recreate as a drawio diagram"

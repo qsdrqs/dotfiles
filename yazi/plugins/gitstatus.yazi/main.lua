@@ -446,7 +446,7 @@ end
 function M:fetch(job)
 	-- get subdirectory of git repository
 	if #job.files == 0 then
-		return 3
+		return true
 	end
 	local view = PlaceholderView.new()
 
@@ -488,7 +488,7 @@ function M:fetch(job)
 	if not ls_flag then
 		git_root = get_git_root(base_url)
 		if git_root == 2 then
-			return git_root
+			return false
 		elseif git_root == 3 then
 			-- not in git repository
 			ls_flag = true
@@ -515,7 +515,7 @@ function M:fetch(job)
 				if not child then
 					ya.err("spawn `ls` command returns " .. tostring(code))
 					ya.err("cwd: " .. sub_url)
-					return 2
+					return false
 				end
 				children[sub_url] = child
 				::continue::
@@ -533,7 +533,7 @@ function M:fetch(job)
 		view:apply_initial()
 		view:resolve(resolve_state)
 
-		return 3
+		return true
 	end
 
 	local cached_root = Cache.peek(git_root)
@@ -554,7 +554,7 @@ function M:fetch(job)
 
 	if not git_status or not dir_git_status then
 		ya.err("dir_git_status is nil")
-		return 2
+		return false
 	end
 
 	local update_track = {}
@@ -593,7 +593,7 @@ function M:fetch(job)
 
 	update_tracked(git_root, update_track)
 
-	return 3
+	return true
 end
 
 function M.entry()
@@ -606,12 +606,12 @@ function M.entry()
 		return
 	end
 	if base_url == "/" then
-		ya.mgr_emit("enter", {})
-		ya.mgr_emit("leave", {})
+		ya.emit("enter", {})
+		ya.emit("leave", {})
 		return
 	end
-	ya.mgr_emit("leave", {})
-	ya.mgr_emit("enter", {})
+	ya.emit("leave", {})
+	ya.emit("enter", {})
 end
 
 return M

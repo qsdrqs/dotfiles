@@ -11,6 +11,21 @@
 
 **Rationale**: Conversations stay in the user's preferred working language for fluency, while written artifacts stay in English for cross-tool, cross-collaborator portability and consistency with the existing codebase.
 
+## Requirement Discipline
+
+**NEVER fabricate requirements, constraints, options, or workarounds.**
+
+When the user states a concrete requirement, keep the work anchored to that requirement. Do not introduce alternate goals, substitute solutions, or workaround paths unless the user asks for them or explicitly approves exploring alternatives.
+
+If the requested path appears blocked:
+
+1. State the observed blocker as a fact with evidence.
+2. Distinguish clearly between what is possible, what is impossible, and what is unknown.
+3. Ask before proposing or pursuing alternatives.
+4. Do not present speculative options as if they satisfy the user's original requirement.
+
+**BLOCKING VIOLATION**: Inventing a requirement or workaround that changes the user's requested outcome without explicit approval.
+
 ## Data Analysis
 
 ### Numeric Statistics

@@ -35,11 +35,11 @@
     "omz": {
       "flake": false,
       "locked": {
-        "lastModified": 1778490026,
-        "narHash": "sha256-SC57P9UxNBfO9lceSxL0u21/qNOcIjPcMGs2IgPkYDQ=",
+        "lastModified": 1779087615,
+        "narHash": "sha256-A6HKwOEyd4jjbWbE5HjCVX9KgfG/jEHi7keSP5Ye/lg=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "a07126330b9f56f12f1e00ddd29786d35d6e64d9",
+        "rev": "cb64103161b69d59e1efefeb761ac85564c44698",
         "type": "github"
       },
       "original": {
@@ -81,11 +81,11 @@
     "spaceship": {
       "flake": false,
       "locked": {
-        "lastModified": 1778676673,
-        "narHash": "sha256-rGo6SPekJCpcJ3Ct5rqSy6A8B0T6bnyRhW7R/w3yIwY=",
+        "lastModified": 1779307058,
+        "narHash": "sha256-MjtS5nCD39pMcXp2s5Qg9NRhcl85rzBXyLBtyOKCkOo=",
         "owner": "denysdovhan",
         "repo": "spaceship-prompt",
-        "rev": "f7a0c32de5c8d5ce953699d2934de683bf3b311e",
+        "rev": "896d85acd59e5e1b9f3e1b75698a2c699f910124",
         "type": "github"
       },
       "original": {

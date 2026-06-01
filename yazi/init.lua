@@ -1,4 +1,5 @@
 local link_fg = "cyan"
+local dir_fg = "12"
 local link_style = ui.Style():fg(link_fg)
 local gitstatus_dot = "white"
 local gitstatus_check = "green"
@@ -56,15 +57,19 @@ function Entity:style()
 		s = ui.Style()
 		white_style = true
 	end
+	if file.cha.is_dir then
+		s = s:fg(dir_fg)
+		white_style = false
+	end
 	if file.cha.is_link then
-		s:fg(link_fg)
+		s = s:fg(link_fg)
 		white_style = false
 	end
 	if file.cha.is_exec then
 		if white_style then
-			s:fg("green")
+			s = s:fg("green")
 		end
-		s:bold()
+		s = s:bold()
 	end
 	if not file.is_hovered then
 		return s
@@ -72,6 +77,20 @@ function Entity:style()
 		return s and s:patch(th.indicator.preview) or th.indicator.preview
 	else
 		return s and s:patch(th.indicator.current) or th.indicator.current
+	end
+end
+
+function Entity:icon()
+	local file = self._file
+	local icon = file:icon()
+	if not icon then
+		return ""
+	elseif file.is_hovered then
+		return icon.text .. " "
+	elseif file.cha.is_dir then
+		return ui.Line(icon.text .. " "):style(ui.Style():fg(dir_fg))
+	else
+		return ui.Line(icon.text .. " "):style(icon.style)
 	end
 end
 
@@ -126,10 +145,10 @@ function Linemode:gitstatus()
 		end
 	end
 
-	local style = ui.Style():reset()
+	local style = ui.Style():reverse(true)
 	local color = status_color_tbl[color_key]
 	if color then
-		style:fg(color)
+		style = style:fg(color)
 	end
 
 	return ui.Line(display):style(style)

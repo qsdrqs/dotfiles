@@ -16,7 +16,7 @@ local update_dircount = ya.sync(function(st, st_dircount)
 			if st.dircount_lock[tostring(file.url)] then
 				st.dircount_lock[tostring(file.url)] = false
 			else
-				ya.mgr_emit("plugin", { "dircount", tostring(file.url)})
+				ya.emit("plugin", { "dircount", tostring(file.url)})
 			end
 		end
 		return st.dircount[tostring(file.url)]
@@ -61,7 +61,7 @@ function M:fetch(job)
 			local child, code = Command("ls"):arg({ "-A" }):arg({ url }):stdout(Command.PIPED):spawn()
 			if not child then
 				ya.err("spawn `ls` command returns " .. tostring(code))
-				return 2
+				return false
 			end
 			children[url] = child
 		end
@@ -93,20 +93,20 @@ function M:fetch(job)
 	-- 	ya.err(res)
 	-- end
 
-	return 3
+	return true
 end
 
 function M.entry(self, job)
 	local args = job.args
 	local file_url = args[1]
 	if not file_url then
-		return
+		return true
 	end
 	-- update dircount
 	local child, code = Command("ls"):arg({ "-A" }):arg({ file_url }):stdout(Command.PIPED):spawn()
 	if not child then
 		ya.err("spawn `ls` command returns " .. tostring(code))
-		return 2
+		return false
 	end
 
 	local i, j = 1, 0
@@ -127,6 +127,7 @@ function M.entry(self, job)
 		[tostring(file_url)] = j
 	}
 	update_dircount_table(dircount)
+	return true
 end
 
 return M

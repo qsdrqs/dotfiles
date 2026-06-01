@@ -1,25 +1,30 @@
 local M = {}
 
 function M:peek(job)
-	local output, code, readelf_succ = nil, nil, false
-	if self.file.cha.is_exec then
+	local path = tostring(job.file.path or job.file.url)
+	local output, err, readelf_succ = nil, nil, false
+	local program = "file"
+	if job.file.cha.is_exec then
 		-- use `readelf -WCa`
-		output, code = Command("readelf")
+		program = "readelf"
+		output, err = Command(program)
 				:arg({
 					"-WCa",
-					tostring(self.file.url),
+					path,
 				})
 				:stdout(Command.PIPED)
 				:output()
-		if output.stderr == "" then
+		if output and output.stderr == "" then
 			readelf_succ = true
 		end
 	end
 	if not readelf_succ then
-		output, code = Command("file")
+		program = os.getenv("YAZI_FILE_ONE") or "file"
+		output, err = Command(program)
 				:arg({
 					"-bL",
-					tostring(self.file.url),
+					"--",
+					path,
 				})
 				:stdout(Command.PIPED)
 				:output()
@@ -29,7 +34,7 @@ function M:peek(job)
 	if output then
 		text = ui.Text.parse("----- File Type Classification -----\n\n" .. output.stdout)
 	else
-		text = ui.Text(string.format("Failed to start `%s`, error: %s", cmd, err))
+		text = ui.Text(string.format("Failed to start `%s`, error: %s", program, err))
 	end
 
 	ya.preview_widget(job, text:area(job.area):wrap(ui.Wrap.YES))
@@ -51,18 +56,28 @@ function M:spot(job)
 end
 
 function M:spot_base(job)
-	local url, cha = job.file.url, job.file.cha
-	local spotter = rt.plugin.spotter(url, job.mime)
-	local previewer = rt.plugin.previewer(url, job.mime)
-	local fetchers = rt.plugin.fetchers(job.file, job.mime)
-	local preloaders = rt.plugin.preloaders(url, job.mime)
+	local cha, pair = job.file.cha, { file = job.file, mime = job.mime }
+	local spotter, previewer, fetchers, preloaders = nil, nil, {}, {}
 
-	for i, v in ipairs(fetchers) do
-		fetchers[i] = v.cmd
+	for _, v in pairs(rt.plugin.spotters:match(pair)) do
+		spotter = v
+		break
 	end
-	for i, v in ipairs(preloaders) do
-		preloaders[i] = v.cmd
+
+	for _, v in pairs(rt.plugin.previewers:match(pair)) do
+		previewer = v
+		break
 	end
+
+	for _, v in pairs(rt.plugin.fetchers:match(pair)) do
+		fetchers[#fetchers + 1] = v.name
+	end
+	fetchers = #fetchers ~= 0 and fetchers or { "-" }
+
+	for _, v in pairs(rt.plugin.preloaders:match(pair)) do
+		preloaders[#preloaders + 1] = v.name
+	end
+	preloaders = #preloaders ~= 0 and preloaders or { "-" }
 
 	return {
 		ui.Row({ "Base" }):style(ui.Style():fg("green")),
@@ -72,10 +87,10 @@ function M:spot_base(job)
 		ui.Row {},
 
 		ui.Row({ "Plugins" }):style(ui.Style():fg("green")),
-		ui.Row { "  Spotter:", spotter and spotter.cmd or "-" },
-		ui.Row { "  Previewer:", previewer and previewer.cmd or "-" },
-		ui.Row { "  Fetchers:", #fetchers ~= 0 and fetchers or "-" },
-		ui.Row { "  Preloaders:", #preloaders ~= 0 and preloaders or "-" },
+		ui.Row { "  Spotter:", spotter and spotter.name or "-" },
+		ui.Row { "  Previewer:", previewer and previewer.name or "-" },
+		ui.Row({ "  Fetchers:", fetchers }):height(#fetchers),
+		ui.Row({ "  Preloaders:", preloaders }):height(#preloaders),
 	}
 end
 

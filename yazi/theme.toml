@@ -1,6 +1,4 @@
-# A TOML linter such as https://taplo.tamasfe.dev/ can use this schema to validate your config.
-# If you encounter any issues, please make an issue at https://github.com/yazi-rs/schemas.
-"$schema" = "https://yazi-rs.github.io/schemas/theme.json"
+#:schema https://yazi-rs.github.io/schemas/theme.json
 
 # vim:fileencoding=utf-8:foldmethod=marker
 
@@ -200,22 +198,21 @@ rules = [
 	{ mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "magenta" },
 
 	# Documents
-	{ mime = "application/doc",   fg = "blue" },
-	{ mime = "application/pdf",   fg = "red" },
-	{ mime = "application/rtf",   fg = "green" },
+	{ mime = "application/doc", fg = "blue" },
+	{ mime = "application/pdf", fg = "red" },
+	{ mime = "application/rtf", fg = "green" },
 	{ mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fg = "27" },
 	{ mime = "application/vnd.*", fg = "lightred" },
 
 	# Fallback
-	# { url = "*", fg = "white" },
-	{ url = "*/", fg = "12" }
+	{ url = "*/", fg = "12" },
 ]
+
+# : }}}
 
 
 [icon]
-globs = []
-
-dirs = [
+prepend_dirs = [
 	{ name = ".config", text = "" },
 	{ name = ".git", text = "" },
 	{ name = "Desktop", text = "" },
@@ -230,7 +227,7 @@ dirs = [
 	{ name = "Videos", text = "" },
 ]
 
-files = [
+prepend_files = [
 	# Dotfiles
 	{ name = ".DS_Store", text = "", fg = "#41535b" },
 	{ name = ".bashprofile", text = "", fg = "#89e051" },
@@ -250,7 +247,7 @@ files = [
 	{ name = "LICENSE", text = "󰿃", fg = "#d0bf41" },
 ]
 
-exts = [
+prepend_exts = [
 	# Programming
 	{ name = "c", text = "", fg = "#599eff" },
 	{ name = "cpp", text = "", fg = "#519aba" },
@@ -365,10 +362,4 @@ exts = [
 	{ name = "pkg", text = "", fg = "#9F0500" },
 ]
 
-conds = [
-	{ if = "dir", text = "" },
-	{ if = "!dir", text = "" },
-]
-
 # : }}}
-

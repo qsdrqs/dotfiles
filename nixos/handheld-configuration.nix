@@ -43,12 +43,36 @@ in
   environment.systemPackages = with pkgs; [
     protonup-qt
     chromium-no-sandbox-in-bwrap
+    easyeffects
+    lsp-plugins
+    mda_lv2
+    zam-plugins
   ];
 
   # Ensure CEF debugging is enabled for Decky Loader
   systemd.user.tmpfiles.rules = [
     "f /home/qsdrqs/.steam/steam/.cef-enable-remote-debugging 0644 qsdrqs users -"
   ];
+
+  systemd.user.services.easyeffects = {
+    description = "EasyEffects audio processor";
+    after = [
+      "pipewire.service"
+      "wireplumber.service"
+      "graphical-session.target"
+    ];
+    partOf = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
+    environment.DISPLAY = ":0";
+    serviceConfig = {
+      ExecStart = "${pkgs.easyeffects}/bin/easyeffects --hide-window --service-mode";
+      ExecStop = "${pkgs.easyeffects}/bin/easyeffects --quit";
+      KillMode = "mixed";
+      Restart = "on-failure";
+      RestartSec = 5;
+      TimeoutStopSec = 10;
+    };
+  };
 
   # decky-sunshine hardcodes "cp /usr/bin/bwrap"; provide the expected path
   systemd.tmpfiles.rules = [
@@ -79,6 +103,9 @@ in
     pkgs.hidapi
     pkgs.pciutils
   ];
+  systemd.services.decky-loader.preStart = lib.mkAfter ''
+    ${pkgs.coreutils}/bin/rm -f /var/lib/decky-loader/data/decky-sunshine/bwrap
+  '';
 
   # Handheld Daemon (HHD) for controller support
   # Patch: use Chrome DevTools WebSocket instead of steam binary for power

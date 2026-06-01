@@ -2,7 +2,7 @@
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-claude-auth",
-    "opencode-gemini-auth@latest",
+    // "opencode-gemini-auth@latest",
     "@mohak34/opencode-notifier@latest",
     "oh-my-opencode-slim"
   ],
