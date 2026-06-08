@@ -14,6 +14,17 @@ let
   niriMonitorPower = pkgs.writeShellScriptBin "niri-monitor-power" ''
     exec ${pkgs.python3}/bin/python3 ${./scripts/niri-monitor-power.py}
   '';
+  shutdownHardTimeout = pkgs.writeShellScript "shutdown-hard-timeout" ''
+    set -eu
+
+    trigger="$1"
+
+    (
+        ${pkgs.coreutils}/bin/sleep 600
+        ${pkgs.coreutils}/bin/sync
+        printf '%s' "$trigger" > /proc/sysrq-trigger
+    ) &
+  '';
 in
 {
   environment.systemPackages = with pkgs; [
@@ -69,6 +80,49 @@ in
   };
 
   systemd = {
+    services = {
+      poweroff-hard-timeout = {
+        description = "Force poweroff if shutdown is still running after 10 minutes";
+        wantedBy = [
+          "poweroff.target"
+          "halt.target"
+        ];
+        before = [
+          "poweroff.target"
+          "halt.target"
+        ];
+        conflicts = [
+          "reboot.target"
+          "kexec.target"
+        ];
+        unitConfig.DefaultDependencies = false;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          KillMode = "none";
+          ExecStart = "${shutdownHardTimeout} o";
+        };
+      };
+
+      reboot-hard-timeout = {
+        description = "Force reboot if reboot is still running after 10 minutes";
+        wantedBy = [ "reboot.target" ];
+        before = [ "reboot.target" ];
+        conflicts = [
+          "poweroff.target"
+          "halt.target"
+          "kexec.target"
+        ];
+        unitConfig.DefaultDependencies = false;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          KillMode = "none";
+          ExecStart = "${shutdownHardTimeout} b";
+        };
+      };
+    };
+
     user.services = {
       libinput-gestures = {
         enable = true;
