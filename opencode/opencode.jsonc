@@ -9,9 +9,6 @@
   "$schema": "https://opencode.ai/config.json",
   "formatter": false,
   "model": "{env:OPENCODE_MODEL}",
-  "compaction": {
-    "auto": false
-  },
   "snapshot": true,
   "agent": {
     "build": {
