@@ -422,7 +422,7 @@ binds {
     Mod+D hotkey-overlay-title="Run an Application: rofi" { spawn-sh "rofi -combi-modi drun,run,ssh  -font 'fira code nerd font 15' -show combi -icon-theme 'Papirus' -show-icons -matching fuzzy"; }
     Mod+Ctrl+W hotkey-overlay-title="Run an Application: rofi" { spawn-sh "rofi -show window -font 'fira code nerd font 15' -show combi -icon-theme 'Papirus' -show-icons -matching fuzzy"; }
 
-    Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn-sh "loginctl lock-session"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.

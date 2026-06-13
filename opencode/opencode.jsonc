@@ -133,7 +133,7 @@
     },
     "openrouter": {
       "models": {
-        "z-ai/glm-5": {
+        "z-ai/glm-5.1": {
           "options": {
             "provider": {
               "order": [
