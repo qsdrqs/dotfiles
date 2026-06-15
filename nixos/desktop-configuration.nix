@@ -69,9 +69,6 @@ let
       sed -i "s|Exec=.*|Exec=$out/bin/qqmusic %U|" $out/share/applications/qqmusic.desktop
     '';
   };
-  baidunetdisk-modern = pkgs.nur.repos.xddxdd.baidunetdisk.override {
-    electron_11 = pkgs.electron_39;
-  };
   vscode-wrapper = (exec: cmd: pkgs.writeShellScriptBin cmd ''
     CODE_EXEC=${exec};
     CONFIG=${config.users.users.qsdrqs.home}/.config/Code/User/settings.json;
@@ -99,7 +96,7 @@ in
 
     # NUR
     qqmusic-hidpi
-    baidunetdisk-modern
+    pkgs.nur.repos.xddxdd.baidunetdisk
     scanmem
   ];
 
