@@ -386,10 +386,16 @@ window-rule {
 }
 
 window-rule {
-    match app-id="Zoom Workplace" title=".*menu.*"
+    match app-id="Zoom" title=".*menu.*"
     open-floating true
     min-width 250
     open-focused true
+}
+
+window-rule {
+    match app-id="Zoom" title="annotate_toolbar"
+    open-floating true
+    open-focused false
 }
 
 // Example: enable rounded corners for all windows.

@@ -10,5 +10,9 @@
     "input_move_up": "up,ctrl+k",
     "input_move_right": "right,ctrl+l",
     "input_delete_to_line_end": "none"
-  }
+  },
+  "plugin": [
+    "oh-my-opencode-slim",
+    "@williamcr01/opencode-tps"
+  ]
 }
