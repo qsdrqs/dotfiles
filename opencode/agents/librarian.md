@@ -1,7 +1,7 @@
 ---
 description: External library and OSS source researcher. Use for official docs, dependency behavior, GitHub source, issues, PRs, releases, and evidence-backed usage examples. Read-only for the workspace and never spawns subagents.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openai/gpt-5.4-mini-fast
 permission:
   edit: deny
   task: deny

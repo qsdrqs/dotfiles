@@ -1,27 +1,17 @@
 {
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
-    "opencode-claude-auth",
+    // "opencode-claude-auth",
     // "opencode-gemini-auth@latest",
     "@mohak34/opencode-notifier@latest",
-    "oh-my-opencode-slim"
+    // "oh-my-opencode-slim",
+    "opencode-background-agents"
   ],
   "$schema": "https://opencode.ai/config.json",
   "formatter": false,
   "model": "{env:OPENCODE_MODEL}",
   "snapshot": true,
   "agent": {
-    "build": {
-      "disable": true
-    },
-    "orchestrator": {
-      "permission": {
-        "*": "allow"
-      }
-    },
-    "general": {
-      "disable": true
-    },
     "explore": {
       "disable": true
     },

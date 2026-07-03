@@ -1,3 +1,11 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Source: https://github.com/hacker1024/linux/tree/ux8406-hid-6.19
+# Title: hid-asus: ASUS Zenbook Duo UX8406 keyboard support
+#
+# Derived from the Linux kernel hid-asus driver (GPL-2.0-only).
+# Device-specific bits (PIDs, quirk, report descriptor fixups,
+# fake-keyboard injection, vendor init retry, hotkey handling)
+# forward-ported to mainline. See nixos/packages.nix for context.
 --- a/drivers/hid/hid-asus.c
 +++ b/drivers/hid/hid-asus.c
 @@ -31,6 +31,7 @@

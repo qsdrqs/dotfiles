@@ -1,0 +1,602 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Source: https://github.com/niri-wm/niri/pull/1856
+# Author: stefanboca
+# Title: input: allow configuring tablet and touch devices by name
+#
+# Derived from niri (GPL-3.0-only). This patch carries PR #1856
+# on top of the nixpkgs niri package until the PR merges upstream
+# and reaches nixpkgs. Remove this patch + overlay once that happens.
+diff -u -N '--exclude=.git' -r a/docs/wiki/Configuration:-Input.md b/docs/wiki/Configuration:-Input.md
+--- a/docs/wiki/Configuration:-Input.md	2026-04-25 04:19:21.000000000 -0700
++++ b/docs/wiki/Configuration:-Input.md	2026-06-19 13:25:33.630415534 -0700
+@@ -4,7 +4,8 @@
+ 
+ There's a section for each device type: `keyboard`, `touchpad`, `mouse`, `trackpoint`, `trackball`, `tablet`, `touch`.
+ Settings in those sections will apply to every device of that type.
+-Currently, there's no way to configure specific devices individually (but that is planned).
++Currently, there's no way to configure specific `keyboard`, `touchpad`, `mouse`, or `trackpoint` devices
++individually (but that is planned).
+ 
+ All settings at a glance:
+ 
+@@ -286,6 +287,35 @@
+ 
+ - `map-to-focused-output`: <sup>Since: 26.04</sup> will map the tablet to the focused output, takes precedence over `map-to-output`.
+ 
++> [!TIP]
++>
++> <sup>Since: next release</sup>
++>
++> It is possible to configure specific `tablet` and `touch` devices by name.
++>
++> Any non‑device‑specific settings will apply as a fallback when no matching device‑specific block exists:
++>
++> ```kdl
++> input {
++>     tablet {
++>         map-to-output "eDP-1";
++>     }
++>
++>     // Map this specific tablet to a different output.
++>     tablet "ELAN9009:00 04F3:2F2A Stylus" {
++>         map-to-output "DP-1";
++>     }
++>
++>     // Map this specific touchscreen to DP-1.
++>     touch "ELAN9009:00 04F3:2F2A" {
++>         map-to-output "DP-1";
++>     }
++> }
++> ```
++>
++> The device name is case-insensitive.
++> Device names are taken from libinput; you can find them by running `sudo libinput list-devices` or `sudo libinput debug-events`.
++
+ ### General Settings
+ 
+ These settings are not specific to a particular input device.
+diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/input.rs
+--- a/niri-config/src/input.rs	2026-04-25 04:19:21.000000000 -0700
++++ b/niri-config/src/input.rs	2026-06-19 13:26:03.950500686 -0700
+@@ -15,8 +15,8 @@
+     pub mouse: Mouse,
+     pub trackpoint: Trackpoint,
+     pub trackball: Trackball,
+-    pub tablet: Tablet,
+-    pub touch: Touch,
++    pub tablets: Tablets,
++    pub touch_screens: TouchScreens,
+     pub disable_power_key_handling: bool,
+     pub warp_mouse_to_focus: Option<WarpMouseToFocus>,
+     pub focus_follows_mouse: Option<FocusFollowsMouse>,
+@@ -37,10 +37,10 @@
+     pub trackpoint: Option<Trackpoint>,
+     #[knuffel(child)]
+     pub trackball: Option<Trackball>,
+-    #[knuffel(child)]
+-    pub tablet: Option<Tablet>,
+-    #[knuffel(child)]
+-    pub touch: Option<Touch>,
++    #[knuffel(children(name = "tablet"))]
++    pub tablets: Tablets,
++    #[knuffel(children(name = "touch"))]
++    pub touch_screens: TouchScreens,
+     #[knuffel(child)]
+     pub disable_power_key_handling: Option<Flag>,
+     #[knuffel(child)]
+@@ -64,15 +64,7 @@
+             workspace_auto_back_and_forth,
+         );
+ 
+-        merge_clone!(
+-            (self, part),
+-            touchpad,
+-            mouse,
+-            trackpoint,
+-            trackball,
+-            tablet,
+-            touch,
+-        );
++        merge_clone!((self, part), touchpad, mouse, trackpoint, trackball);
+ 
+         merge_clone_opt!(
+             (self, part),
+@@ -81,6 +73,11 @@
+             mod_key,
+             mod_key_nested,
+         );
++
++        self.tablets.0.extend(part.tablets.0.iter().cloned());
++        self.touch_screens
++            .0
++            .extend(part.touch_screens.0.iter().cloned());
+     }
+ }
+ 
+@@ -355,8 +352,10 @@
+     }
+ }
+ 
+-#[derive(knuffel::Decode, Debug, Default, Clone, PartialEq)]
++#[derive(knuffel::Decode, Debug, Clone, PartialEq)]
+ pub struct Tablet {
++    #[knuffel(argument)]
++    pub name: Option<String>,
+     #[knuffel(child)]
+     pub off: bool,
+     #[knuffel(child, unwrap(arguments))]
+@@ -369,8 +368,47 @@
+     pub left_handed: bool,
+ }
+ 
+-#[derive(knuffel::Decode, Debug, Default, Clone, PartialEq)]
++const DEFAULT_TABLET: Tablet = Tablet {
++    name: None,
++    off: false,
++    calibration_matrix: None,
++    map_to_output: None,
++    map_to_focused_output: false,
++    left_handed: false,
++};
++impl Default for Tablet {
++    fn default() -> Self {
++        DEFAULT_TABLET
++    }
++}
++
++#[derive(Debug, Default, PartialEq)]
++pub struct Tablets(pub Vec<Tablet>);
++
++impl FromIterator<Tablet> for Tablets {
++    fn from_iter<T: IntoIterator<Item = Tablet>>(iter: T) -> Self {
++        Self(Vec::from_iter(iter))
++    }
++}
++
++impl Tablets {
++    pub fn find<'a>(&'a self, name: Option<&str>) -> &'a Tablet {
++        name.and_then(|name| {
++            self.0.iter().find(|t| {
++                t.name
++                    .as_deref()
++                    .is_some_and(|n| n.eq_ignore_ascii_case(name))
++            })
++        })
++        .or_else(|| self.0.iter().find(|t| t.name.is_none()))
++        .unwrap_or(&DEFAULT_TABLET)
++    }
++}
++
++#[derive(knuffel::Decode, Debug, Clone, PartialEq)]
+ pub struct Touch {
++    #[knuffel(argument)]
++    pub name: Option<String>,
+     #[knuffel(child)]
+     pub off: bool,
+     #[knuffel(child, unwrap(arguments))]
+@@ -379,6 +417,41 @@
+     pub map_to_output: Option<String>,
+ }
+ 
++const DEFAULT_TOUCH: Touch = Touch {
++    name: None,
++    off: false,
++    calibration_matrix: None,
++    map_to_output: None,
++};
++impl Default for Touch {
++    fn default() -> Self {
++        DEFAULT_TOUCH
++    }
++}
++
++#[derive(Debug, Default, PartialEq)]
++pub struct TouchScreens(pub Vec<Touch>);
++
++impl FromIterator<Touch> for TouchScreens {
++    fn from_iter<T: IntoIterator<Item = Touch>>(iter: T) -> Self {
++        Self(Vec::from_iter(iter))
++    }
++}
++
++impl TouchScreens {
++    pub fn find<'a>(&'a self, name: Option<&str>) -> &'a Touch {
++        name.and_then(|name| {
++            self.0.iter().find(|t| {
++                t.name
++                    .as_deref()
++                    .is_some_and(|n| n.eq_ignore_ascii_case(name))
++            })
++        })
++        .or_else(|| self.0.iter().find(|t| t.name.is_none()))
++        .unwrap_or(&DEFAULT_TOUCH)
++    }
++}
++
+ #[derive(knuffel::Decode, Debug, Clone, Copy, PartialEq)]
+ pub struct FocusFollowsMouse {
+     #[knuffel(property, str)]
+@@ -705,6 +778,90 @@
+         )
+         "#);
+     }
++
++    #[test]
++    fn parse_tablets_name() {
++        // Test no name and name provided
++        let parsed = do_parse(
++            r#"
++            tablet {
++                map-to-output "eDP-1"
++            }
++
++            tablet "ELAN9009:00 04F3:2F2A Stylus" {
++                map-to-output "DP-1"
++            }
++            "#,
++        );
++
++        assert_debug_snapshot!(parsed.tablets, @r#"
++        Tablets(
++            [
++                Tablet {
++                    name: None,
++                    off: false,
++                    calibration_matrix: None,
++                    map_to_output: Some(
++                        "eDP-1",
++                    ),
++                    left_handed: false,
++                },
++                Tablet {
++                    name: Some(
++                        "ELAN9009:00 04F3:2F2A Stylus",
++                    ),
++                    off: false,
++                    calibration_matrix: None,
++                    map_to_output: Some(
++                        "DP-1",
++                    ),
++                    left_handed: false,
++                },
++            ],
++        )
++        "#);
++    }
++
++    #[test]
++    fn parse_touch_screens_name() {
++        // Test no name and name provided
++        let parsed = do_parse(
++            r#"
++            touch {
++                map-to-output "eDP-1"
++            }
++
++            touch "ELAN9009:00 04F3:2F2A" {
++                map-to-output "DP-1"
++            }
++            "#,
++        );
++
++        assert_debug_snapshot!(parsed.touch_screens, @r#"
++        TouchScreens(
++            [
++                Touch {
++                    name: None,
++                    off: false,
++                    calibration_matrix: None,
++                    map_to_output: Some(
++                        "eDP-1",
++                    ),
++                },
++                Touch {
++                    name: Some(
++                        "ELAN9009:00 04F3:2F2A",
++                    ),
++                    off: false,
++                    calibration_matrix: None,
++                    map_to_output: Some(
++                        "DP-1",
++                    ),
++                },
++            ],
++        )
++        "#);
++    }
+ 
+     #[test]
+     fn scroll_factor_h_v_factors() {
+diff -u -N '--exclude=.git' -r a/niri-config/src/lib.rs b/niri-config/src/lib.rs
+--- a/niri-config/src/lib.rs	2026-04-25 04:19:21.000000000 -0700
++++ b/niri-config/src/lib.rs	2026-06-19 13:26:03.950930213 -0700
+@@ -1097,31 +1097,41 @@
+                     left_handed: true,
+                     middle_emulation: true,
+                 },
+-                tablet: Tablet {
+-                    off: false,
+-                    calibration_matrix: Some(
+-                        [
+-                            1.0,
+-                            2.0,
+-                            3.0,
+-                            4.0,
+-                            5.0,
+-                            6.0,
+-                        ],
+-                    ),
+-                    map_to_output: Some(
+-                        "eDP-1",
+-                    ),
+-                    map_to_focused_output: true,
+-                    left_handed: false,
+-                },
+-                touch: Touch {
+-                    off: false,
+-                    calibration_matrix: None,
+-                    map_to_output: Some(
+-                        "eDP-1",
+-                    ),
+-                },
++                tablets: Tablets(
++                    [
++                        Tablet {
++                            name: None,
++                            off: false,
++                            calibration_matrix: Some(
++                                [
++                                    1.0,
++                                    2.0,
++                                    3.0,
++                                    4.0,
++                                    5.0,
++                                    6.0,
++                                ],
++                            ),
++                            map_to_output: Some(
++                                "eDP-1",
++                            ),
++                            map_to_focused_output: true,
++                            left_handed: false,
++                        },
++                    ],
++                ),
++                touch_screens: TouchScreens(
++                    [
++                        Touch {
++                            name: None,
++                            off: false,
++                            calibration_matrix: None,
++                            map_to_output: Some(
++                                "eDP-1",
++                            ),
++                        },
++                    ],
++                ),
+                 disable_power_key_handling: true,
+                 warp_mouse_to_focus: Some(
+                     WarpMouseToFocus {
+diff -u -N '--exclude=.git' -r a/src/handlers/mod.rs b/src/handlers/mod.rs
+--- a/src/handlers/mod.rs	2026-04-25 04:19:21.000000000 -0700
++++ b/src/handlers/mod.rs	2026-06-19 13:25:33.632093664 -0700
+@@ -129,7 +129,7 @@
+         let keyboards = self
+             .niri
+             .devices
+-            .iter()
++            .keys()
+             .filter(|device| device.has_capability(input::DeviceCapability::Keyboard))
+             .cloned();
+ 
+diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
+--- a/src/input/mod.rs	2026-04-25 04:19:21.000000000 -0700
++++ b/src/input/mod.rs	2026-06-19 13:30:29.498917493 -0700
+@@ -71,6 +71,11 @@
+ 
+ pub const DOUBLE_CLICK_TIME: Duration = Duration::from_millis(400);
+ 
++#[derive(Debug, Clone, PartialEq)]
++pub struct DeviceData {
++    pub name: String,
++}
++
+ #[derive(Debug, Clone, Copy, PartialEq)]
+ pub struct TabletData {
+     pub aspect_ratio: f64,
+@@ -200,7 +205,9 @@
+ 
+         match event {
+             InputEvent::DeviceAdded { device } => {
+-                self.niri.devices.insert(device.clone());
++                let name = device.name().to_string();
++                let data = DeviceData { name };
++                self.niri.devices.insert(device.clone(), data);
+ 
+                 if device.has_capability(input::DeviceCapability::TabletTool) {
+                     match device.size() {
+@@ -294,28 +301,33 @@
+     where
+         I::Device: 'static,
+     {
+-        let device_output = event.device().output(self);
++        let device = event.device();
++        let device_output = device.output(self);
+         let device_output = device_output.filter(|output| self.niri.output_exists(output));
+         let device_output = device_output.as_ref();
+-        let (target_geo, keep_ratio, px, transform) =
+-            if let Some(output) = device_output.or_else(|| self.niri.output_for_tablet()) {
+-                (
+-                    self.niri.global_space.output_geometry(output).unwrap(),
+-                    true,
+-                    1. / output.current_scale().fractional_scale(),
+-                    output.current_transform(),
+-                )
+-            } else {
+-                let geo = self.global_bounding_rectangle()?;
++        let data = (&device as &dyn Any)
++            .downcast_ref::<input::Device>()
++            .and_then(|device| self.niri.devices.get(device));
++        let (target_geo, keep_ratio, px, transform) = if let Some(output) =
++            device_output.or_else(|| self.niri.output_for_tablet(data.map(|d| d.name.as_ref())))
++        {
++            (
++                self.niri.global_space.output_geometry(output).unwrap(),
++                true,
++                1. / output.current_scale().fractional_scale(),
++                output.current_transform(),
++            )
++        } else {
++            let geo = self.global_bounding_rectangle()?;
+ 
+-                // FIXME: this 1 px size should ideally somehow be computed for the rightmost output
+-                // corresponding to the position on the right when clamping.
+-                let output = self.niri.global_space.outputs().next().unwrap();
+-                let scale = output.current_scale().fractional_scale();
++            // FIXME: this 1 px size should ideally somehow be computed for the rightmost output
++            // corresponding to the position on the right when clamping.
++            let output = self.niri.global_space.outputs().next().unwrap();
++            let scale = output.current_scale().fractional_scale();
+ 
+-                // Do not keep ratio for the unified mode as this is what OpenTabletDriver expects.
+-                (geo, false, 1. / scale, Transform::Normal)
+-            };
++            // Do not keep ratio for the unified mode as this is what OpenTabletDriver expects.
++            (geo, false, 1. / scale, Transform::Normal)
++        };
+ 
+         let mut pos = {
+             let size = transform.invert().transform_size(target_geo.size);
+@@ -4052,11 +4064,23 @@
+     fn compute_touch_location<I: InputBackend>(
+         &self,
+         evt: &impl AbsolutePositionEvent<I>,
+-    ) -> Option<Point<f64, Logical>> {
+-        self.compute_absolute_location(evt, self.niri.output_for_touch())
++    ) -> Option<Point<f64, Logical>>
++    where
++        I::Device: 'static,
++    {
++        let data = (&evt.device() as &dyn Any)
++            .downcast_ref::<input::Device>()
++            .and_then(|device| self.niri.devices.get(device));
++        self.compute_absolute_location(
++            evt,
++            self.niri.output_for_touch(data.map(|d| d.name.as_str())),
++        )
+     }
+ 
+-    fn on_touch_down<I: InputBackend>(&mut self, evt: I::TouchDownEvent) {
++    fn on_touch_down<I: InputBackend>(&mut self, evt: I::TouchDownEvent)
++    where
++        I::Device: 'static,
++    {
+         let Some(handle) = self.niri.seat.get_touch() else {
+             return;
+         };
+@@ -4211,7 +4235,10 @@
+             },
+         )
+     }
+-    fn on_touch_motion<I: InputBackend>(&mut self, evt: I::TouchMotionEvent) {
++    fn on_touch_motion<I: InputBackend>(&mut self, evt: I::TouchMotionEvent)
++    where
++        I::Device: 'static,
++    {
+         let Some(handle) = self.niri.seat.get_touch() else {
+             return;
+         };
+@@ -4912,7 +4939,7 @@
+ 
+     let is_tablet = device.has_capability(input::DeviceCapability::TabletTool);
+     if is_tablet {
+-        let c = &config.tablet;
++        let c = config.tablets.find(Some(&device.name()));
+         let _ = device.config_send_events_set_mode(if c.off {
+             input::SendEventsMode::DISABLED
+         } else {
+@@ -4938,7 +4965,7 @@
+ 
+     let is_touch = device.has_capability(input::DeviceCapability::Touch);
+     if is_touch {
+-        let c = &config.touch;
++        let c = config.touch_screens.find(Some(&device.name()));
+         let _ = device.config_send_events_set_mode(if c.off {
+             input::SendEventsMode::DISABLED
+         } else {
+diff -u -N '--exclude=.git' -r a/src/niri.rs b/src/niri.rs
+--- a/src/niri.rs	2026-04-25 04:19:21.000000000 -0700
++++ b/src/niri.rs	2026-06-19 13:26:03.952453447 -0700
+@@ -133,7 +133,7 @@
+ use crate::input::scroll_tracker::ScrollTracker;
+ use crate::input::{
+     apply_libinput_settings, mods_with_finger_scroll_binds, mods_with_mouse_binds,
+-    mods_with_wheel_binds, TabletData,
++    mods_with_wheel_binds, DeviceData, TabletData,
+ };
+ use crate::ipc::server::IpcServer;
+ use crate::layer::mapped::LayerSurfaceRenderElement;
+@@ -266,7 +266,7 @@
+     /// startup, libinput will immediately send a closed event.
+     pub is_lid_closed: bool,
+ 
+-    pub devices: HashSet<input::Device>,
++    pub devices: HashMap<input::Device, DeviceData>,
+     pub tablets: HashMap<input::Device, TabletData>,
+     pub touch: HashSet<input::Device>,
+ 
+@@ -1505,8 +1505,8 @@
+             || config.input.mouse != old_config.input.mouse
+             || config.input.trackball != old_config.input.trackball
+             || config.input.trackpoint != old_config.input.trackpoint
+-            || config.input.tablet != old_config.input.tablet
+-            || config.input.touch != old_config.input.touch
++            || config.input.tablets != old_config.input.tablets
++            || config.input.touch_screens != old_config.input.touch_screens
+         {
+             libinput_config_changed = true;
+         }
+@@ -1644,7 +1644,7 @@
+ 
+         if libinput_config_changed {
+             let config = self.niri.config.borrow();
+-            for mut device in self.niri.devices.iter().cloned() {
++            for mut device in self.niri.devices.keys().cloned() {
+                 apply_libinput_settings(&config.input, &mut device);
+             }
+         }
+@@ -2511,7 +2511,7 @@
+             monitors_active: true,
+             is_lid_closed: false,
+ 
+-            devices: HashSet::new(),
++            devices: HashMap::new(),
+             tablets: HashMap::new(),
+             touch: HashSet::new(),
+ 
+@@ -3603,19 +3603,20 @@
+             .map(|(_, m)| m.window.clone())
+     }
+ 
+-    pub fn output_for_tablet(&self) -> Option<&Output> {
++    pub fn output_for_tablet(&self, name: Option<&str>) -> Option<&Output> {
+         let config = self.config.borrow();
+-        if config.input.tablet.map_to_focused_output {
++        let tablet = config.input.tablets.find(name);
++        if tablet.map_to_focused_output {
+             self.layout.active_output()
+         } else {
+-            let map_to_output = config.input.tablet.map_to_output.as_ref();
++            let map_to_output = tablet.map_to_output.as_ref();
+             map_to_output.and_then(|name| self.output_by_name_match(name))
+         }
+     }
+ 
+-    pub fn output_for_touch(&self) -> Option<&Output> {
++    pub fn output_for_touch(&self, name: Option<&str>) -> Option<&Output> {
+         let config = self.config.borrow();
+-        let map_to_output = config.input.touch.map_to_output.as_ref();
++        let map_to_output = config.input.touch_screens.find(name).map_to_output.as_ref();
+         map_to_output
+             .and_then(|name| self.output_by_name_match(name))
+             .or_else(|| self.global_space.outputs().next())

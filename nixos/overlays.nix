@@ -271,6 +271,15 @@ in
           ];
         });
 
+        # Carry niri PR #1856 (per-device tablet/touch config) on top of
+        # the nixpkgs niri package until the PR merges upstream.
+        # Remove this override + the patch file once it reaches nixpkgs.
+        niri = super.niri.overrideAttrs (oldAttrs: {
+          patches = (oldAttrs.patches or [ ]) ++ [
+            ./patches/niri-pr1856-per-device-tablet-touch.patch
+          ];
+        });
+
       })
   ];
 }

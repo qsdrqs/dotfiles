@@ -12,7 +12,7 @@
     "input_delete_to_line_end": "none"
   },
   "plugin": [
-    "oh-my-opencode-slim",
+    // "oh-my-opencode-slim",
     "@williamcr01/opencode-tps"
   ]
 }
