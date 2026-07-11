@@ -105,6 +105,7 @@ in
         # Begin Temporary fixed version packages
         freerdp = super.freerdp.override { openh264 = null; };
         global = pkgs-stable.global;
+        arandr = pkgs-stable.arandr;
         # End Temporary fixed version packages
 
         ckb-next = super.ckb-next.overrideAttrs (oldAttrs: {

@@ -96,7 +96,7 @@ in
 
     # NUR
     qqmusic-hidpi
-    pkgs.nur.repos.xddxdd.baidunetdisk
+    # pkgs.nur.repos.xddxdd.baidunetdisk
     scanmem
   ];
 

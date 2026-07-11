@@ -39,8 +39,9 @@ in
 {
   imports = [ ./grub-efi-configuration.nix ];
   # begin howdy
+  # Temporarily disabled until NixOS/nixpkgs#540826 reaches this flake; restore both services afterward.
   services.howdy = {
-    enable = true;
+    enable = false;
     control = "sufficient"; # was told to be insecure
     settings = {
       core.no_confirmation = true;
@@ -50,24 +51,28 @@ in
     };
   };
   services.linux-enable-ir-emitter = {
-    enable = true;
+    enable = false;
   };
 
   # Enable polkit-1 integration for howdy
   security.pam.services.polkit-1.howdy.enable = false;
 
-  systemd.services.linux-enable-ir-emitter.preStart =
-  let
-    video-device = "/dev/${config.services.linux-enable-ir-emitter.device}";
-    wait-script = ./scripts/wait-for-ir-emitter-devices.sh;
-  in
-  ''
-    ${wait-script} ${video-device}
-  '';
+  systemd.services.linux-enable-ir-emitter.preStart = lib.mkIf config.services.linux-enable-ir-emitter.enable (
+    let
+      video-device = "/dev/${config.services.linux-enable-ir-emitter.device}";
+      wait-script = ./scripts/wait-for-ir-emitter-devices.sh;
+    in
+    ''
+      ${wait-script} ${video-device}
+    ''
+  );
   # end howdy
 
   # begin handy (speech-to-text)
-  programs.handy.enable = true;
+  # Allow Handy to type transcriptions through the virtual input device.
+  services.udev.extraRules = ''
+    KERNEL=="uinput", GROUP="input", MODE="0660"
+  '';
   # end handy
 
   boot.kernelModules = [
@@ -82,6 +87,7 @@ in
   ];
 
   environment.systemPackages = with pkgs; [
+    handy
     telegram-desktop
     slack
     snapper-gui
@@ -102,7 +108,7 @@ in
     zotero
     xournalpp
     apktool
-    realvnc-vnc-viewer
+    # realvnc-vnc-viewer
     kdePackages.krdc
     drawio
 

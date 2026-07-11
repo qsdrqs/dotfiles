@@ -27,7 +27,7 @@
     android-tools
 
     keepassxc
-    texlive.combined.scheme-full
+    texliveFull
     distrobox
     bun
 
