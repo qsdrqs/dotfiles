@@ -1,0 +1,4 @@
+interface:
+  display_name: "Background Task"
+  short_description: "Run and monitor long commands in tmux"
+  default_prompt: "Use tmux to run this long command as a monitored background task."
