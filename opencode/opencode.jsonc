@@ -12,6 +12,11 @@
   "model": "{env:OPENCODE_MODEL}",
   "snapshot": true,
   "agent": {
+    "build": {
+      "permission": {
+        "*": "allow"
+      }
+    },
     "explore": {
       "disable": true
     },

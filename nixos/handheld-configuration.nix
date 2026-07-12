@@ -143,6 +143,7 @@ in
   # udev rules for input device access (HHD needs rw on hidraw + evdev)
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="backlight", RUN+="${pkgs.coreutils}/bin/chmod 0666 /sys/class/backlight/%k/brightness"
+    SUBSYSTEM=="hidraw", KERNELS=="*28DE:12FD*", GROUP="input", MODE="0660"
   '';
 
   # hide GRUB menu on handheld (shared GRUB config in grub-efi-configuration.nix)

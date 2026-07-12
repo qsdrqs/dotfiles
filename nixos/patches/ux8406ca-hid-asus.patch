@@ -16,11 +16,11 @@
  #include <linux/leds.h>
  
  #include "hid-ids.h"
-@@ -102,6 +103,10 @@
+@@ -99,6 +100,10 @@
+ #define QUIRK_ROG_CLAYMORE_II_KEYBOARD	BIT(12)
  #define QUIRK_ROG_ALLY_XPAD		BIT(13)
  #define QUIRK_HID_FN_LOCK		BIT(14)
- #define QUIRK_ROG_NKEY_ID1ID2_INIT	BIT(15)
-+#define QUIRK_ZENBOOK_DUO_KEYBOARD	BIT(16)
++#define QUIRK_ZENBOOK_DUO_KEYBOARD	BIT(15)
 +
 +#define ZENBOOK_DUO_KBD_INIT_RETRIES 5
 +#define ZENBOOK_DUO_KBD_INIT_RETRY_DELAY_MS 1000
@@ -148,14 +148,16 @@
  	if (drvdata->quirks & (QUIRK_T100CHI | QUIRK_T90CHI)) {
  		ret = asus_battery_probe(hdev);
  		if (ret) {
-@@ -1297,9 +1375,11 @@ static int asus_probe(struct hid_device *hdev, const struct hid_device_id *id)
- 		return ret;
+@@ -1303,10 +1381,12 @@ static int asus_probe(struct hid_device *hdev, const struct hid_device_id *id)
  	}
  
+ 	/* Laptops keyboard backlight is always at 0x5a */
 -	if (is_vendor && (drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT) &&
--	    asus_kbd_register_leds(hdev))
+-	    (asus_has_report_id(hdev, FEATURE_KBD_REPORT_ID)) &&
+-		(asus_kbd_register_leds(hdev)))
 -		hid_warn(hdev, "Failed to initialize backlight.\n");
-+	if (is_vendor && (drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT)) {
++	if (is_vendor && (drvdata->quirks & QUIRK_USE_KBD_BACKLIGHT) &&
++	    asus_has_report_id(hdev, FEATURE_KBD_REPORT_ID)) {
 +		ret = asus_kbd_register_leds(hdev);
 +		if (ret < 0)
 +			asus_kbd_schedule_backlight_retry(hdev, ret);

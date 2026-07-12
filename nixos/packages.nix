@@ -213,4 +213,65 @@
       sudo systemctl stop interception-tools-ctrl2esc.service
       sudo systemctl start interception-tools-caps2esc.service
     '';
+
+  # scaphandre: power consumption metrology agent, used by the laptop
+  # profile's Prometheus exporter. Inlined here because upstream nixpkgs
+  # removed both the package and the
+  # `services.prometheus.exporters.scaphandre` NixOS option in late June
+  # 2026 (marked broken with no upstream progress since Feb 2025). Pin the
+  # last working release (v1.0.2) and apply the riemann-client rustfmt
+  # fixup so it builds under the toolchain in our nixos-unstable input.
+  scaphandre =
+    {
+      lib,
+      rustPlatform,
+      fetchFromGitHub,
+      pkg-config,
+      openssl,
+      runCommand,
+    }:
+    let
+      version = "1.0.2";
+      base = rustPlatform.buildRustPackage {
+        pname = "scaphandre";
+        inherit version;
+        src = fetchFromGitHub {
+          owner = "hubblo-org";
+          repo = "scaphandre";
+          rev = "v${version}";
+          hash = "sha256-I+cECdpLoIj4yuWXfirwHlcn0Hkm9NxPqo/EqFiBObw=";
+        };
+        cargoHash = "sha256-OIoQ2r/T0ZglF1pe25ND8xe/BEWgP9JbWytJp4k7yyg=";
+        nativeBuildInputs = [ pkg-config ];
+        buildInputs = [ openssl ];
+        # These tests hard-code /sys/class/powercap, which is unavailable in the build sandbox.
+        checkFlags = [
+          "--skip"
+          "exporter_qemu"
+          "--skip"
+          "sensors::powercap_rapl::tests::get_topology_returns_topology_type"
+          "--skip"
+          "sensors::tests::read_core_stats"
+          "--skip"
+          "sensors::tests::read_socket_stats"
+          "--skip"
+          "sensors::tests::read_topology_stats"
+        ];
+        meta = {
+          description = "Electrical power consumption metrology agent";
+          homepage = "https://github.com/hubblo-org/scaphandre";
+          license = lib.licenses.asl20;
+          platforms = [ "x86_64-linux" ];
+          maintainers = [ ];
+          mainProgram = "scaphandre";
+        };
+      };
+    in
+    base.overrideAttrs (old: {
+      cargoDeps = runCommand "${old.pname}-${old.version}-vendor-patched" { } ''
+        cp -r ${old.cargoDeps} $out
+        chmod -R u+w $out
+        patch -p1 -d $out/source-registry-0 < ${./patches/riemann-client-rustfmt.patch}
+      '';
+    });
 }

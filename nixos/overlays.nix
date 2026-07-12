@@ -121,14 +121,8 @@ in
             ./patches/blueman-dbusmenu-root-properties.patch
           ];
         });
-        scaphandre = super.scaphandre.overrideAttrs (old: {
-          cargoDeps = super.runCommand "${old.pname}-${old.version}-vendor-patched" {} ''
-            cp -r ${old.cargoDeps} $out
-            chmod -R u+w $out
-            patch -p1 -d $out/source-registry-0 < ${./patches/riemann-client-rustfmt.patch}
-          '';
-          meta.broken = false;
-        });
+
+        scaphandre = packages.scaphandre;
 
         # neovim-unwrapped =
         #   (super.neovim-unwrapped.override {

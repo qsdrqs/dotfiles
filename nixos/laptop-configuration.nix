@@ -175,15 +175,24 @@ in
       }
     ];
   };
-  services.prometheus.exporters.scaphandre = {
-    enable = true;
-    listenAddress = "127.0.0.1";
-    port = 8081;
-    telemetryPath = "metrics";
-    user = "root";
-    group = "root";
-
-    extraFlags = [ "--containers" ];
+  systemd.services.prometheus-scaphandre-exporter = {
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.scaphandre}/bin/scaphandre prometheus --address 127.0.0.1 --port 8081 --suffix metrics --containers";
+      Restart = "always";
+      User = "root";
+      CapabilityBoundingSet = [ "" ];
+      NoNewPrivileges = true;
+      PrivateDevices = true;
+      ProtectControlGroups = true;
+      ProtectHome = true;
+      ProtectKernelTunables = true;
+      ProtectSystem = "strict";
+      RestrictAddressFamilies = [ "AF_INET" ];
+      RestrictNamespaces = true;
+      SystemCallArchitectures = "native";
+    };
   };
   services.grafana = {
     enable = true;
