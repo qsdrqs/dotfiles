@@ -28,6 +28,12 @@ If the requested path appears blocked:
 
 **BLOCKING VIOLATION**: Inventing a requirement or workaround that changes the user's requested outcome without explicit approval.
 
+## Version Control Safety
+
+**Treat version control operations conservatively.**
+
+Unless the user explicitly authorizes version control operations, do not attempt any potentially irreversible or state-changing version control commands, including `commit`, `checkout`, `push`, or commands using `--force`.
+
 ## Data Analysis
 
 ### Numeric Statistics
