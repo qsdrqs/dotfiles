@@ -1,6 +1,5 @@
 {
   "plugin": [
-    "superpowers@git+https://github.com/obra/superpowers.git",
     // "opencode-claude-auth",
     // "opencode-gemini-auth@latest",
     "@mohak34/opencode-notifier@latest",

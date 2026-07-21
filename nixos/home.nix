@@ -193,7 +193,6 @@ in
           "tui.json"
         ];
         localSkillsDir = "${homeDir}/dotfiles/opencode/skills";
-        superpowersSkillsDir = "${homeDir}/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills";
       in
       ''
         mkdir -p ~/.config/opencode
@@ -235,7 +234,6 @@ in
         }
 
         linkSkillDirs "${localSkillsDir}"
-        linkSkillDirs "${superpowersSkillsDir}"
       '';
     agent-browser-config = ''
       mkdir -p ~/.agent-browser
