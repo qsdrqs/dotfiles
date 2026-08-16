@@ -155,6 +155,7 @@ in
   environment.etc."/xdg/menus/applications.menu".text = builtins.readFile "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
 
   services.xserver.enable = true;
+  services.displayManager.defaultSession = "niri";
   services.displayManager.sddm = {
     enable = true;
     autoNumlock = true;

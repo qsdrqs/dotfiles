@@ -25,7 +25,6 @@
     };
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     ctrl2esc = {
       url = "gitlab:qsdrqs/ctrl2esc";

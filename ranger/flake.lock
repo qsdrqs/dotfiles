@@ -19,11 +19,11 @@
     "ranger": {
       "flake": false,
       "locked": {
-        "lastModified": 1783865333,
-        "narHash": "sha256-CoZMt7+E/ASNSshfq2en54tqpauC1ON2kjZOtvJpy0Y=",
+        "lastModified": 1786446212,
+        "narHash": "sha256-pT+LcIkIWrTu+EiWGJC36J1Hg9ouqDfhopzJAsX/jFE=",
         "owner": "ranger",
         "repo": "ranger",
-        "rev": "4831012d8d5f48bc4fae9c1c63bdd2ca62ade560",
+        "rev": "3566a876c9d4b202e47898e1be069eab92090a02",
         "type": "github"
       },
       "original": {
@@ -67,11 +67,11 @@
     "ranger-zjumper": {
       "flake": false,
       "locked": {
-        "lastModified": 1770382438,
-        "narHash": "sha256-7eKWe09JE7/BZx40iJ7Zw7oRklrctiL5p2AJdWgfL2U=",
+        "lastModified": 1785144452,
+        "narHash": "sha256-X6/HAbrz0gCBETMNR1ruX10zsQkGLQ8oagdXVVEaqpo=",
         "owner": "ask1234560",
         "repo": "ranger-zjumper",
-        "rev": "e53fc9788b3455b432bf853e111d3b6afa8e1608",
+        "rev": "7df69206b225af2934f95fa4477f86f39810e9ef",
         "type": "github"
       },
       "original": {
