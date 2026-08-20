@@ -6,6 +6,7 @@ let
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/chromium \
+      --run 'export GOOGLE_API_KEY=$(cat ${./private/google-api-key})' \
       --run 'export GOOGLE_DEFAULT_CLIENT_ID=$(cat ${./private/google-default-client-id})' \
       --run 'export GOOGLE_DEFAULT_CLIENT_SECRET=$(cat ${./private/google-default-client-secret})'
       '';
@@ -51,6 +52,7 @@ in
     pulseaudio
     alsa-utils
     google-chromium
+    google-chrome
     firefox-devedition
     firefox-alias
     chntpw # Windows registry editor

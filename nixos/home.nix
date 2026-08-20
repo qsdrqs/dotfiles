@@ -190,7 +190,7 @@ in
           "oh-my-openagent.json"
           "oh-my-opencode-slim.json"
           "AGENTS.md"
-          "tui.json"
+          "cli.json"
         ];
         localSkillsDir = "${homeDir}/dotfiles/opencode/skills";
       in
