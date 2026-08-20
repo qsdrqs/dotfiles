@@ -1,0 +1,32 @@
+{
+  "theme": {
+    "name": "github"
+  },
+  "keybinds": {
+    "session.page.up": "ctrl+b",
+    "session.page.down": "ctrl+f",
+    "session.half.page.up": "ctrl+u",
+    "session.half.page.down": "ctrl+d",
+    "input.move.left": "left,ctrl+h",
+    "input.move.right": "right,ctrl+l",
+    "input.move.up": "up,ctrl+k",
+    "input.move.down": "down,ctrl+j",
+    "input.delete.to.line.end": "none"
+  },
+  "plugins": [],
+  "attention": {
+    "enabled": true,
+    "notifications": true,
+    "sound": true,
+    "volume": 0.4
+  },
+  "diffs": {
+    "wrap": "word"
+  },
+  "session": {
+    "sidebar": "auto",
+    "scrollbar": false,
+    "thinking": "show"
+  },
+  "animations": true
+}

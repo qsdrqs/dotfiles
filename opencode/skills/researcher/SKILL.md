@@ -54,7 +54,7 @@ This skill uses a **multi-agent collaborative architecture**:
 
 **🤖 Research Agents（研究员）:**
 - Each agent focuses on **ONE** specific subtopic/angle
-- Agents run independently in parallel (`run_in_background=True`)
+- Agents run independently in parallel (`background=true`)
 - Agents **DO NOT** spawn other agents - that's YOUR job
 - Agents return structured findings for YOU to synthesize
 
@@ -71,7 +71,7 @@ This skill uses a **multi-agent collaborative architecture**:
 
 **Research Agents（研究员）:**
 - Each agent focuses on ONE specific subtopic/angle
-- Agents run independently and in parallel (`run_in_background=True`)
+- Agents run independently and in parallel (`background=true`)
 - Agents fetch original sources (not just snippets)
 - Agents return structured findings with evidence links
 
@@ -89,14 +89,14 @@ When user asks for research, **YOU** must:
 2. **SPAWN MULTIPLE AGENTS** - Launch 6-12+ agents IN PARALLEL
    ```python
    # WRONG - Don't do this:
-   task(description="Research everything", prompt="Research GraphQL vs REST...")
+   subagent(agent="general", description="Research everything", prompt="Research GraphQL vs REST...")
    
    # CORRECT - Do this:
-   task_A1 = task(..., run_in_background=True)  # GraphQL docs
-   task_A2 = task(..., run_in_background=True)  # GraphQL community
-   task_B1 = task(..., run_in_background=True)  # REST docs
-   task_B2 = task(..., run_in_background=True)  # REST community
-   task_C1 = task(..., run_in_background=True)  # Comparison benchmarks
+   subagent(agent="general", description="GraphQL docs", prompt="...", background=True)
+   subagent(agent="general", description="GraphQL community", prompt="...", background=True)
+   subagent(agent="general", description="REST docs", prompt="...", background=True)
+   subagent(agent="general", description="REST community", prompt="...", background=True)
+   subagent(agent="general", description="Comparison benchmarks", prompt="...", background=True)
    # ... etc
    ```
 
@@ -108,7 +108,7 @@ When user asks for research, **YOU** must:
    - Agent 5: Comparative benchmark studies
    - Agent 6: Migration case studies & lessons learned
 
-4. **WAIT & COLLECT** - Use `background_output()` to gather all results
+4. **WAIT & COLLECT** - Background subagents notify you automatically when they finish (no polling needed). Collect all results once the notifications arrive.
 
 5. **SYNTHESIZE** - Cross-validate findings from ALL agents
 
@@ -126,9 +126,9 @@ Before you launch any agents, verify:
 - [ ] I have identified **3-7 distinct research directions**
 - [ ] For each direction, I have planned **2-4 specific angles**
 - [ ] I will spawn **6-12+ agents total** (directions × angles)
-- [ ] All agents will run with `run_in_background=True`
+- [ ] All agents will run with `background=true`
 - [ ] Each agent prompt focuses on **ONE angle only**
-- [ ] I have a plan to collect and synthesize all results
+- [ ] I have a plan to collect and synthesize all results (completion notifications)
 
 **If you can't check all boxes, STOP and redesign your approach.**
 
@@ -177,10 +177,9 @@ For EACH direction, spawn **2-4 specialized agents** simultaneously:
 # Example: Researching "GraphQL vs REST API performance"
 
 # Direction A: GraphQL Performance - Docs/Benchmarks angle
-task_A1 = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="GraphQL perf - official docs",
     prompt="""TASK: Deep research on GraphQL performance characteristics
 RESEARCH_DIRECTION: GraphQL Performance Analysis
@@ -190,12 +189,10 @@ KEY_QUESTION: What are GraphQL's performance characteristics, caching strategies
 AVAILABLE TOOLS (YOU MUST USE THESE):
 - websearch: Search for documentation, benchmarks, best practices
 - webfetch: Fetch and read full content from URLs (NEVER rely on snippets)
-- codesearch: Search for code examples of DataLoader, caching implementations
 
 MUST_DO:
 - Use websearch to find: official GraphQL docs, Apollo/Relay performance guides, benchmark studies
 - For EACH promising result, use webfetch to read the FULL article/page
-- Use codesearch to find DataLoader implementation examples
 - Extract specific performance numbers, caching strategies, and N+1 solutions
 - Include exact URLs and dates for every finding
 
@@ -220,10 +217,9 @@ RETURN_FORMAT:
 )
 
 # Direction A: GraphQL Performance - Community angle
-task_A2 = task(
-    category="deep", 
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="GraphQL perf - community issues",
     prompt="""TASK: Deep research on GraphQL real-world performance issues
 RESEARCH_DIRECTION: GraphQL Performance Analysis
@@ -233,11 +229,9 @@ KEY_QUESTION: What performance pitfalls do teams encounter with GraphQL in produ
 AVAILABLE TOOLS (YOU MUST USE THESE):
 - websearch: Search for Reddit, HN discussions, blog posts about GraphQL issues
 - webfetch: Fetch and read full discussion threads and articles
-- grep_app_searchGitHub: Search GitHub issues mentioning GraphQL performance problems
-- codesearch: Search for GraphQL performance-related code and configurations
 
 MUST_DO:
-- Use grep_app_searchGitHub to find real issues: search "GraphQL performance" in repos
+- Use websearch to find GitHub issues: search "GraphQL performance" with site:github.com
 - Use websearch to find: Reddit threads, HN discussions, engineering blog postmortems
 - For EACH promising discussion/article, use webfetch to read the FULL content
 - Look for specific performance problems, solutions tried, and lessons learned
@@ -265,10 +259,9 @@ RETURN_FORMAT:
 )
 
 # Direction B: REST Performance
-task_B1 = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="REST perf - docs and benchmarks",
     prompt="""TASK: Deep research on REST API performance characteristics
 RESEARCH_DIRECTION: REST Performance Analysis
@@ -278,12 +271,10 @@ KEY_QUESTION: What are REST's performance characteristics, caching mechanisms, a
 AVAILABLE TOOLS (YOU MUST USE THESE):
 - websearch: Search for REST API best practices, HTTP caching, benchmark studies
 - webfetch: Fetch and read full documentation and articles
-- codesearch: Search for REST API implementation patterns, caching strategies
 
 MUST_DO:
 - Use websearch to find: HTTP/REST official specs, caching best practices, benchmark comparisons
 - For EACH promising result, use webfetch to read the FULL content
-- Use codesearch to find REST API optimization examples
 - Extract specific performance characteristics and HTTP caching mechanisms
 - Include exact URLs and dates for every finding
 
@@ -306,10 +297,9 @@ RETURN_FORMAT:
 ## Open Questions"""
 )
 
-task_B2 = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="REST perf - community experiences",
     prompt="""TASK: Deep research on REST production experiences
 RESEARCH_DIRECTION: REST Performance Analysis
@@ -319,10 +309,9 @@ KEY_QUESTION: What are the real-world experiences with REST API performance at s
 AVAILABLE TOOLS (YOU MUST USE THESE):
 - websearch: Search for community discussions, Reddit, HN, blog posts
 - webfetch: Fetch and read full articles and discussions
-- grep_app_searchGitHub: Search GitHub for REST API related issues
 
 MUST_DO:
-- Use websearch and grep_app_searchGitHub to find real production experiences
+- Use websearch to find real production experiences (including site:github.com issues)
 - For EACH promising source, use webfetch to read the FULL content
 - Include exact URLs and dates for every finding
 
@@ -344,10 +333,9 @@ RETURN_FORMAT:
 )
 
 # Direction C: Comparative Studies
-task_C1 = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="GraphQL vs REST comparison",
     prompt="""TASK: Comparative research on GraphQL vs REST
 RESEARCH_DIRECTION: Comparative Analysis
@@ -357,8 +345,6 @@ KEY_QUESTION: What do comparative studies and migration reports say about GraphQ
 AVAILABLE TOOLS (YOU MUST USE THESE):
 - websearch: Search for benchmark comparisons, migration case studies
 - webfetch: Fetch and read full benchmark reports and case studies
-- codesearch: Search for comparative implementations
-- grep_app_searchGitHub: Search for migration examples and comparisons
 
 MUST_DO:
 - Use websearch to find: benchmark studies comparing GraphQL and REST, migration case studies
@@ -402,8 +388,8 @@ For each direction, assign agents with **complementary angles**:
 
 While agents work (typically 30-120 seconds):
 1. Continue with other work or brief the user on progress
-2. Periodically check completion: `background_output(task_id=task_A1.task_id, block=False)`
-3. Collect all results once agents complete
+2. Background subagents notify you automatically when they complete - no polling needed
+3. Collect all results once the completion notifications arrive
 
 ---
 
@@ -506,20 +492,15 @@ Research agents MUST use the following tools to perform web research:
   - Use for: Reading full articles, documentation pages, GitHub issues
   - MUST fetch original sources, not rely on search snippets
 
-- **`codesearch`**: Search for code examples and implementations
-  - Use for: Finding code patterns, configuration examples, library usage
-
 ### Specialized Tools
-- **`context7_resolve-library-id`** + **`context7_query-docs`**: Query technical documentation
+- **`context7_resolve-library-id`** + **`context7_query-docs`**: Query technical documentation (if the context7 MCP is available)
   - Use for: Official library/framework docs, API references
   - Example: Query specific function usage or configuration options
 
-- **`grep_app_searchGitHub`**: Search GitHub repositories
-  - Use for: Finding real-world code examples, issues, PRs
-  - Use `repo:` filter to target specific organizations
+- GitHub search: Use `websearch` with `site:github.com` to find real-world code, issues, and PRs
 
 ### Tool Usage Rules
-1. **ALWAYS start with search**: Use `websearch` or `codesearch` to discover sources
+1. **ALWAYS start with search**: Use `websearch` to discover sources
 2. **NEVER rely on snippets**: Always use `webfetch` to read full content
 3. **Include source links**: Every finding must include the URL where it was found
 4. **Check dates**: Note publication/last-updated dates for time-sensitive claims
@@ -535,10 +516,9 @@ Research agents MUST use the following tools to perform web research:
 ### Template
 
 ```python
-task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="[Direction] - [Angle]",
     prompt="""TASK: Deep research on [specific topic]
 RESEARCH_DIRECTION: [Direction name from orchestrator plan]
@@ -559,12 +539,10 @@ Your job is to go DEEP on this ONE angle, not WIDE across all angles.
 AVAILABLE TOOLS (YOU MUST USE THESE):
 - websearch: Use this to search the web for sources, documentation, discussions
 - webfetch: Use this to fetch and read full content from URLs (NEVER rely on search snippets)
-- codesearch: Use this to search for code examples and technical implementations
-- grep_app_searchGitHub: Use this to search GitHub repos for issues, examples, real-world usage
 
 MUST_DO:
 - Focus ONLY on your assigned ANGLE
-- Use websearch/codesearch to find 8-15 relevant sources
+- Use websearch to find 8-15 relevant sources
 - For EACH promising source, use webfetch to read the FULL content (not just snippets)
 - Extract specific claims, quotes, and data points with context
 - Include exact URLs and dates for every finding
@@ -623,7 +601,7 @@ KEY_QUESTION: What are GraphQL's caching mechanisms and performance characterist
 - [ ] Confidence levels assigned based on source quality
 
 ### For Research Agents
-- [ ] **Used websearch/codesearch to find sources** (not skipped)
+- [ ] **Used websearch to find sources** (not skipped)
 - [ ] **Used webfetch to read full content** (never relied on snippets)
 - [ ] Dates included for all time-sensitive claims
 - [ ] At least 3-5 independent sources per major finding
@@ -649,8 +627,6 @@ Every research agent MUST actively use the available tools. **Not using tools is
 1. **Discovery Phase** - Use search tools:
    ```python
    websearch(query="your search terms")
-   codesearch(query="code patterns", language=["Python", "JavaScript"])
-   grep_app_searchGitHub(query="error pattern", repo="organization/repo")
    ```
 
 2. **Fetch Phase** - ALWAYS fetch full content:
@@ -666,7 +642,7 @@ Every research agent MUST actively use the available tools. **Not using tools is
 
 ### Non-negotiable: Fetch Originals
 Never rely on search result snippets. Agents MUST:
-1. **Search first**: Use `websearch`, `codesearch`, or `grep_app_searchGitHub`
+1. **Search first**: Use `websearch` to discover sources
 2. **Fetch full content**: Use `webfetch` to read the actual page/article
 3. **Extract claims**: Pull out specific quotes, numbers, findings
 4. **Record metadata**: Save URL, title, date for every source
@@ -690,18 +666,18 @@ for result in results[:5]:
 
 ### Parallel Agent Management
 ```python
-# Launch phase
-tasks = {}
+# Launch phase: spawn one background subagent per direction x angle
 for direction in directions:
     for angle in direction.angles:
-        task_result = task(..., run_in_background=True)
-        tasks[f"{direction.name}-{angle}"] = task_result.task_id
+        subagent(
+            agent="general",
+            background=True,
+            description=f"{direction.name}-{angle}",
+            prompt=build_agent_prompt(direction, angle),
+        )
 
-# Collection phase
-results = {}
-for name, task_id in tasks.items():
-    output = background_output(task_id=task_id, block=True)
-    results[name] = output
+# Collection phase: background subagents notify you automatically
+# when they complete - synthesize results as the notifications arrive.
 ```
 
 ---
@@ -730,7 +706,7 @@ for name, task_id in tasks.items():
 |--------------|--------------|----------|
 | **⚠️ Single agent doing everything** | Defeats multi-agent purpose; one agent cannot cover all angles comprehensively | Spawn 6-12+ agents, each with ONE specific angle |
 | **⚠️ Asking one agent to "research all directions"** | Agent will do shallow work or get overwhelmed | YOU decompose directions; spawn separate agents per direction |
-| Sequential agent execution | Defeats parallel efficiency | Always use `run_in_background=True` |
+| Sequential agent execution | Defeats parallel efficiency | Always use `background=True` |
 | Overlapping agent scopes | Wasted effort, confusing synthesis | Give each agent distinct ANGLE |
 | Suppressing contradictions | Creates false confidence | Highlight disagreements with analysis |
 | Too many agents per direction | Diminishing returns, synthesis burden | Max 3-4 agents per direction |
@@ -744,7 +720,8 @@ for name, task_id in tasks.items():
 ❌ **WRONG approach** (don't do this):
 ```python
 # DON'T DO THIS - One agent doing everything
-task(
+subagent(
+    agent="general",
     description="Research GraphQL vs REST",
     prompt="""Research everything about GraphQL vs REST:
 - GraphQL performance
@@ -761,21 +738,18 @@ task(
 # DO THIS - Multiple specialized agents in parallel
 
 # Direction A: GraphQL Performance (2 agents)
-task_A1 = task(..., description="GraphQL - docs & benchmarks", run_in_background=True)
-task_A2 = task(..., description="GraphQL - community issues", run_in_background=True)
+subagent(agent="general", description="GraphQL - docs & benchmarks", prompt="...", background=True)
+subagent(agent="general", description="GraphQL - community issues", prompt="...", background=True)
 
 # Direction B: REST Performance (2 agents)  
-task_B1 = task(..., description="REST - docs & benchmarks", run_in_background=True)
-task_B2 = task(..., description="REST - community issues", run_in_background=True)
+subagent(agent="general", description="REST - docs & benchmarks", prompt="...", background=True)
+subagent(agent="general", description="REST - community issues", prompt="...", background=True)
 
 # Direction C: Comparative Studies (2 agents)
-task_C1 = task(..., description="Benchmarks comparison", run_in_background=True)
-task_C2 = task(..., description="Migration case studies", run_in_background=True)
+subagent(agent="general", description="Benchmarks comparison", prompt="...", background=True)
+subagent(agent="general", description="Migration case studies", prompt="...", background=True)
 
-# Collect all results
-results_A1 = background_output(task_id=task_A1.task_id)
-results_A2 = background_output(task_id=task_A2.task_id)
-# ... etc
+# Collect all results as completion notifications arrive
 
 # Synthesize findings from ALL agents
 ```

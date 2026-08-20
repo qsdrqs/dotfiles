@@ -22,14 +22,10 @@ Identify 4 distinct research directions:
 ## Step 2: Launch All Agents in Parallel (Orchestrator)
 
 ```python
-# Store task IDs to collect later
-tasks = {}
-
 # Direction A: GraphQL Performance
-tasks['A1'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="GraphQL perf - docs & benchmarks",
     prompt="""TASK: Research GraphQL mobile performance - official sources
 RESEARCH_DIRECTION: GraphQL Mobile Performance
@@ -40,10 +36,9 @@ KEY_QUESTION: What are GraphQL's performance characteristics for mobile apps acc
 """
 )
 
-tasks['A2'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="GraphQL perf - community issues",
     prompt="""TASK: Research GraphQL mobile performance - real world issues
 RESEARCH_DIRECTION: GraphQL Mobile Performance
@@ -55,10 +50,9 @@ KEY_QUESTION: What performance problems do teams encounter with GraphQL on mobil
 )
 
 # Direction B: REST Performance
-tasks['B1'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="REST perf - docs & benchmarks",
     prompt="""TASK: Research REST mobile performance - official sources
 RESEARCH_DIRECTION: REST Mobile Performance
@@ -69,10 +63,9 @@ KEY_QUESTION: What are REST's performance characteristics and caching mechanisms
 """
 )
 
-tasks['B2'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="REST perf - community experience",
     prompt="""TASK: Research REST mobile performance - real world experience
 RESEARCH_DIRECTION: REST Mobile Performance
@@ -84,10 +77,9 @@ KEY_QUESTION: How do teams optimize REST APIs for mobile in production?
 )
 
 # Direction C: Migration Cost
-tasks['C1'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="Migration - case studies",
     prompt="""TASK: Research REST to GraphQL migration experiences
 RESEARCH_DIRECTION: Migration Cost and Complexity
@@ -98,10 +90,9 @@ KEY_QUESTION: What do case studies say about the effort and cost to migrate from
 """
 )
 
-tasks['C2'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="Migration - tooling & automation",
     prompt="""TASK: Research migration tooling and automation
 RESEARCH_DIRECTION: Migration Cost and Complexity
@@ -113,10 +104,9 @@ KEY_QUESTION: What tools and automation exist to help migrate from REST to Graph
 )
 
 # Direction D: Learning Curve
-tasks['D1'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="Learning - complexity & tutorials",
     prompt="""TASK: Research GraphQL learning complexity
 RESEARCH_DIRECTION: Team Learning Curve
@@ -127,10 +117,9 @@ KEY_QUESTION: How complex is GraphQL to learn compared to REST, based on officia
 """
 )
 
-tasks['D2'] = task(
-    category="deep",
-    load_skills=["researcher"],
-    run_in_background=True,
+subagent(
+    agent="general",
+    background=True,
     description="Learning - training resources",
     prompt="""TASK: Research GraphQL training resources availability
 RESEARCH_DIRECTION: Team Learning Curve
@@ -141,7 +130,7 @@ KEY_QUESTION: What training resources, courses, and community support exist for 
 """
 )
 
-print(f"Launched {len(tasks)} agents in parallel")
+print("Launched 8 agents in parallel")
 ```
 
 ## Step 3: Inform User
@@ -170,20 +159,11 @@ This will take about 60-90 seconds. I'll synthesize findings from all agents onc
 
 ## Step 4: Collect Results (Orchestrator)
 
-```python
-import time
-
-# Wait a bit for agents to start working
-time.sleep(5)
-
-# Collect all results
-results = {}
-for name, task_obj in tasks.items():
-    print(f"Collecting results from Agent {name}...")
-    results[name] = background_output(task_id=task_obj.task_id, block=True)
-    print(f"✓ Agent {name} complete")
-
-print(f"\nCollected results from all {len(results)} agents")
+```
+Each background subagent notifies you automatically when it completes.
+As the completion notifications arrive, collect each agent's findings and
+mark them off. No polling or task IDs needed - the V2 subagent runtime
+delivers results directly to your conversation.
 ```
 
 ## Step 5: Synthesize Findings (Orchestrator)

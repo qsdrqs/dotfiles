@@ -1,9 +1,9 @@
 ---
 name: agent-team
 description: >
-  Orchestrate a swarm of AI agents for parallel task execution using opencode sessions and tmux.
-  One opencode server (with --port) hosts multiple sessions - one per agent. tmux windows provide
-  visual monitoring via `opencode attach`. A standardized Python CLI (swarm.py) handles all
+  Orchestrate a swarm of AI agents for parallel task execution using opencode 2 sessions and tmux.
+  Worker sessions live on the shared background service; tmux windows provide
+  visual monitoring via the full opencode2 TUI. A standardized Python CLI (swarm.py) handles all
   inter-agent communication. Use when: (1) user asks to parallelize work across agents,
   (2) user says "spin up a team", "agent team", "swarm", "use multiple agents",
   (3) a task naturally decomposes into 2+ independent sub-tasks that benefit from parallel execution,
@@ -23,19 +23,20 @@ Read `references/worker-protocol.md` and follow it. Stop reading this file.
 
 ## Prerequisites
 
-Ideally the user starts opencode with `--port`:
+The opencode 2 background service must be running and healthy. Verify with:
+```bash
+opencode2 service status
 ```
-opencode --port 4096
-```
-If they did not, `swarm.py init` will automatically start `opencode serve --port 4096` in a
-tmux window. This works but means the user's own TUI session is on a separate instance.
-For the best experience (user's TUI + workers on same server), recommend `--port 4096`.
+Worker sessions are created on this shared service, so the user's own TUI session
+and all workers live on the same server. `swarm.py init` resolves the service URL
+(`opencode2 service status`) and authenticates via `~/.config/opencode/service.json`
+(Basic Auth), so no manual server setup is needed.
 
 ## Swarm CLI
 
 All communication uses `scripts/swarm.py` in this skill directory. Resolve the path:
 ```bash
-SWARM_CLI="$(dirname "$(dirname "$(readlink -f "$(which opencode)")")")/skills/agent-team/scripts/swarm.py"
+SWARM_CLI="$(dirname "$(dirname "$(readlink -f "$(which opencode2)")")")/skills/agent-team/scripts/swarm.py"
 # Or use the skill directory directly if known
 ```
 
@@ -65,22 +66,22 @@ Output a plan table before proceeding:
 
 ```bash
 python3 {SWARM_CLI} init \
-  --port 4096 \
-  --workdir {project_directory} \
   --worker "api:Implement REST API endpoints" \
   --worker "ui:Implement React frontend components"
 ```
 
-This creates sessions, starts tmux windows with `opencode attach`, and writes state.
+This creates worker sessions on the shared background service, starts tmux
+windows with the full opencode2 TUI for visual monitoring, and writes state.
 
 ### Phase 2.5: Register Leader Session
 
 After init, find your own session ID and register it so workers can `report` back to you.
 
-1. Use `session_search` to find your session (search for a unique string from this conversation):
+1. List sessions via the V2 API and find yours (search for a unique string from this conversation, e.g. the session title):
    ```
-   session_search(query="some unique phrase from the init output")
+   opencode2 api get /api/session
    ```
+   The list includes `id`, `title`, `agent`, and timestamps; match by title or by most-recent-updated.
 2. Register it:
    ```bash
    python3 {SWARM_CLI} set-leader --session {your_session_id}
@@ -200,8 +201,9 @@ stuck, intervene by reading both and relaying information.
 
 **Worker goes off-track**: Abort and re-task:
 ```bash
-# Via the opencode API directly:
-curl -X POST http://localhost:{port}/session/{session_id}/abort
+# Via the opencode 2 API directly (Basic Auth: user "opencode", password from ~/.config/opencode/service.json):
+curl -u "opencode:$(python3 -c 'import json;print(json.load(open("$HOME/.config/opencode/service.json"))["password"])')" \
+  -X POST http://127.0.0.1:$(opencode2 service status | sed 's|.*:||')/api/session/{session_id}/interrupt
 python3 {SWARM_CLI} send --to {worker_name} --message "Stop. New task: {corrected task}"
 ```
 

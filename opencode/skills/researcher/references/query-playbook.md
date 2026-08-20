@@ -14,8 +14,7 @@ Research agents MUST actively use these tools:
 
 **1. Search Phase:**
 - `websearch` - For general web searches, documentation, discussions
-- `codesearch` - For finding code examples, implementations
-- `grep_app_searchGitHub` - For GitHub issues, PRs, code patterns
+- GitHub search via `websearch` with `site:github.com` for issues, PRs, code patterns
 
 **2. Fetch Phase (CRITICAL):**
 - `webfetch` - MUST fetch and read full content from URLs
@@ -183,8 +182,8 @@ This is especially important for:
 1. **Search** (use appropriate tool for your angle):
    - Docs: `websearch` for official docs, specs
    - Papers: `websearch` for arXiv, Google Scholar
-   - Community: `websearch` + `grep_app_searchGitHub` for discussions
-   - Benchmarks: `websearch` + `codesearch` for performance studies
+   - Community: `websearch` for discussions (reddit, HN, stackoverflow)
+   - Benchmarks: `websearch` for performance studies
 
 2. **Fetch** (MANDATORY - use `webfetch`):
    - **Docs agent**: Fetch full documentation pages, not just landing pages
