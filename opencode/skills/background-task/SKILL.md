@@ -1,21 +1,21 @@
 ---
 name: background-task
-description: Use when running a command that may take longer than 60 seconds, may hang, or needs progress monitoring and cancellation without blocking the agent.
+description: Use when running a long-running or interactive command that needs progress monitoring and cancellation without blocking the agent.
 ---
 
 # Background Task
 
 ## Overview
 
-Run long commands in a uniquely named tmux session. Keep each foreground wait under 60 seconds, preserve output and exit status, and remain able to inspect or cancel the exact task.
+Run long-running or interactive commands in a uniquely named tmux session. Use adaptive foreground waits with a 10-minute single-wait cap, preserve output and exit status, and remain able to inspect or cancel the exact task.
 
 Do not add a reusable management script. Use the standard tmux workflow below.
 
 ## Decision Rule
 
-- Run a command normally when it should finish within 60 seconds.
-- Use this workflow when it may exceed 60 seconds or its duration is uncertain.
-- Prefer splitting work into foreground commands shorter than 60 seconds when practical.
+- Run a command normally when it is quick and one-shot.
+- Use this workflow when the command is long-running, interactive, may hang, or its duration is uncertain.
+- Do not use one long blocking tool call as a substitute for this workflow.
 - Do not use `nohup`, `disown`, an ad hoc watchdog, or one long blocking tool call instead of tmux.
 
 ## Start
@@ -97,7 +97,7 @@ Choose the next wait from observed progress:
 - Start with a short wait, usually 5 to 10 seconds, to catch immediate failures.
 - Increase toward 15 to 30 seconds after repeated healthy progress or during an expected quiet phase.
 - Shorten toward 5 seconds when output changes quickly, completion is near, or behavior looks suspicious.
-- Keep every foreground `sleep` below 60 seconds. Do not tight-poll, and do not use one large sleep.
+- Vary each foreground `sleep` adaptively based on observed progress; do not use a fixed interval. Keep a single `sleep` at or under 10 minutes. Do not tight-poll, and do not use one huge sleep to wait out the whole task.
 - After every wait, explicitly decide: continue waiting, inspect more output, cancel, or collect the result.
 
 ## Complete

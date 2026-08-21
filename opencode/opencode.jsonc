@@ -2,7 +2,6 @@
   "plugin": [
     // "opencode-claude-auth",
     // "opencode-gemini-auth@latest",
-    "@mohak34/opencode-notifier@latest",
     // "oh-my-opencode-slim",
     // "opencode-background-agents"
   ],
@@ -130,17 +129,6 @@
     },
     "openrouter": {
       "models": {
-        "z-ai/glm-5.1": {
-          "options": {
-            "provider": {
-              "order": [
-                "novita/fp8",
-                "z-ai"
-              ],
-              "allow_fallbacks": false
-            }
-          }
-        },
         "openai/gpt-oss-20b": {
           "options": {
             "provider": {
@@ -161,21 +149,21 @@
             }
           }
         },
-        "minimax/minimax-m2.1": {
-          "options": {
-            "provider": {
-              "order": [
-                "minimax/lightning"
-              ],
-              "allow_fallbacks": false
-            }
-          }
-        },
         "qwen/qwen3-coder-30b-a3b-instruct": {
           "options": {
             "provider": {
               "order": [
                 "alibaba"
+              ],
+              "allow_fallbacks": false
+            }
+          }
+        },
+        "deepseek/deepseek-v4-flash-0731": {
+          "options": {
+            "provider": {
+              "order": [
+                "wafer/fast"
               ],
               "allow_fallbacks": false
             }
@@ -218,5 +206,8 @@
       }
     }
   },
-  "lsp": true
+  "lsp": true,
+  "websearch": {
+    "provider": "random"
+  }
 }
