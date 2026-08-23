@@ -90,6 +90,33 @@ in
   # enable normal users to use reboot or shutdown
   security.polkit.enable = true;
 
+  # Temporary passwordless sudo for coding agents:
+  # anyone in the "sudo-nopasswd" group gets NOPASSWD: ALL.
+  # Toggle with the idempotent "sudo-nopasswd" script (packages.nix),
+  # no rebuild needed:
+  #   sudo sudo-nopasswd on     # create group + add user
+  #   sudo sudo-nopasswd off    # remove user + delete group
+  security.sudo.extraRules = [
+    {
+      groups = [ "sudo-nopasswd" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+
+  # Resolve group membership against the group database on every sudo
+  # invocation instead of the login-time kernel group vector. The default is
+  # "adaptive", which only queries the database when the vector is full, so
+  # newly added groups are invisible until re-login. "dynamic" makes the
+  # sudo-nopasswd toggle above take effect immediately, no re-login.
+  environment.etc."sudo.conf".text = ''
+    Set group_source dynamic
+  '';
+
   system.activationScripts.link_bin_bash.text = ''
     ln -sf ${pkgs.bash}/bin/bash /bin/bash
     mkdir -p /usr/bin
@@ -232,6 +259,7 @@ in
 
     packages.caps2esc
     packages.ctrl2esc
+    packages.sudo-nopasswd
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
