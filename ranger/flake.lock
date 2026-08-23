@@ -19,11 +19,11 @@
     "ranger": {
       "flake": false,
       "locked": {
-        "lastModified": 1786446212,
-        "narHash": "sha256-pT+LcIkIWrTu+EiWGJC36J1Hg9ouqDfhopzJAsX/jFE=",
+        "lastModified": 1786779304,
+        "narHash": "sha256-v5f7bSpfc3Up7sdnd+ILVG+crB4Aiw8uUfdR/QdZXVw=",
         "owner": "ranger",
         "repo": "ranger",
-        "rev": "3566a876c9d4b202e47898e1be069eab92090a02",
+        "rev": "3187384e4078d91848bd22ea0dc8eb5fe2866f59",
         "type": "github"
       },
       "original": {

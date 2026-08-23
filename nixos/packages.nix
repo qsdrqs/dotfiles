@@ -188,6 +188,13 @@
       mkdir -p "$1" && cd "$1"
     '';
 
+  # Idempotent toggle for temporary passwordless sudo. Script lives in
+  # nixos/scripts/sudo-nopasswd.sh; the matching NOPASSWD rule for group
+  # "sudo-nopasswd" lives in minimal-configuration.nix.
+  sudo-nopasswd =
+    { pkgs }:
+    pkgs.writeShellScriptBin "sudo-nopasswd" (builtins.readFile ./scripts/sudo-nopasswd.sh);
+
   patchdir =
     { pkgs }:
     pkgs.writeShellScriptBin "patchdir" ''

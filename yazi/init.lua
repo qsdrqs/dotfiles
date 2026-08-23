@@ -82,7 +82,7 @@ end
 
 function Entity:icon()
 	local file = self._file
-	local icon = file:icon()
+	local icon = th.icon:match(file, { hovered = file.is_hovered })
 	if not icon then
 		return ""
 	elseif file.is_hovered then

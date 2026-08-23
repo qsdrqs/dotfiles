@@ -146,6 +146,13 @@ Any task that **writes or modifies code** (edits, refactors, bugfixes, new code)
 
 **Rationale**: Claude Sonnet's task-time reasoning is not rigorous enough for code modifications. It tends to add justification-driven side mechanisms (short-circuits, guard clauses, special-case branches) that survive past their original rationale and silently break unrelated systems. The cost of routing a code change through a stronger category is small; the cost of debugging a Claude Sonnet implementation oversight at experiment / integration time is large.
 
+## Subagent Invocation Mode
+
+**By default, invoke subagents in `background` mode.**
+
+- Call subagents with `background: true` unless the main session explicitly needs the subagent to block it (i.e., the caller cannot continue until the subagent's result is available).
+- Reserve foreground (blocking) mode for cases where blocking is explicitly intended.
+
 ## OpenCode Skills
 
 **Persist skill create/update changes in the dotfiles repo.**

@@ -90,12 +90,7 @@ in
     enable = true;
     user = "qsdrqs";
     extraPackages = [ pkgs.flatpak pkgs.drm_info pkgs.bubblewrap pkgs.bash ];
-    package = (pkgs.decky-loader.override {
-      pnpm_9 = pkgs.pnpm_10;
-    }).overridePythonAttrs (old: {
-      pnpmDeps = old.pnpmDeps.overrideAttrs (_: {
-        outputHash = "sha256-X1L8JYG5hgYMmfg0aa8XhkRU6/oFrYTPiXDIyq77puE=";
-      });
+    package = pkgs.decky-loader.overridePythonAttrs (old: {
       patches = (old.patches or []) ++ [
         ./patches/decky-loader-env.patch
       ];

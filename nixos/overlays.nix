@@ -115,18 +115,18 @@ in
           ];
         });
 
-        moonlight-qt = super.moonlight-qt.overrideAttrs (oldAttrs: {
-          patches = (oldAttrs.patches or [ ]) ++ [
-            (super.fetchpatch {
-              url = "https://github.com/moonlight-stream/moonlight-qt/commit/13880353d8741ae331bf13433c5ad80071d5f44f.patch";
-              hash = "sha256-bAOAMQteO1XGH6Xn957mNAqnRdaeHIlOtLM8FBzcTJA=";
-            })
-            (super.fetchpatch {
-              url = "https://github.com/moonlight-stream/moonlight-qt/commit/6ce02616f04fb83cd7c5d1492b03367f2220ac46.patch";
-              hash = "sha256-kiIF60OLle43rD34uJr0Zu4fa0dlggdoWUfJ5j5mtU4=";
-            })
-          ];
-        });
+        # moonlight-qt = super.moonlight-qt.overrideAttrs (oldAttrs: {
+        #   patches = (oldAttrs.patches or [ ]) ++ [
+        #     (super.fetchpatch {
+        #       url = "https://github.com/moonlight-stream/moonlight-qt/commit/13880353d8741ae331bf13433c5ad80071d5f44f.patch";
+        #       hash = "sha256-bAOAMQteO1XGH6Xn957mNAqnRdaeHIlOtLM8FBzcTJA=";
+        #     })
+        #     (super.fetchpatch {
+        #       url = "https://github.com/moonlight-stream/moonlight-qt/commit/6ce02616f04fb83cd7c5d1492b03367f2220ac46.patch";
+        #       hash = "sha256-kiIF60OLle43rD34uJr0Zu4fa0dlggdoWUfJ5j5mtU4=";
+        #     })
+        #   ];
+        # });
 
         # Fix blueman to expose root properties on D-Bus menu, which is required for the applet to work properly in waybar.
         blueman = super.blueman.overrideAttrs (oldAttrs: {
