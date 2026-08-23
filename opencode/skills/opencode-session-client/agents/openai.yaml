@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenCode Session Client"
+  short_description: "Send and poll messages on an opencode session via opencode2 CLI"
+  default_prompt: "Send a message to an opencode session with opencode2 run and wait for the response"

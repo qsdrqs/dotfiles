@@ -251,11 +251,47 @@ def session_wait(base: str, session_id: str, timeout: float) -> bool:
         raise SwarmError(f"failed to wait on session {session_id}: {exc}") from exc
 
 
-def create_session(base: str) -> str:
-    payload = unwrap(http_json(base, "POST", "/api/session", payload={}), "create session")
-    if not isinstance(payload, dict) or not isinstance(payload.get("id"), str):
+def create_session(base: str, model: dict[str, Any] | None = None) -> str:
+    payload: dict[str, Any] = {}
+    if model is not None:
+        payload["model"] = model
+    body = unwrap(http_json(base, "POST", "/api/session", payload=payload), "create session")
+    if not isinstance(body, dict) or not isinstance(body.get("id"), str):
         raise SwarmError("failed to create opencode session")
-    return payload["id"]
+    return body["id"]
+
+
+def parse_model(spec: str) -> dict[str, str]:
+    """Parse 'providerID/modelID#variant' into the V2 model object."""
+    provider, sep, rest = spec.partition("/")
+    model_id, _, variant = rest.partition("#")
+    if not sep or not provider or not model_id:
+        raise SwarmError(f"invalid --model '{spec}', expected 'providerID/modelID[#variant]'")
+    model: dict[str, str] = {"id": model_id, "providerID": provider}
+    if variant:
+        model["variant"] = variant
+    return model
+
+
+def fetch_session_model(base: str, session_id: str) -> dict[str, Any]:
+    """Read the model of an existing session (used as default for workers)."""
+    body = unwrap(http_json(base, "GET", f"/api/session/{session_id}"), f"session {session_id}")
+    if not isinstance(body, dict):
+        raise SwarmError(f"unexpected session payload for {session_id}")
+    model = body.get("model")
+    if not isinstance(model, dict) or not isinstance(model.get("id"), str) or not isinstance(model.get("providerID"), str):
+        raise SwarmError(f"session {session_id} has no readable model; pass --model explicitly")
+    return model
+
+
+def resolve_model(base: str, explicit: str | None, leader_session: str | None) -> dict[str, Any]:
+    """Resolve the worker model: explicit --model wins; otherwise default to
+    the leader session's current model."""
+    if explicit:
+        return parse_model(explicit)
+    if not leader_session:
+        raise SwarmError("--model is required, or pass --leader-session to default to the leader's current model")
+    return fetch_session_model(base, leader_session)
 
 
 def async_send(base: str, session_id: str, message: str) -> None:
@@ -291,6 +327,7 @@ def init_command(args: argparse.Namespace) -> int:
     if not args.worker:
         raise SwarmError("at least one --worker is required")
     base = ensure_server()
+    model = resolve_model(base, args.model, args.leader_session)
     names = set()
     workers: list[dict[str, Any]] = []
     for spec in args.worker:
@@ -298,17 +335,20 @@ def init_command(args: argparse.Namespace) -> int:
         if worker["name"] in names:
             raise SwarmError(f"duplicate worker name: {worker['name']}")
         names.add(worker["name"])
-        worker["session_id"] = create_session(base)
+        worker["session_id"] = create_session(base, model)
         workers.append(worker)
     create_tmux_windows(workers)
     leader_session = args.leader_session
     save_state({
         "base": base,
         "leader_session": leader_session,
+        "model": model,
         "workers": workers,
     })
     rows = [[worker["name"], worker["session_id"], worker["role"]] for worker in workers]
     print(format_table(["name", "session_id", "role"], rows))
+    model_ref = f"{model.get('providerID')}/{model.get('id')}#{model.get('variant')}" if model.get("variant") else f"{model.get('providerID')}/{model.get('id')}"
+    print(f"model:  {model_ref}")
     print(f"state: {STATE_FILE}")
     print(f"tmux:  {TMUX_SESSION}")
     return 0
@@ -317,6 +357,11 @@ def init_command(args: argparse.Namespace) -> int:
 def add_command(args: argparse.Namespace) -> int:
     state = load_state()
     base = str(state["base"])
+    model = state.get("model")
+    if args.model:
+        model = parse_model(args.model)
+    elif not isinstance(model, dict) or not isinstance(model.get("id"), str):
+        raise SwarmError("--model is required (state has no worker model); pass 'providerID/modelID[#variant]'")
     existing_names = {s["name"] for s in state["workers"]}
     added: list[dict[str, Any]] = []
     for spec in args.worker:
@@ -324,10 +369,11 @@ def add_command(args: argparse.Namespace) -> int:
         if worker["name"] in existing_names:
             raise SwarmError(f"worker name already exists: {worker['name']}")
         existing_names.add(worker["name"])
-        worker["session_id"] = create_session(base)
+        worker["session_id"] = create_session(base, model)
         added.append(worker)
     create_tmux_windows(added)
     state["workers"].extend(added)
+    state["model"] = model
     save_state(state)
     rows = [[s["name"], s["session_id"], s["role"]] for s in added]
     print(format_table(["name", "session_id", "role"], rows))
@@ -462,11 +508,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     init_parser = subparsers.add_parser("init", help="create worker sessions and tmux windows")
     init_parser.add_argument("--worker", action="append", default=[])
+    init_parser.add_argument("--model", default=None, help="worker model as 'providerID/modelID[#variant]' (default: leader session's model)")
     init_parser.add_argument("--leader-session", default=None, help="session ID of the leader agent")
     init_parser.set_defaults(func=init_command)
 
     add_parser = subparsers.add_parser("add", help="add new workers to a running swarm")
     add_parser.add_argument("--worker", action="append", default=[], required=True)
+    add_parser.add_argument("--model", default=None, help="worker model as 'providerID/modelID[#variant]' (default: state's worker model)")
     add_parser.set_defaults(func=add_command)
 
     send_parser = subparsers.add_parser("send", help="send a message to one worker")

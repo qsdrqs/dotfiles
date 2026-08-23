@@ -61,6 +61,32 @@
     }
   },
   "provider": {
+    // Override Codex OAuth clamp (400k/272k/128k) for GPT-5.6.
+    // Codex 0.149.0 advertises max_context_window 872000 for sol/terra/luna;
+    // long context is configurable per OpenAI docs. -fast variants are
+    // separate catalog entries and must be overridden explicitly.
+    "openai": {
+      "models": {
+        "gpt-5.6-sol": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-5.6-sol-fast": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-5.6-terra": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-5.6-terra-fast": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-5.6-luna": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-5.6-luna-fast": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        }
+      }
+    },
     "NRP": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "NRP",

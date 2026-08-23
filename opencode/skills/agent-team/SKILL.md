@@ -64,18 +64,39 @@ Output a plan table before proceeding:
 
 ### Phase 2: Initialize the Swarm
 
+**MANDATORY: workers must be created with an explicit model.** Pass
+`--model providerID/modelID[#variant]` (same format as `opencode2 run
+--model`). If omitted, `--leader-session` is required so the workers default
+to the leader session's current model:
+
 ```bash
+# Preferred: explicit model (replace providerID/modelID#variant with a real model)
 python3 {SWARM_CLI} init \
+  --model "providerID/modelID#variant" \
+  --worker "api:Implement REST API endpoints" \
+  --worker "ui:Implement React frontend components"
+
+# Or: default to the leader's current model (needs --leader-session)
+python3 {SWARM_CLI} init \
+  --leader-session {your_session_id} \
   --worker "api:Implement REST API endpoints" \
   --worker "ui:Implement React frontend components"
 ```
 
-This creates worker sessions on the shared background service, starts tmux
-windows with the full opencode2 TUI for visual monitoring, and writes state.
+`init` refuses to start without a resolvable model: no `--model` and no
+`--leader-session` is an error, because falling back to the server's default
+model would silently diverge from the leader's model.
+
+This creates worker sessions on the shared background service (each carrying
+the chosen model), starts tmux windows with the full opencode2 TUI for visual
+monitoring, and writes state. The model is persisted in state; later `add`
+calls reuse it unless overridden with `--model`.
 
 ### Phase 2.5: Register Leader Session
 
-After init, find your own session ID and register it so workers can `report` back to you.
+Workers `report` back to the leader session, so it must be registered. If you
+already passed `--leader-session` to `init`, it is registered - skip this
+step. Otherwise:
 
 1. List sessions via the V2 API and find yours (search for a unique string from this conversation, e.g. the session title):
    ```
