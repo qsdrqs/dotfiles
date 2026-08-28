@@ -1,18 +1,18 @@
 ---
 name: researcher
-description: "Multi-agent parallel research workflow: YOU (the Orchestrator) spawn 6-12+ research agents simultaneously, each investigating ONE specific angle. YOU decompose the topic into 3-7 directions, launch parallel agents per direction, then synthesize all findings. DO NOT use a single agent - use multiple agents in parallel. Use for complex research requiring comprehensive coverage."
+description: "Adaptive evidence-backed research for requests that explicitly need research, a survey, or a source-backed comparison. Route local inspection to explore, external sources to librarian, and difficult unresolved reasoning to general; start small and expand only with user approval."
 ---
 
 # Researcher (Multi-Agent Iterative Web Research)
 
 ## ⚠️ CRITICAL: READ THIS FIRST
 
-**YOU ARE THE ORCHESTRATOR. DO NOT DELEGATE EVERYTHING TO A SINGLE AGENT.**
+**YOU ARE THE ORCHESTRATOR. DELEGATION IS A TOOL, NOT A TARGET.**
 
-❌ **WRONG**: Launching 1 agent to "research everything"  
-✅ **CORRECT**: Launching 6-12+ agents in parallel, each with a specific focus
+❌ **WRONG**: Launching a large swarm before checking whether local or primary-source evidence already answers the question
+✅ **CORRECT**: Starting with 1-2 role-appropriate agents, synthesizing their evidence, and expanding only when necessary
 
-Your job is to **COORDINATE** multiple agents, not to **DO** the research yourself and not to ask one agent to do everything.
+Your job is to minimize research cost while preserving evidence quality. The orchestrator owns scoping, routing, synthesis, and stopping decisions.
 
 ---
 
@@ -23,8 +23,8 @@ This skill uses a **multi-agent collaborative architecture**:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    ORCHESTRATOR (You)                       │
-│         - Decomposes problem into 3-7 directions            │
-│         - Spawns 6-12+ parallel research agents             │
+│         - Identifies the smallest decisive questions        │
+│         - Starts 1-2 role-appropriate research agents       │
 │         - Monitors progress & collects results              │
 │         - Synthesizes & validates findings                  │
 └────────────────────┬────────────────────────────────────────┘
@@ -47,10 +47,11 @@ This skill uses a **multi-agent collaborative architecture**:
 ### Role Definitions
 
 **🎭 Orchestrator（指挥者）- That's YOU:**
-- **DECOMPOSE** the research into 3-7 distinct directions
-- **SPAWN** 6-12+ specialized agents in **PARALLEL** (not sequentially)
+- **DECOMPOSE** only as far as needed to identify decisive, non-overlapping questions
+- **START SMALL** with 1-2 specialized agents in parallel
 - **COORDINATE**: Each agent gets ONE specific angle only
 - **SYNTHESIZE**: Combine findings from all agents, cross-validate
+- **STOP** once primary-source evidence resolves the question
 
 **🤖 Research Agents（研究员）:**
 - Each agent focuses on **ONE** specific subtopic/angle
@@ -62,12 +63,22 @@ This skill uses a **multi-agent collaborative architecture**:
 
 | Metric | Target |
 |--------|--------|
-| Research directions | 3-7 |
-| Agents per direction | 2-4 |
-| **Total agents spawned** | **6-12+** |
+| Focused first wave | 1-2 agents |
+| Maximum without approval | 4 total agents, at most 1 `general` |
+| Deep mode | 5-6 preferred, only after explicit approval |
 | Sequential agents | 0 (all parallel) |
 
-**If you're only spawning 1-2 agents, you're doing it wrong.**
+An approved count is a ceiling, not a quota. A second wave always requires explicit user approval.
+
+### Agent Routing
+
+| Work | Agent | Default use |
+|------|-------|-------------|
+| Local repository search, file discovery, pinned source inspection | `explore` | First choice for local evidence |
+| Official docs, standards, releases, GitHub source/issues, dependency behavior | `librarian` | First choice for external research |
+| Difficult cross-domain reasoning, unresolved contradictions, complex feasibility analysis | `general` | Escalation only |
+
+Do not mention underlying model names; assignments may change. Do not use `general` for routine web search or local code discovery. The orchestrator performs final synthesis.
 
 **Research Agents（研究员）:**
 - Each agent focuses on ONE specific subtopic/angle
@@ -83,39 +94,30 @@ This skill uses a **multi-agent collaborative architecture**:
 
 When user asks for research, **YOU** must:
 
-1. **DECOMPOSE** - Break the topic into 3-7 distinct research directions
-   - Example: "GraphQL vs REST" → Directions: GraphQL Perf, REST Perf, Migration Cost, Learning Curve
+1. **DECOMPOSE** - Identify the smallest set of independent questions that determine the conclusion.
 
-2. **SPAWN MULTIPLE AGENTS** - Launch 6-12+ agents IN PARALLEL
+2. **ROUTE THE FIRST WAVE** - Launch 1-2 role-appropriate agents in parallel.
    ```python
    # WRONG - Don't do this:
    subagent(agent="general", description="Research everything", prompt="Research GraphQL vs REST...")
    
-   # CORRECT - Do this:
-   subagent(agent="general", description="GraphQL docs", prompt="...", background=True)
-   subagent(agent="general", description="GraphQL community", prompt="...", background=True)
-   subagent(agent="general", description="REST docs", prompt="...", background=True)
-   subagent(agent="general", description="REST community", prompt="...", background=True)
-   subagent(agent="general", description="Comparison benchmarks", prompt="...", background=True)
-   # ... etc
+   # CORRECT - Local evidence plus external primary sources:
+   subagent(agent="explore", description="Inspect current implementation", prompt="...", background=True)
+   subagent(agent="librarian", description="Check official evidence", prompt="...", background=True)
    ```
 
-3. **ASSIGN SPECIFIC ANGLES** - Each agent gets ONE narrow focus:
-   - Agent 1: GraphQL official docs & benchmarks
-   - Agent 2: GraphQL community issues & Reddit discussions
-   - Agent 3: REST official docs & specs
-   - Agent 4: REST production experience reports
-   - Agent 5: Comparative benchmark studies
-   - Agent 6: Migration case studies & lessons learned
+3. **ASSIGN SPECIFIC ANGLES** - Each agent gets one narrow, non-overlapping question and the minimum context needed to answer it.
 
 4. **WAIT & COLLECT** - Background subagents notify you automatically when they finish (no polling needed). Collect all results once the notifications arrive.
 
-5. **SYNTHESIZE** - Cross-validate findings from ALL agents
+5. **SYNTHESIZE AND STOP** - Cross-validate findings and stop when primary-source evidence answers the question.
+
+6. **EXPAND ONLY WITH APPROVAL** - Explain the unresolved question and proposed added cost before every second wave. More than 4 total agents or more than 1 `general` agent requires explicit approval.
 
 ### Common Mistake
 
-❌ **Mistake**: "I'll spawn one agent to do the research"  
-✅ **Correct**: "I'll spawn 8 agents, each focusing on one aspect"
+❌ **Mistake**: "More agents automatically mean better research"
+✅ **Correct**: "I'll use the smallest role-appropriate first wave and expand only if evidence remains materially incomplete"
 
 **Remember**: The subagents are your workforce. You are the manager. Don't hire one person to do everything—hire specialists for each task.
 
@@ -123,12 +125,13 @@ When user asks for research, **YOU** must:
 
 Before you launch any agents, verify:
 
-- [ ] I have identified **3-7 distinct research directions**
-- [ ] For each direction, I have planned **2-4 specific angles**
-- [ ] I will spawn **6-12+ agents total** (directions × angles)
+- [ ] I have identified the smallest decisive questions
+- [ ] I have chosen the least expensive capable agent for each question
+- [ ] I will start with **1-2 agents total** unless the user approved deep mode
 - [ ] All agents will run with `background=true`
 - [ ] Each agent prompt focuses on **ONE angle only**
 - [ ] I have a plan to collect and synthesize all results (completion notifications)
+- [ ] Any second wave or budget above 4 agents has explicit user approval
 
 **If you can't check all boxes, STOP and redesign your approach.**
 
@@ -149,7 +152,7 @@ If the prompt is too vague to search effectively, ask 2–5 clarification questi
 
 **Step 2: Initial broad scan (Orchestrator performs this)**
 
-Generate 6-12 query variants and perform lightweight scanning to identify 3-7 distinct research directions.
+Run a lightweight scan and inspect available local evidence before delegation. Identify only the questions whose answers can change the conclusion.
 
 For each direction, document:
 - Direction name (1-2 words)
@@ -171,14 +174,14 @@ Present:
 
 **Step 4: Spawn research agents in parallel**
 
-For EACH direction, spawn **2-4 specialized agents** simultaneously:
+In focused mode, spawn 1-2 role-appropriate agents. The extended example below illustrates an explicitly approved deep-mode comparison; it is not the default budget.
 
 ```python
 # Example: Researching "GraphQL vs REST API performance"
 
 # Direction A: GraphQL Performance - Docs/Benchmarks angle
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="GraphQL perf - official docs",
     prompt="""TASK: Deep research on GraphQL performance characteristics
@@ -218,7 +221,7 @@ RETURN_FORMAT:
 
 # Direction A: GraphQL Performance - Community angle
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="GraphQL perf - community issues",
     prompt="""TASK: Deep research on GraphQL real-world performance issues
@@ -260,7 +263,7 @@ RETURN_FORMAT:
 
 # Direction B: REST Performance
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="REST perf - docs and benchmarks",
     prompt="""TASK: Deep research on REST API performance characteristics
@@ -298,7 +301,7 @@ RETURN_FORMAT:
 )
 
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="REST perf - community experiences",
     prompt="""TASK: Deep research on REST production experiences
@@ -334,7 +337,7 @@ RETURN_FORMAT:
 
 # Direction C: Comparative Studies
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="GraphQL vs REST comparison",
     prompt="""TASK: Comparative research on GraphQL vs REST
@@ -473,35 +476,29 @@ Structure:
 **Step 9: Handle user feedback**
 
 Based on user response:
-- If user wants deeper investigation: spawn new agents for specific subtopics
-- If user wants alternative directions: repeat Phase 2 with new directions
+- If user wants deeper investigation: propose a bounded second wave and wait for explicit approval
+- If user wants alternative directions: propose the new scope and added cost before repeating Phase 2
 - If user is satisfied: conclude and offer to save research artifacts
+
+If the user asks to stop, immediately interrupt every active child session and launch no more agents. Treat any user-provided budget or agent limit as a hard ceiling.
 
 ---
 
 ## Available Tools for Research Agents
 
-Research agents MUST use the following tools to perform web research:
+Use tools according to the selected agent role. Do not force local exploration agents into external web research.
 
 ### Primary Research Tools
-- **`websearch`**: General web search for finding sources
-  - Use for: Initial discovery, finding documentation, blog posts, forums
-  - Example: Search "GraphQL performance best practices 2024"
-
-- **`webfetch`**: Fetch specific URLs for deep reading
-  - Use for: Reading full articles, documentation pages, GitHub issues
-  - MUST fetch original sources, not rely on search snippets
+- **`explore`**: Use repository search and file-reading tools for local code, configuration, and pinned sources.
+- **`librarian`**: Use external search and fetch tools for official docs, standards, releases, repositories, issues, and PRs.
+- **`general`**: Use task-appropriate tools only for the unresolved reasoning scope assigned to it.
 
 ### Specialized Tools
-- **`context7_resolve-library-id`** + **`context7_query-docs`**: Query technical documentation (if the context7 MCP is available)
-  - Use for: Official library/framework docs, API references
-  - Example: Query specific function usage or configuration options
-
-- GitHub search: Use `websearch` with `site:github.com` to find real-world code, issues, and PRs
+Follow current environment requirements for library documentation and available search integrations. Tool names and availability may change.
 
 ### Tool Usage Rules
-1. **ALWAYS start with search**: Use `websearch` to discover sources
-2. **NEVER rely on snippets**: Always use `webfetch` to read full content
+1. **Search locally first when applicable**: Prefer pinned implementation evidence over generic web results.
+2. **Fetch originals for external claims**: Never rely on search snippets.
 3. **Include source links**: Every finding must include the URL where it was found
 4. **Check dates**: Note publication/last-updated dates for time-sensitive claims
 
@@ -517,7 +514,7 @@ Research agents MUST use the following tools to perform web research:
 
 ```python
 subagent(
-    agent="general",
+    agent=selected_agent,
     background=True,
     description="[Direction] - [Angle]",
     prompt="""TASK: Deep research on [specific topic]
@@ -536,14 +533,14 @@ You are researching ONLY this specific angle. Do NOT:
 
 Your job is to go DEEP on this ONE angle, not WIDE across all angles.
 
-AVAILABLE TOOLS (YOU MUST USE THESE):
-- websearch: Use this to search the web for sources, documentation, discussions
-- webfetch: Use this to fetch and read full content from URLs (NEVER rely on search snippets)
+AVAILABLE TOOLS:
+- Use the tools appropriate for the selected agent role and current environment.
+- For external research, search for and fetch original sources; never rely on snippets.
 
 MUST_DO:
 - Focus ONLY on your assigned ANGLE
-- Use websearch to find 8-15 relevant sources
-- For EACH promising source, use webfetch to read the FULL content (not just snippets)
+- In focused mode, use 2-4 relevant primary sources; expand only when evidence conflicts or the user approved deep mode
+- For each external source used as evidence, read the full relevant content rather than a search snippet
 - Extract specific claims, quotes, and data points with context
 - Include exact URLs and dates for every finding
 - Search from multiple independent sources
@@ -604,7 +601,7 @@ KEY_QUESTION: What are GraphQL's caching mechanisms and performance characterist
 - [ ] **Used websearch to find sources** (not skipped)
 - [ ] **Used webfetch to read full content** (never relied on snippets)
 - [ ] Dates included for all time-sensitive claims
-- [ ] At least 3-5 independent sources per major finding
+- [ ] Major claims have enough independent evidence for the requested depth, including a primary source when available
 - [ ] Both supporting and contradicting evidence reported
 - [ ] PDFs converted to text when relevant
 
@@ -670,7 +667,7 @@ for result in results[:5]:
 for direction in directions:
     for angle in direction.angles:
         subagent(
-            agent="general",
+            agent=route_agent(angle),
             background=True,
             description=f"{direction.name}-{angle}",
             prompt=build_agent_prompt(direction, angle),
@@ -693,7 +690,7 @@ for direction in directions:
    - B: Migration complexity/cost  
    - C: Team learning curve
    - D: Long-term ecosystem trends
-3. Deploy: Spawn 8 agents (2 per direction, different angles)
+3. Deploy: Propose a bounded role-routed plan and obtain approval before deep-mode delegation
 4. Synthesize: Cross-validate findings, note contradictions
 5. Report: "GraphQL shows 30% payload reduction but 2-3 week migration cost..."
 6. Iterate: User asks about caching → spawn 2 more agents on caching specifics
@@ -704,12 +701,12 @@ for direction in directions:
 
 | Anti-Pattern | Why It's Bad | Solution |
 |--------------|--------------|----------|
-| **⚠️ Single agent doing everything** | Defeats multi-agent purpose; one agent cannot cover all angles comprehensively | Spawn 6-12+ agents, each with ONE specific angle |
+| **⚠️ Launching a swarm by default** | Burns budget before the decisive questions are known | Start with 1-2 role-appropriate agents and expand only with approval |
 | **⚠️ Asking one agent to "research all directions"** | Agent will do shallow work or get overwhelmed | YOU decompose directions; spawn separate agents per direction |
 | Sequential agent execution | Defeats parallel efficiency | Always use `background=True` |
 | Overlapping agent scopes | Wasted effort, confusing synthesis | Give each agent distinct ANGLE |
 | Suppressing contradictions | Creates false confidence | Highlight disagreements with analysis |
-| Too many agents per direction | Diminishing returns, synthesis burden | Max 3-4 agents per direction |
+| Too many agents per direction | Diminishing returns, synthesis burden | Use one agent per necessary angle unless the user approves deeper coverage |
 | Single-source claims | Unreliable | Require multiple independent sources |
 | Ignoring agent findings | Wasted work | All agent outputs must inform synthesis |
 
@@ -735,19 +732,19 @@ subagent(
 
 ✅ **CORRECT approach** (do this):
 ```python
-# DO THIS - Multiple specialized agents in parallel
+# DEEP MODE ONLY - Use a bounded approved plan with specialized agents
 
 # Direction A: GraphQL Performance (2 agents)
-subagent(agent="general", description="GraphQL - docs & benchmarks", prompt="...", background=True)
-subagent(agent="general", description="GraphQL - community issues", prompt="...", background=True)
+subagent(agent="librarian", description="GraphQL - docs & benchmarks", prompt="...", background=True)
+subagent(agent="librarian", description="GraphQL - community issues", prompt="...", background=True)
 
 # Direction B: REST Performance (2 agents)  
-subagent(agent="general", description="REST - docs & benchmarks", prompt="...", background=True)
-subagent(agent="general", description="REST - community issues", prompt="...", background=True)
+subagent(agent="librarian", description="REST - docs & benchmarks", prompt="...", background=True)
+subagent(agent="librarian", description="REST - community issues", prompt="...", background=True)
 
 # Direction C: Comparative Studies (2 agents)
-subagent(agent="general", description="Benchmarks comparison", prompt="...", background=True)
-subagent(agent="general", description="Migration case studies", prompt="...", background=True)
+subagent(agent="librarian", description="Benchmarks comparison", prompt="...", background=True)
+subagent(agent="librarian", description="Migration case studies", prompt="...", background=True)
 
 # Collect all results as completion notifications arrive
 
@@ -773,7 +770,7 @@ subagent(agent="general", description="Migration case studies", prompt="...", ba
 For simple research tasks that don't require multi-angle coverage, you can still use the original single-agent workflow:
 
 1. Clarify the question
-2. Broad scan (6-12 query variants)
+2. Lightweight scan of local and primary-source evidence
 3. Deep dive (1-3 subtopics)
 4. Synthesize and report
 
@@ -784,14 +781,14 @@ However, for complex decisions with trade-offs, prefer the multi-agent approach 
 ## Reference Materials
 
 - **Query patterns & source triage**: See `references/query-playbook.md`
-- **Complete Orchestrator example**: See `examples/orchestrator-example.md` for a full walkthrough of correct multi-agent research execution
+- **Approved deep-mode example**: See `examples/orchestrator-example.md` only when the user explicitly approved a broad comparison above the focused-mode budget
 
 ## Quick Reminder
 
 Before starting research:
-1. ✓ Decompose into 3-7 directions
-2. ✓ Plan 6-12+ parallel agents
+1. ✓ Identify the smallest decisive questions
+2. ✓ Route 1-2 first-wave agents by capability
 3. ✓ Each agent = ONE angle only
-4. ✓ Synthesize all findings
+4. ✓ Synthesize before requesting any second wave
 
 **You are the conductor, not the orchestra!**

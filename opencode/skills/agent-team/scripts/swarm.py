@@ -160,16 +160,32 @@ def message_text(message: dict[str, Any]) -> str:
     text = message.get("text")
     if isinstance(text, str) and text.strip():
         return text.strip()
-    parts = message.get("parts") or []
-    texts = [part["text"].strip() for part in parts if isinstance(part, dict) and isinstance(part.get("text"), str) and part["text"].strip()]
+    parts = message.get("content") or message.get("parts") or []
+    texts = [
+        part["text"].strip()
+        for part in parts
+        if isinstance(part, dict)
+        and part.get("type") == "text"
+        and isinstance(part.get("text"), str)
+        and part["text"].strip()
+    ]
     if texts:
         return "\n".join(texts)
-    labels = [f"[{part['type']}]" for part in parts if isinstance(part, dict) and isinstance(part.get("type"), str) and part["type"]]
-    return " ".join(labels)
+    return ""
 
 def snippet(text: str, limit: int = 60) -> str:
     flat = " ".join(text.split())
     return flat if len(flat) <= limit else flat[: limit - 3] + "..."
+
+
+def message_role(message: dict[str, Any]) -> str:
+    role = message.get("type")
+    if isinstance(role, str) and role:
+        return role
+    info = message.get("info") or {}
+    role = info.get("role")
+    return role if isinstance(role, str) and role else "unknown"
+
 
 def prefixed_message(sender: str, message: str) -> str:
     sender = sender.strip() or "leader"
@@ -223,7 +239,9 @@ def read_messages(base: str, session_id: str) -> list[dict[str, Any]]:
     payload = unwrap(http_json(base, "GET", f"/api/session/{session_id}/message"), f"session {session_id}")
     if not isinstance(payload, list):
         raise SwarmError(f"unexpected message payload for session {session_id}")
-    return [item for item in payload if isinstance(item, dict)]
+    messages = [item for item in payload if isinstance(item, dict)]
+    messages.sort(key=lambda item: (item.get("time") or {}).get("created") or 0)
+    return messages
 
 
 def session_wait(base: str, session_id: str, timeout: float) -> bool:
@@ -241,6 +259,8 @@ def session_wait(base: str, session_id: str, timeout: float) -> bool:
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return response.status == 204
+    except TimeoutError:
+        return False
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace").strip()
         message = f"HTTP {exc.code} for POST /api/session/{session_id}/wait"
@@ -400,7 +420,8 @@ def status_command(args: argparse.Namespace) -> int:
     rows = []
     for worker in state["workers"]:
         messages = read_messages(base, worker["session_id"])
-        rows.append([worker["name"], worker["role"], str(len(messages)), snippet(message_text(messages[-1])) if messages else "-"])
+        latest = next((message_text(message) for message in reversed(messages) if message_text(message)), "-")
+        rows.append([worker["name"], worker["role"], str(len(messages)), snippet(latest)])
     print(format_table(["name", "role", "messages", "last activity"], rows))
     return 0
 
@@ -409,14 +430,14 @@ def read_command(args: argparse.Namespace) -> int:
     state = load_state()
     worker = get_worker(state, args.source)
     messages = read_messages(str(state["base"]), worker["session_id"])
-    selected = messages[-args.last :] if args.last > 0 else []
+    displayable = [message for message in messages if message_text(message)]
+    selected = displayable[-args.last :] if args.last > 0 else []
     if not selected:
         print(f"no messages for {worker['name']}")
         return 0
     blocks = []
     for message in selected:
-        info = message.get("info") or {}
-        blocks.append(f"[{info.get('role', 'unknown')}] {message_text(message) or '[no text parts]'}")
+        blocks.append(f"[{message_role(message)}] {message_text(message) or '[no text parts]'}")
     print("\n\n".join(blocks))
     return 0
 

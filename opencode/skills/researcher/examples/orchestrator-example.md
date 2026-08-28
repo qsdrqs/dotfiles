@@ -1,6 +1,6 @@
-# Multi-Agent Research Example: Complete Orchestrator Walkthrough
+# Approved Deep-Mode Research Example
 
-This example demonstrates the **correct** way to use the researcher skill as an Orchestrator.
+This example demonstrates an explicitly approved broad comparison. It is not the default focused-mode budget.
 
 ## Scenario
 
@@ -17,14 +17,14 @@ Identify 4 distinct research directions:
 | C. Migration Cost | What's the cost to migrate? | Case studies, Tooling |
 | D. Team Learning | How steep is the learning curve? | Tutorials complexity, Training resources |
 
-**Total agents to spawn**: 8 (2 per direction)
+**Approved agent ceiling**: 8 (2 per direction). Stop early if fewer agents resolve the decision.
 
 ## Step 2: Launch All Agents in Parallel (Orchestrator)
 
 ```python
 # Direction A: GraphQL Performance
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="GraphQL perf - docs & benchmarks",
     prompt="""TASK: Research GraphQL mobile performance - official sources
@@ -37,7 +37,7 @@ KEY_QUESTION: What are GraphQL's performance characteristics for mobile apps acc
 )
 
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="GraphQL perf - community issues",
     prompt="""TASK: Research GraphQL mobile performance - real world issues
@@ -51,7 +51,7 @@ KEY_QUESTION: What performance problems do teams encounter with GraphQL on mobil
 
 # Direction B: REST Performance
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="REST perf - docs & benchmarks",
     prompt="""TASK: Research REST mobile performance - official sources
@@ -64,7 +64,7 @@ KEY_QUESTION: What are REST's performance characteristics and caching mechanisms
 )
 
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="REST perf - community experience",
     prompt="""TASK: Research REST mobile performance - real world experience
@@ -78,7 +78,7 @@ KEY_QUESTION: How do teams optimize REST APIs for mobile in production?
 
 # Direction C: Migration Cost
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="Migration - case studies",
     prompt="""TASK: Research REST to GraphQL migration experiences
@@ -91,7 +91,7 @@ KEY_QUESTION: What do case studies say about the effort and cost to migrate from
 )
 
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="Migration - tooling & automation",
     prompt="""TASK: Research migration tooling and automation
@@ -105,7 +105,7 @@ KEY_QUESTION: What tools and automation exist to help migrate from REST to Graph
 
 # Direction D: Learning Curve
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="Learning - complexity & tutorials",
     prompt="""TASK: Research GraphQL learning complexity
@@ -118,7 +118,7 @@ KEY_QUESTION: How complex is GraphQL to learn compared to REST, based on officia
 )
 
 subagent(
-    agent="general",
+    agent="librarian",
     background=True,
     description="Learning - training resources",
     prompt="""TASK: Research GraphQL training resources availability
@@ -130,13 +130,13 @@ KEY_QUESTION: What training resources, courses, and community support exist for 
 """
 )
 
-print("Launched 8 agents in parallel")
+print("Launched the explicitly approved deep-mode agents in parallel")
 ```
 
 ## Step 3: Inform User
 
 ```
-I've launched 8 research agents to investigate your question from multiple angles:
+You approved a deep-mode plan with up to 8 research agents. I launched the non-overlapping external-source angles in parallel:
 
 **Direction A: GraphQL Performance** (2 agents)
 - Agent A1: Official documentation & benchmarks
@@ -254,8 +254,8 @@ print(synthesis)
 
 ## Key Takeaways
 
-1. **Decomposed** the question into 4 distinct directions
-2. **Spawned 8 agents** in parallel (2 per direction with different angles)
+1. **Decomposed** the question into 4 distinct directions after focused evidence was insufficient
+2. **Obtained approval** for a deep-mode ceiling of 8 agents
 3. **Each agent** had a specific, narrow focus
 4. **Collected** all results before synthesizing
 5. **Cross-validated** findings from multiple agents

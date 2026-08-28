@@ -164,6 +164,14 @@ When creating or updating OpenCode skills for this setup:
 
 **Rationale**: `~/.config/opencode/skills` is activation output assembled from dotfiles and external symlinks, so direct edits there will drift from the managed source.
 
+## SSH Connection Persistence
+
+SSH keys are loaded with `ssh-add -c`, so every agent signing triggers a
+confirmation popup. A global `ControlPath` is already configured. When the user
+asks to persist/unlock an ssh target (or repeated ssh popups need to be
+avoided): run `ssh -f -N -M -o ControlPersist=2h <target>` (one popup), then
+plain `ssh <target> ...` reuses the socket. End with `ssh -O exit <target>`.
+
 ## Language-Specific Conventions
 
 ### Python

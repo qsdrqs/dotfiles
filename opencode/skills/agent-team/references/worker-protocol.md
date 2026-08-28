@@ -9,7 +9,9 @@ You were initialized with a `[SWARM INIT]` message containing:
 - **Your teammates** (name, role, session ID)
 - **Your task**
 
-Remember your name. Prefix ALL outgoing peer messages with `[FROM {your_name}]`.
+Remember your name and pass it with `--from {your_name}` on every outgoing
+message. The CLI adds the `[FROM {your_name}]` prefix; do not include that
+prefix manually in `--message`.
 
 ## Communication Commands
 

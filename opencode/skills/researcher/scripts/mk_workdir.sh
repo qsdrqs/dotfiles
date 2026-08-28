@@ -2,6 +2,6 @@
 set -euo pipefail
 
 prefix="${1:-researcher}"
-workdir="$(mktemp -d "/tmp/${prefix}.XXXXXX")"
+mkdir -p /tmp/opencode
+workdir="$(mktemp -d "/tmp/opencode/${prefix}.XXXXXX")"
 echo "$workdir"
-

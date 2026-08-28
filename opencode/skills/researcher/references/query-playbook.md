@@ -2,15 +2,20 @@
 
 Use this file when you need help generating better search queries, choosing sources, and deciding when you've searched "enough".
 
-## Multi-Agent Mode Supplement
+## Delegated Research Supplement
 
-When operating in multi-agent mode (see SKILL.md), each Research Agent should:
+When delegating research (see SKILL.md), each research agent should:
 
 ### Focus on ONE angle only
 Each agent gets a specific ANGLE assignment. Don't drift into other angles' territory.
 
-### MANDATORY: Use Tools (Never Skip!)
-Research agents MUST actively use these tools:
+### Use role-appropriate tools
+
+- `explore` agents use repository search and file-reading tools for local evidence.
+- `librarian` agents use available search and fetch tools for external evidence.
+- `general` agents use only the tools needed for their explicitly unresolved reasoning scope.
+
+External research agents follow this sequence:
 
 **1. Search Phase:**
 - `websearch` - For general web searches, documentation, discussions
@@ -31,17 +36,20 @@ Research agents MUST actively use these tools:
 results = websearch(query="GraphQL performance caching best practices")
 
 # Step 2: Fetch each promising source
-for url in [r.url for r in results[:8]]:
+for url in [r.url for r in results[:4]]:
     content = webfetch(url=url, format="markdown")
     # Step 3: Read and extract specific findings
     # Look for: specific claims, numbers, quotes, dates
 ```
 
 ### Search breadth per agent
-- **Docs agent**: 5-10 official sources (docs, specs, release notes)
-- **Papers agent**: 3-5 academic papers with methodology review
-- **Community agent**: 8-15 discussion threads/issues for comprehensive coverage
-- **Benchmarks agent**: 3-5 benchmark studies with methodology validation
+
+In focused mode, use 2-4 relevant primary sources per angle. Source quality and independence matter more than count. Expand only when evidence conflicts, a claim spans versions or environments, or the user approved deep mode.
+
+- **Docs agent**: official docs, specs, source, tests, and release notes needed for the claim
+- **Papers agent**: papers with enough methodological detail to evaluate the claim
+- **Community agent**: targeted issues or reports that reveal concrete failure modes
+- **Benchmarks agent**: studies whose methodology and environment can be verified
 
 ### Return structure for agents
 ```markdown
@@ -102,6 +110,7 @@ Prefer diversity: if every source says the same thing but all cite each other, f
 
 ### Multi-agent source coordination
 When multiple agents investigate the same direction:
+- Choose only the roles needed to resolve the question; do not instantiate every role by default.
 - **Docs agent** focuses on primary sources
 - **Papers agent** validates with academic rigor
 - **Community agent** finds real-world counterexamples
@@ -115,13 +124,12 @@ When multiple agents investigate the same direction:
 - Have checked recency for fast-moving topics (dates within the last 6–24 months, depending on domain).
 - Have looked for known failure modes / counterexamples.
 
-### Multi-agent mode (per direction)
-- [ ] Docs agent found authoritative specifications
-- [ ] Papers agent found peer-reviewed research (if applicable)
-- [ ] Community agent found real-world experiences (positive AND negative)
-- [ ] Benchmarks agent found quantitative comparisons (if applicable)
-- [ ] Cross-agent validation: Do findings align or are contradictions explained?
-- [ ] Synthesis confidence: Can the orchestrator make a clear recommendation?
+### Delegated mode
+- [ ] Every delegated role was necessary for the decision.
+- [ ] Primary sources support each major claim.
+- [ ] When multiple agents investigated related evidence, their findings were cross-validated.
+- [ ] Contradictions are explained or clearly left open.
+- [ ] The orchestrator can make a recommendation without another research wave.
 
 ## 4) Notes format (keep it lightweight)
 
@@ -175,9 +183,9 @@ This is especially important for:
 - Papers (abstracts may omit limitations/assumptions)
 - Benchmarks (methodology details matter)
 
-### Multi-agent fetch strategy
+### Delegated fetch strategy
 
-**Each agent MUST use tools in this order:**
+External research agents use tools in this order. Local `explore` agents instead inspect the repository and pinned source directly.
 
 1. **Search** (use appropriate tool for your angle):
    - Docs: `websearch` for official docs, specs
@@ -206,9 +214,9 @@ If a source is a PDF, prefer converting it to text locally so you can:
 
 Recommended: run `scripts/pdf_to_text.sh <paper.pdf> <paper.txt>` and then search within the text.
 
-## 7) Download workspace: prefer `/tmp`
+## 7) Download workspace: use `/tmp/opencode`
 
-If you need to download any files for analysis, keep them out of the repo by using a temporary work directory under `/tmp`.
+If you need to download any files for analysis, keep them out of the repo by using a temporary work directory under `/tmp/opencode`.
 
 - Create a workdir: `workdir="$(scripts/mk_workdir.sh)"`
 - Download into: `$workdir`
