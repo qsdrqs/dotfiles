@@ -6,13 +6,13 @@ let
     gpiozero
     lgpio
   ];
+  wifi-interface-external = "wld0";
   wifi-interface-internal = "wlu1";
   eth-interface-internal = "enu1u3c2";
 in
 {
   imports = with nixos-raspberrypi.nixosModules.raspberry-pi-5; [
     base
-    page-size-16k
     display-vc4
     bluetooth
   ];
@@ -112,6 +112,7 @@ in
       };
     };
   };
+  networking.wireless.interfaces = [ wifi-interface-external ];
   networking.networkmanager.unmanaged = [ wifi-interface-internal eth-interface-internal ];
 
   services.hostapd = {
@@ -139,10 +140,10 @@ in
     # };
     radios."${wifi-interface-internal}" = {
       countryCode = "US";
-      # channel = 36;
-      channel = 6;
-      # band = "5g";
-      band = "2g";
+      channel = 36;
+      # channel = 6;
+      band = "5g";
+      # band = "2g";
       wifi4 = {
         enable = true;
         capabilities = [
@@ -151,16 +152,16 @@ in
           "SHORT-GI-40"
         ];
       };
-      # wifi5 = {
-      #   enable = true;
-      #   operatingChannelWidth = "80";
-      #   capabilities = [
-      #     "SHORT-GI-80"
-      #   ];
-      # };
-      # settings = {
-      #   vht_oper_centr_freq_seg0_idx = 42; # for wifi5 to work
-      # };
+      wifi5 = {
+        enable = true;
+        operatingChannelWidth = "80";
+        capabilities = [
+          "SHORT-GI-80"
+        ];
+      };
+      settings = {
+        vht_oper_centr_freq_seg0_idx = 42; # for wifi5 to work
+      };
       networks = {
         "${wifi-interface-internal}" = {
           ssid = "RaspNix";

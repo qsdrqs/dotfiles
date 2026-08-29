@@ -13,6 +13,7 @@
 }:
 let
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
+  userName = "qsdrqs";
 in
 {
   boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
@@ -89,6 +90,21 @@ in
 
   # enable normal users to use reboot or shutdown
   security.polkit.enable = true;
+
+  # Add SSH-agent signature authentication, including hardware-backed FIDO2
+  # keys, as an authentication method for services that opt in below.
+  security.pam.rssh = {
+    enable = true;
+    settings = {
+      auth_key_file = "/etc/ssh/sudo_authorized_keys.d/$ruser";
+      # Prompt when the SSH agent needs user interaction, such as a key touch.
+      cue = true;
+    };
+  };
+  # Apply SSH-agent authentication to sudo without changing other PAM services.
+  security.pam.services.sudo.rssh = true;
+
+  environment.etc."ssh/sudo_authorized_keys.d/qsdrqs".source = ./private/sudo_authorized_keys;
 
   # Temporary passwordless sudo for coding agents:
   # anyone in the "sudo-nopasswd" group gets NOPASSWD: ALL.
@@ -288,7 +304,12 @@ in
         libGL
       ];
     };
-    gnupg.agent.enable = true;
+    gnupg.agent = {
+      enable = true;
+      # Restricted socket for forwarding to remote hosts (RemoteForward in
+      # ssh config), allowing remote gpg to sign/decrypt via local YubiKey.
+      enableExtraSocket = true;
+    };
     command-not-found.enable = false;
     nix-index.enable = true;
     ssh.startAgent = true;
@@ -304,6 +325,8 @@ in
         KbdInteractiveAuthentication = false;
         X11Forwarding = true;
         GatewayPorts = "yes";
+        # Clean up stale forwarded unix sockets (gpg-agent forwarding)
+        StreamLocalBindUnlink = "yes";
         # AllowTcpForwarding = true;
       };
     };

@@ -87,6 +87,22 @@ in
     includes = [ "ssh-config" ];
     enableDefaultConfig = false;
   };
+  programs.gpg = {
+    enable = true;
+    scdaemonSettings = {
+      # scdaemon's internal CCID driver conflicts with pcscd (pulled in by
+      # yubikey-manager); force PC/SC access so gpg can talk to the YubiKey.
+      disable-ccid = true;
+    };
+    # Distribute own public key (secret parts live on YubiKeys only) and
+    # mark it ultimately trusted on every machine.
+    publicKeys = [
+      {
+        source = ./gpg-pubkey.asc;
+        trust = "ultimate";
+      }
+    ];
+  };
   home.file."extra_config" = {
     source = ./private/ssh-config;
     target = ".ssh/ssh-config";

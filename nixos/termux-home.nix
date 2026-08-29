@@ -32,15 +32,32 @@ in
     claude-code
   ];
   home.sessionVariables = {
+    # Termux's Android CA paths are not the paths expected by Nix-built tools.
+    # Use the Nix CA bundle for HTTPS certificate verification.
+    NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    # Point glibc-based programs at the timezone database shipped by Nix.
     TZDIR = "${pkgs.tzdata}/share/zoneinfo";
   };
   home.activation = {
-    timeZoneFiles = ''
+    # Expose the Nix glibc loader and libraries inside the Termux chroot so
+    # dynamically linked Nix binaries can start there.
+    glibcLoader = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      CHROOT_LIB="${termux_root}/chroot-root/lib"
+      if [ -e "$CHROOT_LIB" ] && [ ! -L "$CHROOT_LIB" ]; then
+        # Never replace a Termux-managed directory with a generated symlink.
+        echo "Refusing to replace non-symlink path: $CHROOT_LIB" >&2
+        exit 1
+      fi
+      run ln -sfn ${pkgs.glibc}/lib "$CHROOT_LIB"
+    '';
+
+    timeZoneFiles = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       ETC="${termux_root}/usr/etc"
       if [ -d $ETC ]; then
-        ln -snf ${pkgs.tzdata}/share/zoneinfo $ETC/zoneinfo
+        run ln -snf ${pkgs.tzdata}/share/zoneinfo $ETC/zoneinfo
         TZ=$(${termux_root}/usr/bin/getprop persist.sys.timezone)
-        ln -sf $ETC/zoneinfo/$TZ $ETC/localtime
+        run ln -sf $ETC/zoneinfo/$TZ $ETC/localtime
       fi
     '';
   };

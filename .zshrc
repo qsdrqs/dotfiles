@@ -572,11 +572,11 @@ _bootstrap_local_agent() {
 
 ### Control flow
 
-# Case A: inside an SSH session (SSH_AUTH_SOCK likely comes from forwarding)
-# Be conservative: only fix it if missing or unusable
+# Case A: inside an SSH session, only use the socket forwarded by the client.
+# Never fall back to an agent local to the SSH server.
 if [[ -n "$SSH_CONNECTION" ]]; then
     if [[ -z "$SSH_AUTH_SOCK" ]] || ! _is_usable_agent_sock "$SSH_AUTH_SOCK"; then
-        update_ssh_auth_sock
+        unset SSH_AUTH_SOCK SSH_AGENT_PID
     fi
 
 # Case B: local interactive shell
@@ -584,4 +584,3 @@ else
     # Try to discover an existing agent or start one if needed
     _bootstrap_local_agent
 fi
-

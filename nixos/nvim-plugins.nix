@@ -59,7 +59,11 @@ let
         ln -s ${config.home.homeDirectory}/.local/share/nvim/lazy/avante.nvim/build $out/build
       '';
     };
-    blinkDOTcmp = inputs.nvim-config.inputs.blinkDOTcmp.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    blinkDOTcmp =
+      if pkgs.stdenv.hostPlatform.isAarch64 then
+        trivialDerivation "blink.cmp" inputs.nvim-config.inputs.blinkDOTcmp # FIXME: check upstream flake update and remove this once it is fixed
+      else
+        inputs.nvim-config.inputs.blinkDOTcmp.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
   genNvimPlugins = entries: builtins.listToAttrs (map
     (entry: {

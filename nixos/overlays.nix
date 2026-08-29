@@ -102,6 +102,17 @@ in
         };
         # End Temporary self updated packages
 
+        # Begin Unstable packages
+        # FIXME: Use stable packages again when AArch64 libxkbcommon is cached or its binfmt tests pass.
+        appimage-run = pkgs-unstable.appimage-run;
+        cloudflare-warp = pkgs-unstable.cloudflare-warp;
+        fastfetch = pkgs-unstable.fastfetch;
+        ffmpeg = pkgs-unstable.ffmpeg;
+        openconnect_openssl = pkgs-unstable.openconnect_openssl;
+        pinentry-curses = pkgs-unstable.pinentry-curses;
+        vim-full = pkgs-unstable.vim-full;
+        # End Unstable packages
+
         # Begin Temporary fixed version packages
         freerdp = super.freerdp.override { openh264 = null; };
         global = pkgs-stable.global;
