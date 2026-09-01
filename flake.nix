@@ -53,6 +53,10 @@
     zsh-config.url = "path:zsh";
     nvim-config.url = "path:nvim";
     dev-shell.url = "path:nixos/dev-shell";
+    keepass-fido2-unlock = {
+      url = "github:qsdrqs/keepass-fido2-unlock";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # wsl
     nixos-wsl = {

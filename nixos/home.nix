@@ -19,6 +19,14 @@ let
   load_gpg_key = pkgs.writeShellScriptBin "load_gpg_key" ''
     sh ${./scripts/load_gpg_key.sh}
   '';
+  importGpgPublicKey = pkgs.writeShellScript "import-gpg-public-key" ''
+    set -eu
+
+    "${pkgs.gnupg}/bin/gpg" --batch --no-tty --import-options keep-ownertrust --import "${./gpg-pubkey.asc}"
+    # Ownertrust value 6 marks the primary key as ultimately trusted.
+    "${pkgs.coreutils}/bin/printf" '%s:6:\n' '3A6A21D81C481690AE281812E2D709340CE26E78' \
+      | "${pkgs.gnupg}/bin/gpg" --batch --no-tty --import-ownertrust
+  '';
   homeDir = config.home.homeDirectory;
 in
 {
@@ -94,14 +102,20 @@ in
       # yubikey-manager); force PC/SC access so gpg can talk to the YubiKey.
       disable-ccid = true;
     };
-    # Distribute own public key (secret parts live on YubiKeys only) and
-    # mark it ultimately trusted on every machine.
-    publicKeys = [
-      {
-        source = ./gpg-pubkey.asc;
-        trust = "ultimate";
-      }
-    ];
+  };
+  systemd.user.services.import-gpg-public-key = {
+    Unit = {
+      Description = "Import personal GPG public key";
+      Requires = [ "gpg-agent.socket" ];
+      After = [ "gpg-agent.socket" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = importGpgPublicKey;
+      Environment = "GNUPGHOME=${config.programs.gpg.homedir}";
+      RemainAfterExit = true;
+    };
+    Install.WantedBy = [ "default.target" ];
   };
   home.file."extra_config" = {
     source = ./private/ssh-config;

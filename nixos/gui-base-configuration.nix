@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 let
   google-chromium = pkgs.symlinkJoin {
     name = "google-chromium";
@@ -22,6 +27,19 @@ let
   '';
 in
 {
+  nixpkgs.overlays = [
+    (
+      _final: prev:
+      let
+        packages = inputs.keepass-fido2-unlock.packages.${prev.stdenv.hostPlatform.system};
+      in
+      {
+        keepassxc = packages.keepassxc-fido2;
+        keepass-fido2-enroll = packages.keepass-fido2-enroll;
+      }
+    )
+  ];
+
   # Audio - pipewire
   services.pipewire = {
     enable = true;
@@ -133,6 +151,7 @@ in
     playerctl
     libsecret
     keepassxc
+    keepass-fido2-enroll
     yubioath-flutter
 
     kitty

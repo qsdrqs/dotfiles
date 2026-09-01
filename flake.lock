@@ -1511,6 +1511,44 @@
         "type": "github"
       }
     },
+    "keepass-fido2-unlock": {
+      "inputs": {
+        "keepassxc-src": "keepassxc-src",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788133199,
+        "narHash": "sha256-vYT+/Px+xezPr+uPtKHzw6B37goFriUrJDtPjSiIMSY=",
+        "owner": "qsdrqs",
+        "repo": "keepass-fido2-unlock",
+        "rev": "ce33265dc1565c0b978434e050738dd44535fbb3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qsdrqs",
+        "repo": "keepass-fido2-unlock",
+        "type": "github"
+      }
+    },
+    "keepassxc-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788125054,
+        "narHash": "sha256-lLvqFdBED8EmZLQU+CB8GUs0iettp0QFlRN45Ve11+E=",
+        "owner": "qsdrqs",
+        "repo": "keepassxc",
+        "rev": "85c71526e17c0c66f0a3b8b41ceb922b39182e35",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qsdrqs",
+        "ref": "fido2-local-unlock",
+        "repo": "keepassxc",
+        "type": "github"
+      }
+    },
     "lazyDOTnvim": {
       "flake": false,
       "locked": {
@@ -3002,6 +3040,7 @@
         "hyprland": "hyprland",
         "hyprland-contrib": "hyprland-contrib",
         "jovian-nixos": "jovian-nixos",
+        "keepass-fido2-unlock": "keepass-fido2-unlock",
         "naersk": "naersk",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",
