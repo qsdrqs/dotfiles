@@ -221,6 +221,34 @@
       sudo systemctl start interception-tools-caps2esc.service
     '';
 
+  wlroots-bridge =
+    {
+      lib,
+      fetchFromGitHub,
+      rustPlatform,
+    }:
+    rustPlatform.buildRustPackage {
+      pname = "wlroots-bridge";
+      version = "0.1.0";
+
+      src = fetchFromGitHub {
+        owner = "patrickjaja";
+        repo = "wlroots-bridge";
+        rev = "main";
+        hash = "sha256-zt0nBekZKMg0fC85ULm0BVeCPGfCrQ+q8JMGPn5dv9U=";
+      };
+
+      cargoHash = "sha256-RXjsWwI2TkiwQWXRgsL2BReCNl+T7ygcNdLO7ALTsmk=";
+
+      meta = {
+        description = "Wayland screenshot, pointer, and keyboard CLI for computer use";
+        homepage = "https://github.com/patrickjaja/wlroots-bridge";
+        license = lib.licenses.mit;
+        platforms = lib.platforms.linux;
+        mainProgram = "wlroots-bridge";
+      };
+    };
+
   # scaphandre: power consumption metrology agent, used by the laptop
   # profile's Prometheus exporter. Inlined here because upstream nixpkgs
   # removed both the package and the

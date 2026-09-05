@@ -79,7 +79,9 @@ statix check nixos/
 - **Module signature**: NixOS modules start with `{ config, pkgs, lib, inputs, ... }:`.
 - **Naming**: `kebab-case` for file names (`desktop-configuration.nix`). `camelCase` for Nix variables and function names (`minimalConfig`, `genZshPlugins`).
 - **Imports**: Reference sibling modules via relative path (`./module.nix`), parent repo files via `../${name}`.
-- **Derivations**: Reuse `commonInstallPhase` and `trivialDerivation` patterns from `nixos/nvim-plugins.nix`.
+- **Custom packages**: Prefer defining custom package functions in `nixos/packages.nix`. Check this shared package collection before creating a standalone package file.
+- **Package references**: Normally instantiate the collection with `builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix)` and reference `packages.<name>` directly in the consuming module. Add an overlay only when integration specifically requires `pkgs.<name>`; convenience for a `nix run` command alone is not a reason to depart from direct references.
+- **Plugin derivations**: Reuse `commonInstallPhase` and `trivialDerivation` patterns from `nixos/nvim-plugins.nix` when packaging plugins.
 
 ### Shell (Bash)
 

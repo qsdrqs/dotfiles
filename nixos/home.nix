@@ -142,6 +142,10 @@ in
       };
       credential = {
         helper = "store";
+        "https://github.com".helper = [
+          ""
+          "!${pkgs.gh}/bin/gh auth git-credential"
+        ];
       };
       pull = {
         rebase = true;
@@ -223,47 +227,62 @@ in
           "cli.json"
         ];
         localSkillsDir = "${homeDir}/dotfiles/opencode/skills";
+        systemSkills = [
+          "imagegen"
+          "openai-docs"
+          "skill-creator"
+          "skill-installer"
+        ];
       in
-      ''
-        mkdir -p ~/.config/opencode
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run mkdir -p ~/.config/opencode
         ${lib.concatMapStringsSep "\n" (cfg: ''
           if [ ! -e ${homeDir}/.config/opencode/${cfg} ]; then
-            ln -s ${homeDir}/dotfiles/opencode/${cfg} ${homeDir}/.config/opencode
+            run ln -s ${homeDir}/dotfiles/opencode/${cfg} ${homeDir}/.config/opencode
           fi
         '') files}
-        if [ -L "${homeDir}/.config/opencode/skills" ]; then
-          rm "${homeDir}/.config/opencode/skills"
-        fi
-        mkdir -p "${homeDir}/.config/opencode/skills"
         if [ -L "${homeDir}/.config/opencode/agents" ]; then
-          rm "${homeDir}/.config/opencode/agents"
+          run rm "${homeDir}/.config/opencode/agents"
         fi
         if [ ! -e "${homeDir}/.config/opencode/agents" ]; then
-          ln -s "${homeDir}/dotfiles/opencode/agents" "${homeDir}/.config/opencode/agents"
+          run ln -s "${homeDir}/dotfiles/opencode/agents" "${homeDir}/.config/opencode/agents"
         fi
 
-        linkSkillDirs() {
-          local sourceDir="$1"
-          local skillDir=""
-          local skillName=""
-          local target=""
+        if [ -L "${homeDir}/.config/opencode/skills" ] || [ -L "${homeDir}/.config/opencode/skills/.system" ]; then
+          echo "OpenCode skills: migrate legacy directory links before activation" >&2
+          exit 1
+        fi
+        run mkdir -p "${homeDir}/.config/opencode/skills" "${homeDir}/.codex"
 
-          if [ ! -d "''${sourceDir}" ]; then
-            return
-          fi
-
-          for skillDir in "''${sourceDir}"/* "''${sourceDir}"/.[!.]* "''${sourceDir}"/..?*; do
-            if [ -d "''${skillDir}" ]; then
-              skillName="$(basename "''${skillDir}")"
-              target="${homeDir}/.config/opencode/skills/''${skillName}"
-              if [ ! -e "''${target}" ]; then
-                ln -s "''${skillDir}" "''${target}"
-              fi
+        linkSkill() {
+          local source="$1"
+          local target="$2"
+          if [ -L "$target" ]; then
+            if [ "$(readlink "$target")" != "$source" ]; then
+              echo "OpenCode skills: unexpected link at $target" >&2
+              return 1
             fi
-          done
+          elif [ -e "$target" ]; then
+            echo "OpenCode skills: unmanaged entry at $target" >&2
+            return 1
+          else
+            run ln -s "$source" "$target"
+          fi
         }
 
-        linkSkillDirs "${localSkillsDir}"
+        for skillDir in "${localSkillsDir}"/* "${localSkillsDir}"/.[!.]* "${localSkillsDir}"/..?*; do
+          if [ -d "$skillDir" ] || [ -L "$skillDir" ]; then
+            skillName="$(basename "$skillDir")"
+            case "$skillName" in
+              .system|${lib.concatStringsSep "|" systemSkills}) continue ;;
+            esac
+            linkSkill "$skillDir" "${homeDir}/.config/opencode/skills/$skillName"
+          fi
+        done
+        ${lib.concatMapStringsSep "\n" (name: ''
+          linkSkill ".system/${name}" "${homeDir}/.config/opencode/skills/${name}"
+        '') systemSkills}
+        linkSkill "${homeDir}/.config/opencode/skills" "${homeDir}/.codex/skills"
       '';
     agent-browser-config = ''
       mkdir -p ~/.agent-browser

@@ -100,6 +100,27 @@ in
           cargoHash = "sha256-96lD0Sc2hdhNKeIS4zkiG4J0dxEFt6/Np7HHMSoF8j4=";
           meta = super.tzupdate.meta;
         };
+
+        decky-loader = super.decky-loader.overridePythonAttrs (oldAttrs: rec {
+          version = "3.2.8";
+          src = super.fetchFromGitHub {
+            owner = "SteamDeckHomebrew";
+            repo = "decky-loader";
+            rev = "v${version}";
+            hash = "sha256-Y2dMTKLXtZAyXuWhnS/jbqjCYyWvSChslt/YxIBbWXw=";
+          };
+          pnpmDeps = super.fetchPnpmDeps {
+            fetcherVersion = 4;
+            pname = oldAttrs.pname;
+            inherit version src;
+            pnpm = super.pnpm_11;
+            sourceRoot = "${src.name}/frontend";
+            postPatch = ''
+              rm pnpm-workspace.yaml
+            '';
+            hash = "sha256-OHimg85kcjk+Tq1Yv8TA9CfPDVzxdgPpzTi2mxyPs4s=";
+          };
+        });
         # End Temporary self updated packages
 
         # Begin Unstable packages

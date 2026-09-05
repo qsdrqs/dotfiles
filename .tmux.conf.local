@@ -287,6 +287,7 @@ tmux_conf_theme_clock_style='24'
 # on Linux, this requires xsel or xclip
 tmux_conf_copy_to_os_clipboard=true
 set -s set-clipboard on
+set-hook -g pane-set-clipboard[100] 'run-shell "tmux save-buffer - | tmux load-buffer -w -"'
 
 # -- user customizations -------------------------------------------------------
 # this is the place to override or undo settings

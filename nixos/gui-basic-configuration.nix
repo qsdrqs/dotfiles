@@ -68,12 +68,14 @@ in
   );
   # end howdy
 
-  # begin handy (speech-to-text)
-  # Allow Handy to type transcriptions through the virtual input device.
+  # begin udev rules
   services.udev.extraRules = ''
+    # Allow Handy to type transcriptions through the virtual input device.
     KERNEL=="uinput", GROUP="input", MODE="0660"
+    # Unblock Bluetooth when its rfkill device is registered.
+    ACTION=="add", SUBSYSTEM=="rfkill", ENV{RFKILL_TYPE}=="bluetooth", RUN+="${pkgs.util-linux}/bin/rfkill unblock bluetooth"
   '';
-  # end handy
+  # end udev rules
 
   boot.kernelModules = [
     # "v4l2loopback"
@@ -215,16 +217,5 @@ in
   services.btrfs.autoScrub.enable = true;
 
   services.desktopManager.plasma6.enable = true;
-
-  # turn on bluetooth on startup
-  systemd.services.rfkill-unblock-bluetooth = {
-    description = "Unblock Bluetooth rfkill";
-    after = [ "systemd-rfkill.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.util-linux}/bin/rfkill unblock bluetooth";
-    };
-  };
 
 }

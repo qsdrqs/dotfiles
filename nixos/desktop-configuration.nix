@@ -1,5 +1,6 @@
 { config, pkgs, pkgs-ghcup, pkgs-master, lib, inputs, ... }:
 let
+  packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
   ida64-fhs = pkgs.buildFHSEnv {
     name = "ida64";
     runScript = "env QT_FONT_DPI=144 ${config.users.users.qsdrqs.home}/ida/ida64";
@@ -80,6 +81,7 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
+    packages.wlroots-bridge
     ida64-fhs
     libreoffice
     # seahorse # keyring manager

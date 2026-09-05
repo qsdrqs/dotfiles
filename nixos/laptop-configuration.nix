@@ -52,8 +52,7 @@ in
       # PCIE_ASPM_ON_BAT = "powersave";
       PCIE_ASPM_ON_BAT = "powersupersave";
 
-      START_CHARGE_THRESH_BAT0 = 75;
-      STOP_CHARGE_THRESH_BAT0 = 80;
+      STOP_CHARGE_THRESH_BAT0 = 100; # Change to 80 to limit battery charge to 80%
     };
   };
   services.power-profiles-daemon.enable = false;

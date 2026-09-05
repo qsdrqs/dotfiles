@@ -90,11 +90,6 @@ in
     enable = true;
     user = "qsdrqs";
     extraPackages = [ pkgs.flatpak pkgs.drm_info pkgs.bubblewrap pkgs.bash ];
-    package = pkgs.decky-loader.overridePythonAttrs (old: {
-      patches = (old.patches or []) ++ [
-        ./patches/decky-loader-env.patch
-      ];
-    });
   };
 
   # Decky plugins need extra shared libs (HueSync: libhidapi, SimpleDeckyTDP: libpci)
