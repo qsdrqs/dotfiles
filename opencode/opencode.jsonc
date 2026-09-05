@@ -67,6 +67,12 @@
     // separate catalog entries and must be overridden explicitly.
     "openai": {
       "models": {
+        "gpt-6-astra": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-6-astra-fast": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
         "gpt-5.6-sol": {
           "limit": { "context": 1050000, "input": 872000, "output": 128000 }
         },
