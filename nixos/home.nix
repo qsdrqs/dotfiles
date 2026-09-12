@@ -225,6 +225,7 @@ in
           "oh-my-opencode-slim.json"
           "AGENTS.md"
           "cli.json"
+          "commands"
         ];
         localSkillsDir = "${homeDir}/dotfiles/opencode/skills";
         systemSkills = [
