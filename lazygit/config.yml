@@ -1,3 +1,5 @@
+git:
+  autoFetch: false
 customCommands:
   - key: "<c-a>"
     description: "Pick AI commit (single/multi)"

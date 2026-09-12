@@ -157,7 +157,7 @@ statix check nixos/
 2. **Idempotent scripts**: All install/link/switch scripts must be safely re-runnable.
 3. **Surface errors**: Scripts must not silently fail or degrade. Print concise error messages.
 4. **Follow existing patterns**: New files and directories must follow the naming and layering of their siblings. Avoid cross-layer coupling.
-5. **Document changes**: Update this file or relevant READMEs when making structural changes.
+5. **Keep existing documentation accurate**: When a structural change makes specific content in this file or an existing relevant README inaccurate, update only that content. Implementing a feature does not by itself require documentation changes. Create standalone documentation only when the user explicitly requests it; a request for code comments is not a request for a separate document. Example: correct an existing README command when its entry point changes, but do not create `docs/new-tool.md` merely because a new tool was added.
 6. **Editing over rewriting**: When modifying docs, edit the targeted content only. Never delete-and-rewrite an entire file unless strictly necessary.
 7. **Web search for uncertainty**: When discussing approaches, search the web for unfamiliar Nix options, APIs, or library behaviors to verify feasibility.
 

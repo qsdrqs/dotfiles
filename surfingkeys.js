@@ -23,6 +23,7 @@ api.map('K', 'u');
 // 禁用默认快捷键
 api.unmap('ZZ');  // 默认：退出浏览器（关闭所有标签）
 api.unmap('x');   // 默认：关闭当前标签
+api.unmap('<Space>'); // Disable Space-prefixed mappings in Normal mode.
 
 // an example to remove mapkey `Ctrl-i`
 api.imap('<ctrl-q>', '<ctrl-a>')

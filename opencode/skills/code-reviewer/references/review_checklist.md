@@ -35,7 +35,9 @@ List blocks; for each block include:
 Try to include for each finding:
 
 - Priority: `P0` / `P1` / `P2`
+- Category: correctness, compatibility, security, performance, maintainability, or conventions; separate from priority
 - Pointer: `file:line` + relevant function/path
+- Convention evidence, when applicable: the scoped rule or representative neighboring code
 - What it does now: current behavior
 - Risk/impact: why it matters (user impact / prod risk / maintenance cost)
 - Recommendation: actionable next step (ideally 1–2 options)
@@ -45,7 +47,9 @@ Priority guidance:
 
 - `P0` blocker: data loss, security, production incident risk, high-likelihood bug, clear compatibility break
 - `P1` important: medium-risk bugs, major test gaps, high future maintenance/observability cost
-- `P2` suggestion: small refactors, naming/structure, micro-optimizations, style consistency
+- `P2` non-blocking: lower-impact defects or convention inconsistencies worth fixing
+
+Optionality is separate from priority. Do not dismiss explicit rule violations as nitpicks or classify every style finding as optional. Distinguish rules, established conventions, and personal preferences using the evidence gathered in `SKILL.md` step 2a.
 
 ## 4) Common Checks (Risk-First)
 
@@ -73,10 +77,20 @@ Priority guidance:
 - Names reflect intent, clean boundaries, reuse vs duplication
 - Logs/metrics: enough context on failure paths; avoid logging secrets
 
+### Code Style / Project Conventions
+- Apply the convention review in `SKILL.md` step 2a to every changed file, including embedded code
+- Compare declarations and consumers for consistency; account for external contracts and scoped exceptions
+- Report conflicts between explicit configuration and neighboring patterns without inventing a project-wide rule
+
 ### Tests / Docs
 - Regression tests for new/changed behavior and critical branches
 - Failure path coverage (auth failure, network failure, invalid inputs)
 - README/comments/examples updated as needed
+
+### Completion / Coverage
+- Name the behavioral checks and convention sources actually inspected
+- Report automated check scope and limitations, including excluded files or embedded code
+- Identify unreviewed areas; missing required coverage means a partial review, not a clean result
 
 ## 5) Large Diff Strategy (Don’t Drown)
 

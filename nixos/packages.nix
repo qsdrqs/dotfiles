@@ -195,6 +195,21 @@
     { pkgs }:
     pkgs.writeShellScriptBin "sudo-nopasswd" (builtins.readFile ./scripts/sudo-nopasswd.sh);
 
+  yubikey-toggle =
+    { pkgs }:
+    pkgs.writeShellScriptBin "yubikey-toggle" (builtins.readFile ./scripts/yubikey-toggle.sh);
+
+  keepassxc-unlock =
+    { pkgs }:
+    let
+      python = pkgs.python3.withPackages (ps: [ ps.dbus-python ]);
+    in
+    pkgs.writeShellScriptBin "keepassxc-unlock" ''
+      set -e
+      export PATH="${pkgs.keepassxc}/bin:$PATH"
+      exec ${python}/bin/python3 ${./scripts/keepassxc-unlock.py} "$@"
+    '';
+
   patchdir =
     { pkgs }:
     pkgs.writeShellScriptBin "patchdir" ''
@@ -232,17 +247,17 @@
       version = "0.1.0";
 
       src = fetchFromGitHub {
-        owner = "patrickjaja";
+        owner = "qsdrqs";
         repo = "wlroots-bridge";
         rev = "main";
-        hash = "sha256-zt0nBekZKMg0fC85ULm0BVeCPGfCrQ+q8JMGPn5dv9U=";
+        hash = "sha256-ipv4QXQACKJ1Qts2sVZLxGkHpEBrDfE6Xi5MI7i67r0=";
       };
 
       cargoHash = "sha256-RXjsWwI2TkiwQWXRgsL2BReCNl+T7ygcNdLO7ALTsmk=";
 
       meta = {
         description = "Wayland screenshot, pointer, and keyboard CLI for computer use";
-        homepage = "https://github.com/patrickjaja/wlroots-bridge";
+        homepage = "https://github.com/qsdrqs/wlroots-bridge";
         license = lib.licenses.mit;
         platforms = lib.platforms.linux;
         mainProgram = "wlroots-bridge";

@@ -2354,7 +2354,6 @@
         "nvim-ts-autotag": "nvim-ts-autotag",
         "nvim-ufo": "nvim-ufo",
         "nvim-web-devicons": "nvim-web-devicons",
-        "opencodeDOTnvim": "opencodeDOTnvim",
         "pantranDOTnvim": "pantranDOTnvim",
         "persistent-breakpointsDOTnvim": "persistent-breakpointsDOTnvim",
         "plenaryDOTnvim": "plenaryDOTnvim",
@@ -2711,22 +2710,6 @@
       "original": {
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "type": "github"
-      }
-    },
-    "opencodeDOTnvim": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1787321091,
-        "narHash": "sha256-WdSWFAxxKKmAjTTyNaTAVLZW4yMaACC4cCMPOHIHRuk=",
-        "owner": "nickjvandyke",
-        "repo": "opencode.nvim",
-        "rev": "2ddeebd3212596b51bf078e6ff52862655b80419",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nickjvandyke",
-        "repo": "opencode.nvim",
         "type": "github"
       }
     },

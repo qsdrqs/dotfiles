@@ -16,7 +16,7 @@ return function(ctx)
     {
       "GustavoKatel/telescope-asynctasks.nvim",
       lazy = true,
-      keys = { "<localleader>at", "<leader>ae" },
+      keys = { "<leader>at", "<leader>ae" },
       cmd = "AsyncTaskTelescope",
       config = function()
         load_plugins({ "asynctasks.vim", "asyncrun.vim" })

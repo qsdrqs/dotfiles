@@ -17,11 +17,22 @@ return function(ctx)
       "folke/sidekick.nvim",
       dependencies = {
         "zbirenbaum/copilot.lua",
+        "folke/snacks.nvim",
       },
       cond = vim.g.vscode == nil,
+      init = function()
+        vim.o.autoread = true
+      end,
       opts = {
         -- add any options here
         cli = {
+          tools = {
+            opencode2 = {
+              cmd = { "opencode2" },
+              is_proc = "\\<opencode2\\>",
+              native_scroll = true,
+            },
+          },
           mux = {
             backend = "tmux",
             enabled = true,
@@ -43,70 +54,53 @@ return function(ctx)
           expr = true,
           desc = "Goto/Apply Next Edit Suggestion",
         },
-        -- {
-        --   "<c-.>",
-        --   function()
-        --     require("sidekick.cli").toggle()
-        --   end,
-        --   desc = "Sidekick Toggle",
-        --   mode = { "n", "t", "i", "x" },
-        -- },
-        -- {
-        --   "<localleader>aa",
-        --   function()
-        --     require("sidekick.cli").send({ msg = "{file}" })
-        --   end,
-        --   desc = "Send File",
-        --   mode = { "n", "t" },
-        -- },
-        -- {
-        --   "<localleader>as",
-        --   function()
-        --     require("sidekick.cli").select({ filter = { installed = true } })
-        --   end,
-        --   desc = "Select CLI",
-        -- },
-        -- {
-        --   "<localleader>ad",
-        --   function()
-        --     require("sidekick.cli").close()
-        --   end,
-        --   desc = "Detach a CLI Session",
-        -- },
-        -- {
-        --   "<localleader>aa",
-        --   function()
-        --     require("sidekick.cli").send({ msg = "{this}" })
-        --   end,
-        --   mode = { "x" },
-        --   desc = "Send This",
-        -- },
-        -- {
-        --   "<localleader>av",
-        --   function()
-        --     require("sidekick.cli").send({ msg = "{selection}" })
-        --   end,
-        --   mode = { "x" },
-        --   desc = "Send Visual Selection",
-        -- },
-        -- {
-        --   "<localleader>ap",
-        --   function()
-        --     require("sidekick.cli").prompt()
-        --   end,
-        --   mode = { "n", "x" },
-        --   desc = "Sidekick Select Prompt",
-        -- },
-        -- -- Example of a keybinding to open codex directly
-        -- {
-        --   "<localleader>ac",
-        --   function()
-        --     require("sidekick.cli").toggle({ name = "codex", focus = true })
-        --   end,
-        --   desc = "Sidekick Toggle Codex",
-        -- },
+        {
+          "<localleader>aa",
+          function()
+            require("sidekick.cli").send({ name = "opencode2", msg = "{this}", focus = true })
+          end,
+          mode = { "n", "x" },
+          desc = "Send context to OpenCode2",
+        },
+        {
+          "<localleader>as",
+          function()
+            require("sidekick.cli").prompt({
+              cb = function(_, text)
+                if text then
+                  require("sidekick.cli").send({ name = "opencode2", text = text })
+                end
+              end,
+            })
+          end,
+          mode = { "n", "x" },
+          desc = "Select OpenCode2 prompt",
+        },
+        {
+          "<localleader>at",
+          function()
+            require("sidekick.cli").toggle({ name = "opencode2" })
+          end,
+          mode = { "n", "t" },
+          desc = "Toggle OpenCode2",
+        },
+        {
+          "go",
+          function()
+            require("sidekick.cli").send({ name = "opencode2", msg = "{selection}", focus = true })
+          end,
+          mode = "x",
+          desc = "Add selection to OpenCode2",
+        },
+        {
+          "goo",
+          function()
+            require("sidekick.cli").send({ name = "opencode2", msg = "{line}", focus = true })
+          end,
+          mode = "n",
+          desc = "Add line to OpenCode2",
+        },
       },
     },
-
   }
 end

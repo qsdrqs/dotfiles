@@ -5,6 +5,7 @@
   ...
 }:
 let
+  packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
   google-chromium = pkgs.symlinkJoin {
     name = "google-chromium";
     paths = [ pkgs.chromium ];
@@ -152,7 +153,9 @@ in
     libsecret
     keepassxc
     keepass-fido2-enroll
+    packages.keepassxc-unlock
     yubioath-flutter
+    packages.yubikey-toggle
 
     kitty
   ];

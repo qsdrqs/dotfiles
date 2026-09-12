@@ -188,10 +188,6 @@
       url = "github:coder/claudecode.nvim";
       flake = false;
     };
-    opencodeDOTnvim = {
-      url = "github:nickjvandyke/opencode.nvim";
-      flake = false;
-    };
     nvim-treesitter-textobjects = {
       url = "github:nvim-treesitter/nvim-treesitter-textobjects?ref=main";
       flake = false;
@@ -530,7 +526,6 @@
         { name = "codecompanion.nvim"; dotname = "codecompanionDOTnvim"; source = inputs.codecompanionDOTnvim; build = false; }
         { name = "snacks.nvim"; dotname = "snacksDOTnvim"; source = inputs.snacksDOTnvim; build = false; }
         { name = "claudecode.nvim"; dotname = "claudecodeDOTnvim"; source = inputs.claudecodeDOTnvim; build = false; }
-        { name = "opencode.nvim"; dotname = "opencodeDOTnvim"; source = inputs.opencodeDOTnvim; build = false; }
         { name = "nvim-treesitter-textobjects"; dotname = "nvim-treesitter-textobjects"; source = inputs.nvim-treesitter-textobjects; build = false; }
         { name = "nvim-treesitter-context"; dotname = "nvim-treesitter-context"; source = inputs.nvim-treesitter-context; build = false; }
         { name = "nvim-ts-autotag"; dotname = "nvim-ts-autotag"; source = inputs.nvim-ts-autotag; build = false; }

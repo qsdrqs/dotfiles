@@ -9,15 +9,16 @@ description: "Review the current local git diff as a pair-reviewer: summarize di
 
 - Establish the **diff scope** fast: what features changed, which files, and likely entry points.
 - Produce a **collaborative review plan**: review order, which modules/functions to inspect, and the logic chain.
-- Provide **prioritized findings**: call out high-risk pitfalls; clearly label “nice-to-have” suggestions.
+- Provide **prioritized findings** for behavioral defects and project convention violations; distinguish required fixes from optional suggestions.
 
 ## Non‑negotiables
 
 1. **Read the diff before judging.** Do not review based on assumptions.
 2. **Make it collaborative.** Share the plan first, let the user adjust focus, then go deep.
-3. **Use clear priorities.** Separate blockers from suggestions; avoid nitpicking.
+3. **Use clear priorities.** Prioritize by impact, not category. Avoid personal-preference nitpicks, not evidence-backed convention findings.
 4. **Anchor to evidence.** Point to `file:line`, function names, or a concrete call path.
 5. **Keep output lean.** Do not paste large code blocks; guide the user through the code.
+6. **Cover behavior and conventions.** Unless the user explicitly narrows the review, both are required. A focus area changes review order, not coverage. Brevity does not justify silently skipping a dimension.
 
 ## Workflow
 
@@ -50,6 +51,24 @@ Goal: answer “what features changed, and which files implement them?”, and i
   - `rg -n "<symbol>" <paths>`
   - `git grep -n "<symbol>"`
 
+### 2a) Establish project conventions and check coverage
+
+Before judging conformity:
+
+- Read applicable `AGENTS.md` instructions, lint/formatter configuration, and relevant compiler configuration for the review target.
+- Inspect representative neighboring code to establish local conventions, including naming, imports, type-only imports where applicable, comments, and file organization.
+- Identify which changed file types and embedded code blocks the configured checks actually cover. Check exclusions and overrides; do not assume a successful command inspected every changed file.
+
+Use this evidence when reviewing each changed file:
+
+- **Explicit rule violation:** cite the applicable rule and report it even if runtime behavior is unaffected. Respect scoped exceptions.
+- **Established convention inconsistency:** cite neighboring examples and explain the inconsistency; do not present it as an explicit rule.
+- **Personal preference:** omit unless the user requests stylistic advice.
+
+If configuration and neighboring code conflict, describe the conflict rather than silently choosing one. Check external contracts before recommending naming or shape changes. Do not relabel pre-existing inconsistencies as newly introduced defects.
+
+Passing lint or formatting checks proves only what the enabled rules and inspected files cover. It does not replace manual convention review, including embedded code skipped by those checks.
+
 ### 3) Make a review plan (walk it together)
 
 Produce an executable plan that includes:
@@ -70,12 +89,16 @@ For each block, cover at least:
 - Security: injection, authZ bypass, sensitive logging, path traversal, privilege escalation.
 - Performance: complexity, N+1, caching/batching, hot paths, IO/locks/concurrency.
 - Maintainability: naming, boundaries, duplication, testability, observability (logs/metrics/traces).
+- Code style & conventions: compare every changed file with the evidence from step 2a; check consistency across declarations and their consumers.
 - Tests & docs: regression coverage, critical branches, README/comments updates.
 
 For each finding, include at least:
 - A pointer: `file:line` and/or function name.
+- A category (e.g. correctness, compatibility, security, performance, maintainability, conventions) independent of priority; convention findings also need a rule or neighboring-code reference.
 - User impact: why it matters.
 - Action: what to do; if optional, label as “suggestion”.
+
+Before reporting completion, check that each changed file received both behavioral and convention review where applicable. State any unreviewed areas and call the review partial if required coverage is missing. Unavailable checks are limitations, not passing results.
 
 ### 5) Output format (keep it consistent)
 
@@ -86,7 +109,8 @@ Use a stable structure so the user can address items one by one:
 - **Findings (prioritized)**:
   - `P0` blocker: likely bugs, data loss, security issues, production incidents.
   - `P1` important: medium risk, maintainability, significant quality gaps.
-  - `P2` suggestion: style, small refactors, nice-to-have improvements.
+  - `P2` non-blocking: lower-impact defects or convention inconsistencies worth fixing. Mark optional suggestions separately; a style finding is not automatically optional or low priority.
+- **Coverage & verification**: briefly name the behavioral checks, convention sources inspected, and automated checks with their actual scope and limitations. If convention review found nothing, say so and identify the sources; do not substitute "lint passed" for this conclusion.
 - **Questions**: if blocked, ask 1–5 actionable questions.
 
 For a deeper checklist and templates, see `references/review_checklist.md`.
