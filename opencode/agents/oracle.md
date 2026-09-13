@@ -1,7 +1,7 @@
 ---
 description: Expert problem solver for difficult problems, architecture decisions, and hard-to-debug failures. Use when routine investigation is insufficient or a high-confidence technical resolution is needed.
 mode: subagent
-model: openai/gpt-6-astra
+model: openai/gpt-6-astra#max
 permissions:
   - action: "*"
     resource: "*"

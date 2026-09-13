@@ -124,9 +124,10 @@ in
     })
 
     samba
-    (freerdp.override {
-      openh264 = null;
-    })
+    freerdp
+    # (freerdp.override {
+    #   openh264 = null;
+    # })
 
     # secure boot and UEFI tools
     sbsigntool

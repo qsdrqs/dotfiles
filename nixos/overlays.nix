@@ -101,43 +101,10 @@ in
           meta = super.tzupdate.meta;
         };
 
-        decky-loader = super.decky-loader.overridePythonAttrs (oldAttrs: rec {
-          version = "3.2.8";
-          src = super.fetchFromGitHub {
-            owner = "SteamDeckHomebrew";
-            repo = "decky-loader";
-            rev = "v${version}";
-            hash = "sha256-Y2dMTKLXtZAyXuWhnS/jbqjCYyWvSChslt/YxIBbWXw=";
-          };
-          pnpmDeps = super.fetchPnpmDeps {
-            fetcherVersion = 4;
-            pname = oldAttrs.pname;
-            inherit version src;
-            pnpm = super.pnpm_11;
-            sourceRoot = "${src.name}/frontend";
-            postPatch = ''
-              rm pnpm-workspace.yaml
-            '';
-            hash = "sha256-OHimg85kcjk+Tq1Yv8TA9CfPDVzxdgPpzTi2mxyPs4s=";
-          };
-        });
         # End Temporary self updated packages
 
-        # Begin Unstable packages
-        # FIXME: Use stable packages again when AArch64 libxkbcommon is cached or its binfmt tests pass.
-        appimage-run = pkgs-unstable.appimage-run;
-        cloudflare-warp = pkgs-unstable.cloudflare-warp;
-        fastfetch = pkgs-unstable.fastfetch;
-        ffmpeg = pkgs-unstable.ffmpeg;
-        openconnect_openssl = pkgs-unstable.openconnect_openssl;
-        pinentry-curses = pkgs-unstable.pinentry-curses;
-        vim-full = pkgs-unstable.vim-full;
-        # End Unstable packages
-
         # Begin Temporary fixed version packages
-        freerdp = super.freerdp.override { openh264 = null; };
-        global = pkgs-stable.global;
-        arandr = pkgs-stable.arandr;
+        # freerdp = super.freerdp.override { openh264 = null; };
         # End Temporary fixed version packages
 
         ckb-next = super.ckb-next.overrideAttrs (oldAttrs: {

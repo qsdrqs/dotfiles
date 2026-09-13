@@ -330,10 +330,18 @@ in
         # AllowTcpForwarding = true;
       };
     };
-    journald.extraConfig = ''
-      SystemMaxUse=500M
-      RuntimeMaxUse=500M
-    '';
+    # Stable (26.05) and RPi inputs still use extraConfig. Recheck on the next input update.
+    journald = if dot.opt.has [ "services" "journald" "settings" "Journal" ] then {
+      settings.Journal = {
+        SystemMaxUse = "500M";
+        RuntimeMaxUse = "500M";
+      };
+    } else {
+      extraConfig = ''
+        SystemMaxUse=500M
+        RuntimeMaxUse=500M
+      '';
+    };
     locate = {
       enable = true;
       package = pkgs.plocate;
