@@ -88,6 +88,19 @@ in
         # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+        # Zotero 10.0.2 fixes HTML indexing with Firefox ESR 140.15.
+        # https://github.com/NixOS/nixpkgs/pull/562964
+        zotero =
+          let
+            zoteroNixpkgs = super.fetchFromGitHub {
+              owner = "NixOS";
+              repo = "nixpkgs";
+              rev = "363fdbe57ed052c76e816e6270206b0cb348e53a";
+              hash = "sha256-eaIzbbImStaHMgxftbumWoZuMC+Xm7TraQSsf6da+VI=";
+            };
+          in
+          super.callPackage "${zoteroNixpkgs}/pkgs/by-name/zo/zotero/package.nix" { };
+
         tzupdate = super.rustPlatform.buildRustPackage {
           pname = "tzupdate";
           version = "unstable-2025-09-02";

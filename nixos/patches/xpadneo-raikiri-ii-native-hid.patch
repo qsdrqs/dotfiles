@@ -1,0 +1,173 @@
+--- a/xpadneo/core.c
++++ b/xpadneo/core.c
+@@ -64,6 +64,10 @@
+ 	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_ASUSTEK, 0x1ABD),
+ 	 .driver_data = XPADNEO_DEVFLAG_SKIP_HEURISTICS },
+ 
++	/* ASUS ROG Raikiri II: native HID input, Xbox-compatible rumble */
++	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_ASUSTEK, 0x1C93),
++	 .driver_data = XPADNEO_DEVFLAG_SKIP_HEURISTICS | XPADNEO_DEVFLAG_NATIVE_HID },
++
+ 	/* SENTINEL VALUE, indicates the end */
+ 	{ }
+ };
+@@ -130,7 +134,8 @@
+ 		hdev->product = xdata->original_product;
+ 	}
+ 
+-	xpadneo_mouse_remove_timer(xdata);
++	if (!(xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID))
++		xpadneo_mouse_remove_timer(xdata);
+ 	xpadneo_rumble_remove(xdata);
+ 	xpadneo_quirks_remove(xdata);
+ 	xpadneo_power_remove(xdata);
+@@ -167,11 +172,14 @@
+ 
+ 	xdata->hdev = hdev;
+ 	hdev->quirks |= HID_QUIRK_INPUT_PER_APP;
+-	hdev->quirks |= HID_QUIRK_NO_INPUT_SYNC;
++	if (!(xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID))
++		hdev->quirks |= HID_QUIRK_NO_INPUT_SYNC;
+ 	hid_set_drvdata(hdev, xdata);
+ 
+ 	xdata->uses_hogp = false;
+-	if (hdev->version == 0x00000903)
++	if (xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID)
++		hid_info(hdev, "using native HID input with Xbox-compatible rumble\n");
++	else if (hdev->version == 0x00000903)
+ 		hid_warn(hdev, "buggy firmware detected, please upgrade to the latest version\n");
+ 	else if (hdev->version < 0x00000500)
+ 		hid_warn(hdev,
+@@ -229,9 +237,11 @@
+ 	xdata->original_vendor = hdev->vendor;
+ 	xdata->original_product = hdev->product;
+ 	xdata->original_version = hdev->version;
+-	hdev->vendor = USB_VENDOR_ID_MICROSOFT;
+-	hdev->product = 0x028E;
+-	hdev->version = 0x00001130;
++	if (!(xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID)) {
++		hdev->vendor = USB_VENDOR_ID_MICROSOFT;
++		hdev->product = 0x028E;
++		hdev->version = 0x00001130;
++	}
+ 
+ 	if ((hdev->vendor != xdata->original_vendor) || (hdev->product != xdata->original_product))
+ 		hid_info(hdev,
+@@ -252,17 +262,19 @@
+ 		goto err_release_id;
+ 	}
+ 
+-	ret = xpadneo_consumer_init(xdata);
+-	if (ret)
+-		goto err_stop_hw;
+-
+-	ret = xpadneo_keyboard_init(xdata);
+-	if (ret)
+-		goto err_uninit_consumer;
+-
+-	ret = xpadneo_mouse_init(xdata);
+-	if (ret)
+-		goto err_uninit_keyboard;
++	if (!(xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID)) {
++		ret = xpadneo_consumer_init(xdata);
++		if (ret)
++			goto err_stop_hw;
++
++		ret = xpadneo_keyboard_init(xdata);
++		if (ret)
++			goto err_uninit_consumer;
++
++		ret = xpadneo_mouse_init(xdata);
++		if (ret)
++			goto err_uninit_keyboard;
++	}
+ 
+ 	ret = core_init_base_device(hdev);
+ 	if (ret) {
+@@ -274,7 +286,8 @@
+ 	if (ret)
+ 		hid_err(hdev, "could not initialize rumble, continuing anyway\n");
+ 
+-	xpadneo_mouse_init_timer(xdata);
++	if (!(xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID))
++		xpadneo_mouse_init_timer(xdata);
+ 
+ 	hid_info(hdev, "%s connected\n", xdata->battery.name);
+ 
+--- a/xpadneo/device.c
++++ b/xpadneo/device.c
+@@ -88,6 +88,9 @@
+ 	/* log size/CRC and optionally hex-dump before any in-place patches */
+ 	xpadneo_debug_descriptor(hdev, rdesc, *rsize);
+ 
++	if (xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID)
++		return rdesc;
++
+ 	/* fixup trailing NUL byte */
+ 	if (*rsize >= 2 && rdesc[*rsize - 2] == 0xC0 && rdesc[*rsize - 1] == 0x00) {
+ 		hid_notice(hdev, "fixing up report descriptor size\n");
+--- a/xpadneo/events.c
++++ b/xpadneo/events.c
+@@ -80,6 +80,9 @@
+ 			     u8 *data, int reportsize)
+ {
+ 	struct xpadneo_devdata *xdata = hid_get_drvdata(hdev);
++
++	if (xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID)
++		return 0;
+ 
+ 	/* the controller spams reports multiple times */
+ 	if (likely(report->id == 0x01)) {
+@@ -163,6 +166,17 @@
+ 	struct input_dev *gamepad = xdata->gamepad.idev;
+ 	struct input_dev *keyboard = xdata->keyboard.idev;
+ 
++	if (xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID) {
++		/* Native trigger axes feed the existing pressure-based rumble. */
++		if (usage->type == EV_ABS) {
++			if (usage->code == ABS_BRAKE)
++				xdata->last_abs_z = value;
++			else if (usage->code == ABS_GAS)
++				xdata->last_abs_rz = value;
++		}
++		return 0;
++	}
++
+ 	if (xpadneo_mouse_event(xdata, usage, value))
+ 		goto stop_processing;
+ 
+@@ -298,6 +312,12 @@
+ 	struct xpadneo_devdata *xdata = hid_get_drvdata(hdev);
+ 	int deadzone = 3072, abs_min = 0, abs_max = 65535;
+ 
++	if (xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID) {
++		if (hi->application == HID_GD_GAMEPAD)
++			xdata->gamepad.idev = hi->input;
++		return 0;
++	}
++
+ 	switch (hi->application) {
+ 	case HID_GD_GAMEPAD:
+ 		hid_info(hdev, "gamepad detected\n");
+--- a/xpadneo/mappings.c
++++ b/xpadneo/mappings.c
+@@ -104,6 +104,9 @@
+ 	struct xpadneo_devdata *xdata = hid_get_drvdata(hdev);
+ 	int i = 0;
+ 
++	if (xdata->device_flags & XPADNEO_DEVFLAG_NATIVE_HID)
++		return MAP_AUTO;
++
+ 	if (usage->hid == HID_DC_BATTERYSTRENGTH) {
+ 		xdata->battery.report_id = field->report->id;
+ 		hid_info(hdev, "battery detected\n");
+--- a/xpadneo/xpadneo.h
++++ b/xpadneo/xpadneo.h
+@@ -53,6 +53,7 @@
+ /* HID device flags stored in hid_device_id.driver_data */
+ #define XPADNEO_DEVFLAG_CAP_SHARE_BUTTON BIT(0)
+ #define XPADNEO_DEVFLAG_SKIP_HEURISTICS  BIT(1)
++#define XPADNEO_DEVFLAG_NATIVE_HID       BIT(2)
+ 
+ /* maximum length of report 0x01 for duplicate packet filtering */
+ #define XPADNEO_REPORT_0x01_LENGTH (55+1)

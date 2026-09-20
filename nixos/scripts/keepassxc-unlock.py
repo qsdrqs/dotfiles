@@ -3,19 +3,20 @@
 
 Usage: keepassxc-unlock DATABASE [--keyfile KEYFILE] [--diagnose]
        keepassxc-unlock --status
+       keepassxc-unlock --lock
 
-The command cancels a matching Quick Unlock page through AT-SPI, then sends
+The command resets matching Quick Unlock credentials through AT-SPI, then sends
 the master password to KeePassXC over the desktop user's D-Bus session.
 """
 
 import argparse
+import configparser
 from dataclasses import dataclass
 import getpass
 import os
 from pathlib import Path
 import subprocess
 import sys
-import time
 import warnings
 
 import dbus
@@ -30,10 +31,6 @@ ATSPI_ACCESSIBLE = "org.a11y.atspi.Accessible"
 ATSPI_ACTION = "org.a11y.atspi.Action"
 SECRETS_SERVICE = "org.freedesktop.secrets"
 SECRETS_PATH = "/org/freedesktop/secrets"
-
-# AT-SPI returns state flags as an array of unsigned words. SHOWING is bit 25
-# in the first word; hidden Quick Unlock pages must not be selected.
-ATSPI_SHOWING = 1 << 25
 
 # An accessible object is identified by both its bus name and object path.
 AccessibleRef = tuple[str, str]
@@ -120,12 +117,6 @@ def read_accessibility_tree(bus, root):
     return nodes
 
 
-def is_showing(bus, reference):
-    """Check the current state, not the state at the time the tree was read."""
-    states = accessible_call(bus, reference, "GetState")
-    return bool(int(states[0]) & ATSPI_SHOWING)
-
-
 def is_target_quick_unlock_page(nodes, button, database):
     """Match the specific KeePassXC page containing this Cancel button.
 
@@ -159,12 +150,10 @@ def is_target_quick_unlock_page(nodes, button, database):
 
 
 def find_cancel_actions(bus, nodes, database):
-    """Return only showing Cancel actions belonging to the target database."""
+    """Return Quick Unlock reset actions belonging to the target database."""
     matches = []
     for reference, node in nodes.items():
         if node.role != "push button" or node.label != "Cancel":
-            continue
-        if not is_showing(bus, reference):
             continue
         if not is_target_quick_unlock_page(nodes, node, database):
             continue
@@ -181,35 +170,27 @@ def find_cancel_actions(bus, nodes, database):
 
 
 def cancel_quick_unlock(session, owner, database):
-    """Exit the target's Quick Unlock page before supplying a master password."""
+    """Reset the target's Quick Unlock credentials before supplying a password."""
     accessibility, root = find_accessibility_application(session, owner)
     nodes = read_accessibility_tree(accessibility, root)
     matches = find_cancel_actions(accessibility, nodes, database)
     if not matches:
-        print("Quick Unlock: no active matching page found.", flush=True)
+        print("Quick Unlock: no matching reset action found.", flush=True)
         return
     if len(matches) != 1:
         raise RuntimeError("Multiple matching Quick Unlock pages; no button was pressed")
 
-    # KeePassXC's resetQuickUnlock() clears this database's in-process cache.
-    # Otherwise its cached-key branch can invoke Polkit instead of using the
-    # password passed to openDatabase(). The database is still locked here.
+    # KeePassXC's resetQuickUnlock() is safe even when its page is hidden or no
+    # cached key exists. Resetting prevents its cached-key branch from invoking
+    # Polkit instead of using the password passed to openDatabase().
     reference, index = matches[0]
-    print("Quick Unlock: cancelling the target database's quick-unlock page...", flush=True)
+    print("Quick Unlock: resetting the target database's cached credentials...", flush=True)
     accepted = accessibility.call_blocking(
         *reference, ATSPI_ACTION, "DoAction", "i", (index,), timeout=5
     )
     if not accepted:
-        raise RuntimeError("Quick Unlock Cancel action was rejected")
-
-    # Acceptance of the UI action is not confirmation that the page changed.
-    # Wait for the matching button to stop showing before asking for a password.
-    deadline = time.monotonic() + 3
-    while is_showing(accessibility, reference):
-        if time.monotonic() >= deadline:
-            raise RuntimeError("Quick Unlock page remained active after Cancel")
-        time.sleep(0.05)
-    print("Quick Unlock: page exited; continuing with the master password.", flush=True)
+        raise RuntimeError("Quick Unlock reset action was rejected")
+    print("Quick Unlock: reset action completed; continuing with the master password.", flush=True)
 
 
 def show_status(session, stage):
@@ -219,14 +200,17 @@ def show_status(session, stage):
         "org.freedesktop.Secret.Service", "Collections",
     )
     print(f"Secret Service status ({stage}):", flush=True)
+    lock_states = []
     for path in collections:
         locked = get_property(
             session, (SECRETS_SERVICE, path),
             "org.freedesktop.Secret.Collection", "Locked",
         )
+        lock_states.append(bool(locked))
         print(f"  {path}: {'LOCKED' if locked else 'UNLOCKED'}", flush=True)
     if not collections:
         print("  No exposed collections.", flush=True)
+    return lock_states
 
 
 def validate_credentials(database, password, keyfile):
@@ -260,6 +244,15 @@ def unlock_database(session, owner, database, password, keyfile):
     print("GUI D-Bus call returned; checking lock status.", flush=True)
 
 
+def lock_databases(session, owner):
+    """Lock all databases currently open in the KeePassXC GUI."""
+    print("Locking all open databases...", flush=True)
+    session.call_blocking(
+        owner, KEEPASSXC_PATH, KEEPASSXC_SERVICE, "lockAllDatabases", "", (), timeout=30,
+    )
+    print("KeePassXC lock request completed; checking lock status.", flush=True)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(prog="keepassxc-unlock", description=__doc__)
     parser.add_argument("database", type=Path, nargs="?", help="Path to the KDBX database")
@@ -272,9 +265,23 @@ def parse_args():
         "--status", action="store_true",
         help="Only read Secret Service lock status; no password required",
     )
+    parser.add_argument(
+        "--lock", action="store_true",
+        help="Lock all databases currently open in KeePassXC",
+    )
     args = parser.parse_args()
+    if args.lock and (args.status or args.database or args.keyfile or args.diagnose):
+        parser.error("--lock cannot be combined with --status, a database, --keyfile, or --diagnose")
     if not args.status and args.database is None:
-        parser.error("database is required unless --status is used")
+        if args.lock:
+            return args
+        state_file = Path("~/.local/state/keepassxc/keepassxc.ini").expanduser()
+        config = configparser.ConfigParser()
+        loaded = config.read(state_file)
+        database = config.get("General", "LastActiveDatabase", fallback="")
+        if not loaded or not database:
+            parser.error(f"database not specified and active database was not found in {state_file}")
+        args.database = Path(database)
     return args
 
 
@@ -287,6 +294,11 @@ def main():
     session = dbus.SessionBus()
     show_status(session, "before")
     if args.status:
+        return
+    if args.lock:
+        owner = session.get_name_owner(KEEPASSXC_SERVICE)
+        lock_databases(session, owner)
+        show_status(session, "after")
         return
 
     database = args.database.expanduser().resolve(strict=True)
@@ -305,7 +317,11 @@ def main():
     unlock_database(session, owner, database, password, keyfile)
     # openDatabase() has no success result. Report Secret Service state instead
     # of treating a successful D-Bus method return as proof of an unlocked vault.
-    show_status(session, "after")
+    lock_states = show_status(session, "after")
+    if not lock_states:
+        raise RuntimeError("GUI D-Bus call returned, but no Secret Service collection is exposed")
+    if all(lock_states):
+        raise RuntimeError("GUI D-Bus call returned, but all Secret Service collections remain locked")
     print(f"Verify gh access with:\n  DBUS_SESSION_BUS_ADDRESS={bus_address} gh auth status")
 
 

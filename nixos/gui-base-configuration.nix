@@ -155,6 +155,8 @@ in
     keepass-fido2-enroll
     packages.keepassxc-unlock
     yubioath-flutter
+    # Provide userspace tools for on-demand USB/IP forwarding of YubiKeys.
+    config.boot.kernelPackages.usbip
     packages.yubikey-toggle
 
     kitty
