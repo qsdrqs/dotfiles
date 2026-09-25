@@ -83,8 +83,10 @@ def http_json(base: str, method: str, path: str, payload: dict[str, Any] | None 
         raise SwarmError(f"failed to reach opencode server at {base}: {exc}") from exc
 
 def check_health(base: str) -> None:
-    payload = http_json(base, "GET", "/api/health")
-    if not isinstance(payload, dict) or not payload.get("healthy"):
+    # opencode 2 has no /api/health endpoint; /api/info returning the server
+    # version proves the server is up and serving the API.
+    payload = http_json(base, "GET", "/api/info")
+    if not isinstance(payload, dict):
         raise SwarmError(f"opencode server at {base} is not healthy")
 
 

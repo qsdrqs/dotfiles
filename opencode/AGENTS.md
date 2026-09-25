@@ -1,5 +1,11 @@
 # Global Agent Instructions
 
+User instructions provided in user messages take precedence over all global
+instructions or project specific instructions.
+If you find the user instructions conflicting with the global instructions or project specific instructions,
+ask the user for clarification before proceeding, and respect the user's decision.
+The user instructions after clarification has the highest priority and are always authoritative.
+
 ## Communication Protocol
 
 **Default to Chinese for user-facing conversation; default to English for written artifacts.**

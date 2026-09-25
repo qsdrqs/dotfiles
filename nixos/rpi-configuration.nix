@@ -261,12 +261,14 @@ in
       description = "Wifi watchdog to monitor and restart wifi kernel module if needed";
       path = [
         pkgs.iproute2 # ip
+        pkgs.iw # iw
+        pkgs.iputils # arping
         pkgs.bash
         pkgs.systemd # systemctl, journalctl
         pkgs.kmod # modprobe
       ];
       serviceConfig = {
-        ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-wifi-watchdog.py} ${wifi-interface-internal}'';
+        ExecStart = ''${(pkgs.python3.withPackages python-packages)}/bin/python ${./scripts/rpi-wifi-watchdog.py} ${wifi-interface-internal} ${wifi-interface-external}'';
         Restart = "on-failure";
         RestartSec = 5;
       };

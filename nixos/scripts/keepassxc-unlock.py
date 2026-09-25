@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 import warnings
 
 import dbus
@@ -70,29 +71,42 @@ def connection_pid(bus, name):
 
 def find_accessibility_application(session, owner):
     """Find this KeePassXC process on the separate accessibility bus."""
+    status = ("org.a11y.Bus", "/org/a11y/bus")
+    enabled = get_property(session, status, "org.a11y.Status", "IsEnabled")
+    screen_reader = get_property(session, status, "org.a11y.Status", "ScreenReaderEnabled")
+    if not enabled and not screen_reader:
+        session.call_blocking(
+            *status, DBUS_PROPERTIES, "Set", "ssv",
+            ("org.a11y.Status", "IsEnabled", dbus.Boolean(True)), timeout=5,
+        )
+        print("AT-SPI: enabled accessibility for this session.", flush=True)
+
     address = session.call_blocking(
         "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Bus", "GetAddress", "", (),
     )
     accessibility = dbus.bus.BusConnection(address)
     registry = ("org.a11y.atspi.Registry", "/org/a11y/atspi/accessible/root")
-    applications = accessible_call(accessibility, registry, "GetChildren")
-
     # Unique bus names are only meaningful on their own bus. Matching the PID
     # ties the accessibility application to the actual KeePassXC D-Bus owner.
     pid = connection_pid(session, owner)
-    matches = []
-    for name, path in applications:
-        try:
-            if connection_pid(accessibility, name) == pid:
-                matches.append((str(name), str(path)))
-        except dbus.DBusException as error:
-            # An unrelated application can exit after the registry was read.
-            if error.get_dbus_name() != "org.freedesktop.DBus.Error.NameHasNoOwner":
-                raise
+    deadline = time.monotonic() + 5 if not enabled and not screen_reader else None
+    while True:
+        applications = accessible_call(accessibility, registry, "GetChildren")
+        matches = []
+        for name, path in applications:
+            try:
+                if connection_pid(accessibility, name) == pid:
+                    matches.append((str(name), str(path)))
+            except dbus.DBusException as error:
+                # An unrelated application can exit after the registry was read.
+                if error.get_dbus_name() != "org.freedesktop.DBus.Error.NameHasNoOwner":
+                    raise
 
-    if len(matches) != 1:
-        raise RuntimeError("Cannot uniquely identify KeePassXC on the accessibility bus")
-    return accessibility, matches[0]
+        if len(matches) == 1:
+            return accessibility, matches[0]
+        if matches or deadline is None or time.monotonic() >= deadline:
+            raise RuntimeError("Cannot uniquely identify KeePassXC on the accessibility bus")
+        time.sleep(0.1)
 
 
 def read_accessibility_tree(bus, root):
@@ -177,20 +191,17 @@ def cancel_quick_unlock(session, owner, database):
     if not matches:
         print("Quick Unlock: no matching reset action found.", flush=True)
         return
-    if len(matches) != 1:
-        raise RuntimeError("Multiple matching Quick Unlock pages; no button was pressed")
-
     # KeePassXC's resetQuickUnlock() is safe even when its page is hidden or no
     # cached key exists. Resetting prevents its cached-key branch from invoking
     # Polkit instead of using the password passed to openDatabase().
-    reference, index = matches[0]
-    print("Quick Unlock: resetting the target database's cached credentials...", flush=True)
-    accepted = accessibility.call_blocking(
-        *reference, ATSPI_ACTION, "DoAction", "i", (index,), timeout=5
-    )
-    if not accepted:
-        raise RuntimeError("Quick Unlock reset action was rejected")
-    print("Quick Unlock: reset action completed; continuing with the master password.", flush=True)
+    for reference, index in matches:
+        print("Quick Unlock: resetting the target database's cached credentials...", flush=True)
+        accepted = accessibility.call_blocking(
+            *reference, ATSPI_ACTION, "DoAction", "i", (index,), timeout=5
+        )
+        if not accepted:
+            raise RuntimeError("Quick Unlock reset action was rejected")
+    print("Quick Unlock: reset actions completed; continuing with the master password.", flush=True)
 
 
 def show_status(session, stage):

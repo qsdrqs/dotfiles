@@ -16,7 +16,7 @@ description: >
 
 ## Role Detection
 
-**If your first message contains `[SWARM INIT]`**: You are a WORKER worker.
+**If your first message contains `[SWARM INIT]`**: You are a WORKER.
 Read `references/worker-protocol.md` and follow it. Stop reading this file.
 
 **Otherwise**: You are the LEADER orchestrator. Continue below.

@@ -151,6 +151,11 @@ statix check nixos/
 - `.vim/`, `after/` - Vim compatibility layer (shared with Neovim via symlink)
 - `tools/` - utility scripts
 
+### OpenCode Skills (`opencode/`)
+
+- `opencode/skills/` holds skills authored and maintained in this repo. Do not copy, vendor, or commit an upstream third-party skill's files into it.
+- Track a third-party skill by its upstream reference, keeping upstream as the source of truth so updates flow from upstream.
+
 ## Key Conventions
 
 1. **Discuss before modifying**: Directory structure, entry scripts, Nix/Home Manager behavior, or cross-platform differences require discussion first.
