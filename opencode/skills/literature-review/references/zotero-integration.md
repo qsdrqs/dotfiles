@@ -390,6 +390,72 @@ on the user's library. If a match exists, it skips creation and only:
 - Appends the contribution note (current logic always appends; manual cleanup
   required if re-running with a different note).
 
+### 4.2 Browser Connector import with chrome-devtools
+
+Use this path when the user requests imports through Zotero Connector in their
+existing Chrome. It uses the browser's current website access and the installed
+Connector's translators and attachment handling, rather than the API import
+loop. Zotero desktop and the Connector must be available. Check the destination
+collection in the Connector's save UI; it can reflect the client's last selection.
+
+**Verified with Zotero Connector 5.0.215:** the content script recognizes clicks
+on links to `https://www.zotero.org/save` (also `https://zotero.org/save`). In the
+distributed extension, `inject/inject.js` forwards the click through
+`onZoteroButtonElementClick`; `background.js` routes that to `_browserAction`,
+the same handler used by the toolbar button. See the
+[Connector source repository](https://github.com/zotero/zotero-connectors).
+This is version-specific implementation evidence, not a guarantee for every
+Connector release.
+
+Workflow:
+
+1. List browser tabs, then use an explicit task tab for the official paper page.
+   Wait for the paper metadata to load before saving. An early save can produce
+   only a webpage item instead of a paper.
+2. If the page has no save link, use `evaluate_script` to add a temporary one:
+
+   ```javascript
+   () => {
+     const id = "zotero-connector-save-action";
+     document.getElementById(id)?.remove();
+     const link = document.createElement("a");
+     link.id = id;
+     link.href = "https://www.zotero.org/save";
+     link.textContent = "Save current paper with Zotero Connector";
+     link.style = "position:fixed;top:8px;left:8px;z-index:2147483647;"
+       + "background:white;color:black;padding:12px;border:2px solid #900";
+     document.body.append(link);
+   }
+   ```
+
+3. Take a fresh page snapshot and click that link's UID using the browser
+   tool's native `click`, with the same explicit page ID. Do not use JavaScript
+   `element.click()` or `dispatchEvent()` for this save action: the Connector
+   checks `event.isTrusted` and requires a primary-button click without modifiers.
+   Ordinary page JavaScript also cannot directly call `window.Zotero`, which
+   lives in the extension's isolated context. Desktop computer-use is not needed
+   for this path. A page-scoped simulated `Ctrl+Shift+S` is not evidence that
+   Chrome's extension shortcut fired.
+4. Inspect the save result and confirm the item and attachment in Zotero. A
+   successful tool click alone is insufficient. Web API verification may lag
+   the desktop save until sync. If the result is ambiguous, inspect existing
+   items before clicking again; a retry can create another duplicate. Remove
+   the temporary link when finished.
+5. Verify item type, publication year, venue, authors, and PDF source. Connector
+   imports can still contain source-page metadata errors: OpenReview imports
+   may use the submission date and omit the conference name; proceedings pages
+   may be detected as journal articles. Resolve discrepancies from the official
+   citation record, such as OpenReview's `Show Bibtex`, without inventing fields.
+   A PDF attachment record does not establish that the file downloaded; confirm
+   the file exists, opens as a PDF, and belongs to the intended publication.
+
+Connector saving normally creates a new item; it is not an in-place update or
+merge. When updating an existing library, check for duplicates first and retain
+the imported item keys for any user-authorized merge. Preserve collections,
+notes, and annotations when merging. When the task requests published versions,
+prefer the official publication PDF and retain an arXiv fallback if the official
+PDF cannot be obtained.
+
 ## 5. PDF policy and the `literature-review-no-pdf` tag
 
 **Default**: every paper that enters the Phase 5 import loop must come

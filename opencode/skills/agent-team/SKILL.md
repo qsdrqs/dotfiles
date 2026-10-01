@@ -6,10 +6,9 @@ description: >
   visual monitoring via the full opencode2 TUI. A standardized Python CLI (swarm.py) handles all
   inter-agent communication. Use when: (1) user asks to parallelize work across agents,
   (2) user says "spin up a team", "agent team", "swarm", "use multiple agents",
-  (3) a task naturally decomposes into 2+ independent sub-tasks that benefit from parallel execution,
-  (4) user says "start agents", "multi-agent", "work in parallel".
-  IMPORTANT: This skill has two roles. If you receive a message containing [SWARM INIT], you are
-  a WORKER - read references/worker-protocol.md immediately. Otherwise you are the LEADER orchestrator.
+  (3) a task naturally decomposes into 2+ independent sub-tasks that benefit from parallel execution.
+  ALSO IMPORTANT: This is not the replacement of the subagent feature. Use this skill when you want to
+  run multiple agents in parallel, each with its own session and model, and coordinate with each other.
 ---
 
 # Agent Team

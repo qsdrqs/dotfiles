@@ -300,6 +300,7 @@ in
       enable = true;
       libraries = with pkgs; [
         stdenv.cc.cc.lib
+        fontconfig
         glib
         libGL
       ];

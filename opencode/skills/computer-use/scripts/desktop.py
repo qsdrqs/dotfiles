@@ -346,7 +346,8 @@ def action_timeout(args):
 
 def preflight(args, meta, display, capture_after=True):
     timeout = args.timeout or 30
-    capabilities = bridge("doctor", timeout=timeout)["globals"]
+    doctor = bridge("doctor", timeout=timeout)
+    capabilities = doctor["globals"]
     target = resolve_target(args, meta)
     required = ["screencopy"] if capture_after else []
     if args.command in POINTER_ACTIONS:
@@ -379,8 +380,10 @@ def preflight(args, meta, display, capture_after=True):
         end_meta = read_metadata(args.to_metadata)
         check_geometry(end_meta, select_screen(screens, end_meta["displayId"]))
     if args.command in ("move", "click", "scroll", "drag"):
-        if any(s["geometry"][axis] < 0 for s in screens for axis in ("x", "y")):
-            raise ValueError("Backend pointer mapping is unreliable for negative output origins")
+        if not doctor.get("pointer_logical_bounds") and any(
+            min(s["geometry"][axis] for s in screens) != 0 for axis in ("x", "y")
+        ):
+            raise ValueError("This output layout requires wlroots-bridge with pointer_logical_bounds support")
     if target and args.command in KEYBOARD_ACTIONS:
         check_focus(target["id"], timeout)
     return observation_screen["id"], target

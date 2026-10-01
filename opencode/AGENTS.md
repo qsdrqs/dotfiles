@@ -328,34 +328,12 @@ lines = output.splitlines()
 
 ## Tool Use Instructions
 
-**IMPORTANT**: You are ALWAYS encouraged to use search tools when available to verify information, find sources, and gather evidence. Do not rely solely on memory or assumptions for factual information.
+**IMPORTANT**: You are ALWAYS encouraged to use search tools when available to verify information, find sources, and gather evidence. Do not rely solely on memory or assumptions for factual information. When doing search, utilize all available tools or MCPs to get more comprehensive information.
 
-### Search Tools
-
-Choose tools to resolve the evidence gap. Prefer official documentation or
-source code matching the relevant version. Use multiple search providers when
-a source is insufficient, claims conflict, or the task calls for broad research;
-do not invoke every search tool merely because it is available.
-
-Example: a definition in the project's pinned nixpkgs source can settle an
-option question. A comparison with conflicting or incomplete sources warrants
-cross-checking with both Brave and Exa.
-
-#### Brave Search
-
-Use Brave Search as the primary web search provider for factual lookups and
-authoritative sources. Use the tool names available in the current environment.
-
-For specialized searches, also use:
-- `brave_news_search` for recent news and current events
-- `brave_image_search` for image lookups
-- `brave_video_search` for video content
-
-#### Exa Web Search
-
-The Exa web search tool has rate limits. If you encounter rate limits, simply wait for 1 second by using `sleep 1` and then retry the search.
+The search tools has rate limits. If you encounter rate limits, simply wait for 1 second by using `sleep 1` and then retry the search.
 
 ## Context7 MCP for Library Documentation
+
 Use Context7 MCP to fetch current documentation whenever the user asks about a library, framework, SDK, API, CLI tool, or cloud service -- even well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. This includes API syntax, configuration, version migration, library-specific debugging, setup instructions, and CLI tool usage. Use even when you think you know the answer -- your training data may not reflect recent changes. Prefer this over web search for library docs.
 
 Do not use for: refactoring, writing scripts from scratch, debugging business logic, code review, or general programming concepts.

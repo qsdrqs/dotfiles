@@ -1,5 +1,9 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 let
+  # Cloud-only voice input addon: the Doubao ASR backend runs in the vinput
+  # daemon, so the local sherpa-onnx runtime is not needed.
+  fcitx5VoiceInput = inputs.fcitx5-vinput.packages.${pkgs.stdenv.hostPlatform.system}.fcitx5-vinput-lite;
+
   hyprlandPackages = with pkgs; [
     # Add waybar package here due to: https://github.com/Alexays/Waybar/issues/3300
     # waybar
@@ -19,11 +23,18 @@ let
 in
 {
   nix.settings = {
-    substituters = [ "https://hyprland.cachix.org" ];
-    trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
+    substituters = [
+      "https://hyprland.cachix.org"
+      "https://fcitx5-vinput.cachix.org"
+    ];
+    trusted-public-keys = [
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "fcitx5-vinput.cachix.org-1:XpX3AA6+dDIX4qJhb1QM7sbTwX6/qSlGvW8Z5NK6XdU="
+    ];
   };
 
   environment.systemPackages = with pkgs; [
+    fcitx5VoiceInput
     wtype
     vscode
     xclip
@@ -213,9 +224,23 @@ in
       addons = with pkgs; [
         fcitx5-rime
         fcitx5-gtk
+        fcitx5VoiceInput
       ];
       waylandFrontend = true;
     };
+  };
+
+  # Doubao / Volcengine cloud ASR runs in a separate daemon that the addon
+  # talks to over D-Bus.
+  systemd.user.services.vinput-daemon = {
+    description = "Vinput voice input daemon";
+    after = [ "pipewire.service" ];
+    serviceConfig = {
+      Type = "dbus";
+      BusName = "org.fcitx.Vinput";
+      ExecStart = "${fcitx5VoiceInput}/bin/vinput-daemon";
+    };
+    wantedBy = [ "default.target" ];
   };
 
   programs.nix-ld.libraries = with pkgs; [
@@ -223,6 +248,7 @@ in
     gmp
     gtk3
     libxcb
+    wayland
   ];
   environment.variables.NIX_LD_LIBRARY_PATH = lib.mkOverride 90 "/run/current-system/sw/share/nix-ld/lib:/run/opengl-driver/lib";
 

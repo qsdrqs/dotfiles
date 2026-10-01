@@ -87,6 +87,18 @@ in
     };
 
     user.services = {
+      laptop-moonlight = {
+        description = "Dual Moonlight laptop displays over WireGuard";
+        partOf = [ "graphical-session.target" ];
+        path = [ pkgs.moonlight-qt pkgs.niri pkgs.procps pkgs.systemd ];
+        environment.MOONLIGHT_HOST = "10.100.0.2";
+        serviceConfig = {
+          Type = "exec";
+          ExecStart = "${pkgs.python3}/bin/python3 ${../niri/moonlight-extend.py}";
+          KillMode = "control-group";
+        };
+      };
+
       libinput-gestures = {
         enable = true;
         path = [ pkgs.hyprland ];

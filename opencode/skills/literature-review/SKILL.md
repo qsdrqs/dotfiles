@@ -543,6 +543,12 @@ If a field cannot be determined from the source text, write `?`. NEVER invent.
 
 ## Phase 5: Layer 4 Zotero Import (Stage B)
 
+When the user requests Zotero Connector imports through their existing Chrome,
+use [Browser Connector import](references/zotero-integration.md#42-browser-connector-import-with-chrome-devtools)
+instead of the API import loop below. Chrome DevTools can trigger the Connector's
+page save link without desktop mouse automation. Verify the imported metadata
+and PDF against the official publication before treating the import as complete.
+
 **Scope**: only papers that **entered the comparison matrix** (Phase 4 row.json
 exists). Triaged-out candidates are not imported.
 

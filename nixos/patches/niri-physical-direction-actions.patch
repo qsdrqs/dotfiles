@@ -1,0 +1,392 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Depends-On: niri-0wd0-vertical-layout.patch
+# Title: Add main-axis-independent physical direction actions
+#
+# Adds focus-left/right/up/down and move-left/right/up/down actions whose
+# direction remains aligned with the physical screen on both horizontal and
+# vertical scrolling layouts.
+diff --git a/docs/wiki/Configuration:-Key-Bindings.md b/docs/wiki/Configuration:-Key-Bindings.md
+--- a/docs/wiki/Configuration:-Key-Bindings.md
++++ b/docs/wiki/Configuration:-Key-Bindings.md
+@@ -97,6 +97,8 @@
+ 
+ These examples assume the default horizontal main axis. The action names stay the same with `layout.main-axis "vertical"`, but their physical direction follows the main/cross-axis interpretation of the layout.
+ 
++To keep directional key bindings aligned with the physical screen direction regardless of the main axis, use `focus-left`, `focus-right`, `focus-up`, and `focus-down`. The corresponding move actions are `move-left`, `move-right`, `move-up`, and `move-down`.
++
+ Similarly, you can bind touchpad scroll "ticks".
+ Touchpad scrolling is continuous, so for these binds it is split into discrete intervals based on distance travelled.
+ 
+diff --git a/niri-config/src/binds.rs b/niri-config/src/binds.rs
+--- a/niri-config/src/binds.rs
++++ b/niri-config/src/binds.rs
+@@ -158,6 +158,10 @@
+     FocusWindow(u64),
+     FocusWindowInColumn(#[knuffel(argument)] u8),
+     FocusWindowPrevious,
++    FocusLeft,
++    FocusRight,
++    FocusUp,
++    FocusDown,
+     FocusColumnLeft,
+     #[knuffel(skip)]
+     FocusColumnLeftUnderMouse,
+@@ -185,6 +189,10 @@
+     FocusWindowBottom,
+     FocusWindowDownOrTop,
+     FocusWindowUpOrBottom,
++    MoveLeft,
++    MoveRight,
++    MoveUp,
++    MoveDown,
+     MoveColumnLeft,
+     MoveColumnRight,
+     MoveColumnToFirst,
+@@ -442,6 +450,10 @@
+             niri_ipc::Action::FocusWindow { id } => Self::FocusWindow(id),
+             niri_ipc::Action::FocusWindowInColumn { index } => Self::FocusWindowInColumn(index),
+             niri_ipc::Action::FocusWindowPrevious {} => Self::FocusWindowPrevious,
++            niri_ipc::Action::FocusLeft {} => Self::FocusLeft,
++            niri_ipc::Action::FocusRight {} => Self::FocusRight,
++            niri_ipc::Action::FocusUp {} => Self::FocusUp,
++            niri_ipc::Action::FocusDown {} => Self::FocusDown,
+             niri_ipc::Action::FocusColumnLeft {} => Self::FocusColumnLeft,
+             niri_ipc::Action::FocusColumnRight {} => Self::FocusColumnRight,
+             niri_ipc::Action::FocusColumnFirst {} => Self::FocusColumnFirst,
+@@ -465,6 +477,10 @@
+             niri_ipc::Action::FocusWindowBottom {} => Self::FocusWindowBottom,
+             niri_ipc::Action::FocusWindowDownOrTop {} => Self::FocusWindowDownOrTop,
+             niri_ipc::Action::FocusWindowUpOrBottom {} => Self::FocusWindowUpOrBottom,
++            niri_ipc::Action::MoveLeft {} => Self::MoveLeft,
++            niri_ipc::Action::MoveRight {} => Self::MoveRight,
++            niri_ipc::Action::MoveUp {} => Self::MoveUp,
++            niri_ipc::Action::MoveDown {} => Self::MoveDown,
+             niri_ipc::Action::MoveColumnLeft {} => Self::MoveColumnLeft,
+             niri_ipc::Action::MoveColumnRight {} => Self::MoveColumnRight,
+             niri_ipc::Action::MoveColumnToFirst {} => Self::MoveColumnToFirst,
+diff --git a/niri-ipc/src/lib.rs b/niri-ipc/src/lib.rs
+--- a/niri-ipc/src/lib.rs
++++ b/niri-ipc/src/lib.rs
+@@ -355,6 +355,14 @@
+     },
+     /// Focus the previously focused window.
+     FocusWindowPrevious {},
++    /// Focus the window in the physical direction to the left.
++    FocusLeft {},
++    /// Focus the window in the physical direction to the right.
++    FocusRight {},
++    /// Focus the window in the physical direction above.
++    FocusUp {},
++    /// Focus the window in the physical direction below.
++    FocusDown {},
+     /// Focus the column to the left.
+     FocusColumnLeft {},
+     /// Focus the column to the right.
+@@ -407,6 +415,14 @@
+     FocusWindowDownOrTop {},
+     /// Focus the window above or the bottommost window.
+     FocusWindowUpOrBottom {},
++    /// Move the focused window in the physical direction to the left.
++    MoveLeft {},
++    /// Move the focused window in the physical direction to the right.
++    MoveRight {},
++    /// Move the focused window in the physical direction above.
++    MoveUp {},
++    /// Move the focused window in the physical direction below.
++    MoveDown {},
+     /// Move the focused column to the left.
+     MoveColumnLeft {},
+     /// Move the focused column to the right.
+diff --git a/src/input/mod.rs b/src/input/mod.rs
+--- a/src/input/mod.rs
++++ b/src/input/mod.rs
+@@ -984,6 +984,46 @@
+                     }
+                 });
+             }
++            Action::MoveLeft => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Width, false);
++                } else {
++                    self.niri.layout.move_physical_left();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
++            Action::MoveRight => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Width, true);
++                } else {
++                    self.niri.layout.move_physical_right();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
++            Action::MoveUp => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Height, false);
++                } else {
++                    self.niri.layout.move_physical_up();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
++            Action::MoveDown => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Height, true);
++                } else {
++                    self.niri.layout.move_physical_down();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
+             Action::MoveColumnLeft => {
+                 if self.niri.screenshot_ui.is_open() {
+                     self.apply_screenshot_move(
+@@ -1153,6 +1193,34 @@
+                     // FIXME: granular
+                     self.niri.queue_redraw_all();
+                 }
++            }
++            Action::FocusLeft => {
++                self.niri.layout.focus_physical_left();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
++            }
++            Action::FocusRight => {
++                self.niri.layout.focus_physical_right();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
++            }
++            Action::FocusUp => {
++                self.niri.layout.focus_physical_up();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
++            }
++            Action::FocusDown => {
++                self.niri.layout.focus_physical_down();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
+             }
+             Action::FocusColumnLeft => {
+                 self.niri.layout.focus_left();
+diff --git a/src/layout/mod.rs b/src/layout/mod.rs
+--- a/src/layout/mod.rs
++++ b/src/layout/mod.rs
+@@ -1803,11 +1803,27 @@
+         workspace.move_left();
+     }
+ 
++    pub fn move_physical_left(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::move_left, Workspace::move_up);
++    }
++
+     pub fn move_right(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.move_right();
++    }
++
++    pub fn move_physical_right(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::move_right, Workspace::move_down);
+     }
+ 
+     pub fn move_column_to_first(&mut self) {
+@@ -1860,11 +1876,27 @@
+         workspace.move_down();
+     }
+ 
++    pub fn move_physical_down(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::move_right, Workspace::move_down);
++    }
++
+     pub fn move_up(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.move_up();
++    }
++
++    pub fn move_physical_up(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::move_left, Workspace::move_up);
+     }
+ 
+     pub fn move_down_or_to_workspace_down(&mut self) {
+@@ -1934,11 +1966,27 @@
+         workspace.focus_left();
+     }
+ 
++    pub fn focus_physical_left(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::focus_left, Workspace::focus_up);
++    }
++
+     pub fn focus_right(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.focus_right();
++    }
++
++    pub fn focus_physical_right(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::focus_right, Workspace::focus_down);
+     }
+ 
+     pub fn focus_column_first(&mut self) {
+@@ -2034,11 +2082,27 @@
+         workspace.focus_down();
+     }
+ 
++    pub fn focus_physical_down(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::focus_right, Workspace::focus_down);
++    }
++
+     pub fn focus_up(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.focus_up();
++    }
++
++    pub fn focus_physical_up(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::focus_left, Workspace::focus_up);
+     }
+ 
+     pub fn focus_down_or_left(&mut self) {
+diff --git a/src/layout/tests.rs b/src/layout/tests.rs
+--- a/src/layout/tests.rs
++++ b/src/layout/tests.rs
+@@ -2016,6 +2016,44 @@
+         moved_x > moved_y.abs(),
+         "expected move-window-down to move floating window right in vertical mode, got dx={moved_x}, dy={moved_y}"
+     );
++}
++
++#[test]
++fn vertical_main_axis_physical_move_actions_keep_screen_directions() {
++    let mut options = Options::default();
++    options.layout.main_axis = MainAxis::Vertical;
++
++    let mut layout = check_ops_with_options(
++        options,
++        [
++            Op::AddOutput(1),
++            Op::AddWindow {
++                params: TestWindowParams::new(1),
++            },
++            Op::ToggleWindowFloating { id: None },
++        ],
++    );
++
++    let window_pos = |layout: &Layout<TestWindow>| {
++        let mut pos = None;
++        layout.with_windows(|win, _, _, window_layout| {
++            if *win.id() == 1 {
++                pos = window_layout.tile_pos_in_workspace_view;
++            }
++        });
++        pos.unwrap()
++    };
++
++    let start = window_pos(&layout);
++    layout.move_physical_right();
++    let after_right = window_pos(&layout);
++    layout.move_physical_down();
++    let after_down = window_pos(&layout);
++
++    assert!(after_right.0 > start.0);
++    assert_eq!(after_right.1, start.1);
++    assert_eq!(after_down.0, after_right.0);
++    assert!(after_down.1 > after_right.1);
+ }
+ 
+ #[test]
+diff --git a/src/ui/hotkey_overlay.rs b/src/ui/hotkey_overlay.rs
+--- a/src/ui/hotkey_overlay.rs
++++ b/src/ui/hotkey_overlay.rs
+@@ -460,10 +460,18 @@
+         Action::Quit(_) => String::from("Exit niri"),
+         Action::ShowHotkeyOverlay => String::from("Show Important Hotkeys"),
+         Action::CloseWindow => String::from("Close Focused Window"),
++        Action::FocusLeft => String::from("Focus Left"),
++        Action::FocusRight => String::from("Focus Right"),
++        Action::FocusUp => String::from("Focus Up"),
++        Action::FocusDown => String::from("Focus Down"),
+         Action::FocusColumnLeft => String::from("Focus Column to the Left"),
+         Action::FocusColumnRight => String::from("Focus Column to the Right"),
+         Action::MoveColumnLeft => String::from("Move Column Left"),
+         Action::MoveColumnRight => String::from("Move Column Right"),
++        Action::MoveLeft => String::from("Move Left"),
++        Action::MoveRight => String::from("Move Right"),
++        Action::MoveUp => String::from("Move Up"),
++        Action::MoveDown => String::from("Move Down"),
+         Action::FocusWorkspaceDown => String::from("Switch Workspace Down"),
+         Action::FocusWorkspaceUp => String::from("Switch Workspace Up"),
+         Action::MoveColumnToWorkspaceDown(_) => String::from("Move Column to Workspace Down"),
+diff --git a/src/ui/mru.rs b/src/ui/mru.rs
+--- a/src/ui/mru.rs
++++ b/src/ui/mru.rs
+@@ -1883,7 +1883,8 @@
+ 
+     for bind in &config.binds.0 {
+         let action = match &bind.action {
+-            Action::FocusColumnRight
++            Action::FocusRight
++            | Action::FocusColumnRight
+             | Action::FocusColumnRightOrFirst
+             | Action::FocusColumnOrMonitorRight
+             | Action::FocusWindowDownOrColumnRight => Action::MruAdvance {
+@@ -1891,7 +1892,8 @@
+                 scope: None,
+                 filter: None,
+             },
+-            Action::FocusColumnLeft
++            Action::FocusLeft
++            | Action::FocusColumnLeft
+             | Action::FocusColumnLeftOrLast
+             | Action::FocusColumnOrMonitorLeft
+             | Action::FocusWindowUpOrColumnLeft => Action::MruAdvance {

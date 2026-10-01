@@ -71,7 +71,7 @@ in
   # begin udev rules
   services.udev.extraRules = ''
     # Allow Handy to type transcriptions through the virtual input device.
-    KERNEL=="uinput", GROUP="input", MODE="0660"
+    # KERNEL=="uinput", GROUP="input", MODE="0660"
     # Unblock Bluetooth when its rfkill device is registered.
     ACTION=="add", SUBSYSTEM=="rfkill", ENV{RFKILL_TYPE}=="bluetooth", RUN+="${pkgs.util-linux}/bin/rfkill unblock bluetooth"
   '';
@@ -89,7 +89,7 @@ in
   ];
 
   environment.systemPackages = with pkgs; [
-    handy
+    # handy
     telegram-desktop
     slack
     snapper-gui

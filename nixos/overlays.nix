@@ -291,13 +291,16 @@ in
           ];
         });
 
-        # Carry niri PR #1856 (per-device tablet/touch config) and the
-        # PR #3800 virtual output backport on top of the nixpkgs niri package.
+        # Carry niri PR #1856 (per-device tablet/touch config), PR #3800
+        # (virtual outputs), 0WD0's vertical layout feature, and physical
+        # direction actions on top of the nixpkgs niri package.
         # Remove each patch once it reaches nixpkgs.
         niri = super.niri.overrideAttrs (oldAttrs: {
           patches = (oldAttrs.patches or [ ]) ++ [
             ./patches/niri-pr1856-per-device-tablet-touch.patch
             ./patches/niri-pr3800-virtual-outputs.patch
+            ./patches/niri-0wd0-vertical-layout.patch
+            ./patches/niri-physical-direction-actions.patch
           ];
         });
 

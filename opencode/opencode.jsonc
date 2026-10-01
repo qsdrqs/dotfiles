@@ -1,6 +1,7 @@
 {
-  "plugin": [
-    "opencode-claude-auth-v2@latest"
+  "plugins": [
+    "opencode-claude-auth-v2@latest",
+    "@cardinal4/opencode-quota@latest"
     // "opencode-claude-auth",
     // "opencode-gemini-auth@latest",
     // "oh-my-opencode-slim",
@@ -9,18 +10,16 @@
   "$schema": "https://opencode.ai/config.json",
   "formatter": false,
   "model": "{env:OPENCODE_MODEL}",
-  "snapshot": true,
-  "agent": {
+  "snapshots": true,
+  "agents": {
     "build": {
-      "permission": {
-        "*": "allow"
-      }
+      "permissions": [{ "action": "*", "resource": "*", "effect": "allow" }]
     },
     "general": {
-      "permission": {
-        "*": "allow",
-        "external_directory": "allow"
-      }
+      "permissions": [
+        { "action": "*", "resource": "*", "effect": "allow" },
+        { "action": "external_directory", "resource": "*", "effect": "allow" }
+      ]
     },
     "explore": {
       "model": "openai/gpt-5.6-luna-fast"
@@ -28,40 +27,42 @@
   },
   "share": "disabled",
   "mcp": {
-    "chrome-devtools": {
-      "type": "local",
-      "command": [
-        "npx",
-        "chrome-devtools-mcp@latest",
-        "--autoConnect"
-      ]
-    },
-    "brave-search": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@brave/brave-search-mcp-server",
-        "--transport",
-        "stdio"
-      ]
-    },
-    "exa": {
-      "type": "remote",
-      "url": "https://mcp.exa.ai/mcp"
-    },
-    "context7": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@upstash/context7-mcp",
-        "--api-key",
-        "{env:CONTEXT7_API_KEY}"
-      ]
+    "servers": {
+      "chrome-devtools": {
+        "type": "local",
+        "command": [
+          "npx",
+          "chrome-devtools-mcp@latest",
+          "--autoConnect"
+        ]
+      },
+      "brave-search": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@brave/brave-search-mcp-server",
+          "--transport",
+          "stdio"
+        ]
+      },
+      "exa": {
+        "type": "remote",
+        "url": "https://mcp.exa.ai/mcp"
+      },
+      "context7": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@upstash/context7-mcp",
+          "--api-key",
+          "{env:CONTEXT7_API_KEY}"
+        ]
+      }
     }
   },
-  "provider": {
+  "providers": {
     // Override Codex OAuth clamp (400k/272k/128k) for GPT-6.
     // Codex 0.149.0 advertises max_context_window 872000 for sol/terra/luna;
     // long context is configurable per OpenAI docs. -fast variants are
@@ -80,6 +81,12 @@
         "gpt-6-sol-fast": {
           "limit": { "context": 1050000, "input": 872000, "output": 128000 }
         },
+        "gpt-5.6-sol": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-5.6-sol-fast": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
         "gpt-6-luna": {
           "limit": { "context": 1050000, "input": 872000, "output": 128000 }
         },
@@ -89,9 +96,9 @@
       }
     },
     "NRP": {
-      "npm": "@ai-sdk/openai-compatible",
+      "package": "aisdk:@ai-sdk/openai-compatible",
       "name": "NRP",
-      "options": {
+      "settings": {
         "baseURL": "https://ellm.nrp-nautilus.io/v1",
         "apiKey": "{env:NRP_API_KEY}"
       },
@@ -102,26 +109,33 @@
             "context": 1000000,
             "output": 65536
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text", "image", "video"],
             "output": ["text"]
           },
-          "tool_call": true,
-          "reasoning": true,
-          "attachment": true,
-          "variants": {
-            "low": {
-              "reasoning_effort": "low"
+          "variants": [
+            {
+              "id": "low",
+              "settings": {
+                "reasoning_effort": "low"
+              }
             },
-            "medium": {
-              "reasoning_effort": "medium"
+            {
+              "id": "medium",
+              "settings": {
+                "reasoning_effort": "medium"
+              }
             },
-            "instruct": {
-              "chat_template_kwargs": {
-                "enable_thinking": false
+            {
+              "id": "instruct",
+              "settings": {
+                "chat_template_kwargs": {
+                  "enable_thinking": false
+                }
               }
             }
-          }
+          ]
         },
         "qwen3-small": {
           "name": "Qwen/Qwen3.8-27B",
@@ -129,26 +143,33 @@
             "context": 1000000,
             "output": 65536
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text", "image", "video"],
             "output": ["text"]
           },
-          "tool_call": true,
-          "reasoning": true,
-          "attachment": true,
-          "variants": {
-            "low": {
-              "reasoning_effort": "low"
+          "variants": [
+            {
+              "id": "low",
+              "settings": {
+                "reasoning_effort": "low"
+              }
             },
-            "medium": {
-              "reasoning_effort": "medium"
+            {
+              "id": "medium",
+              "settings": {
+                "reasoning_effort": "medium"
+              }
             },
-            "instruct": {
-              "chat_template_kwargs": {
-                "enable_thinking": false
+            {
+              "id": "instruct",
+              "settings": {
+                "chat_template_kwargs": {
+                  "enable_thinking": false
+                }
               }
             }
-          }
+          ]
         },
         "glm-5": {
           "name": "Inferact/GLM-5.3-NVFP4",
@@ -156,24 +177,29 @@
             "context": 1048576,
             "output": 65536
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text"],
             "output": ["text"]
           },
-          "tool_call": true,
-          "reasoning": true,
-          "variants": {
-            "low": {
-              "chat_template_kwargs": {
-                "reasoning_effort": "low"
+          "variants": [
+            {
+              "id": "low",
+              "settings": {
+                "chat_template_kwargs": {
+                  "reasoning_effort": "low"
+                }
               }
             },
-            "high": {
-              "chat_template_kwargs": {
-                "reasoning_effort": "high"
+            {
+              "id": "high",
+              "settings": {
+                "chat_template_kwargs": {
+                  "reasoning_effort": "high"
+                }
               }
             }
-          }
+          ]
         },
         "deepseek-v4-flash": {
           "name": "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp",
@@ -181,30 +207,37 @@
             "context": 1048576,
             "output": 65536
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text", "image"],
             "output": ["text"]
           },
-          "tool_call": true,
-          "reasoning": true,
-          "attachment": true,
-          "variants": {
-            "low": {
-              "chat_template_kwargs": {
-                "reasoning_effort": "low"
+          "variants": [
+            {
+              "id": "low",
+              "settings": {
+                "chat_template_kwargs": {
+                  "reasoning_effort": "low"
+                }
               }
             },
-            "high": {
-              "chat_template_kwargs": {
-                "reasoning_effort": "high"
+            {
+              "id": "high",
+              "settings": {
+                "chat_template_kwargs": {
+                  "reasoning_effort": "high"
+                }
               }
             },
-            "instruct": {
-              "chat_template_kwargs": {
-                "thinking": false
+            {
+              "id": "instruct",
+              "settings": {
+                "chat_template_kwargs": {
+                  "thinking": false
+                }
               }
             }
-          }
+          ]
         },
         "kimi": {
           "name": "moonshotai/Kimi-K2.7-Code",
@@ -212,13 +245,11 @@
             "context": 131072,
             "output": 32768
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text", "image", "video"],
             "output": ["text"]
-          },
-          "tool_call": true,
-          "reasoning": true,
-          "attachment": true
+          }
         },
         "minimax-m2": {
           "name": "MiniMaxAI/MiniMax-M2.7",
@@ -226,12 +257,11 @@
             "context": 204800,
             "output": 32768
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text"],
             "output": ["text"]
-          },
-          "tool_call": true,
-          "reasoning": true
+          }
         },
         "gpt-oss": {
           "name": "openai/gpt-oss-120b",
@@ -239,12 +269,11 @@
             "context": 131072,
             "output": 32768
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text"],
             "output": ["text"]
-          },
-          "tool_call": true,
-          "reasoning": true
+          }
         },
         "gemma": {
           "name": "google/gemma-4-31B-it-qat-w4a16-ct",
@@ -252,20 +281,21 @@
             "context": 262144,
             "output": 32768
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text", "image", "video"],
             "output": ["text"]
           },
-          "tool_call": true,
-          "reasoning": true,
-          "attachment": true,
-          "variants": {
-            "instruct": {
-              "chat_template_kwargs": {
-                "enable_thinking": false
+          "variants": [
+            {
+              "id": "instruct",
+              "settings": {
+                "chat_template_kwargs": {
+                  "enable_thinking": false
+                }
               }
             }
-          }
+          ]
         },
         "gemma-small": {
           "name": "google/gemma-4-12B-it-qat-w4a16-ct",
@@ -273,20 +303,21 @@
             "context": 262144,
             "output": 32768
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text", "image", "video"],
             "output": ["text"]
           },
-          "tool_call": true,
-          "reasoning": true,
-          "attachment": true,
-          "variants": {
-            "instruct": {
-              "chat_template_kwargs": {
-                "enable_thinking": false
+          "variants": [
+            {
+              "id": "instruct",
+              "settings": {
+                "chat_template_kwargs": {
+                  "enable_thinking": false
+                }
               }
             }
-          }
+          ]
         }
       }
     },
@@ -300,30 +331,38 @@
             "input": 1048576,
             "output": 131072
           },
-          "modalities": {
+          "capabilities": {
+            "tools": true,
             "input": ["text"],
             "output": ["text"]
           },
-          "tool_call": true,
-          "reasoning": true,
-          "variants": {
-            "low": {
-              "reasoning_effort": "low"
+          "variants": [
+            {
+              "id": "low",
+              "settings": {
+                "reasoning_effort": "low"
+              }
             },
-            "high": {
-              "reasoning_effort": "high"
+            {
+              "id": "high",
+              "settings": {
+                "reasoning_effort": "high"
+              }
             },
-            "max": {
-              "reasoning_effort": "max"
+            {
+              "id": "max",
+              "settings": {
+                "reasoning_effort": "max"
+              }
             }
-          }
+          ]
         }
       }
     },
     "openrouter": {
       "models": {
         "openai/gpt-oss-20b": {
-          "options": {
+          "body": {
             "provider": {
               "order": [
                 "groq"
@@ -333,7 +372,7 @@
           }
         },
         "openai/gpt-oss-120b": {
-          "options": {
+          "body": {
             "provider": {
               "order": [
                 "cerebras"
@@ -343,7 +382,7 @@
           }
         },
         "qwen/qwen3-coder-30b-a3b-instruct": {
-          "options": {
+          "body": {
             "provider": {
               "order": [
                 "alibaba"
@@ -353,7 +392,7 @@
           }
         },
         "deepseek/deepseek-v4-flash-0731": {
-          "options": {
+          "body": {
             "provider": {
               "order": [
                 "wafer/fast"
@@ -363,7 +402,7 @@
           }
         }
       },
-      "options": {
+      "settings": {
         "apiKey": "{env:OPENROUTER_API_KEY}",
         "websearch_cited": {
           "model": "google/gemini-3.1-pro-preview"
@@ -371,9 +410,9 @@
       }
     },
     "llama.cpp": {
-      "npm": "@ai-sdk/openai-compatible",
+      "package": "aisdk:@ai-sdk/openai-compatible",
       "name": "llama-server (local)",
-      "options": {
+      "settings": {
         "baseURL": "http://127.0.0.1:8080/v1"
       },
       "models": {
@@ -394,8 +433,22 @@
       }
     },
     "deepseek": {
-      "options": {
+      "settings": {
         "apiKey": "{env:DEEPSEEK_API_KEY}"
+      },
+      "models": {
+        "deepseek-flash": {
+          "variants": [
+            {
+              "id": "instruct",
+              "body": {
+                "thinking": {
+                  "type": "disabled"
+                }
+              }
+            }
+          ]
+        }
       }
     }
   },

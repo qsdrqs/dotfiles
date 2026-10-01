@@ -216,7 +216,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
  #[derive(knuffel::Decode, Debug, Clone, Copy, PartialEq)]
  pub struct FocusFollowsMouse {
      #[knuffel(property, str)]
-@@ -705,6 +778,90 @@
+@@ -705,6 +778,92 @@
          )
          "#);
      }
@@ -246,6 +246,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
 +                    map_to_output: Some(
 +                        "eDP-1",
 +                    ),
++                    map_to_focused_output: false,
 +                    left_handed: false,
 +                },
 +                Tablet {
@@ -257,6 +258,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
 +                    map_to_output: Some(
 +                        "DP-1",
 +                    ),
++                    map_to_focused_output: false,
 +                    left_handed: false,
 +                },
 +            ],

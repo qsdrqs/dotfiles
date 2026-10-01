@@ -287,10 +287,11 @@ changes. Report task completion based on visible results, not exit status.
   pointer input still uses the bridge. Inspect orientation
   and geometry before using coordinates; if they disagree, stop and report the
   mismatch rather than guessing a rotation correction.
-- The initially tested pointer implementation clamps negative global
-  coordinates and assumes an output layout rooted at zero. If discovered
-  screens have negative origins, report this limitation before pointer actions;
-  the helper's mathematical conversion does not fix the backend's mapping.
+- Nonzero desktop bounding-box origins (including negative output positions)
+  require a bridge whose `doctor` report advertises `pointer_logical_bounds`.
+  The helper checks this before pointer actions. If missing, use an updated
+  bridge rather than bypassing the check. The corrected bridge translates global
+  logical coordinates relative to the complete output bounding box.
 - `session-start` is a no-op on this backend, not exclusive input ownership.
   Keyboard and mouse actions share the user's live desktop.
 - Window IDs must come from recent discovery or selector resolution. The helper

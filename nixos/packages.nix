@@ -250,7 +250,7 @@
         owner = "qsdrqs";
         repo = "wlroots-bridge";
         rev = "main";
-        hash = "sha256-2VWdKC9a/wBLWRwtQOwPvveYGfUFTeXgGKPOchbNClc=";
+        hash = "sha256-mSf/B44fEc3wI4JmHw4OC4uZ7WZcMrj6WsVbHUrgzoU=";
       };
 
       cargoHash = "sha256-RXjsWwI2TkiwQWXRgsL2BReCNl+T7ygcNdLO7ALTsmk=";

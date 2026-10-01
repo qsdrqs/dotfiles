@@ -44,6 +44,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    fcitx5-vinput = {
+      url = "github:xifan2333/fcitx5-vinput";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     tree-sitter-grub = {
       url = "github:qsdrqs/tree-sitter-grub";
       flake = false;

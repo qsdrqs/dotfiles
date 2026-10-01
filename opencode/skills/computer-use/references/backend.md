@@ -5,6 +5,19 @@ Interface and image-format details are based on upstream revision
 [maintained source](https://github.com/qsdrqs/wlroots-bridge) includes the
 modifier-state fix at `556113c0d59ca692e29b19cd28771f4763d6fb67`.
 
+## Pointer coordinate mapping
+
+Absolute pointer motion uses the union of the logical output rectangles:
+subtract its minimum x/y from global coordinates and use its width/height as
+the protocol extents. This supports outputs left of or above the global origin,
+as well as layouts whose minimum coordinates are positive. Using only the
+right/bottom edges and clamping global coordinates to zero misplaces the pointer.
+
+Corrected bridges advertise `pointer_logical_bounds: true` in `doctor`.
+The helper requires this capability when either desktop bounding-box origin is
+nonzero; older bridges remain usable with zero-origin layouts. Input coordinates
+remain global logical coordinates, including negative values.
+
 ## Capture routing
 
 The helper prefers `grim` for full-output and region captures. It writes PNG

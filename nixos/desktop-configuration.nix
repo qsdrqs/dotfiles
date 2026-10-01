@@ -81,7 +81,6 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
-    packages.wlroots-bridge
     ida64-fhs
     libreoffice
     # seahorse # keyring manager
@@ -100,6 +99,11 @@ in
     qqmusic-hidpi
     # pkgs.nur.repos.xddxdd.baidunetdisk
     scanmem
+    (pkgs.writeShellApplication {
+      name = "laptop-displays";
+      runtimeInputs = [ pkgs.niri pkgs.systemd pkgs.jq ];
+      text = builtins.readFile ../niri/laptop-displays.sh;
+    })
   ];
 
   services.howdy.settings.core.use_cnn = true;
@@ -180,6 +184,42 @@ in
     capSysAdmin = true;
     openFirewall = true;
   };
+
+  systemd.user.services =
+    let
+      apps = (pkgs.formats.json { }).generate "sunshine-laptop-apps.json" {
+        env = { };
+        apps = [ { name = "Desktop"; } ];
+      };
+      settingsFormat = pkgs.formats.keyValue { };
+    in
+    lib.genAttrs [ "sunshine-laptop-1" "sunshine-laptop-2" ] (name:
+      let
+        display = if name == "sunshine-laptop-1" then "1" else "2";
+        settings = settingsFormat.generate "${name}.conf" {
+          port = if display == "1" then 31089 else 31189;
+          output_name = "laptop-edp${display}";
+          sunshine_name = "${config.networking.hostName}-laptop-${display}";
+          file_state = "laptop-${display}/sunshine_state.json";
+          credentials_file = "sunshine_state.json";
+          log_path = "laptop-${display}/sunshine.log";
+          file_apps = "${apps}";
+          keyboard = false;
+          mouse = false;
+          controller = false;
+          native_pen_touch = false;
+        };
+      in
+      {
+        description = "Sunshine stream for laptop eDP-${display}";
+        partOf = [ "graphical-session.target" ];
+        after = [ "graphical-session.target" ];
+        serviceConfig = {
+          ExecStart = "${config.security.wrapperDir}/sunshine ${settings}";
+          Restart = "on-failure";
+          RestartSec = "5s";
+        };
+      });
 
   services.hardware.openrgb.enable = true;
 
