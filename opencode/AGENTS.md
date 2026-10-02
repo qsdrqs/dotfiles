@@ -303,6 +303,7 @@ confirmation popup. A global `ControlPath` is already configured. When the user
 asks to persist/unlock an ssh target (or repeated ssh popups need to be
 avoided): run `ssh -f -N -M -o ControlPersist=2h <target>` (one popup), then
 plain `ssh <target> ...` reuses the socket. End with `ssh -O exit <target>`.
+For security considerations, do not keep the session open longer than necessary work flow.
 
 ## Language-Specific Conventions
 

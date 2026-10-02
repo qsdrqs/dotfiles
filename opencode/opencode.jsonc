@@ -1,7 +1,7 @@
 {
   "plugins": [
     "opencode-claude-auth-v2@latest",
-    "@cardinal4/opencode-quota@latest"
+    "@slkiser/opencode-quota@latest"
     // "opencode-claude-auth",
     // "opencode-gemini-auth@latest",
     // "oh-my-opencode-slim",
@@ -26,6 +26,11 @@
     }
   },
   "share": "disabled",
+  "experimental": {
+    "quotaToast": {
+      "maintainerAnnouncements": { "home": false }
+    }
+  },
   "mcp": {
     "servers": {
       "chrome-devtools": {
@@ -73,6 +78,12 @@
           "limit": { "context": 1050000, "input": 872000, "output": 128000 }
         },
         "gpt-6-astra-fast": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-6.1-sol": {
+          "limit": { "context": 1050000, "input": 872000, "output": 128000 }
+        },
+        "gpt-6.1-sol-fast": {
           "limit": { "context": 1050000, "input": 872000, "output": 128000 }
         },
         "gpt-6-sol": {

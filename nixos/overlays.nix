@@ -47,6 +47,7 @@ let
   pkgs-last = import inputs.nixpkgs-last {
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
+    config.cudaSupport = cudaSupport;
   };
   packages = builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix);
   cudaSupport = config.nixpkgs.config.cudaSupport or false;
@@ -90,6 +91,8 @@ in
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
         # Zotero 10.0.2 fixes HTML indexing with Firefox ESR 140.15.
         # https://github.com/NixOS/nixpkgs/pull/562964
+        # Built on nixpkgs-last because the current zotero needs a CUDA firefox-esr-153 that is not
+        # in cache.nixos-cuda.org yet; remove together with the nixpkgs-last overrides below.
         zotero =
           let
             zoteroNixpkgs = super.fetchFromGitHub {
@@ -99,7 +102,7 @@ in
               hash = "sha256-eaIzbbImStaHMgxftbumWoZuMC+Xm7TraQSsf6da+VI=";
             };
           in
-          super.callPackage "${zoteroNixpkgs}/pkgs/by-name/zo/zotero/package.nix" { };
+          pkgs-last.callPackage "${zoteroNixpkgs}/pkgs/by-name/zo/zotero/package.nix" { };
 
         tzupdate = super.rustPlatform.buildRustPackage {
           pname = "tzupdate";
@@ -118,6 +121,20 @@ in
 
         # Begin Temporary fixed version packages
         # freerdp = super.freerdp.override { openh264 = null; };
+        # ltrace 0.7.91 check phase fails with GCC 16 (C++20 default): testsuite demangle-lib.cpp
+        # triggers the "'volatile'-qualified return type is deprecated" warning, so DejaGnu fails
+        # every demangle.exp test. nixpkgs master has the same derivation. Use the GCC 15 build
+        # from nixpkgs-last until nixpkgs ltrace builds with GCC 16.
+        ltrace = pkgs-last.ltrace;
+        # The CUDA builds of onnxruntime and its consumers for the current nixpkgs input (after the
+        # GCC 16 staging-next, NixOS/nixpkgs#566094) are not in cache.nixos-cuda.org yet, so they
+        # would compile locally. Take Firefox and OBS (obs-backgroundremoval links onnxruntime)
+        # from nixpkgs-last, whose CUDA builds are cached. zotero above is built on nixpkgs-last
+        # for the same reason.
+        # Remove once cache.nixos-cuda.org covers the current nixpkgs input.
+        firefox-devedition-unwrapped = pkgs-last.firefox-devedition-unwrapped;
+        obs-studio = pkgs-last.obs-studio;
+        obs-studio-plugins = pkgs-last.obs-studio-plugins;
         # End Temporary fixed version packages
 
         ckb-next = super.ckb-next.overrideAttrs (oldAttrs: {

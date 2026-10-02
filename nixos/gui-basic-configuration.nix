@@ -39,7 +39,7 @@ in
 {
   imports = [ ./grub-efi-configuration.nix ];
   # begin howdy
-  # Temporarily disabled until NixOS/nixpkgs#540826 reaches this flake; restore both services afterward.
+  # disable howdy
   services.howdy = {
     enable = false;
     control = "sufficient"; # was told to be insecure

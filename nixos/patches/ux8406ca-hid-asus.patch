@@ -101,7 +101,7 @@
 +	struct hid_device *hdev = drvdata->hdev;
 +	int ret;
 +
-+	if (drvdata->kbd_backlight)
++	if (drvdata->listener.brightness_set)
 +		return;
 +
 +	ret = asus_kbd_register_leds(hdev);
@@ -113,7 +113,7 @@
 +	hid_info(hdev, "Initialized keyboard backlight after retry\n");
 +
 +	if (drvdata->quirks & QUIRK_HID_FN_LOCK) {
-+		ret = asus_kbd_set_fn_lock(hdev, drvdata->fn_lock);
++		ret = asus_kbd_fn_lock_set(drvdata, drvdata->fn_lock);
 +		if (ret < 0)
 +			hid_warn(hdev, "Failed to resync Fn lock after retry: %d\n", ret);
 +	}
@@ -166,14 +166,14 @@
  	/*
  	 * For ROG keyboards, skip rename for consistency and ->input check as
 @@ -1340,6 +1420,9 @@ static void asus_remove(struct hid_device *hdev)
+ {
  	struct asus_drvdata *drvdata = hid_get_drvdata(hdev);
- 	unsigned long flags;
  
 +	if (drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD)
 +		cancel_delayed_work_sync(&drvdata->kbd_backlight_init_work);
 +
- 	if (drvdata->kbd_backlight) {
- 		asus_hid_unregister_listener(&drvdata->kbd_backlight->listener);
+ 	if (drvdata->listener.brightness_set)
+ 		asus_hid_unregister_listener(&drvdata->listener);
  
 @@ -1356,6 +1439,30 @@
  	hid_hw_stop(hdev);

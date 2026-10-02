@@ -96,7 +96,7 @@ in
     (pkgs.callPackage (import "${inputs.nixpkgs-ghcup}/pkgs/development/tools/haskell/ghcup/default.nix") { })
 
     # NUR
-    qqmusic-hidpi
+    # qqmusic-hidpi
     # pkgs.nur.repos.xddxdd.baidunetdisk
     scanmem
     (pkgs.writeShellApplication {

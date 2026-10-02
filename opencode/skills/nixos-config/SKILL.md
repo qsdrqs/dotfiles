@@ -53,12 +53,14 @@ Modify `~/dotfiles` NixOS + Home Manager configuration safely: make minimal, str
    - Before any `nix build` command, inspect local resources with Python: logical CPU count, MemAvailable GiB, and 1-minute load average.
    - If logical CPUs are fewer than 4, MemAvailable is below 8 GiB, load average is higher than logical CPUs, or resource detection fails, use the `question` tool to ask for user consent before running `nix build`. The approval is per-command and does not carry over to later builds.
    - If logical CPUs are at least 4, MemAvailable is at least 8 GiB, and load average is not higher than logical CPUs, `nix build` may run without asking.
+   - Before building a whole configuration, also check what it would build locally with `scripts/build_cost.py dry-run <name>`. If heavy packages that normally come from a binary cache would be built locally, the build conditions are not met: report the list and ask before building. Definitions and the cache checks are in [references/build-cost-and-breakage.md](references/build-cost-and-breakage.md).
    - If switching is explicitly requested and approved, use the user's `snr-switch` shell function:
      - `snr-switch <device>` (e.g. `snr-switch desktop`, `snr-switch laptop`)
      - This runs from `~/dotfiles`: cleans syncthing conflict files, then executes `nixos-rebuild switch --sudo --ask-sudo-password --flake path:.#<device>`.
      - Manual switch: `nixos-rebuild switch --sudo --ask-sudo-password --flake path:$HOME/dotfiles#<name>`
    - Home Manager standalone switch, only if explicitly requested and approved: `home-manager switch --flake path:$HOME/dotfiles#<name>`
    - When something breaks, keep traces visible (`--show-trace`) and fix the first failure, not the last symptom.
+   - When a package fails to build, a build is too large, or you must choose between pinning packages and rolling back a nixpkgs input, read [references/build-cost-and-breakage.md](references/build-cost-and-breakage.md).
 
 6. Provide rollback guidance when you change active state
    - Mention the standard NixOS rollback mechanisms (generations / `nixos-rebuild --rollback`) appropriate to the user’s request.
@@ -128,3 +130,7 @@ Use the scripts in `scripts/` for consistent, source-first lookups.
 
 - Resolve nixpkgs source: `scripts/nixpkgs_src.sh`
 - Find an option by source search: `scripts/find_nixos_option.sh services.openssh.enable --dotfiles ~/dotfiles`
+- Summarize local builds of a target, optionally with input overrides: `scripts/build_cost.py dry-run desktop [--override-input nixpkgs github:NixOS/nixpkgs/<rev>]`
+- Count real dependents of derivations in a target closure: `scripts/build_cost.py dependents desktop '^ltrace-[0-9]'`
+- Check which binary caches serve a path or installable: `scripts/cache_status.sh /run/current-system`
+- List channel releases inside the rollback window: `scripts/channel_revs.py [--channel 26.05] [--days 8]`
