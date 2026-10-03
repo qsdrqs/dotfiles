@@ -1,6 +1,6 @@
 ---
 name: computer-use
-description: Operate desktop applications visually using screenshots, mouse, and keyboard through wlroots-bridge. Use for tasks that require interacting with the current desktop GUI; check backend availability and Wayland capabilities before operating.
+description: Operate desktop applications visually using screenshots, mouse, and keyboard through wlroots-bridge, by default inside an isolated headless niri agent desktop that never touches the user's live session; operate the user's own desktop only when they explicitly ask for it. Check backend availability and Wayland capabilities before operating.
 ---
 
 # Computer Use
@@ -8,8 +8,73 @@ description: Operate desktop applications visually using screenshots, mouse, and
 Use `wlroots-bridge` for input, `grim` for PNG captures when installed, niri IPC
 for window targeting on niri, and `wl-copy`/`wl-paste` for text clipboard access.
 The helper requires Python 3 with only its standard library.
-Set `HELPER` to `scripts/desktop.py` resolved relative to this skill's base
-directory; do not assume a username, repository location, compositor, or screen ID.
+Set `HELPER` to `scripts/desktop.py` and `AGENT` to `scripts/agent_desktop.py`,
+both resolved relative to this skill's base directory; do not assume a username,
+repository location, compositor, or screen ID. Helper commands operate the agent
+desktop described next unless `--target main` is given.
+
+## Agent desktop
+
+By default every helper command operates an isolated agent desktop: a second,
+headless niri instance with its own Wayland socket, private D-Bus session bus
+and VNC access, started on demand by `agent_desktop.py`. It shares the user's
+HOME, so applications run with the user's real configuration, but nothing in it
+reaches the user's live session: the user's cursor, focus and windows are never
+touched. Details are in [backend.md](references/backend.md).
+
+```bash
+python3 "$AGENT" start
+```
+
+`start` is idempotent and takes well under a second. It copies the user's Chrome
+profile, starts the desktop, and prints its endpoints. Check that `inputDevices`
+is empty and `secretsBridge` is `true` before working; otherwise stop and report.
+The desktop has one 1920x1080 output, so `--display` is unnecessary.
+
+Choosing the target:
+
+- Operate the agent desktop unless the user explicitly asks to control their own
+  computer or desktop (for example "control my desktop", 控制我的电脑, 控制我的桌面).
+  Only then pass `--target main` to every helper call, and only for that request.
+- There is no fallback. When the agent desktop is not running, helper commands
+  fail with an error: start it; do not switch to `--target main`.
+
+Running applications:
+
+- `python3 "$AGENT" spawn -- COMMAND ARGS...` runs a command inside the agent
+  desktop. Before launching a Chromium or Electron application such as Slack,
+  Element or VS Code, check with `pgrep` that it is not running in the user's
+  session: a running instance takes over the launch and opens the window on the
+  user's desktop. Firefox holds a profile lock and will not start while the
+  user's instance runs.
+- `python3 "$AGENT" chrome [-- URL...]` opens Chrome on the copied profile, so
+  web logins work; later calls open URLs in the same agent Chrome. Open links
+  with this command, not `xdg-open`, which would hand them to the user's running
+  Chrome. Chrome is muted unless `--audio` is given. Chrome on Linux has no quit
+  shortcut: `Ctrl+Shift+Q` does nothing; use `Alt+F` then `x`.
+- Applications read the user's keyring through a forwarding bridge. Every read
+  shows a KeePassXC notification on the user's desktop, and a locked database
+  shows its unlock prompt there. This is expected.
+- Do not play audio unless the task requires it.
+- The agent desktop has no portal, notification daemon, tray or dconf service:
+  applications use their built-in dialogs, their notifications are dropped, and
+  GTK settings changes are not saved. X11 applications run through
+  xwayland-satellite; `status` reports `x11Display`.
+
+Watching and taking over:
+
+```bash
+python3 "$AGENT" vnc
+```
+
+This prints a `viewer` command (`wlvncc SOCKET`) for the user. The desktop has
+one seat, so when the user says they are taking over, send no input until they
+hand back.
+
+Finish with `python3 "$AGENT" stop` when the task is done or the user asks. It
+kills every application in the agent desktop, so unsaved work there is lost,
+and deletes the Chrome copy; other applications have written to the user's real
+configuration as usual.
 
 ## Start with one checked observation
 
@@ -238,7 +303,7 @@ python3 "$HELPER" hold-key --window "$WINDOW_ID" --key shift --key Right --durat
 ```
 
 `--display` chooses observation only; it does not redirect typing or focus a
-window. Untargeted input uses live desktop focus. `type` sends key events;
+window. Untargeted input uses the targeted desktop's current focus. `type` sends key events;
 `paste` is preferable for long, multilingual, or multiline text. Clipboard writes
 replace the system text clipboard explicitly. Paste shortcuts depend on the
 application; terminals often need `--keys ctrl+shift+v`. For values
@@ -293,7 +358,9 @@ changes. Report task completion based on visible results, not exit status.
   bridge rather than bypassing the check. The corrected bridge translates global
   logical coordinates relative to the complete output bounding box.
 - `session-start` is a no-op on this backend, not exclusive input ownership.
-  Keyboard and mouse actions share the user's live desktop.
+  Keyboard and mouse actions share the targeted desktop's single seat: with a
+  VNC viewer in the agent desktop, or with the user's own input under
+  `--target main`.
 - Window IDs must come from recent discovery or selector resolution. The helper
   associates niri windows with outputs; use screenshots to locate controls,
   rather than treating that association as window-local coordinates. Global

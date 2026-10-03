@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Operate Wayland windows with PNG observations and configurable batches.
 
-Usage: desktop.py screenshot [--display ID] [--output-dir DIR]
+Usage: desktop.py [--target agent|main] screenshot [--display ID] [--output-dir DIR]
        desktop.py zoom --display ID --x X --y Y --w W --h H
        desktop.py point --metadata FILE --x X --y Y
        desktop.py click --metadata FILE --x X --y Y [--dry-run]
@@ -10,6 +10,9 @@ Usage: desktop.py screenshot [--display ID] [--output-dir DIR]
        desktop.py paste --window niri:ID --text-file FILE
        desktop.py batch --file FILE [--display ID] [--metadata FILE]
        desktop.py --help
+
+Commands operate the isolated agent desktop started by agent_desktop.py unless
+--target main selects the user's own session. There is no fallback between them.
 """
 
 import argparse
@@ -19,6 +22,7 @@ import math
 import os
 from pathlib import Path
 import shutil
+import socket
 import struct
 import subprocess
 import sys
@@ -26,6 +30,7 @@ import tempfile
 import time
 
 
+AGENT_RUNTIME_NAME = "computer-use-agent"
 QUERIES = ("doctor", "screens", "windows", "frontmost-app", "clipboard-read")
 POINTER_ACTIONS = ("move", "click", "scroll", "drag", "mouse-down", "mouse-up")
 KEYBOARD_ACTIONS = ("type", "key", "hold-key", "paste")
@@ -66,6 +71,39 @@ def run_command(name, *args, timeout=30, input_data=None):
 
 def bridge(*args, timeout=30):
     return json.loads(run_command("wlroots-bridge", *args, timeout=timeout))
+
+
+def configure_target(target):
+    if target == "main":
+        if not os.environ.get("WAYLAND_DISPLAY") and not os.environ.get("WAYLAND_SOCKET"):
+            # Callers outside the graphical session (for example over SSH) find the session that
+            # the compositor exported to the systemd user manager.
+            output = run_command("systemctl", "--user", "show-environment", timeout=10).decode("utf-8", errors="replace")
+            session = dict(line.split("=", 1) for line in output.splitlines() if "=" in line)
+            if not session.get("WAYLAND_DISPLAY"):
+                raise ValueError("No graphical session: WAYLAND_DISPLAY is unset here and in the systemd user manager")
+            os.environ.update({key: session[key] for key in ("WAYLAND_DISPLAY", "NIRI_SOCKET", "DISPLAY") if session.get(key)})
+        return
+    runtime = os.environ.get("XDG_RUNTIME_DIR")
+    if not runtime:
+        raise ValueError("XDG_RUNTIME_DIR is not set")
+    path = Path(runtime) / AGENT_RUNTIME_NAME / "agent.env"
+    if not path.exists():
+        raise ValueError("The agent desktop is not running; start it with agent_desktop.py start")
+    data = path.read_bytes().decode("utf-8", errors="replace")
+    env = dict(item.split("=", 1) for item in data.split("\0") if "=" in item)
+    for key in ("WAYLAND_DISPLAY", "NIRI_SOCKET"):
+        if not env.get(key):
+            raise ValueError(f"The agent desktop did not record {key}; restart it")
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+        probe.settimeout(5)
+        try:
+            probe.connect(env["NIRI_SOCKET"])
+        except OSError as error:
+            raise ValueError(f"The agent desktop is not reachable at {env['NIRI_SOCKET']} ({error}); restart it") from None
+    os.environ.pop("WAYLAND_SOCKET", None)
+    # wlroots-bridge names its left-button holder pidfile after CLAUDE_PROFILE; keep it apart from the main session's.
+    os.environ.update(WAYLAND_DISPLAY=env["WAYLAND_DISPLAY"], NIRI_SOCKET=env["NIRI_SOCKET"], CLAUDE_PROFILE=AGENT_RUNTIME_NAME)
 
 
 def has_niri():
@@ -161,6 +199,7 @@ def query(args):
     if args.command == "doctor":
         output["tools"] = {name: bool(shutil.which(name)) for name in ("grim", "niri", "wl-copy", "wl-paste")}
         output["windowBackend"] = "niri" if has_niri() else "wlroots-bridge"
+        output["target"] = args.target
     return output
 
 
@@ -553,6 +592,7 @@ def positive_number(value):
 
 def make_parser():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--target", choices=("agent", "main"), default="agent", help="Desktop to operate: the isolated agent desktop (default) or the user's main session")
     commands = parser.add_subparsers(dest="command", required=True)
     for name in (*QUERIES, "screenshot", "zoom", "point", "batch", *ACTIONS):
         command = commands.add_parser(name)
@@ -616,6 +656,8 @@ def make_parser():
 def main():
     args = make_parser().parse_args()
     try:
+        if args.command != "point" and not getattr(args, "dry_run", False):
+            configure_target(args.target)
         code = 0
         if args.command in QUERIES:
             result = query(args)

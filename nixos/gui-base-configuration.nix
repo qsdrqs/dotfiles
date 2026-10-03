@@ -156,6 +156,8 @@ in
     packages.keepassxc-unlock
     yubioath-flutter
     packages.wlroots-bridge
+    # VNC viewer for watching and taking over the computer-use agent desktop.
+    wlvncc
     # Provide userspace tools for on-demand USB/IP forwarding of YubiKeys.
     config.boot.kernelPackages.usbip
     packages.yubikey-toggle

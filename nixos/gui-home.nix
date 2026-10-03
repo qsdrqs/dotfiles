@@ -19,6 +19,11 @@ in
       "x-scheme-handler/tg" = [ "userapp-Telegram Desktop-FKA2H2.desktop" ];
       "x-scheme-handler/tonsite" = [ "userapp-Telegram Desktop-0VB4X2.desktop" ];
       "x-scheme-handler/baiduyunguanjia" = [ "baidunetdisk.desktop" ];
+      "text/html" = [ "google-chrome.desktop" ];
+      "x-scheme-handler/http" = [ "google-chrome.desktop" ];
+      "x-scheme-handler/https" = [ "google-chrome.desktop" ];
+      "x-scheme-handler/about" = [ "google-chrome.desktop" ];
+      "x-scheme-handler/unknown" = [ "google-chrome.desktop" ];
     };
   };
 
