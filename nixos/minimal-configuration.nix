@@ -168,7 +168,7 @@ in
       ];
     };
     package = pkgs.nixVersions.latest;
-    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+    settings.nix-path = [ "nixpkgs=${inputs.nixpkgs}" ];
   };
 
   # List packages installed in system profile. To search, run:
