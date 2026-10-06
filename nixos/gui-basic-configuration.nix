@@ -88,6 +88,9 @@ in
     "ventoy-1.1.17"
   ];
 
+  # linux-wifi-hotspot invokes create_ap through pkexec.
+  security.polkit.enablePkexecWrapper = true;
+
   environment.systemPackages = with pkgs; [
     # handy
     telegram-desktop

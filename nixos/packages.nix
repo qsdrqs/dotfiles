@@ -54,6 +54,61 @@
       };
     };
 
+  rtw88-usb-tx-recovery =
+    {
+      stdenv,
+      lib,
+      kernel,
+      python3,
+    }:
+    stdenv.mkDerivation {
+      pname = "rtw88-usb-tx-recovery";
+      version = kernel.version;
+
+      src = kernel.src;
+      patches = [ ./patches/rtw88-usb-tx-recovery.patch ];
+      nativeBuildInputs = [ python3 ] ++ kernel.moduleBuildDependencies;
+
+      hardeningDisable = [
+        "pic"
+        "format"
+      ];
+      enableParallelBuilding = true;
+      dontConfigure = true;
+
+      buildPhase = ''
+        runHook preBuild
+
+        mkdir build
+        cp drivers/net/wireless/realtek/rtw88/usb.c \
+          drivers/net/wireless/realtek/rtw88/*.h build/
+        cat > build/Kbuild <<'EOF'
+        obj-m := rtw88_usb.o
+        rtw88_usb-y := usb.o
+        EOF
+
+        make -C ${kernel.dev}/lib/modules/${kernel.modDirVersion}/build \
+          M=$(pwd)/build W=1 KCFLAGS=-Werror modules
+
+        runHook postBuild
+      '';
+
+      installPhase = ''
+        runHook preInstall
+
+        install -D -m 0644 build/rtw88_usb.ko \
+          $out/lib/modules/${kernel.modDirVersion}/updates/rtw88_usb.ko
+
+        runHook postInstall
+      '';
+
+      meta = {
+        description = "rtw88 USB transport with failed-frame handling and endpoint recovery";
+        license = lib.licenses.gpl2Only;
+        platforms = lib.platforms.linux;
+      };
+    };
+
   # Patched hid-asus kernel module for ASUS Zenbook Duo UX8406 (incl. UX8406CA).
   #
   # Adds keyboard backlight, Fn keys, Fn-lock support, hotkey mappings, and

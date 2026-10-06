@@ -28,7 +28,9 @@
   "share": "disabled",
   "experimental": {
     "quotaToast": {
-      "maintainerAnnouncements": { "home": false }
+      "maintainerAnnouncements": { "home": false },
+      "showOnIdle": false,
+      "showOnQuestion": false
     }
   },
   "mcp": {
@@ -466,5 +468,13 @@
   "lsp": true,
   "websearch": {
     "provider": "random"
+  },
+  "provider": {
+    // Detected anthropic authentication; opencode-quota added this global provider declaration.
+    "anthropic": {},
+    // Detected copilot authentication; opencode-quota added this global provider declaration.
+    "copilot": {},
+    // Detected opencode-go authentication; opencode-quota added this global provider declaration.
+    "opencode-go": {}
   }
 }

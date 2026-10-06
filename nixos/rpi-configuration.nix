@@ -49,9 +49,15 @@ in
   # boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu ];
   # boot.extraModulePackages = [ rtl88x2bu_module ];
 
+  boot.extraModulePackages = [
+    (config.boot.kernelPackages.callPackage (import ./packages.nix).rtw88-usb-tx-recovery { })
+  ];
+
   boot.kernelParams = [
     # "iomem=relaxed" # for operating /dev/mem in userspace
     "usbcore.autosuspend=-1"
+    # Keep RTL8822BU USB link power management disabled.
+    "usbcore.quirks=0bda:b812:k"
   ];
   boot.extraModprobeConfig = ''
     options rtw88_core disable_lps_deep=y

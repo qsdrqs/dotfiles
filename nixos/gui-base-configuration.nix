@@ -15,6 +15,12 @@ let
       --run 'export GOOGLE_API_KEY=$(cat ${./private/google-api-key})' \
       --run 'export GOOGLE_DEFAULT_CLIENT_ID=$(cat ${./private/google-default-client-id})' \
       --run 'export GOOGLE_DEFAULT_CLIENT_SECRET=$(cat ${./private/google-default-client-secret})'
+      ln -s chromium "$out/bin/google-chrome"
+      ln -s chromium "$out/bin/google-chrome-stable"
+      unlink "$out/share/applications"
+      mkdir "$out/share/applications"
+      ln -s ${pkgs.chromium}/share/applications/* "$out/share/applications/"
+      ln -s chromium-browser.desktop "$out/share/applications/google-chrome.desktop"
     '';
   };
   firefox-alias = pkgs.writeShellScriptBin "firefox" ''
@@ -144,7 +150,6 @@ in
     pulseaudio
     alsa-utils
     google-chromium
-    google-chrome
     firefox-devedition
     firefox-alias
     chntpw # Windows registry editor

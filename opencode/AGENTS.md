@@ -305,6 +305,18 @@ avoided): run `ssh -f -N -M -o ControlPersist=2h <target>` (one popup), then
 plain `ssh <target> ...` reuses the socket. End with `ssh -O exit <target>`.
 For security considerations, do not keep the session open longer than necessary work flow.
 
+## Browser Automation
+
+Use the chrome-devtools MCP for browser automation.
+
+The chrome-devtools MCP attaches to the user's running Chrome (`--autoConnect`),
+so pages carry the user's real sign-ins and open tabs.
+
+The user may have the Surfingkeys extension enabled. Before simulating keyboard or mouse
+input on a site, press `Alt+s` on that page and confirm that the snapshot shows
+`Surfingkeys turned OFF for <origin>`; if it shows ON, press `Alt+s` again.
+Do this before entering any data.
+
 ## Language-Specific Conventions
 
 ### Python

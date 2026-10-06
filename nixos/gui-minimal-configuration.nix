@@ -125,6 +125,12 @@ in
   programs.niri.enable = true;
   programs.ydotool.enable = true;
   programs.waybar.enable = true;
+  # Forward the NixOS module's systemdSupport override to the underlying package.
+  programs.waybar.package = lib.makeOverridable
+    (args: inputs.waybar.packages.${pkgs.stdenv.hostPlatform.system}.waybar.override {
+      waybar = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.waybar.override args;
+    })
+    { };
 
   systemd.user.services.waybar.serviceConfig.ExecStartPre =
     let

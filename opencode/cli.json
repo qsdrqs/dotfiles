@@ -11,9 +11,47 @@
     "input.move.right": "right,ctrl+l",
     "input.move.up": "up,ctrl+k",
     "input.move.down": "down,ctrl+j",
-    "input.delete.to.line.end": "none"
+    "input.delete.to.line.end": "none",
+    "input.line.home": "ctrl+a,ctrl+q",
+    "session.tab.next": ["ctrl+tab", "alt+down", "alt+."],
+    "session.tab.previous": ["ctrl+shift+tab", "alt+up", { "name": ",", "meta": true }]
   },
-  "plugins": [],
+  "plugins": [
+    {
+      "package": "opencode-vim@latest",
+      "options": {
+        "vim": {
+          "keymaps": {
+            "normal": {
+              "J": "7j",
+              "K": "7k",
+              "H": "7h",
+              "L": "7l",
+              "<C-q>": "^",
+              "<C-e>": "$",
+              "Y": "y$"
+            },
+            "visual": {
+              "J": "7j",
+              "K": "7k",
+              "H": "7h",
+              "L": "7l",
+              "<C-q>": "^",
+              "<C-e>": "$"
+            },
+            "visual-line": {
+              "J": "7j",
+              "K": "7k",
+              "H": "7h",
+              "L": "7l",
+              "<C-q>": "^",
+              "<C-e>": "$"
+            }
+          }
+        }
+      }
+    }
+  ],
   "attention": {
     "enabled": true,
     "notifications": true,

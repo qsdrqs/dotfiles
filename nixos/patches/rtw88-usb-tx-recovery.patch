@@ -1,0 +1,520 @@
+diff --git a/drivers/net/wireless/realtek/rtw88/usb.c b/drivers/net/wireless/realtek/rtw88/usb.c
+--- a/drivers/net/wireless/realtek/rtw88/usb.c
++++ b/drivers/net/wireless/realtek/rtw88/usb.c
+@@ -25,6 +25,8 @@
+ struct rtw_usb_txcb {
+ 	struct rtw_dev *rtwdev;
+ 	struct sk_buff_head tx_ack_queue;
++	struct sk_buff *skb;
++	int ep;
+ };
+ 
+ static void rtw_usb_fill_tx_checksum(struct rtw_usb *rtwusb,
+@@ -316,9 +318,125 @@
+ 	return 0;
+ }
+ 
+-static void rtw_usb_write_port_tx_complete(struct urb *urb)
+-{
+-	struct rtw_usb_txcb *txcb = urb->context;
++static void rtw_usb_purge_tx_queue(struct rtw_dev *rtwdev,
++				   struct sk_buff_head *queue)
++{
++	struct sk_buff *skb;
++
++	while ((skb = skb_dequeue(queue))) {
++		skb_pull(skb, rtwdev->chip->tx_pkt_desc_sz);
++		ieee80211_free_txskb(rtwdev->hw, skb);
++	}
++}
++
++static bool rtw_usb_tx_cancelled(int status)
++{
++	return status == -ENOENT || status == -ECONNRESET ||
++	       status == -ENODEV || status == -ESHUTDOWN;
++}
++
++static void rtw_usb_tx_status(struct rtw_usb *rtwusb, int ep, int status,
++			      int length, int actual)
++{
++	struct rtw_dev *rtwdev = rtwusb->rtwdev;
++	enum rtw_usb_tx_state *state = &rtwusb->tx_state[ep];
++
++	lockdep_assert_held(&rtwusb->tx_lock);
++
++	if (rtwusb->tx_stopped || rtw_usb_tx_cancelled(status))
++		return;
++
++	if (!status) {
++		if (*state == RTW_USB_TX_PROBING && actual == length) {
++			*state = RTW_USB_TX_READY;
++			dev_info(rtwdev->dev,
++				 "USB TX ep 0x%02x resumed: %d/%d bytes\n",
++				 rtwusb->out_ep[ep], actual, length);
++			queue_work(rtwusb->txwq, &rtwusb->tx_work);
++		}
++		return;
++	}
++
++	if (*state == RTW_USB_TX_PROBING) {
++		*state = RTW_USB_TX_FAILED;
++		dev_err(rtwdev->dev,
++			"USB TX ep 0x%02x recovery failed: status %d, %d/%d bytes\n",
++			rtwusb->out_ep[ep], status, actual, length);
++	} else if (*state == RTW_USB_TX_READY &&
++		   (status == -EPROTO || status == -EPIPE)) {
++		*state = RTW_USB_TX_RECOVERING;
++		dev_warn_ratelimited(rtwdev->dev,
++				     "USB TX ep 0x%02x failed: status %d, %d/%d bytes; scheduling recovery\n",
++				     rtwusb->out_ep[ep], status, actual, length);
++	} else {
++		return;
++	}
++
++	rtwusb->tx_recovery_pending |= BIT(ep);
++	queue_work(rtwusb->txwq, &rtwusb->tx_recovery_work);
++}
++
++static void rtw_usb_tx_recovery_work(struct work_struct *work)
++{
++	struct rtw_usb *rtwusb = container_of(work, struct rtw_usb,
++					    tx_recovery_work);
++	struct rtw_dev *rtwdev = rtwusb->rtwdev;
++	unsigned long flags;
++	bool recover, failed;
++	int ep, ret;
++
++	/* TX work is serialized here; direct H2C writers hold this mutex. */
++	mutex_lock(&rtwdev->mutex);
++	for (ep = 0; ep < rtwdev->hci.bulkout_num; ep++) {
++		spin_lock_irqsave(&rtwusb->tx_lock, flags);
++		if (rtwusb->tx_stopped) {
++			spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++			break;
++		}
++		if (!(rtwusb->tx_recovery_pending & BIT(ep))) {
++			spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++			continue;
++		}
++		rtwusb->tx_recovery_pending &= ~BIT(ep);
++		recover = rtwusb->tx_state[ep] == RTW_USB_TX_RECOVERING;
++		spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++
++		usb_kill_anchored_urbs(&rtwusb->tx_anchor[ep]);
++		ret = 0;
++		if (recover) {
++			dev_info(rtwdev->dev,
++				 "USB TX ep 0x%02x drained; clearing halt\n",
++				 rtwusb->out_ep[ep]);
++			ret = usb_clear_halt(rtwusb->udev,
++					     usb_sndbulkpipe(rtwusb->udev,
++							     rtwusb->out_ep[ep]));
++			if (ret)
++				dev_err(rtwdev->dev,
++					"USB TX ep 0x%02x clear-halt failed: %d\n",
++					rtwusb->out_ep[ep], ret);
++			else
++				dev_info(rtwdev->dev,
++					 "USB TX ep 0x%02x clear-halt complete; awaiting TX completion\n",
++					 rtwusb->out_ep[ep]);
++		}
++
++		spin_lock_irqsave(&rtwusb->tx_lock, flags);
++		if (recover && !rtwusb->tx_stopped) {
++			rtwusb->tx_state[ep] = ret ? RTW_USB_TX_FAILED :
++						   RTW_USB_TX_VERIFY;
++			if (!ret)
++				queue_work(rtwusb->txwq, &rtwusb->tx_work);
++		}
++		failed = rtwusb->tx_state[ep] == RTW_USB_TX_FAILED;
++		spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++		if (failed)
++			rtw_usb_purge_tx_queue(rtwdev, &rtwusb->tx_queue[ep]);
++	}
++	mutex_unlock(&rtwdev->mutex);
++}
++
++static void rtw_usb_txcb_complete(struct rtw_usb_txcb *txcb, int status)
++{
+ 	struct rtw_dev *rtwdev = txcb->rtwdev;
+ 	struct ieee80211_hw *hw = rtwdev->hw;
+ 
+@@ -334,6 +452,11 @@
+ 		tx_data = rtw_usb_get_tx_data(skb);
+ 
+ 		skb_pull(skb, rtwdev->chip->tx_pkt_desc_sz);
++
++		if (status) {
++			ieee80211_free_txskb(hw, skb);
++			continue;
++		}
+ 
+ 		/* enqueue to wait for tx report */
+ 		if (info->flags & IEEE80211_TX_CTL_REQ_TX_STATUS) {
+@@ -351,7 +474,25 @@
+ 		ieee80211_tx_status_irqsafe(hw, skb);
+ 	}
+ 
++	dev_kfree_skb_any(txcb->skb);
+ 	kfree(txcb);
++}
++
++static void rtw_usb_write_port_tx_complete(struct urb *urb)
++{
++	struct rtw_usb_txcb *txcb = urb->context;
++	struct rtw_usb *rtwusb = rtw_get_usb_priv(txcb->rtwdev);
++	unsigned long flags;
++	int status = urb->status;
++
++	if (!status && urb->actual_length != urb->transfer_buffer_length)
++		status = -EREMOTEIO;
++
++	spin_lock_irqsave(&rtwusb->tx_lock, flags);
++	rtw_usb_tx_status(rtwusb, txcb->ep, status,
++			  urb->transfer_buffer_length, urb->actual_length);
++	spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++	rtw_usb_txcb_complete(txcb, status);
+ }
+ 
+ static int qsel_to_ep(struct rtw_usb *rtwusb, unsigned int qsel)
+@@ -363,12 +504,14 @@
+ }
+ 
+ static int rtw_usb_write_port(struct rtw_dev *rtwdev, u8 qsel, struct sk_buff *skb,
+-			      usb_complete_t cb, void *context)
++			      struct rtw_usb_txcb *txcb)
+ {
+ 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+ 	struct usb_device *usbd = rtwusb->udev;
+ 	struct urb *urb;
+ 	unsigned int pipe;
++	unsigned long flags;
++	bool probe;
+ 	int ret;
+ 	int ep = qsel_to_ep(rtwusb, qsel);
+ 
+@@ -380,9 +523,35 @@
+ 	if (!urb)
+ 		return -ENOMEM;
+ 
+-	usb_fill_bulk_urb(urb, usbd, pipe, skb->data, skb->len, cb, context);
++	txcb->ep = ep;
++	usb_fill_bulk_urb(urb, usbd, pipe, skb->data, skb->len,
++			  rtw_usb_write_port_tx_complete, txcb);
+ 	urb->transfer_flags |= URB_ZERO_PACKET;
++
++	spin_lock_irqsave(&rtwusb->tx_lock, flags);
++	if (rtwusb->tx_stopped) {
++		ret = -ESHUTDOWN;
++		goto unlock;
++	}
++	if (rtwusb->tx_state[ep] != RTW_USB_TX_READY &&
++	    rtwusb->tx_state[ep] != RTW_USB_TX_VERIFY) {
++		ret = -EAGAIN;
++		goto unlock;
++	}
++
++	probe = rtwusb->tx_state[ep] == RTW_USB_TX_VERIFY;
++	if (probe)
++		rtwusb->tx_state[ep] = RTW_USB_TX_PROBING;
++	usb_anchor_urb(urb, &rtwusb->tx_anchor[ep]);
+ 	ret = usb_submit_urb(urb, GFP_ATOMIC);
++	if (ret) {
++		usb_unanchor_urb(urb);
++		if (probe && ret != -EPROTO && ret != -EPIPE)
++			rtwusb->tx_state[ep] = RTW_USB_TX_VERIFY;
++		rtw_usb_tx_status(rtwusb, ep, ret, skb->len, 0);
++	}
++unlock:
++	spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
+ 
+ 	usb_free_urb(urb);
+ 
+@@ -404,7 +573,7 @@
+ 	if (skb_queue_empty(list))
+ 		return false;
+ 
+-	txcb = kmalloc(sizeof(*txcb), GFP_ATOMIC);
++	txcb = kzalloc(sizeof(*txcb), GFP_ATOMIC);
+ 	if (!txcb)
+ 		return false;
+ 
+@@ -423,6 +592,7 @@
+ 		skb_head = skb_iter;
+ 		goto queue;
+ 	}
++	txcb->skb = skb_head;
+ 
+ 	while (skb_iter) {
+ 		unsigned long flags;
+@@ -453,15 +623,14 @@
+ 		rtw_usb_fill_tx_checksum(rtwusb, skb_head, agg_num);
+ 
+ queue:
+-	skb_queue_tail(&txcb->tx_ack_queue, skb_head);
++	if (!txcb->skb)
++		skb_queue_tail(&txcb->tx_ack_queue, skb_head);
+ 	tx_desc = (struct rtw_tx_desc *)skb_head->data;
+ 	qsel = le32_get_bits(tx_desc->w1, RTW_TX_DESC_W1_QSEL);
+ 
+-	ret = rtw_usb_write_port(rtwdev, qsel, skb_head,
+-				 rtw_usb_write_port_tx_complete, txcb);
++	ret = rtw_usb_write_port(rtwdev, qsel, skb_head, txcb);
+ 	if (ret) {
+-		ieee80211_purge_tx_queue(rtwdev->hw, &txcb->tx_ack_queue);
+-		kfree(txcb);
++		rtw_usb_txcb_complete(txcb, ret);
+ 		return false;
+ 	}
+ 
+@@ -471,12 +640,22 @@
+ static void rtw_usb_tx_handler(struct work_struct *work)
+ {
+ 	struct rtw_usb *rtwusb = container_of(work, struct rtw_usb, tx_work);
++	unsigned long flags;
++	bool ready;
+ 	int i, limit;
+ 
+ 	for (i = ARRAY_SIZE(rtwusb->tx_queue) - 1; i >= 0; i--) {
+ 		for (limit = 0; limit < 200; limit++) {
+ 			struct sk_buff_head *list = &rtwusb->tx_queue[i];
+ 
++			spin_lock_irqsave(&rtwusb->tx_lock, flags);
++			ready = !rtwusb->tx_stopped &&
++				(rtwusb->tx_state[i] == RTW_USB_TX_READY ||
++				 rtwusb->tx_state[i] == RTW_USB_TX_VERIFY);
++			spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++			if (!ready)
++				break;
++
+ 			if (!rtw_usb_tx_agg_skb(rtwusb, list))
+ 				break;
+ 		}
+@@ -489,14 +668,7 @@
+ 	int i;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(rtwusb->tx_queue); i++)
+-		ieee80211_purge_tx_queue(rtwdev->hw, &rtwusb->tx_queue[i]);
+-}
+-
+-static void rtw_usb_write_port_complete(struct urb *urb)
+-{
+-	struct sk_buff *skb = urb->context;
+-
+-	dev_kfree_skb_any(skb);
++		rtw_usb_purge_tx_queue(rtwdev, &rtwusb->tx_queue[i]);
+ }
+ 
+ static int rtw_usb_write_data(struct rtw_dev *rtwdev,
+@@ -504,6 +676,7 @@
+ 			      u8 *buf)
+ {
+ 	const struct rtw_chip_info *chip = rtwdev->chip;
++	struct rtw_usb_txcb *txcb;
+ 	struct sk_buff *skb;
+ 	unsigned int size;
+ 	u8 qsel;
+@@ -515,6 +688,15 @@
+ 	skb = dev_alloc_skb(chip->tx_pkt_desc_sz + size);
+ 	if (unlikely(!skb))
+ 		return -ENOMEM;
++
++	txcb = kzalloc(sizeof(*txcb), GFP_ATOMIC);
++	if (!txcb) {
++		dev_kfree_skb_any(skb);
++		return -ENOMEM;
++	}
++	txcb->rtwdev = rtwdev;
++	txcb->skb = skb;
++	skb_queue_head_init(&txcb->tx_ack_queue);
+ 
+ 	skb_reserve(skb, chip->tx_pkt_desc_sz);
+ 	skb_put_data(skb, buf, size);
+@@ -523,11 +705,10 @@
+ 	rtw_tx_fill_tx_desc(rtwdev, pkt_info, skb);
+ 	rtw_tx_fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
+ 
+-	ret = rtw_usb_write_port(rtwdev, qsel, skb,
+-				 rtw_usb_write_port_complete, skb);
++	ret = rtw_usb_write_port(rtwdev, qsel, skb, txcb);
+ 	if (unlikely(ret)) {
+ 		rtw_err(rtwdev, "failed to do USB write, ret=%d\n", ret);
+-		dev_kfree_skb_any(skb);
++		rtw_usb_txcb_complete(txcb, ret);
+ 	}
+ 
+ 	return ret;
+@@ -583,6 +764,7 @@
+ 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+ 	const struct rtw_chip_info *chip = rtwdev->chip;
+ 	struct rtw_usb_tx_data *tx_data;
++	unsigned long flags;
+ 	u8 *pkt_desc;
+ 	int ep;
+ 
+@@ -595,7 +777,15 @@
+ 	tx_data = rtw_usb_get_tx_data(skb);
+ 	tx_data->sn = pkt_info->sn;
+ 
++	spin_lock_irqsave(&rtwusb->tx_lock, flags);
++	if (rtwusb->tx_stopped || rtwusb->tx_state[ep] == RTW_USB_TX_FAILED) {
++		spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++		skb_pull(skb, chip->tx_pkt_desc_sz);
++		ieee80211_free_txskb(rtwdev->hw, skb);
++		return 0;
++	}
+ 	skb_queue_tail(&rtwusb->tx_queue[ep], skb);
++	spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
+ 
+ 	return 0;
+ }
+@@ -603,8 +793,12 @@
+ static void rtw_usb_tx_kick_off(struct rtw_dev *rtwdev)
+ {
+ 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+-
+-	queue_work(rtwusb->txwq, &rtwusb->tx_work);
++	unsigned long flags;
++
++	spin_lock_irqsave(&rtwusb->tx_lock, flags);
++	if (!rtwusb->tx_stopped)
++		queue_work(rtwusb->txwq, &rtwusb->tx_work);
++	spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
+ }
+ 
+ static void rtw_usb_rx_handler(struct work_struct *work)
+@@ -829,7 +1023,22 @@
+ 
+ static int rtw_usb_setup(struct rtw_dev *rtwdev)
+ {
+-	/* empty function for rtw_hci_ops */
++	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
++	unsigned long flags;
++	int i;
++
++	spin_lock_irqsave(&rtwusb->tx_lock, flags);
++	if (rtwusb->tx_shutdown) {
++		spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++		return -ENODEV;
++	}
++	if (rtwusb->tx_stopped) {
++		for (i = 0; i < RTW_USB_EP_MAX; i++)
++			rtwusb->tx_state[i] = RTW_USB_TX_READY;
++		rtwusb->tx_recovery_pending = 0;
++		rtwusb->tx_stopped = false;
++	}
++	spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
+ 	return 0;
+ }
+ 
+@@ -840,6 +1049,21 @@
+ 
+ static void rtw_usb_stop(struct rtw_dev *rtwdev)
+ {
++	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
++	unsigned long flags;
++	int i;
++
++	spin_lock_irqsave(&rtwusb->tx_lock, flags);
++	rtwusb->tx_stopped = true;
++	rtwusb->tx_recovery_pending = 0;
++	spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++
++	/* The caller holds rtwdev->mutex, which recovery work also needs. */
++	cancel_work(&rtwusb->tx_recovery_work);
++	cancel_work_sync(&rtwusb->tx_work);
++	for (i = 0; i < RTW_USB_EP_MAX; i++)
++		usb_kill_anchored_urbs(&rtwusb->tx_anchor[i]);
++	rtw_usb_tx_queue_purge(rtwusb);
+ }
+ 
+ static void rtw_usb_deep_ps(struct rtw_dev *rtwdev, bool enter)
+@@ -1029,20 +1253,44 @@
+ 		return -ENOMEM;
+ 	}
+ 
+-	for (i = 0; i < ARRAY_SIZE(rtwusb->tx_queue); i++)
++	spin_lock_init(&rtwusb->tx_lock);
++	rtwusb->tx_stopped = true;
++	for (i = 0; i < ARRAY_SIZE(rtwusb->tx_queue); i++) {
+ 		skb_queue_head_init(&rtwusb->tx_queue[i]);
++		init_usb_anchor(&rtwusb->tx_anchor[i]);
++	}
+ 
+ 	INIT_WORK(&rtwusb->tx_work, rtw_usb_tx_handler);
++	INIT_WORK(&rtwusb->tx_recovery_work, rtw_usb_tx_recovery_work);
+ 
+ 	return 0;
+ }
+ 
++static void rtw_usb_shutdown_tx(struct rtw_dev *rtwdev)
++{
++	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
++	unsigned long flags;
++	int i;
++
++	spin_lock_irqsave(&rtwusb->tx_lock, flags);
++	rtwusb->tx_shutdown = true;
++	rtwusb->tx_stopped = true;
++	rtwusb->tx_recovery_pending = 0;
++	spin_unlock_irqrestore(&rtwusb->tx_lock, flags);
++
++	cancel_work_sync(&rtwusb->tx_recovery_work);
++	cancel_work_sync(&rtwusb->tx_work);
++	for (i = 0; i < RTW_USB_EP_MAX; i++)
++		usb_kill_anchored_urbs(&rtwusb->tx_anchor[i]);
++	rtw_usb_tx_queue_purge(rtwusb);
++}
++
+ static void rtw_usb_deinit_tx(struct rtw_dev *rtwdev)
+ {
+ 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+ 
++	rtw_usb_shutdown_tx(rtwdev);
+ 	destroy_workqueue(rtwusb->txwq);
+-	rtw_usb_tx_queue_purge(rtwusb);
+ }
+ 
+ static int rtw_usb_intf_init(struct rtw_dev *rtwdev,
+@@ -1366,6 +1614,7 @@
+ 	rtwdev = hw->priv;
+ 	rtwusb = rtw_get_usb_priv(rtwdev);
+ 
++	rtw_usb_shutdown_tx(rtwdev);
+ 	rtw_usb_cancel_rx_bufs(rtwusb);
+ 
+ 	rtw_unregister_hw(rtwdev, hw);
+diff --git a/drivers/net/wireless/realtek/rtw88/usb.h b/drivers/net/wireless/realtek/rtw88/usb.h
+--- a/drivers/net/wireless/realtek/rtw88/usb.h
++++ b/drivers/net/wireless/realtek/rtw88/usb.h
+@@ -61,6 +61,14 @@
+ 	u8 sn;
+ };
+ 
++enum rtw_usb_tx_state {
++	RTW_USB_TX_READY,
++	RTW_USB_TX_RECOVERING,
++	RTW_USB_TX_VERIFY,
++	RTW_USB_TX_PROBING,
++	RTW_USB_TX_FAILED,
++};
++
+ struct rtw_usb {
+ 	struct rtw_dev *rtwdev;
+ 	struct usb_device *udev;
+@@ -85,6 +93,15 @@
+ 	struct sk_buff_head rx_free_queue;
+ 	struct work_struct rx_work;
+ 	struct work_struct rx_urb_work;
++
++	/* Protects TX submission, recovery state and work scheduling. */
++	spinlock_t tx_lock;
++	struct usb_anchor tx_anchor[RTW_USB_EP_MAX];
++	enum rtw_usb_tx_state tx_state[RTW_USB_EP_MAX];
++	struct work_struct tx_recovery_work;
++	unsigned long tx_recovery_pending;
++	bool tx_stopped;
++	bool tx_shutdown;
+ };
+ 
+ static inline struct rtw_usb_tx_data *rtw_usb_get_tx_data(struct sk_buff *skb)
