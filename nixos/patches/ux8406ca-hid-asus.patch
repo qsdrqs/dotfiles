@@ -58,6 +58,43 @@
  	}
  
  	if (usage->type == EV_KEY && value) {
+@@ -670,22 +688,34 @@
+ 
+ static void asus_kbd_set_fn_lock(struct hid_device *hdev, bool enabled)
+ {
++	struct asus_drvdata *drvdata = hid_get_drvdata(hdev);
+ 	const u8 buf[FEATURE_KBD_REPORT_SIZE] = { FEATURE_KBD_REPORT_ID, 0xd0, 0x4e, !!enabled };
++	size_t size = sizeof(buf);
+ 	int ret;
+ 
+-	ret = asus_kbd_set_report(hdev, buf, sizeof(buf));
++	/* Zenbook Duo firmware rejects Fn lock reports padded to 64 bytes. */
++	if (drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD)
++		size = 4;
++
++	ret = asus_kbd_set_report(hdev, buf, size);
+ 	if (ret < 0)
+ 		hid_err(hdev, "Asus failed to set fn lock: %d\n", ret);
+ }
+ 
+ static void asus_kbd_set_brightness(struct hid_device *hdev, u8 brightness)
+ {
++	struct asus_drvdata *drvdata = hid_get_drvdata(hdev);
+ 	const u8 buf[FEATURE_KBD_REPORT_SIZE] = {
+ 		FEATURE_KBD_REPORT_ID, 0xba, 0xc5, 0xc4, brightness
+ 	};
++	size_t size = sizeof(buf);
+ 	int ret;
+ 
+-	ret = asus_kbd_set_report(hdev, buf, sizeof(buf));
++	/* Keep the native five-byte backlight command for Zenbook Duo. */
++	if (drvdata->quirks & QUIRK_ZENBOOK_DUO_KEYBOARD)
++		size = 5;
++
++	ret = asus_kbd_set_report(hdev, buf, size);
+ 	if (ret < 0)
+ 		hid_err(hdev, "Asus failed to set keyboard backlight: %d\n", ret);
+ }
 @@ -781,7 +799,62 @@ static int asus_kbd_register_leds(struct hid_device *hdev)
  	}
  

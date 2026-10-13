@@ -135,6 +135,49 @@ in
         firefox-devedition-unwrapped = pkgs-last.firefox-devedition-unwrapped;
         obs-studio = pkgs-last.obs-studio;
         obs-studio-plugins = pkgs-last.obs-studio-plugins;
+        # minted 3.7.0 ships latexminted 0.6.0, whose ArgParser does not accept
+        # the `color` keyword that Python 3.14's argparse now forwards, so every
+        # minted document fails. Upstream fixed this in minted 3.8.0 with
+        # latexminted 0.7.x; nixpkgs (including nixpkgs-master) still ships
+        # 3.7.0. Replace both halves: the LaTeX package (minted.sty >= 3.8.0)
+        # and the Python executable (0.7.1).
+        # https://github.com/NixOS/nixpkgs/issues/542483
+        # Remove once nixpkgs ships minted >= 3.8.0.
+        texlive = super.texlive // {
+          pkgs = super.texlive.pkgs // {
+            minted =
+              let
+                version = "3.8.0";
+                src = super.fetchFromGitHub {
+                  owner = "gpoore";
+                  repo = "minted";
+                  rev = "631f7e8e93f37d4f6e7767ff45692d53e7c7360d"; # "[latex] minted v3.8.0"
+                  hash = "sha256-xUWScWRR62ikRxxz/YEauWLirvhsQPCcyE1O6cpWZRw=";
+                };
+                minted = super.texlive.pkgs.minted;
+                container =
+                  name: container: script:
+                  super.runCommand "minted-${version}${name}" {
+                    inherit (container) meta;
+                    passthru = container.passthru // {
+                      inherit version;
+                    };
+                  } script;
+              in
+              minted // {
+                tex = container "-tex" minted.tex ''
+                  install -Dm444 -t "$out"/tex/latex/minted \
+                    ${src}/latex/minted/minted.sty \
+                    ${src}/latex/minted/minted1.sty \
+                    ${src}/latex/minted/minted2.sty
+                '';
+                out = container "" minted.out ''
+                  mkdir -p "$out"/bin
+                  ln -s ${lib.getExe super.latexminted} "$out"/bin/latexminted
+                '';
+              };
+          };
+        };
         # End Temporary fixed version packages
 
         ckb-next = super.ckb-next.overrideAttrs (oldAttrs: {

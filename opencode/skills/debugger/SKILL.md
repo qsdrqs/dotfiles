@@ -7,7 +7,7 @@ description: "Evidence-driven debugging for project or system issues: reproduce 
 
 ## Outcome
 
-- Deliver an evidence-backed root cause and a verified fix (or clearly state what evidence is missing and how to obtain it).
+- Deliver an evidence-backed root cause and a verified fix. If investigation is genuinely blocked, identify the concrete blocker and the exact input or authorization needed to continue.
 - Always produce a reproducible failing command/test (or a concrete explanation of why reproduction is blocked).
 
 ## Hard Constraints (Non‑Negotiable)
@@ -18,6 +18,15 @@ description: "Evidence-driven debugging for project or system issues: reproduce 
 3. **Every conclusion must be tied to concrete evidence**: a command output, a stack trace, a log line, a file+line, or a test.
 4. **After any fix, re-run the reproduction** (and relevant tests) to verify the bug is gone.
 5. **Keep an audit trail**: commands you ran + files you changed + the observed results.
+6. **Investigate instead of disclaiming.** Follow the user-facing reporting rules below; uncertainty is a reason to perform the next diagnostic check, not a substitute for an answer.
+
+## User-Facing Reporting
+
+- Do not use empty evidence-limit disclaimers, including equivalents in any language of "This cannot show/explain/represent X; the specific cause remains unknown" or "The evidence only shows X, not Y." Do not evade this rule by rephrasing the same non-answer.
+- When a relevant cause remains unresolved and an in-scope diagnostic check is available, run it. Do not stop at a symptom, list unrelated things the evidence does not prove, or merely propose checks you can perform yourself.
+- Report the causal explanation and the decisive evidence concisely. Intermediate updates should communicate a useful finding or a concrete blocker, not generic uncertainty.
+- Stop without a diagnosis only at a concrete access, permission, input, or execution-limit blocker. Name the failed check and observed obstacle, then request the specific input or authorization needed for the next check. "The cause is not yet clear" is not a blocker.
+- Never invent certainty to avoid a disclaimer. Resolve uncertainty through investigation; if blocked, report the obstacle directly without presenting an unfinished investigation as a completed diagnosis.
 
 ## 0) Intake Checklist (Ask If Missing)
 
@@ -33,9 +42,9 @@ description: "Evidence-driven debugging for project or system issues: reproduce 
 - Run the user-provided steps **exactly**. Capture stdout/stderr + exit code.
 - Reduce to the smallest deterministic reproducer (single test, single command, smallest input).
 - If you cannot reproduce:
-  - Say explicitly: “I cannot reproduce this yet.”
-  - List the missing evidence (logs, inputs, exact command, environment mismatch).
-  - Propose 1–3 concrete experiments to obtain that evidence.
+  - Report the command attempted and its observed result.
+  - Perform available in-scope checks to obtain the missing evidence (logs, inputs, exact command, environment mismatch).
+  - If blocked, request the specific missing input or authorization needed for the next check.
 
 **Tip:** Use a disposable workdir under `/tmp` to keep artifacts (logs, traces, repro inputs) tidy:
 
@@ -76,7 +85,8 @@ Repeat until a single root cause is proven:
 
 - State the **fact** and cite the evidence (exact log/trace/output).
 - Write one **testable hypothesis** that explains the fact.
-- Define one **falsification experiment** (minimal change/command) and run it.
+- Before proposing a new experiment, identify the specific evidence gap and review existing logs, prior tests, and source-level evidence. Reuse evidence that already answers the same question; do not require a fresh experiment merely to recreate that evidence.
+- If a genuine evidence gap remains, define and run the smallest **falsification experiment** that resolves it. Do not add A/B, rollback, or restart controls solely to strengthen an already-supported causal explanation after the complete fix has been verified.
 - Record result and update the hypothesis set.
 
 ## 4) Fix + Verify

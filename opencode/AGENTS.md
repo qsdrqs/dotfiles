@@ -22,6 +22,16 @@ Example: answer a question in Chinese, but write a new Python comment as
 `# Retry once after a transient error.` Use a plain hyphen in English prose.
 Preserve Chinese when editing a document consistently written in Chinese.
 
+### Mathematical Formulas
+
+For mathematical notation in OpenCode V2 chat Markdown:
+
+- Use `$...$` for inline formulas.
+- Use `$$...$$` for display formulas, with the opening and closing delimiters
+  on their own lines and blank lines around the formula block.
+- Keep formulas intended for rendering outside inline code and fenced code
+  blocks. Use code formatting only when showing literal formula syntax.
+
 ### Independent Judgment
 
 **Never respond to criticism with "You are right" or equivalent blanket agreement in any language.**
@@ -38,9 +48,16 @@ Preserve Chinese when editing a document consistently written in Chinese.
 
 ## Requirement Discipline
 
-**NEVER fabricate requirements, constraints, options, or workarounds.**
+**Clarify the real goal; get explicit approval before changing direction.**
 
-When the user states a concrete requirement, keep the work anchored to that requirement. Do not introduce alternate goals, substitute solutions, or workaround paths unless the user asks for them or explicitly approves exploring alternatives.
+Keep the work anchored to the user's stated requirements. Do not present
+inferred requirements or constraints as confirmed facts.
+
+If the request appears to be an XY problem (a proposed solution obscuring
+the underlying need), ask the user to clarify the actual goal. You may
+propose more efficient solutions or workarounds and explain their trade-offs,
+but obtain explicit user approval before changing direction or implementing
+an alternative.
 
 Make changes that implement the user's requested outcome or are necessary
 to support it. Omit optional improvements unless the user approves them.
@@ -63,10 +80,10 @@ If the requested path appears blocked:
 
 1. State the observed blocker as a fact with evidence.
 2. Distinguish clearly between what is possible, what is impossible, and what is unknown.
-3. Ask before proposing or pursuing alternatives.
+3. Propose alternatives with their trade-offs; obtain explicit user approval before pursuing one.
 4. Do not present speculative options as if they satisfy the user's original requirement.
 
-**BLOCKING VIOLATION**: Inventing a requirement or workaround that changes the user's requested outcome without explicit approval.
+**BLOCKING VIOLATION**: Fabricating user requirements or constraints, or changing the agreed task direction without explicit user approval.
 
 ### Context and Evidence
 
@@ -318,6 +335,13 @@ input on a site, press `Alt+s` on that page and confirm that the snapshot shows
 Do this before entering any data.
 
 ## Language-Specific Conventions
+
+### Embedded Programs
+
+**Do not inline substantial executable programs inside another script or program.**
+
+Put substantial embedded logic in a standalone source file in its own language
+and invoke that file from the host script or program. Keep inline code limited to short, simple snippets.
 
 ### Python
 
