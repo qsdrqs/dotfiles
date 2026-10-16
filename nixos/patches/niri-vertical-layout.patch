@@ -4,16 +4,15 @@
 # Source-Commit: 7bbe4e3a383374ebf0d32e9c978ca36c43873095
 # Source-Range: 710bfae1081a735a2bd52d3a992a6bfee205a0de^..7bbe4e3a383374ebf0d32e9c978ca36c43873095
 # Author: 0WD0 <wd.1105848296@gmail.com>
-# Title: Configurable vertical main axis for the scrolling layout
+# Title: Vertical scrolling layout and physical direction actions
 #
 # Derived from niri (GPL-3.0-only). This patch backports 0WD0's vertical
-# layout feature series to niri v26.04 and adapts newer input and rendering
-# APIs to the v26.04 codebase.
+# layout feature series to niri main. It also provides main-axis-independent
+# physical focus and movement actions for horizontal and vertical layouts.
 diff --git a/docs/wiki/Configuration:-Gestures.md b/docs/wiki/Configuration:-Gestures.md
-index 24e2b2ae..71740ff1 100644
 --- a/docs/wiki/Configuration:-Gestures.md
 +++ b/docs/wiki/Configuration:-Gestures.md
-@@ -60,16 +60,16 @@ gestures {
+@@ -60,16 +60,16 @@
  
  <sup>Since: 25.05</sup>
  
@@ -35,23 +34,23 @@ index 24e2b2ae..71740ff1 100644
  ```kdl
  gestures {
 diff --git a/docs/wiki/Configuration:-Key-Bindings.md b/docs/wiki/Configuration:-Key-Bindings.md
-index f60df35b..4d243103 100644
 --- a/docs/wiki/Configuration:-Key-Bindings.md
 +++ b/docs/wiki/Configuration:-Key-Bindings.md
-@@ -95,6 +95,8 @@ binds {
+@@ -95,6 +95,10 @@
  }
  ```
  
 +These examples assume the default horizontal main axis. The action names stay the same with `layout.main-axis "vertical"`, but their physical direction follows the main/cross-axis interpretation of the layout.
 +
++To keep directional key bindings aligned with the physical screen direction regardless of the main axis, use `focus-left`, `focus-right`, `focus-up`, and `focus-down`. The corresponding move actions are `move-left`, `move-right`, `move-up`, and `move-down`.
++
  Similarly, you can bind touchpad scroll "ticks".
  Touchpad scrolling is continuous, so for these binds it is split into discrete intervals based on distance travelled.
  
 diff --git a/docs/wiki/Configuration:-Layout.md b/docs/wiki/Configuration:-Layout.md
-index 5e5e2a5c..1d919110 100644
 --- a/docs/wiki/Configuration:-Layout.md
 +++ b/docs/wiki/Configuration:-Layout.md
-@@ -7,6 +7,7 @@ Here are the contents of this section at a glance:
+@@ -7,6 +7,7 @@
  ```kdl
  layout {
      gaps 16
@@ -59,7 +58,7 @@ index 5e5e2a5c..1d919110 100644
      center-focused-column "never"
      always-center-single-column
      empty-workspace-above-first
-@@ -115,12 +116,34 @@ layout {
+@@ -115,12 +116,34 @@
  }
  ```
  
@@ -95,7 +94,7 @@ index 5e5e2a5c..1d919110 100644
  - `"always"`, the focused column will always be centered.
  - `"on-overflow"`, focusing a column will center it if it doesn't fit on screen together with the previously focused column.
  
-@@ -176,14 +199,14 @@ layout {
+@@ -176,14 +199,14 @@
  
  ### `preset-column-widths`
  
@@ -106,16 +105,17 @@ index 5e5e2a5c..1d919110 100644
 -`proportion` sets the width as a fraction of the output width, taking gaps into account.
 -For example, you can perfectly fit four windows sized `proportion 0.25` on an output, regardless of the gaps setting.
 -The default preset widths are <sup>1</sup>&frasl;<sub>3</sub>, <sup>1</sup>&frasl;<sub>2</sub> and <sup>2</sup>&frasl;<sub>3</sub> of the output.
+-
+-`fixed` sets the window width in logical pixels exactly.
 +`proportion` sets the span as a fraction of the output along the main axis, taking gaps into account.
 +For example, you can perfectly fit four windows sized `proportion 0.25` along the main axis of an output, regardless of the gaps setting.
 +The default preset spans are <sup>1</sup>&frasl;<sub>3</sub>, <sup>1</sup>&frasl;<sub>2</sub> and <sup>2</sup>&frasl;<sub>3</sub> of the output along the main axis.
- 
--`fixed` sets the window width in logical pixels exactly.
++
 +`fixed` sets the window span on the main axis in logical pixels exactly.
  
  ```kdl
  layout {
-@@ -199,28 +222,30 @@ layout {
+@@ -199,28 +222,30 @@
  
  ### `default-column-width`
  
@@ -133,11 +133,14 @@ index 5e5e2a5c..1d919110 100644
  ```
  
 -You can also leave the brackets empty, then the windows themselves will decide their initial width.
-+You can also leave the brackets empty, then the windows themselves will decide their initial main-axis span.
- 
- ```kdl
- layout {
+-
+-```kdl
+-layout {
 -    // New windows decide their initial width themselves.
++You can also leave the brackets empty, then the windows themselves will decide their initial main-axis span.
++
++```kdl
++layout {
 +    // New windows decide their initial main-axis span themselves.
      default-column-width {}
  }
@@ -151,7 +154,7 @@ index 5e5e2a5c..1d919110 100644
  >
  > This is a bit [unclearly defined](https://gitlab.freedesktop.org/wayland/wayland-protocols/-/issues/155) in the Wayland protocol, so some clients may misinterpret it.
  > Either way, `default-column-width {}` is most useful for specific windows, in form of a [window rule](./Configuration:-Window-Rules.md#default-column-width) with the same syntax.
-@@ -229,13 +254,13 @@ layout {
+@@ -229,13 +254,13 @@
  
  <sup>Since: 0.1.9</sup>
  
@@ -161,19 +164,19 @@ index 5e5e2a5c..1d919110 100644
  
 -`proportion` sets the height as a fraction of the output height, taking gaps into account.
 -The default preset heights are <sup>1</sup>&frasl;<sub>3</sub>, <sup>1</sup>&frasl;<sub>2</sub> and <sup>2</sup>&frasl;<sub>3</sub> of the output.
+-
+-`fixed` sets the height in logical pixels exactly.
 +`proportion` sets the span as a fraction of the output along the cross axis, taking gaps into account.
 +The default preset cross-axis spans are <sup>1</sup>&frasl;<sub>3</sub>, <sup>1</sup>&frasl;<sub>2</sub> and <sup>2</sup>&frasl;<sub>3</sub> of the output along the cross axis.
- 
--`fixed` sets the height in logical pixels exactly.
++
 +`fixed` sets the cross-axis span in logical pixels exactly.
  
  ```kdl
  layout {
 diff --git a/docs/wiki/Development:-Design-Principles.md b/docs/wiki/Development:-Design-Principles.md
-index 7a3892a8..c5365139 100644
 --- a/docs/wiki/Development:-Design-Principles.md
 +++ b/docs/wiki/Development:-Design-Principles.md
-@@ -58,6 +58,8 @@ Here are some design considerations for the window layout logic.
+@@ -81,6 +81,8 @@
  
  1. Setting window width or height to a fixed pixel size (e.g. `set-column-width 1280` or `default-column-width { fixed 1280; }`) will set the size of the window itself, however setting to a proportional size (e.g. `set-column-width 50%`) will set the size of the tile, including the border added by niri.
  
@@ -182,7 +185,7 @@ index 7a3892a8..c5365139 100644
      - With proportions, the user is looking to tile multiple windows on the screen, so they should include borders.
      - With fixed sizes, the user wants to test a specific client size or take a specifically sized screenshot, so they should affect the window directly.
      - After the size is set, it is always converted to a value that includes the borders, to make the code sane. That is, `set-column-width 1000` followed by changing the niri border width will resize the window accordingly.
-@@ -107,7 +109,7 @@ They assume QWERTY.
+@@ -130,7 +132,7 @@
  The binds are ordered in a way to gradually introduce you to different bind configuration concepts.
  
  The general system is: if a hotkey switches somewhere, then adding <kbd>Ctrl</kbd> will move the focused window or column there.
@@ -192,10 +195,9 @@ index 7a3892a8..c5365139 100644
  
  Since <kbd>Alt</kbd> is a modifier in nested niri, binds with explicit <kbd>Alt</kbd> are mainly the ones only useful on the host, for example spawning a screen locker.
 diff --git a/docs/wiki/Gestures.md b/docs/wiki/Gestures.md
-index 5c94d71f..f1a2802a 100644
 --- a/docs/wiki/Gestures.md
 +++ b/docs/wiki/Gestures.md
-@@ -38,27 +38,31 @@ If you double-click on a left or right tiled window resize edge, the column will
+@@ -38,27 +38,31 @@
  
  This works with both window-initiated resizes (when using client-side decorations), and niri-initiated <kbd>Mod</kbd> + right click resizes.
  
@@ -233,7 +235,7 @@ index 5c94d71f..f1a2802a 100644
  
  #### Open and Close the Overview
  
-@@ -79,7 +83,7 @@ Also works on a touchscreen.
+@@ -105,7 +109,7 @@
  
  <sup>Since: 25.05</sup>
  
@@ -243,10 +245,9 @@ index 5c94d71f..f1a2802a 100644
  
  #### Drag-and-Drop Hold to Activate
 diff --git a/docs/wiki/Overview.md b/docs/wiki/Overview.md
-index f9bb94a3..0fdb762c 100644
 --- a/docs/wiki/Overview.md
 +++ b/docs/wiki/Overview.md
-@@ -14,7 +14,7 @@ https://github.com/user-attachments/assets/379a5d1f-acdb-4c11-b36c-e85fd91f0995
+@@ -14,7 +14,7 @@
  Open it with the `toggle-overview` bind, via the top-left hot corner, or using a touchpad four-finger swipe up.
  While in the overview, all keyboard shortcuts keep working, while pointing devices get easier:
  
@@ -255,7 +256,7 @@ index f9bb94a3..0fdb762c 100644
  - Touchpad: two-finger scrolling that matches the normal three-finger gestures.
  - Touchscreen: one-finger scrolling, or one-finger long press to move a window.
  
-@@ -24,7 +24,7 @@ While in the overview, all keyboard shortcuts keep working, while pointing devic
+@@ -24,7 +24,7 @@
  >
  > Put your bar on the *top* layer.
  
@@ -264,11 +265,57 @@ index f9bb94a3..0fdb762c 100644
  Combined with the hot corner, this lets you do a mouse-only DnD across workspaces.
  
  <video controls src="https://github.com/user-attachments/assets/5f09c5b7-ff40-462b-8b9c-f1b8073a2cbb">
+diff --git a/niri-config/src/binds.rs b/niri-config/src/binds.rs
+--- a/niri-config/src/binds.rs
++++ b/niri-config/src/binds.rs
+@@ -162,6 +162,10 @@
+     FocusWindow(u64),
+     FocusWindowInColumn(#[knuffel(argument)] u8),
+     FocusWindowPrevious,
++    FocusLeft,
++    FocusRight,
++    FocusUp,
++    FocusDown,
+     FocusColumnLeft,
+     #[knuffel(skip)]
+     FocusColumnLeftUnderMouse,
+@@ -189,6 +193,10 @@
+     FocusWindowBottom,
+     FocusWindowDownOrTop,
+     FocusWindowUpOrBottom,
++    MoveLeft,
++    MoveRight,
++    MoveUp,
++    MoveDown,
+     MoveColumnLeft,
+     MoveColumnRight,
+     MoveColumnToFirst,
+@@ -450,6 +458,10 @@
+             niri_ipc::Action::FocusWindow { id } => Self::FocusWindow(id),
+             niri_ipc::Action::FocusWindowInColumn { index } => Self::FocusWindowInColumn(index),
+             niri_ipc::Action::FocusWindowPrevious {} => Self::FocusWindowPrevious,
++            niri_ipc::Action::FocusLeft {} => Self::FocusLeft,
++            niri_ipc::Action::FocusRight {} => Self::FocusRight,
++            niri_ipc::Action::FocusUp {} => Self::FocusUp,
++            niri_ipc::Action::FocusDown {} => Self::FocusDown,
+             niri_ipc::Action::FocusColumnLeft {} => Self::FocusColumnLeft,
+             niri_ipc::Action::FocusColumnRight {} => Self::FocusColumnRight,
+             niri_ipc::Action::FocusColumnFirst {} => Self::FocusColumnFirst,
+@@ -473,6 +485,10 @@
+             niri_ipc::Action::FocusWindowBottom {} => Self::FocusWindowBottom,
+             niri_ipc::Action::FocusWindowDownOrTop {} => Self::FocusWindowDownOrTop,
+             niri_ipc::Action::FocusWindowUpOrBottom {} => Self::FocusWindowUpOrBottom,
++            niri_ipc::Action::MoveLeft {} => Self::MoveLeft,
++            niri_ipc::Action::MoveRight {} => Self::MoveRight,
++            niri_ipc::Action::MoveUp {} => Self::MoveUp,
++            niri_ipc::Action::MoveDown {} => Self::MoveDown,
+             niri_ipc::Action::MoveColumnLeft {} => Self::MoveColumnLeft,
+             niri_ipc::Action::MoveColumnRight {} => Self::MoveColumnRight,
+             niri_ipc::Action::MoveColumnToFirst {} => Self::MoveColumnToFirst,
 diff --git a/niri-config/src/layout.rs b/niri-config/src/layout.rs
-index f84528bd..5a23eb0d 100644
 --- a/niri-config/src/layout.rs
 +++ b/niri-config/src/layout.rs
-@@ -14,6 +14,7 @@ pub struct Layout {
+@@ -14,6 +14,7 @@
      pub shadow: Shadow,
      pub tab_indicator: TabIndicator,
      pub insert_hint: InsertHint,
@@ -276,7 +323,7 @@ index f84528bd..5a23eb0d 100644
      pub preset_column_widths: Vec<PresetSize>,
      pub default_column_width: Option<PresetSize>,
      pub preset_window_heights: Vec<PresetSize>,
-@@ -34,6 +35,7 @@ impl Default for Layout {
+@@ -34,6 +35,7 @@
              shadow: Shadow::default(),
              tab_indicator: TabIndicator::default(),
              insert_hint: InsertHint::default(),
@@ -284,7 +331,7 @@ index f84528bd..5a23eb0d 100644
              preset_column_widths: vec![
                  PresetSize::Proportion(1. / 3.),
                  PresetSize::Proportion(0.5),
-@@ -72,6 +74,7 @@ impl MergeWith<LayoutPart> for Layout {
+@@ -72,6 +74,7 @@
  
          merge_clone!(
              (self, part),
@@ -292,7 +339,7 @@ index f84528bd..5a23eb0d 100644
              preset_column_widths,
              preset_window_heights,
              center_focused_column,
-@@ -106,6 +109,8 @@ pub struct LayoutPart {
+@@ -106,6 +109,8 @@
      pub tab_indicator: Option<TabIndicatorPart>,
      #[knuffel(child)]
      pub insert_hint: Option<InsertHintPart>,
@@ -301,25 +348,24 @@ index f84528bd..5a23eb0d 100644
      #[knuffel(child, unwrap(children))]
      pub preset_column_widths: Option<Vec<PresetSize>>,
      #[knuffel(child)]
-@@ -170,6 +175,13 @@ pub enum CenterFocusedColumn {
+@@ -168,6 +173,13 @@
+     /// Focusing a column will center it if it doesn't fit on the screen together with the
+     /// previously focused column.
      OnOverflow,
- }
- 
++}
++
 +#[derive(knuffel::DecodeScalar, Debug, Default, PartialEq, Eq, Clone, Copy)]
 +pub enum MainAxis {
 +    #[default]
 +    Horizontal,
 +    Vertical,
-+}
-+
+ }
+ 
  impl<S> knuffel::Decode<S> for DefaultPresetSize
- where
-     S: knuffel::traits::ErrorSpan,
 diff --git a/niri-config/src/lib.rs b/niri-config/src/lib.rs
-index 329b7669..be1c0951 100644
 --- a/niri-config/src/lib.rs
 +++ b/niri-config/src/lib.rs
-@@ -810,6 +810,7 @@ mod tests {
+@@ -829,6 +829,7 @@
                  }
  
                  center-focused-column "on-overflow"
@@ -327,7 +373,7 @@ index 329b7669..be1c0951 100644
  
                  default-column-display "tabbed"
  
-@@ -1413,6 +1414,7 @@ mod tests {
+@@ -1462,6 +1463,7 @@
                          },
                      ),
                  },
@@ -335,26 +381,57 @@ index 329b7669..be1c0951 100644
                  preset_column_widths: [
                      Proportion(
                          0.25,
+diff --git a/niri-ipc/src/lib.rs b/niri-ipc/src/lib.rs
+--- a/niri-ipc/src/lib.rs
++++ b/niri-ipc/src/lib.rs
+@@ -355,6 +355,14 @@
+     },
+     /// Focus the previously focused window.
+     FocusWindowPrevious {},
++    /// Focus the window in the physical direction to the left.
++    FocusLeft {},
++    /// Focus the window in the physical direction to the right.
++    FocusRight {},
++    /// Focus the window in the physical direction above.
++    FocusUp {},
++    /// Focus the window in the physical direction below.
++    FocusDown {},
+     /// Focus the column to the left.
+     FocusColumnLeft {},
+     /// Focus the column to the right.
+@@ -407,6 +415,14 @@
+     FocusWindowDownOrTop {},
+     /// Focus the window above or the bottommost window.
+     FocusWindowUpOrBottom {},
++    /// Move the focused window in the physical direction to the left.
++    MoveLeft {},
++    /// Move the focused window in the physical direction to the right.
++    MoveRight {},
++    /// Move the focused window in the physical direction above.
++    MoveUp {},
++    /// Move the focused window in the physical direction below.
++    MoveDown {},
+     /// Move the focused column to the left.
+     MoveColumnLeft {},
+     /// Move the focused column to the right.
 diff --git a/resources/default-config.kdl b/resources/default-config.kdl
-index ccad1ac2..8ca156a8 100644
 --- a/resources/default-config.kdl
 +++ b/resources/default-config.kdl
-@@ -121,6 +121,12 @@ layout {
+@@ -121,6 +121,12 @@
+     // - "on-overflow", focusing a column will center it if it doesn't fit
      //   together with the previously focused column.
      center-focused-column "never"
- 
++
 +    // Main axis of the scrolling layout:
 +    // - "horizontal", default behavior: columns are laid out left-to-right.
 +    // - "vertical", columns are laid out top-to-bottom.
 +    // Column width actions work on the main axis; window height actions work on the cross axis.
 +    // main-axis "horizontal"
-+
+ 
      // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
      preset-column-widths {
-         // Proportion sets the width as a fraction of the output width, taking gaps into account.
 diff --git a/src/input/axis_policy.rs b/src/input/axis_policy.rs
 new file mode 100644
-index 00000000..061fb753
 --- /dev/null
 +++ b/src/input/axis_policy.rs
 @@ -0,0 +1,175 @@
@@ -534,10 +611,9 @@ index 00000000..061fb753
 +    }
 +}
 diff --git a/src/input/mod.rs b/src/input/mod.rs
-index f1ad4932..f26584ff 100644
 --- a/src/input/mod.rs
 +++ b/src/input/mod.rs
-@@ -9,7 +9,7 @@ use input::event::gesture::GestureEventCoordinates as _;
+@@ -8,7 +8,7 @@
  use niri_config::{
      Action, Bind, Binds, Config, Key, ModKey, Modifiers, MruDirection, SwitchBinds, Trigger,
  };
@@ -546,23 +622,23 @@ index f1ad4932..f26584ff 100644
  use smithay::backend::input::{
      AbsolutePositionEvent, Axis, AxisSource, ButtonState, Device, DeviceCapability, Event,
      GestureBeginEvent, GestureEndEvent, GesturePinchUpdateEvent as _, GestureSwipeUpdateEvent as _,
-@@ -19,6 +19,7 @@ use smithay::backend::input::{
+@@ -18,6 +18,7 @@
      TabletToolTipState, TouchEvent,
  };
  use smithay::backend::libinput::LibinputInputBackend;
 +use smithay::desktop::Window;
  use smithay::input::dnd::DnDGrab;
- use smithay::input::keyboard::{keysyms, FilterResult, Keysym, Layout, ModifiersState};
- use smithay::input::pointer::{
-@@ -40,6 +41,7 @@ use smithay::wayland::pointer_constraints::{with_pointer_constraint, PointerCons
- use smithay::wayland::tablet_manager::{TabletDescriptor, TabletSeatTrait};
+ use smithay::input::keyboard::{
+     keysyms, FilterResult, KeyboardSource, Keysym, Layout, ModifiersState,
+@@ -43,6 +44,7 @@
+ use smithay::wayland::virtual_keyboard::VirtualKeyboardDevice;
  use touch_overview_grab::TouchOverviewGrab;
  
 +use self::axis_policy::{InputAxisPolicy, OverviewWheelTarget};
  use self::move_grab::MoveGrab;
  use self::pick_color_grab::PickColorGrab;
  use self::pick_window_grab::PickWindowGrab;
-@@ -47,6 +49,7 @@ use self::resize_grab::ResizeGrab;
+@@ -50,6 +52,7 @@
  use self::spatial_movement_grab::SpatialMovementGrab;
  #[cfg(feature = "dbus")]
  use crate::dbus::freedesktop_a11y::KbMonBlock;
@@ -570,18 +646,20 @@ index f1ad4932..f26584ff 100644
  use crate::layout::scrolling::ScrollDirection;
  use crate::layout::{ActivateWindow, LayoutElement as _};
  use crate::niri::{CastTarget, PointerVisibility, State};
-@@ -55,6 +58,7 @@ use crate::ui::screenshot_ui::ScreenshotUi;
+@@ -58,6 +61,7 @@
  use crate::utils::spawning::{spawn, spawn_sh};
  use crate::utils::{center, get_monotonic_time, CastSessionId, ResizeEdge};
  
 +mod axis_policy;
  pub mod backend_ext;
+ pub mod click_grab;
  pub mod move_grab;
- pub mod pick_color_grab;
-@@ -241,6 +245,85 @@ impl State {
+@@ -272,6 +276,85 @@
+             }
+             _ => (),
          }
-     }
- 
++    }
++
 +    pub fn axis_policy_on_output(&self, output: &Output) -> Option<InputAxisPolicy> {
 +        let mon = self.niri.layout.monitor_for_output(output)?;
 +        Some(InputAxisPolicy::from_main_axis(
@@ -659,13 +737,53 @@ index f1ad4932..f26584ff 100644
 +
 +        // FIXME: granular
 +        self.niri.queue_redraw_all();
-+    }
-+
+     }
+ 
      fn on_device_added(&mut self, device: impl Device) {
-         if device.has_capability(DeviceCapability::TabletTool) {
-             let tablet_seat = self.niri.seat.tablet_seat();
-@@ -891,25 +974,29 @@ impl State {
+@@ -1006,27 +1089,71 @@
+                     }
+                 });
              }
++            Action::MoveLeft => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Width, false);
++                } else {
++                    self.niri.layout.move_physical_left();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
++            Action::MoveRight => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Width, true);
++                } else {
++                    self.niri.layout.move_physical_right();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
++            Action::MoveUp => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Height, false);
++                } else {
++                    self.niri.layout.move_physical_up();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
++            Action::MoveDown => {
++                if self.niri.screenshot_ui.is_open() {
++                    self.apply_screenshot_move(PhysicalAxis::Height, true);
++                } else {
++                    self.niri.layout.move_physical_down();
++                    self.maybe_warp_cursor_to_focus();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
++            }
              Action::MoveColumnLeft => {
                  if self.niri.screenshot_ui.is_open() {
 -                    self.niri.screenshot_ui.move_left();
@@ -676,12 +794,13 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_left();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::MoveColumnRight => {
                  if self.niri.screenshot_ui.is_open() {
@@ -693,16 +812,17 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_right();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::MoveColumnToFirst => {
                  self.niri.layout.move_column_to_first();
-@@ -925,7 +1012,10 @@ impl State {
+@@ -1042,7 +1169,10 @@
              }
              Action::MoveColumnLeftOrToMonitorLeft => {
                  if self.niri.screenshot_ui.is_open() {
@@ -714,7 +834,7 @@ index f1ad4932..f26584ff 100644
                  } else if let Some(output) = self.niri.output_left() {
                      if self.niri.layout.move_column_left_or_to_output(&output)
                          && !self.maybe_warp_cursor_to_focus_centered()
-@@ -934,17 +1024,21 @@ impl State {
+@@ -1051,17 +1181,21 @@
                      } else {
                          self.maybe_warp_cursor_to_focus();
                      }
@@ -723,12 +843,13 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_left();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::MoveColumnRightOrToMonitorRight => {
                  if self.niri.screenshot_ui.is_open() {
@@ -740,7 +861,7 @@ index f1ad4932..f26584ff 100644
                  } else if let Some(output) = self.niri.output_right() {
                      if self.niri.layout.move_column_right_or_to_output(&output)
                          && !self.maybe_warp_cursor_to_focus_centered()
-@@ -953,55 +1047,66 @@ impl State {
+@@ -1070,55 +1204,66 @@
                      } else {
                          self.maybe_warp_cursor_to_focus();
                      }
@@ -749,12 +870,13 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_right();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::MoveWindowDown => {
                  if self.niri.screenshot_ui.is_open() {
@@ -766,12 +888,13 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_down();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::MoveWindowUp => {
                  if self.niri.screenshot_ui.is_open() {
@@ -783,12 +906,13 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_up();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::MoveWindowDownOrToWorkspaceDown => {
                  if self.niri.screenshot_ui.is_open() {
@@ -800,11 +924,12 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_down_or_to_workspace_down();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::MoveWindowUpOrToWorkspaceUp => {
                  if self.niri.screenshot_ui.is_open() {
@@ -816,15 +941,51 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.move_up_or_to_workspace_up();
                      self.maybe_warp_cursor_to_focus();
-+                    // FIXME: granular
-+                    self.niri.queue_redraw_all();
-                 }
+-                }
 -                // FIXME: granular
 -                self.niri.queue_redraw_all();
++                    // FIXME: granular
++                    self.niri.queue_redraw_all();
++                }
              }
              Action::ConsumeOrExpelWindowLeft => {
                  self.niri.layout.consume_or_expel_window_left(None);
-@@ -1965,20 +2070,22 @@ impl State {
+@@ -1153,6 +1298,34 @@
+                     // FIXME: granular
+                     self.niri.queue_redraw_all();
+                 }
++            }
++            Action::FocusLeft => {
++                self.niri.layout.focus_physical_left();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
++            }
++            Action::FocusRight => {
++                self.niri.layout.focus_physical_right();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
++            }
++            Action::FocusUp => {
++                self.niri.layout.focus_physical_up();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
++            }
++            Action::FocusDown => {
++                self.niri.layout.focus_physical_down();
++                self.maybe_warp_cursor_to_focus();
++                self.niri.layer_shell_on_demand_focus = None;
++                // FIXME: granular
++                self.niri.queue_redraw_all();
+             }
+             Action::FocusColumnLeft => {
+                 self.niri.layout.focus_left();
+@@ -2082,20 +2255,22 @@
              }
              Action::SetColumnWidth(change) => {
                  if self.niri.screenshot_ui.is_open() {
@@ -855,7 +1016,7 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.set_window_width(None, change);
                  }
-@@ -1992,10 +2099,12 @@ impl State {
+@@ -2109,10 +2284,12 @@
              }
              Action::SetWindowHeight(change) => {
                  if self.niri.screenshot_ui.is_open() {
@@ -872,7 +1033,7 @@ index f1ad4932..f26584ff 100644
                  } else {
                      self.niri.layout.set_window_height(None, change);
                  }
-@@ -2808,6 +2917,7 @@ impl State {
+@@ -2931,6 +3108,7 @@
                  if let Some((output, ws)) = self.niri.workspace_under_cursor(true) {
                      let ws_id = ws.id();
                      let ws_idx = self.niri.layout.find_workspace_by_id(ws_id).unwrap().0;
@@ -880,7 +1041,7 @@ index f1ad4932..f26584ff 100644
  
                      self.niri.layout.focus_output(&output);
  
-@@ -2820,7 +2930,8 @@ impl State {
+@@ -2943,7 +3121,8 @@
                      self.niri
                          .layout
                          .view_offset_gesture_begin(&output, Some(ws_idx), false);
@@ -890,36 +1051,36 @@ index f1ad4932..f26584ff 100644
                      pointer.set_grab(self, grab, serial, Focus::Clear);
                      self.niri
                          .cursor_manager
-@@ -2845,9 +2956,9 @@ impl State {
-                             Some((output, mon.active_workspace_ref()))
-                         })
+@@ -2974,6 +3153,7 @@
+ 
+                 if let Some((output, ws)) = output_ws {
+                     let ws_id = ws.id();
++                    let axis_policy = InputAxisPolicy::from_main_axis(ws.main_axis());
+ 
+                     self.niri.layout.focus_output(&output);
+ 
+@@ -2983,7 +3163,8 @@
+                         button: button_code,
+                         location,
                      };
--
-                     if let Some((output, ws)) = output_ws {
-                         let ws_id = ws.id();
-+                        let axis_policy = InputAxisPolicy::from_main_axis(ws.main_axis());
+-                    let grab = SpatialMovementGrab::new(start_data, output, ws_id, false);
++                    let grab =
++                        SpatialMovementGrab::new(start_data, output, ws_id, axis_policy, false);
+                     pointer.set_grab(self, grab, serial, Focus::Clear);
+                     self.niri
+                         .cursor_manager
+@@ -3228,6 +3409,10 @@
+             let mods = self.niri.seat.get_keyboard().unwrap().modifier_state();
+             let modifiers = modifiers_from_state(mods);
+             let use_builtin_bindings = should_handle_in_overview || is_mru_open;
++            let overview_axis_policy = should_handle_in_overview.then(|| {
++                self.view_axis_policy_under_cursor_or_active_workspace()
++                    .unwrap_or_default()
++            });
  
-                         self.niri.layout.focus_output(&output);
- 
-@@ -2857,7 +2968,8 @@ impl State {
-                             button: button_code,
-                             location,
-                         };
--                        let grab = SpatialMovementGrab::new(start_data, output, ws_id, false);
-+                        let grab =
-+                            SpatialMovementGrab::new(start_data, output, ws_id, axis_policy, false);
-                         pointer.set_grab(self, grab, serial, Focus::Clear);
-                         self.niri
-                             .cursor_manager
-@@ -3107,54 +3219,78 @@ impl State {
-                 || is_mru_open
-                 || self.niri.mods_with_wheel_binds.contains(&modifiers);
-             if should_handle {
-+                let overview_axis_policy = should_handle_in_overview.then(|| {
-+                    self.view_axis_policy_under_cursor_or_active_workspace()
-+                        .unwrap_or_default()
-+                });
-+
+             if use_builtin_bindings
+                 || self
+@@ -3238,59 +3423,70 @@
                  let horizontal = horizontal_amount_v120.unwrap_or(0.);
                  let ticks = self.niri.horizontal_wheel_tracker.accumulate(horizontal);
                  if ticks != 0 {
@@ -959,13 +1120,21 @@ index f1ad4932..f26584ff 100644
 -                                mod_key,
 -                                Trigger::WheelScrollLeft,
 -                                mods,
--                            );
+-                            )
+-                            .filter(|bind| {
+-                                !self.niri.screenshot_ui.is_open()
+-                                    || allowed_during_screenshot(&bind.action)
+-                            });
 -                            let bind_right = find_configured_bind(
 -                                bindings,
 -                                mod_key,
 -                                Trigger::WheelScrollRight,
 -                                mods,
--                            );
+-                            )
+-                            .filter(|bind| {
+-                                !self.niri.screenshot_ui.is_open()
+-                                    || allowed_during_screenshot(&bind.action)
+-                            });
 -                            (bind_left, bind_right)
 -                        };
 +                    let (bind_left, bind_right) = if let Some(target) = overview_axis_policy
@@ -1035,7 +1204,7 @@ index f1ad4932..f26584ff 100644
  
                      if let Some(right) = bind_right {
                          for _ in 0..ticks {
-@@ -3171,40 +3307,20 @@ impl State {
+@@ -3318,14 +3514,20 @@
                  let vertical = vertical_amount_v120.unwrap_or(0.);
                  let ticks = self.niri.vertical_wheel_tracker.accumulate(vertical);
                  if ticks != 0 {
@@ -1049,17 +1218,19 @@ index f1ad4932..f26584ff 100644
                                  modifiers: Modifiers::empty(),
                              },
 -                            action: Action::FocusWorkspaceUpUnderMouse,
--                            repeat: true,
--                            cooldown: Some(Duration::from_millis(50)),
--                            allow_when_locked: false,
--                            allow_inhibiting: false,
--                            hotkey_overlay_title: None,
--                        });
--                        let bind_down = Some(Bind {
--                            key: Key {
--                                trigger: Trigger::WheelScrollDown,
--                                modifiers: Modifiers::empty(),
--                            },
++                            action: match target {
++                                OverviewWheelTarget::Column => Action::FocusColumnLeftUnderMouse,
++                                OverviewWheelTarget::Workspace => {
++                                    Action::FocusWorkspaceUpUnderMouse
++                                }
++                            },
+                             repeat: true,
+                             cooldown: Some(Duration::from_millis(50)),
+                             allow_when_locked: false,
+@@ -3337,33 +3539,12 @@
+                                 trigger: Trigger::WheelScrollDown,
+                                 modifiers: Modifiers::empty(),
+                             },
 -                            action: Action::FocusWorkspaceDownUnderMouse,
 -                            repeat: true,
 -                            cooldown: Some(Duration::from_millis(50)),
@@ -1074,30 +1245,28 @@ index f1ad4932..f26584ff 100644
 -                                trigger: Trigger::WheelScrollUp,
 -                                modifiers: Modifiers::empty(),
 +                            action: match target {
-+                                OverviewWheelTarget::Column => Action::FocusColumnLeftUnderMouse,
-+                                OverviewWheelTarget::Workspace => {
-+                                    Action::FocusWorkspaceUpUnderMouse
-+                                }
-                             },
--                            action: Action::FocusColumnLeftUnderMouse,
-                             repeat: true,
-                             cooldown: Some(Duration::from_millis(50)),
-                             allow_when_locked: false,
-@@ -3216,7 +3332,12 @@ impl State {
-                                 trigger: Trigger::WheelScrollDown,
-                                 modifiers: Modifiers::empty(),
-                             },
--                            action: Action::FocusColumnRightUnderMouse,
-+                            action: match target {
 +                                OverviewWheelTarget::Column => Action::FocusColumnRightUnderMouse,
 +                                OverviewWheelTarget::Workspace => {
 +                                    Action::FocusWorkspaceDownUnderMouse
 +                                }
-+                            },
+                             },
+-                            action: Action::FocusColumnLeftUnderMouse,
+-                            repeat: true,
+-                            cooldown: Some(Duration::from_millis(50)),
+-                            allow_when_locked: false,
+-                            allow_inhibiting: false,
+-                            hotkey_overlay_title: None,
+-                        });
+-                        let bind_down = Some(Bind {
+-                            key: Key {
+-                                trigger: Trigger::WheelScrollDown,
+-                                modifiers: Modifiers::empty(),
+-                            },
+-                            action: Action::FocusColumnRightUnderMouse,
                              repeat: true,
                              cooldown: Some(Duration::from_millis(50)),
                              allow_when_locked: false,
-@@ -3272,10 +3393,18 @@ impl State {
+@@ -3426,10 +3607,18 @@
              if should_handle_in_overview && modifiers.is_empty() {
                  let mut redraw = false;
  
@@ -1117,7 +1286,7 @@ index f1ad4932..f26584ff 100644
                  let is_vertical = self.niri.overview_scroll_swipe_gesture.is_vertical();
  
                  if action.end() {
-@@ -3304,10 +3433,11 @@ impl State {
+@@ -3458,10 +3647,11 @@
                              }
                          }
  
@@ -1133,7 +1302,7 @@ index f1ad4932..f26584ff 100644
                          if let Some(Some(_)) = res {
                              redraw = true;
                          }
-@@ -3330,7 +3460,7 @@ impl State {
+@@ -3484,7 +3674,7 @@
                          let res = self
                              .niri
                              .layout
@@ -1142,7 +1311,7 @@ index f1ad4932..f26584ff 100644
                          if let Some(Some(_)) = res {
                              redraw = true;
                          }
-@@ -3801,6 +3931,7 @@ impl State {
+@@ -4100,6 +4290,7 @@
          }
  
          let is_overview_open = self.niri.layout.is_overview_open();
@@ -1150,7 +1319,7 @@ index f1ad4932..f26584ff 100644
  
          if let Some((cx, cy)) = &mut self.niri.gesture_swipe_3f_cumulative {
              *cx += delta_x;
-@@ -3812,7 +3943,9 @@ impl State {
+@@ -4111,7 +4302,9 @@
                  self.niri.gesture_swipe_3f_cumulative = None;
  
                  if let Some(output) = self.niri.output_under_cursor() {
@@ -1161,39 +1330,48 @@ index f1ad4932..f26584ff 100644
                          let output_ws = if is_overview_open {
                              self.niri.workspace_under_cursor(true)
                          } else {
-@@ -3840,12 +3973,14 @@ impl State {
+@@ -4139,23 +4332,25 @@
          }
  
-         let timestamp = Duration::from_micros(event.time());
+         let timestamp = Duration::from_micros(event.time().micros());
 +        let (view_delta, workspace_delta) =
 +            axis_policy.split_view_workspace_deltas(delta_x, delta_y);
  
          let mut handled = false;
--        let res = self
--            .niri
--            .layout
--            .workspace_switch_gesture_update(delta_y, timestamp, true);
 +        let res =
 +            self.niri
 +                .layout
 +                .workspace_switch_gesture_update(workspace_delta, timestamp, true);
-         if let Some(output) = res {
-             if let Some(output) = output {
-                 self.niri.queue_redraw(&output);
-@@ -3856,7 +3991,7 @@ impl State {
++        if let Some(output) = res {
++            if let Some(output) = output {
++                self.niri.queue_redraw(&output);
++            }
++            handled = true;
++        }
++
          let res = self
              .niri
              .layout
+-            .workspace_switch_gesture_update(delta_y, timestamp, true);
+-        if let Some(output) = res {
+-            if let Some(output) = output {
+-                self.niri.queue_redraw(&output);
+-            }
+-            handled = true;
+-        }
+-
+-        let res = self
+-            .niri
+-            .layout
 -            .view_offset_gesture_update(delta_x, timestamp, true);
 +            .view_offset_gesture_update(view_delta, timestamp, true);
          if let Some(output) = res {
              if let Some(output) = output {
                  self.niri.queue_redraw(&output);
 diff --git a/src/input/move_grab.rs b/src/input/move_grab.rs
-index 8834b100..15cafe45 100644
 --- a/src/input/move_grab.rs
 +++ b/src/input/move_grab.rs
-@@ -188,19 +188,12 @@ impl MoveGrab {
+@@ -189,19 +189,12 @@
              // Check if the gesture moved far enough to decide.
              let c = self.new_location - self.start_data.location();
              if c.x * c.x + c.y * c.y >= 8. * 8. {
@@ -1207,18 +1385,19 @@ index 8834b100..15cafe45 100644
 -                            .then(|| ws.is_floating(&self.window))
 -                    })
 -                    .unwrap_or(false);
-+                let (is_floating, axis_policy) =
-+                    data.window_axis_policy(&self.window).unwrap_or_default();
- 
+-
 -                let is_view_offset =
 -                    self.enable_view_offset && !is_floating && c.x.abs() > c.y.abs();
++                let (is_floating, axis_policy) =
++                    data.window_axis_policy(&self.window).unwrap_or_default();
++
 +                let is_view_offset = self.enable_view_offset
 +                    && !is_floating
 +                    && axis_policy.gesture_prefers_view_offset(c.x, c.y);
  
                  let started = if is_view_offset {
                      self.begin_view_offset(data)
-@@ -241,11 +234,17 @@ impl MoveGrab {
+@@ -242,11 +235,17 @@
                  }
              }
              GestureState::ViewOffset => {
@@ -1242,18 +1421,17 @@ index 8834b100..15cafe45 100644
                      if let Some(output) = output {
                          data.niri.queue_redraw(&output);
 diff --git a/src/input/spatial_movement_grab.rs b/src/input/spatial_movement_grab.rs
-index 546929a0..fc33b9a0 100644
 --- a/src/input/spatial_movement_grab.rs
 +++ b/src/input/spatial_movement_grab.rs
-@@ -10,6 +10,7 @@ use smithay::input::SeatHandler;
+@@ -11,6 +11,7 @@
  use smithay::output::Output;
  use smithay::utils::{Logical, Point, SERIAL_COUNTER};
  
 +use crate::input::axis_policy::InputAxisPolicy;
  use crate::layout::workspace::WorkspaceId;
  use crate::niri::State;
- use crate::utils::get_monotonic_time;
-@@ -19,6 +20,7 @@ pub struct SpatialMovementGrab {
+ 
+@@ -19,6 +20,7 @@
      last_location: Point<f64, Logical>,
      output: Output,
      workspace_id: WorkspaceId,
@@ -1261,7 +1439,7 @@ index 546929a0..fc33b9a0 100644
      gesture: GestureState,
  
      // Accumulated and applied in frame().
-@@ -39,6 +41,7 @@ impl SpatialMovementGrab {
+@@ -39,6 +41,7 @@
          start_data: PointerGrabStartData<State>,
          output: Output,
          workspace_id: WorkspaceId,
@@ -1269,7 +1447,7 @@ index 546929a0..fc33b9a0 100644
          is_view_offset: bool,
      ) -> Self {
          let location = start_data.location;
-@@ -53,6 +56,7 @@ impl SpatialMovementGrab {
+@@ -53,6 +56,7 @@
              start_data,
              output,
              workspace_id,
@@ -1277,7 +1455,7 @@ index 546929a0..fc33b9a0 100644
              gesture,
              new_location: location,
              event_timestamp: None,
-@@ -86,12 +90,16 @@ impl SpatialMovementGrab {
+@@ -86,12 +90,16 @@
  
                  // Check if the gesture moved far enough to decide. Threshold copied from GTK 4.
                  if c.x * c.x + c.y * c.y >= 8. * 8. {
@@ -1296,7 +1474,7 @@ index 546929a0..fc33b9a0 100644
                              } else {
                                  None
                              }
-@@ -101,17 +109,23 @@ impl SpatialMovementGrab {
+@@ -101,17 +109,23 @@
                      } else {
                          self.gesture = GestureState::WorkspaceSwitch;
                          layout.workspace_switch_gesture_begin(&self.output, false);
@@ -1324,20 +1502,19 @@ index 546929a0..fc33b9a0 100644
          };
  
 diff --git a/src/input/touch_overview_grab.rs b/src/input/touch_overview_grab.rs
-index 92b19bc2..76fda332 100644
 --- a/src/input/touch_overview_grab.rs
 +++ b/src/input/touch_overview_grab.rs
-@@ -167,6 +167,9 @@ impl TouchGrab<State> for TouchOverviewGrab {
-         }
+@@ -77,6 +77,9 @@
+             return true;
+         };
  
-         let timestamp = Duration::from_millis(u64::from(event.time));
 +        let workspace_axis_policy = self
 +            .workspace_id
 +            .and_then(|ws_id| data.axis_policy_for_workspace_id(ws_id));
          let layout = &mut data.niri.layout;
  
          // Check if we should become interactive move.
-@@ -191,7 +194,11 @@ impl TouchGrab<State> for TouchOverviewGrab {
+@@ -107,7 +110,11 @@
  
              // Check if the gesture moved far enough to decide. Threshold copied from libadwaita.
              if c.x * c.x + c.y * c.y >= 16. * 16. {
@@ -1350,9 +1527,9 @@ index 92b19bc2..76fda332 100644
                      if let Some((ws_idx, ws)) = layout.find_workspace_by_id(ws_id) {
                          if ws.current_output() == Some(&self.output) {
                              layout.view_offset_gesture_begin(&self.output, Some(ws_idx), false);
-@@ -215,13 +222,17 @@ impl TouchGrab<State> for TouchOverviewGrab {
-         let delta = event.location - self.last_location;
-         self.last_location = event.location;
+@@ -143,13 +150,17 @@
+         let delta = self.new_location - self.last_location;
+         self.last_location = self.new_location;
  
 +        let axis_policy = workspace_axis_policy.unwrap_or_default();
 +        let (view_delta, workspace_delta) =
@@ -1372,7 +1549,6 @@ index 92b19bc2..76fda332 100644
                  let window = self.window.as_ref().unwrap();
 diff --git a/src/layout/axis.rs b/src/layout/axis.rs
 new file mode 100644
-index 00000000..6c9843ff
 --- /dev/null
 +++ b/src/layout/axis.rs
 @@ -0,0 +1,242 @@
@@ -1619,10 +1795,9 @@ index 00000000..6c9843ff
 +    }
 +}
 diff --git a/src/layout/closing_window.rs b/src/layout/closing_window.rs
-index ca28f598..407dfb00 100644
 --- a/src/layout/closing_window.rs
 +++ b/src/layout/closing_window.rs
-@@ -209,6 +209,7 @@ impl ClosingWindow {
+@@ -209,6 +209,7 @@
  
                  let mut location = self.pos + offset;
                  location.x -= view_rect.loc.x;
@@ -1630,7 +1805,7 @@ index ca28f598..407dfb00 100644
                  let elem = RelocateRenderElement::from_element(
                      elem,
                      location.to_physical_precise_round(scale),
-@@ -291,6 +292,7 @@ impl ClosingWindow {
+@@ -291,6 +292,7 @@
  
          let mut location = self.pos + offset;
          location.x -= view_rect.loc.x;
@@ -1639,10 +1814,9 @@ index ca28f598..407dfb00 100644
              elem,
              location.to_physical_precise_round(scale),
 diff --git a/src/layout/floating.rs b/src/layout/floating.rs
-index d102f40d..7101b961 100644
 --- a/src/layout/floating.rs
 +++ b/src/layout/floating.rs
-@@ -8,6 +8,7 @@ use niri_ipc::{PositionChange, SizeChange, WindowLayout};
+@@ -8,6 +8,7 @@
  use smithay::backend::renderer::gles::GlesRenderer;
  use smithay::utils::{Logical, Point, Rectangle, Scale, Serial, Size};
  
@@ -1650,7 +1824,7 @@ index d102f40d..7101b961 100644
  use super::closing_window::{ClosingWindow, ClosingWindowRenderElement};
  use super::scrolling::ColumnWidth;
  use super::tile::{Tile, TileRenderElement, TileRenderSnapshot};
-@@ -915,6 +916,34 @@ impl<W: LayoutElement> FloatingSpace<W> {
+@@ -925,6 +926,34 @@
          }
      }
  
@@ -1685,10 +1859,12 @@ index d102f40d..7101b961 100644
      fn move_to(&mut self, idx: usize, new_pos: Point<f64, Logical>, animate: bool) {
          if animate {
              self.move_and_animate(idx, new_pos);
-@@ -951,6 +980,64 @@ impl<W: LayoutElement> FloatingSpace<W> {
-         self.move_by(Point::from((0., DIRECTIONAL_MOVE_PX)));
-     }
+@@ -959,6 +988,64 @@
  
+     pub fn move_down(&mut self) {
+         self.move_by(Point::from((0., DIRECTIONAL_MOVE_PX)));
++    }
++
 +    pub(super) fn move_main(&mut self, axis: AxisMap, direction: AxisDirection) {
 +        match direction {
 +            AxisDirection::Backward => axis.map_main(self, Self::move_left, Self::move_up),
@@ -1745,16 +1921,13 @@ index d102f40d..7101b961 100644
 +            |floating| floating.set_window_width(id, change, animate),
 +            |floating| floating.set_window_height(id, change, animate),
 +        );
-+    }
-+
+     }
+ 
      pub fn move_window(
-         &mut self,
-         id: Option<&W::Id>,
 diff --git a/src/layout/mod.rs b/src/layout/mod.rs
-index 5c4dd639..c2d57cf6 100644
 --- a/src/layout/mod.rs
 +++ b/src/layout/mod.rs
-@@ -52,6 +52,7 @@ use smithay::utils::{Logical, Point, Rectangle, Scale, Serial, Size, Transform};
+@@ -52,6 +52,7 @@
  use tile::{Tile, TileRenderElement};
  use workspace::{WorkspaceAddWindowTarget, WorkspaceId};
  
@@ -1762,7 +1935,7 @@ index 5c4dd639..c2d57cf6 100644
  pub use self::monitor::MonitorRenderElement;
  use self::monitor::{Monitor, WorkspaceSwitch};
  use self::workspace::{OutputId, Workspace};
-@@ -75,6 +76,7 @@ use crate::utils::{
+@@ -75,6 +76,7 @@
  };
  use crate::window::ResolvedWindowRules;
  
@@ -1770,7 +1943,7 @@ index 5c4dd639..c2d57cf6 100644
  pub mod closing_window;
  pub mod floating;
  pub mod focus_ring;
-@@ -594,14 +596,21 @@ impl<W: LayoutElement> InteractiveMoveState<W> {
+@@ -609,14 +611,21 @@
  impl<W: LayoutElement> InteractiveMoveData<W> {
      fn tile_render_location(&self, zoom: f64) -> Point<f64, Logical> {
          let scale = Scale::from(self.output.current_scale().fractional_scale());
@@ -1795,7 +1968,119 @@ index 5c4dd639..c2d57cf6 100644
          // Round to physical pixels.
          pos.to_physical_precise_round(scale).to_logical(scale)
      }
-@@ -3815,17 +3824,25 @@ impl<W: LayoutElement> Layout<W> {
+@@ -1848,11 +1857,27 @@
+         workspace.move_left();
+     }
+ 
++    pub fn move_physical_left(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::move_left, Workspace::move_up);
++    }
++
+     pub fn move_right(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.move_right();
++    }
++
++    pub fn move_physical_right(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::move_right, Workspace::move_down);
+     }
+ 
+     pub fn move_column_to_first(&mut self) {
+@@ -1905,11 +1930,27 @@
+         workspace.move_down();
+     }
+ 
++    pub fn move_physical_down(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::move_right, Workspace::move_down);
++    }
++
+     pub fn move_up(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.move_up();
++    }
++
++    pub fn move_physical_up(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::move_left, Workspace::move_up);
+     }
+ 
+     pub fn move_down_or_to_workspace_down(&mut self) {
+@@ -1979,11 +2020,27 @@
+         workspace.focus_left();
+     }
+ 
++    pub fn focus_physical_left(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::focus_left, Workspace::focus_up);
++    }
++
+     pub fn focus_right(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.focus_right();
++    }
++
++    pub fn focus_physical_right(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_main(workspace, Workspace::focus_right, Workspace::focus_down);
+     }
+ 
+     pub fn focus_column_first(&mut self) {
+@@ -2079,11 +2136,27 @@
+         workspace.focus_down();
+     }
+ 
++    pub fn focus_physical_down(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::focus_right, Workspace::focus_down);
++    }
++
+     pub fn focus_up(&mut self) {
+         let Some(workspace) = self.active_workspace_mut() else {
+             return;
+         };
+         workspace.focus_up();
++    }
++
++    pub fn focus_physical_up(&mut self) {
++        let Some(workspace) = self.active_workspace_mut() else {
++            return;
++        };
++        let axis = workspace.axis();
++        axis.map_cross(workspace, Workspace::focus_left, Workspace::focus_up);
+     }
+ 
+     pub fn focus_down_or_left(&mut self) {
+@@ -3860,17 +3933,25 @@
          let zoom = mon.overview_zoom();
  
          let is_floating = ws.is_floating(&window_id);
@@ -1823,7 +2108,7 @@ index 5c4dd639..c2d57cf6 100644
          let pointer_ratio_within_window = (
              f64::clamp(pointer_offset_within_window.x / window_size.w, 0., 1.),
              f64::clamp(pointer_offset_within_window.y / window_size.h, 0., 1.),
-@@ -3891,13 +3908,14 @@ impl<W: LayoutElement> Layout<W> {
+@@ -3936,13 +4017,14 @@
                  }
                  .band(sq_dist / INTERACTIVE_MOVE_START_THRESHOLD);
  
@@ -1839,7 +2124,7 @@ index 5c4dd639..c2d57cf6 100644
                              ws.tiles_mut()
                                  .find(|tile| *tile.window().id() == window_id)
                                  .unwrap(),
-@@ -3905,7 +3923,12 @@ impl<W: LayoutElement> Layout<W> {
+@@ -3950,7 +4032,12 @@
                          )
                      })
                      .unwrap();
@@ -1854,10 +2139,9 @@ index 5c4dd639..c2d57cf6 100644
                  // Put it back to be able to easily return.
                  self.interactive_move = Some(InteractiveMoveState::Starting {
 diff --git a/src/layout/monitor.rs b/src/layout/monitor.rs
-index 53c06069..60951fd5 100644
 --- a/src/layout/monitor.rs
 +++ b/src/layout/monitor.rs
-@@ -10,6 +10,7 @@ use smithay::backend::renderer::element::utils::{
+@@ -10,6 +10,7 @@
  use smithay::output::Output;
  use smithay::utils::{Logical, Point, Rectangle, Size};
  
@@ -1865,7 +2149,7 @@ index 53c06069..60951fd5 100644
  use super::insert_hint_element::{InsertHintElement, InsertHintRenderElement};
  use super::scrolling::{Column, ColumnWidth};
  use super::tile::Tile;
-@@ -32,7 +33,7 @@ use crate::utils::{
+@@ -33,7 +34,7 @@
      output_size, round_logical_in_physical, round_logical_in_physical_max1, ResizeEdge,
  };
  
@@ -1874,7 +2158,7 @@ index 53c06069..60951fd5 100644
  const WORKSPACE_GESTURE_MOVEMENT: f64 = 300.;
  
  const WORKSPACE_GESTURE_RUBBER_BAND: RubberBand = RubberBand {
-@@ -40,7 +41,7 @@ const WORKSPACE_GESTURE_RUBBER_BAND: RubberBand = RubberBand {
+@@ -41,7 +42,7 @@
      limit: 0.05,
  };
  
@@ -1883,7 +2167,7 @@ index 53c06069..60951fd5 100644
  ///
  /// This constant is tied to the default dnd-edge-workspace-switch max-speed setting.
  const WORKSPACE_DND_EDGE_SCROLL_MOVEMENT: f64 = 1500.;
-@@ -375,6 +376,26 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -376,6 +377,26 @@
          &self.workspaces[self.active_workspace_idx]
      }
  
@@ -1910,7 +2194,57 @@ index 53c06069..60951fd5 100644
      pub fn find_named_workspace(&self, workspace_name: &str) -> Option<&Workspace<W>> {
          self.workspaces.iter().find(|ws| {
              ws.name
-@@ -1152,6 +1173,7 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -889,22 +910,30 @@
+ 
+         let new_idx = self.idx_of_ws(new_id).unwrap();
+ 
+-        // Animate vertical movement between workspaces.
++        // Animate movement between workspaces along the cross axis.
+         //
+         // Recompute the source idx in case some workspace was removed during clean-up. If the
+         // source workspace itself was removed, don't bother animating this since the removal is
+         // instant anyway.
+         if let Some(source_workspace_idx) = self.idx_of_ws(source_id) {
+-            old_render_pos.y +=
+-                self.workspace_size_with_gap(1.).h * (source_workspace_idx as f64 - new_idx as f64);
+-        }
+-
++            old_render_pos += self.overview_axis().point_from_main_cross(
++                0.,
++                self.workspace_switch_span_with_gap(1.)
++                    * (source_workspace_idx as f64 - new_idx as f64),
++            );
++        }
++
++        let axis = self.overview_axis();
+         let (tile, new_render_pos) = self.workspaces[new_idx]
+             .tiles_with_render_positions_mut(false)
+             .find(|(tile, _)| tile.window().id() == &window)
+             .unwrap();
+         tile.animate_move_from_with_config(old_render_pos - new_render_pos, config);
+-        tile.set_anim_y_between_workspaces();
++        if axis.is_vertical() {
++            tile.set_anim_x_between_workspaces();
++        } else {
++            tile.set_anim_y_between_workspaces();
++        }
+     }
+ 
+     pub fn move_column_to_workspace_up(&mut self, activate: bool) {
+@@ -947,9 +976,9 @@
+ 
+         let column = workspace.remove_active_column().unwrap();
+ 
+-        // Animate vertical movement between workspaces.
+-        old_render_pos.y +=
+-            self.workspace_size_with_gap(1.).h * (source_workspace_idx as f64 - new_idx as f64);
++        // Column positions use internal main/cross coordinates.
++        old_render_pos.y += self.workspace_switch_span_with_gap(1.)
++            * (source_workspace_idx as f64 - new_idx as f64);
+ 
+         // If the view is following the column, match the animation.
+         let config = if activate {
+@@ -1153,6 +1182,7 @@
                      let hint_height = gap - hint_gap * 2.;
  
                      let next_ws_geo = self.workspaces_render_geo().nth(ws_idx).unwrap();
@@ -1918,7 +2252,7 @@ index 53c06069..60951fd5 100644
                      let hint_width = round_logical_in_physical(scale, next_ws_geo.size.w * 0.75);
                      let hint_x =
                          round_logical_in_physical(scale, (next_ws_geo.size.w - hint_width) / 2.);
-@@ -1169,14 +1191,14 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1170,14 +1200,14 @@
                      let view_rect = Rectangle::new(hint_loc_diff, next_ws_geo.size);
  
                      self.insert_hint_element.update_render_elements(
@@ -1936,7 +2270,7 @@ index 53c06069..60951fd5 100644
                      });
                  }
              }
-@@ -1354,20 +1376,25 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1355,20 +1385,25 @@
      }
  
      fn workspace_size(&self, zoom: f64) -> Size<f64, Logical> {
@@ -1968,7 +2302,7 @@ index 53c06069..60951fd5 100644
      }
  
      pub fn overview_zoom(&self) -> f64 {
-@@ -1416,51 +1443,51 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1417,51 +1452,51 @@
                  //   These are render_idx values, so first workspace to second would have switch
                  //   from = 0. and to = 1. regardless of the zoom level.
                  //
@@ -2033,19 +2367,21 @@ index 53c06069..60951fd5 100644
  
                  let zoom = self.overview_zoom();
 -                let ws_height_with_gap = self.workspace_size_with_gap(zoom).h;
-+                let ws_switch_span = self.workspace_switch_span_with_gap(zoom);
- 
+-
 -                let first_ws_y = -switch_anim.value() * from_ws_height_with_gap
 -                    + switch_anim.to() * (from_ws_height_with_gap - ws_height_with_gap);
+-
+-                return -first_ws_y / ws_height_with_gap;
++                let ws_switch_span = self.workspace_switch_span_with_gap(zoom);
++
 +                let first_ws_cross = -switch_anim.value() * from_ws_switch_span
 +                    + switch_anim.to() * (from_ws_switch_span - ws_switch_span);
- 
--                return -first_ws_y / ws_height_with_gap;
++
 +                return -first_ws_cross / ws_switch_span;
              }
          };
  
-@@ -1475,27 +1502,28 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1476,27 +1511,28 @@
          let scale = self.scale.fractional_scale();
          let zoom = self.overview_zoom();
  
@@ -2053,19 +2389,21 @@ index 53c06069..60951fd5 100644
          let ws_size = self.workspace_size(zoom);
          let gap = self.workspace_gap(zoom);
 -        let ws_height_with_gap = ws_size.h + gap;
-+        let ws_switch_span = axis.size_cross(ws_size) + gap;
- 
+-
 -        let static_offset = (self.view_size.to_point() - ws_size.to_point()).downscale(2.);
 -        let static_offset = static_offset
 -            .to_physical_precise_round(scale)
 -            .to_logical(scale);
+-
+-        let first_ws_y = -self.workspace_render_idx() * ws_height_with_gap;
+-        let first_ws_y = round_logical_in_physical(scale, first_ws_y);
++        let ws_switch_span = axis.size_cross(ws_size) + gap;
++
 +        let static_main = (axis.size_main(self.view_size) - axis.size_main(ws_size)) / 2.;
 +        let static_main = round_logical_in_physical(scale, static_main);
 +        let static_cross = (axis.size_cross(self.view_size) - axis.size_cross(ws_size)) / 2.;
 +        let static_cross = round_logical_in_physical(scale, static_cross);
- 
--        let first_ws_y = -self.workspace_render_idx() * ws_height_with_gap;
--        let first_ws_y = round_logical_in_physical(scale, first_ws_y);
++
 +        let first_ws_cross = static_cross - self.workspace_render_idx() * ws_switch_span;
 +        let first_ws_cross = round_logical_in_physical(scale, first_ws_cross);
  
@@ -2085,7 +2423,7 @@ index 53c06069..60951fd5 100644
              let loc = loc.to_physical_precise_round(scale).to_logical(scale);
  
              Rectangle::new(loc, ws_size)
-@@ -1540,15 +1568,23 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1548,15 +1584,23 @@
          &self,
          pos_within_output: Point<f64, Logical>,
      ) -> Option<(&Workspace<W>, Rectangle<f64, Logical>)> {
@@ -2094,6 +2432,7 @@ index 53c06069..60951fd5 100644
 -            let loc = Point::from((0., geo.loc.y));
 -            let size = Size::from((self.view_size.w, geo.size.h));
 -            let bounds = Rectangle::new(loc, size);
+-
 +        let axis = self.overview_axis();
 +        let pos_cross = axis.point_cross(pos_within_output);
 +        let output_main_span = axis.size_main(self.view_size);
@@ -2104,7 +2443,7 @@ index 53c06069..60951fd5 100644
 +            if !(geo_cross <= pos_cross && pos_cross < geo_cross_end) {
 +                return None;
 +            }
- 
++
 +            let bounds = Rectangle::new(
 +                axis.point_from_main_cross(0., geo_cross),
 +                axis.size_from_main_cross(output_main_span, axis.size_cross(geo.size)),
@@ -2116,7 +2455,7 @@ index 53c06069..60951fd5 100644
      }
  
      pub fn workspace_under_narrow(
-@@ -1588,48 +1624,51 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1596,48 +1640,51 @@
          &self,
          pos_within_output: Point<f64, Logical>,
      ) -> (InsertWorkspace, Rectangle<f64, Logical>) {
@@ -2129,11 +2468,12 @@ index 53c06069..60951fd5 100644
  
          // Monitors always have at least one workspace.
          let ((idx, ws), geo) = iter.next().unwrap();
-+        let geo_cross = axis.point_cross(geo.loc);
-+        let geo_cross_end = geo_cross + axis.size_cross(geo.size);
- 
+-
 -        // Check if above first.
 -        if pos_within_output.y < geo.loc.y {
++        let geo_cross = axis.point_cross(geo.loc);
++        let geo_cross_end = geo_cross + axis.size_cross(geo.size);
++
 +        // Check before first workspace along the overview-switch axis.
 +        if pos_cross < geo_cross {
              return (InsertWorkspace::NewAt(idx), dummy);
@@ -2183,7 +2523,7 @@ index 53c06069..60951fd5 100644
          (InsertWorkspace::NewAt(last_idx + 1), dummy)
      }
  
-@@ -1677,13 +1716,14 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1685,7 +1732,8 @@
          let _span = tracy_client::span!("Monitor::render_workspaces");
  
          let scale = self.scale.fractional_scale();
@@ -2192,37 +2532,39 @@ index 53c06069..60951fd5 100644
 +        let width = (self.view_size.w * scale).ceil() as i32;
          let height = (self.view_size.h * scale).ceil() as i32;
  
-         // Crop the elements to prevent them overflowing, currently visible during a workspace
-         // switch.
-         //
--        // HACK: crop to infinite bounds at least horizontally where we
-+        // HACK: crop to infinite bounds along the workspace-main axis where we
-         // know there's no workspace joining or monitor bounds, otherwise
-         // it will cut pixel shaders and mess up the coordinate space.
-         // There's also a damage tracking bug which causes glitched
-@@ -1691,10 +1731,17 @@ impl<W: LayoutElement> Monitor<W> {
-         //
-         // FIXME: use proper bounds after fixing the Crop element.
-         let crop_bounds = if self.workspace_switch.is_some() || self.overview_progress.is_some() {
--            Rectangle::new(
--                Point::from((-i32::MAX / 2, 0)),
--                Size::from((i32::MAX, height)),
--            )
-+            if self.overview_axis().is_vertical() {
-+                Rectangle::new(
-+                    Point::from((0, -i32::MAX / 2)),
-+                    Size::from((width, i32::MAX)),
-+                )
-+            } else {
-+                Rectangle::new(
-+                    Point::from((-i32::MAX / 2, 0)),
-+                    Size::from((i32::MAX, height)),
-+                )
-+            }
-         } else {
-             Rectangle::new(
-                 Point::from((-i32::MAX / 2, -i32::MAX / 2)),
-@@ -1844,10 +1891,10 @@ impl<W: LayoutElement> Monitor<W> {
+         let zoom = self.overview_zoom();
+@@ -1719,7 +1767,7 @@
+             // Crop the elements to prevent them overflowing, currently visible during a workspace
+             // switch.
+             //
+-            // HACK: crop to infinite bounds at least horizontally where we
++            // HACK: crop to infinite bounds along the workspace-main axis where we
+             // know there's no workspace joining or monitor bounds, otherwise
+             // it will cut pixel shaders and mess up the coordinate space.
+             // There's also a damage tracking bug which causes glitched
+@@ -1734,10 +1782,17 @@
+             // windows from appearing and disappearing.
+             let crop_bounds =
+                 if cull && (self.workspace_switch.is_some() || self.overview_progress.is_some()) {
+-                    Rectangle::new(
+-                        Point::from((-i32::MAX / 2, 0)),
+-                        Size::from((i32::MAX, height)),
+-                    )
++                    if self.overview_axis().is_vertical() {
++                        Rectangle::new(
++                            Point::from((0, -i32::MAX / 2)),
++                            Size::from((width, i32::MAX)),
++                        )
++                    } else {
++                        Rectangle::new(
++                            Point::from((-i32::MAX / 2, 0)),
++                            Size::from((i32::MAX, height)),
++                        )
++                    }
+                 } else {
+                     Rectangle::new(
+                         Point::from((-i32::MAX / 2, -i32::MAX / 2)),
+@@ -1908,10 +1963,10 @@
          }
  
          let zoom = self.overview_zoom();
@@ -2235,7 +2577,7 @@ index 53c06069..60951fd5 100644
          };
  
          let Some(WorkspaceSwitch::Gesture(gesture)) = &mut self.workspace_switch else {
-@@ -1861,13 +1908,13 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1925,13 +1980,13 @@
              zoom
          };
  
@@ -2245,14 +2587,15 @@ index 53c06069..60951fd5 100644
          rubber_band.limit /= zoom;
  
 -        gesture.tracker.push(delta_y, timestamp);
-+        gesture.tracker.push(delta_cross, timestamp);
- 
+-
 -        let pos = gesture.tracker.pos() / total_height;
++        gesture.tracker.push(delta_cross, timestamp);
++
 +        let pos = gesture.tracker.pos() / total_cross_span;
  
          let (min, max) = gesture.min_max(self.workspaces.len());
          let new_idx = gesture.start_idx + pos;
-@@ -1883,6 +1930,7 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1947,6 +2002,7 @@
  
      pub fn dnd_scroll_gesture_scroll(&mut self, pos: Point<f64, Logical>, speed: f64) -> bool {
          let zoom = self.overview_zoom();
@@ -2260,17 +2603,18 @@ index 53c06069..60951fd5 100644
  
          let Some(WorkspaceSwitch::Gesture(gesture)) = &mut self.workspace_switch else {
              return false;
-@@ -1894,37 +1942,37 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -1958,37 +2014,37 @@
          };
  
          let config = &self.options.gestures.dnd_edge_workspace_switch;
 -        let trigger_height = config.trigger_height;
-+        let trigger_span = config.trigger_height;
- 
+-
 -        // Restrict the scrolling horizontally to the strip of workspaces to avoid unwanted trigger
 -        // after using the hot corner or during horizontal scroll.
 -        let width = self.view_size.w * zoom;
 -        let x = pos.x - (self.view_size.w - width) / 2.;
++        let trigger_span = config.trigger_height;
++
 +        // Restrict the scrolling to the visible workspace strip to avoid unwanted trigger after
 +        // using the hot corner or during orthogonal scroll.
 +        let strip_main_span = axis.size_main(self.view_size) * zoom;
@@ -2279,16 +2623,18 @@ index 53c06069..60951fd5 100644
          // Consider the working area so layer-shell docks and such don't prevent scrolling.
 -        let y = pos.y - self.working_area.loc.y;
 -        let height = self.working_area.size.h;
-+        let cross = axis.point_cross(pos) - axis.point_cross(self.working_area.loc);
-+        let cross_span = axis.size_cross(self.working_area.size);
- 
+-
 -        let y = y.clamp(0., height);
 -        let trigger_height = trigger_height.clamp(0., height / 2.);
-+        let cross = cross.clamp(0., cross_span);
-+        let trigger_span = trigger_span.clamp(0., cross_span / 2.);
- 
+-
 -        let delta = if x < 0. || width <= x {
 -            // Outside the bounds horizontally.
++        let cross = axis.point_cross(pos) - axis.point_cross(self.working_area.loc);
++        let cross_span = axis.size_cross(self.working_area.size);
++
++        let cross = cross.clamp(0., cross_span);
++        let trigger_span = trigger_span.clamp(0., cross_span / 2.);
++
 +        let delta = if main < 0. || strip_main_span <= main {
 +            // Outside the bounds along the workspace strip.
              0.
@@ -2315,7 +2661,7 @@ index 53c06069..60951fd5 100644
          };
          let delta = delta * speed;
  
-@@ -1952,8 +2000,8 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -2016,8 +2072,8 @@
  
          gesture.tracker.push(delta, now);
  
@@ -2326,7 +2672,7 @@ index 53c06069..60951fd5 100644
          let unclamped = gesture.start_idx + pos;
  
          let (min, max) = gesture.min_max(self.workspaces.len());
-@@ -1976,12 +2024,12 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -2040,12 +2096,12 @@
          }
  
          let zoom = self.overview_zoom();
@@ -2341,7 +2687,7 @@ index 53c06069..60951fd5 100644
          };
  
          let Some(WorkspaceSwitch::Gesture(gesture)) = &mut self.workspace_switch else {
-@@ -1995,9 +2043,9 @@ impl<W: LayoutElement> Monitor<W> {
+@@ -2059,9 +2115,9 @@
          let mut rubber_band = WORKSPACE_GESTURE_RUBBER_BAND;
          rubber_band.limit /= zoom;
  
@@ -2355,10 +2701,9 @@ index 53c06069..60951fd5 100644
          let (min, max) = gesture.min_max(self.workspaces.len());
          let new_idx = gesture.start_idx + pos;
 diff --git a/src/layout/scrolling.rs b/src/layout/scrolling.rs
-index 007bcaf5..e67537ab 100644
 --- a/src/layout/scrolling.rs
 +++ b/src/layout/scrolling.rs
-@@ -10,6 +10,7 @@ use ordered_float::NotNan;
+@@ -10,6 +10,7 @@
  use smithay::backend::renderer::gles::GlesRenderer;
  use smithay::utils::{Logical, Point, Rectangle, Scale, Serial, Size};
  
@@ -2366,14 +2711,14 @@ index 007bcaf5..e67537ab 100644
  use super::closing_window::{ClosingWindow, ClosingWindowRenderElement};
  use super::monitor::InsertPosition;
  use super::tab_indicator::{TabIndicator, TabIndicatorRenderElement, TabInfo};
-@@ -27,9 +28,19 @@ use crate::utils::transaction::{Transaction, TransactionBlocker};
+@@ -28,8 +29,18 @@
  use crate::utils::ResizeEdge;
  use crate::window::ResolvedWindowRules;
  
 -/// Amount of touchpad movement to scroll the view for the width of one working area.
 +/// Amount of touchpad movement to scroll the view for the main-axis span of one working area.
  const VIEW_GESTURE_WORKING_AREA_MOVEMENT: f64 = 1200.;
- 
++
 +/// A vector in scrolling-space coordinates, where X is main axis and Y is cross axis.
 +fn main_space_vec(main: f64) -> Point<f64, Logical> {
 +    Point::from((main, 0.))
@@ -2383,11 +2728,10 @@ index 007bcaf5..e67537ab 100644
 +fn cross_space_vec(cross: f64) -> Point<f64, Logical> {
 +    Point::from((0., cross))
 +}
-+
+ 
  /// A scrollable-tiling space for windows.
  #[derive(Debug)]
- pub struct ScrollingSpace<W: LayoutElement> {
-@@ -105,7 +116,7 @@ niri_render_elements! {
+@@ -106,7 +117,7 @@
  /// Extra per-column data.
  #[derive(Debug, Clone, Copy, PartialEq)]
  struct ColumnData {
@@ -2396,7 +2740,7 @@ index 007bcaf5..e67537ab 100644
      width: f64,
  }
  
-@@ -231,38 +242,39 @@ struct TileData {
+@@ -257,38 +268,39 @@
      interactively_resizing_by_left_edge: bool,
  }
  
@@ -2455,8 +2799,8 @@ index 007bcaf5..e67537ab 100644
      Preset(usize),
  }
  
-@@ -282,6 +294,12 @@ struct MoveAnimation {
-     from: f64,
+@@ -312,6 +324,12 @@
+     is_between_workspaces: bool,
  }
  
 +#[derive(Debug, Clone, Copy)]
@@ -2468,7 +2812,7 @@ index 007bcaf5..e67537ab 100644
  impl<W: LayoutElement> ScrollingSpace<W> {
      pub fn new(
          view_size: Size<f64, Logical>,
-@@ -290,6 +308,9 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -320,6 +338,9 @@
          clock: Clock,
          options: Rc<Options>,
      ) -> Self {
@@ -2478,7 +2822,7 @@ index 007bcaf5..e67537ab 100644
          let working_area = compute_working_area(parent_area, scale, options.layout.struts);
  
          Self {
-@@ -317,6 +338,9 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -347,6 +368,9 @@
          scale: f64,
          options: Rc<Options>,
      ) {
@@ -2488,10 +2832,12 @@ index 007bcaf5..e67537ab 100644
          let working_area = compute_working_area(parent_area, scale, options.layout.struts);
  
          for (column, data) in zip(&mut self.columns, &mut self.data) {
-@@ -336,6 +360,30 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -364,6 +388,30 @@
+         if !self.columns.is_empty() && !self.view_offset.is_gesture() {
+             self.animate_view_offset_to_column(None, self.active_column_idx, None);
          }
-     }
- 
++    }
++
 +    fn axis(&self) -> AxisMap {
 +        AxisMap::new(self.options.layout.main_axis)
 +    }
@@ -2514,32 +2860,19 @@ index 007bcaf5..e67537ab 100644
 +
 +    fn map_rect_out(&self, rect: Rectangle<f64, Logical>) -> Rectangle<f64, Logical> {
 +        self.axis().rect_out(rect)
-+    }
-+
-     pub fn update_shaders(&mut self) {
-         for col in &mut self.columns {
-             col.update_shaders();
-@@ -397,14 +445,14 @@ impl<W: LayoutElement> ScrollingSpace<W> {
      }
  
-     pub fn update_render_elements(&mut self, is_active: bool) {
+     pub fn update_shaders(&mut self) {
+@@ -427,7 +475,7 @@
+     }
+ 
+     pub fn update_render_elements(&mut self, is_active: bool, layer: RenderLayer) {
 -        let view_pos = Point::from((self.view_pos(), 0.));
-+        let view_main_offset = main_space_vec(self.view_main_pos());
++        let view_pos = main_space_vec(self.view_main_pos());
          let view_size = self.view_size;
          let active_idx = self.active_column_idx;
--        for (col_idx, (col, col_x)) in self.columns_mut().enumerate() {
-+        for (col_idx, (col, column_main)) in self.columns_mut().enumerate() {
-             let is_active = is_active && col_idx == active_idx;
--            let col_off = Point::from((col_x, 0.));
--            let col_pos = view_pos - col_off - col.render_offset();
--            let view_rect = Rectangle::new(col_pos, view_size);
-+            let column_offset = main_space_vec(column_main);
-+            let column_pos = view_main_offset - column_offset - col.render_offset();
-+            let view_rect = Rectangle::new(column_pos, view_size);
-             col.update_render_elements(is_active, view_rect);
-         }
-     }
-@@ -470,12 +518,13 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+         for (col_idx, (col, col_x)) in self.columns_mut().enumerate() {
+@@ -505,12 +553,13 @@
              Size::from((0., 0.))
          };
  
@@ -2555,7 +2888,7 @@ index 007bcaf5..e67537ab 100644
      }
  
      pub fn new_window_size(
-@@ -534,7 +583,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -569,7 +618,8 @@
              full_height
          };
  
@@ -2565,7 +2898,7 @@ index 007bcaf5..e67537ab 100644
      }
  
      pub fn is_centering_focused_column(&self) -> bool {
-@@ -544,60 +594,80 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -579,60 +629,80 @@
  
      fn compute_new_view_offset_fit(
          &self,
@@ -2589,10 +2922,11 @@ index 007bcaf5..e67537ab 100644
          };
  
 -        let target_x = target_x.unwrap_or_else(|| self.target_view_pos());
-+        let target_view_main = target_view_main.unwrap_or_else(|| self.target_view_main_pos());
- 
+-
 -        let new_offset =
 -            compute_new_view_offset(target_x + area.loc.x, area.size.w, col_x, width, padding);
++        let target_view_main = target_view_main.unwrap_or_else(|| self.target_view_main_pos());
++
 +        let new_offset = compute_new_view_offset(
 +            target_view_main + work_area.loc.x,
 +            work_area.size.w,
@@ -2618,15 +2952,17 @@ index 007bcaf5..e67537ab 100644
      ) -> f64 {
          if mode.is_fullscreen() {
 -            return self.compute_new_view_offset_fit(target_x, col_x, width, mode);
+-        }
+-
+-        let area = if mode.is_maximized() {
 +            return self.compute_new_view_offset_fit(
 +                target_view_main,
 +                column_main,
 +                column_span,
 +                mode,
 +            );
-         }
- 
--        let area = if mode.is_maximized() {
++        }
++
 +        let work_area = if mode.is_maximized() {
              self.parent_area
          } else {
@@ -2636,6 +2972,12 @@ index 007bcaf5..e67537ab 100644
 -        // Columns wider than the view are left-aligned (the fit code can deal with that).
 -        if area.size.w <= width {
 -            return self.compute_new_view_offset_fit(target_x, col_x, width, mode);
+-        }
+-
+-        -(area.size.w - width) / 2. - area.loc.x
+-    }
+-
+-    fn compute_new_view_offset_for_column_fit(&self, target_x: Option<f64>, idx: usize) -> f64 {
 +        // Columns wider than the view are aligned to the start edge (the fit code can deal with
 +        // that).
 +        if work_area.size.w <= column_span {
@@ -2645,13 +2987,11 @@ index 007bcaf5..e67537ab 100644
 +                column_span,
 +                mode,
 +            );
-         }
- 
--        -(area.size.w - width) / 2. - area.loc.x
++        }
++
 +        -(work_area.size.w - column_span) / 2. - work_area.loc.x
-     }
- 
--    fn compute_new_view_offset_for_column_fit(&self, target_x: Option<f64>, idx: usize) -> f64 {
++    }
++
 +    fn compute_new_view_offset_for_column_fit(
 +        &self,
 +        target_view_main: Option<f64>,
@@ -2666,7 +3006,7 @@ index 007bcaf5..e67537ab 100644
              col.width(),
              col.sizing_mode(),
          )
-@@ -605,13 +675,13 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -640,13 +710,13 @@
  
      fn compute_new_view_offset_for_column_centered(
          &self,
@@ -2683,7 +3023,7 @@ index 007bcaf5..e67537ab 100644
              col.width(),
              col.sizing_mode(),
          )
-@@ -619,26 +689,26 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -654,26 +724,26 @@
  
      fn compute_new_view_offset_for_column(
          &self,
@@ -2715,17 +3055,18 @@ index 007bcaf5..e67537ab 100644
                  }
  
                  // Always take the left or right neighbor of the target as the source.
-@@ -648,33 +718,308 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -683,33 +753,308 @@
                      idx.saturating_sub(1)
                  };
  
 -                let source_col_x = self.column_x(source_idx);
 -                let source_col_width = self.columns[source_idx].width();
-+                let source_column_main = self.column_main_pos(source_idx);
-+                let source_column_span = self.columns[source_idx].width();
- 
+-
 -                let target_col_x = self.column_x(idx);
 -                let target_col_width = self.columns[idx].width();
++                let source_column_main = self.column_main_pos(source_idx);
++                let source_column_span = self.columns[source_idx].width();
++
 +                let target_column_main = self.column_main_pos(idx);
 +                let target_column_span = self.columns[idx].width();
  
@@ -2756,6 +3097,8 @@ index 007bcaf5..e67537ab 100644
              }
              CenterFocusedColumn::Never => {
 -                self.compute_new_view_offset_for_column_fit(target_x, idx)
+-            }
+-        }
 +                self.compute_new_view_offset_for_column_fit(target_view_main, idx)
 +            }
 +        }
@@ -3031,13 +3374,13 @@ index 007bcaf5..e67537ab 100644
 +                    break;
 +                }
 +                col_idx = prev_idx;
-             }
-         }
++            }
++        }
 +        col_idx
      }
  
      fn animate_view_offset(&mut self, idx: usize, new_view_offset: f64) {
-@@ -691,9 +1036,9 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -726,9 +1071,9 @@
          new_view_offset: f64,
          config: niri_config::Animation,
      ) {
@@ -3050,7 +3393,7 @@ index 007bcaf5..e67537ab 100644
          self.view_offset.offset(offset_delta);
  
          let pixel = 1. / self.scale;
-@@ -733,33 +1078,35 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -768,33 +1113,35 @@
  
      fn animate_view_offset_to_column_centered(
          &mut self,
@@ -3092,7 +3435,7 @@ index 007bcaf5..e67537ab 100644
              idx,
              prev_idx,
              self.options.animations.horizontal_view_movement.0,
-@@ -803,29 +1150,30 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -838,29 +1185,30 @@
              return InsertPosition::NewColumn(0);
          }
  
@@ -3132,7 +3475,7 @@ index 007bcaf5..e67537ab 100644
              .last()
              .unwrap_or((0, 0.));
  
-@@ -837,12 +1185,12 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -872,12 +1220,12 @@
          // Find the closest gap between tiles.
          let col = &self.columns[col_idx];
  
@@ -3147,7 +3490,7 @@ index 007bcaf5..e67537ab 100644
                  (col.active_tile_idx, top)
              } else {
                  (col.active_tile_idx + 1, bottom)
-@@ -851,14 +1199,14 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -886,14 +1234,14 @@
              col.tile_offsets()
                  .map(|tile_off| tile_off.y)
                  .enumerate()
@@ -3167,7 +3510,7 @@ index 007bcaf5..e67537ab 100644
              InsertPosition::NewColumn(closest_col_idx)
          } else {
              InsertPosition::InColumn(col_idx, closest_tile_idx)
-@@ -894,7 +1242,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -929,7 +1277,7 @@
          tile: Tile<W>,
          activate: bool,
      ) {
@@ -3176,7 +3519,7 @@ index 007bcaf5..e67537ab 100644
  
          let target_column = &mut self.columns[col_idx];
          let tile_idx = tile_idx.unwrap_or(target_column.tiles.len());
-@@ -930,7 +1278,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -965,7 +1313,7 @@
  
          // Adding a wider window into a column increases its width now (even if the window will
          // shrink later). Move the columns to account for this.
@@ -3184,8 +3527,8 @@ index 007bcaf5..e67537ab 100644
 +        let offset = self.column_main_pos(col_idx + 1) - prev_next_x;
          if self.active_column_idx <= col_idx {
              for col in &mut self.columns[col_idx + 1..] {
-                 col.animate_move_from(-offset);
-@@ -992,7 +1340,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+                 col.animate_move_x_from(-offset);
+@@ -1028,7 +1376,7 @@
          }
  
          // Animate movement of other columns.
@@ -3194,7 +3537,7 @@ index 007bcaf5..e67537ab 100644
          let config = anim_config.unwrap_or(self.options.animations.window_movement.0);
          if self.active_column_idx <= idx {
              for col in &mut self.columns[idx + 1..] {
-@@ -1073,7 +1421,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1095,7 +1443,8 @@
          let movement_config = anim_config.unwrap_or(self.options.animations.window_movement.0);
  
          // Animate movement of other tiles.
@@ -3204,7 +3547,7 @@ index 007bcaf5..e67537ab 100644
          // than the others.
          let offset_y = column.tile_offset(tile_idx + 1).y - column.tile_offset(tile_idx).y;
          for tile in &mut column.tiles[tile_idx + 1..] {
-@@ -1166,7 +1515,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1196,7 +1545,7 @@
      ) -> Column<W> {
          // Animate movement of the other columns.
          let movement_config = anim_config.unwrap_or(self.options.animations.window_movement.0);
@@ -3212,8 +3555,8 @@ index 007bcaf5..e67537ab 100644
 +        let offset = self.column_main_pos(column_idx + 1) - self.column_main_pos(column_idx);
          if self.active_column_idx <= column_idx {
              for col in &mut self.columns[column_idx + 1..] {
-                 col.animate_move_from_with_config(offset, movement_config);
-@@ -1325,7 +1674,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+                 col.animate_move_x_from_with_config(offset, movement_config);
+@@ -1355,7 +1704,7 @@
  
          // When a column goes between fullscreen and non-fullscreen, the tiles origin can change.
          // The change comes from things like ignoring struts and hiding the tab indicator in
@@ -3222,7 +3565,7 @@ index 007bcaf5..e67537ab 100644
          let column = &mut self.columns[col_idx];
          let new_origin = column.tiles_origin();
          let origin_delta = prev_origin - new_origin;
-@@ -1387,8 +1736,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1417,8 +1766,8 @@
              // We might need to move the view to ensure the resized window is still visible. But
              // only do it when the view isn't frozen by an interactive resize or a view gesture.
              if self.interactive_resize.is_none() && !self.view_offset.is_gesture() {
@@ -3233,7 +3576,7 @@ index 007bcaf5..e67537ab 100644
                  let config = if ongoing_resize_anim {
                      self.options.animations.window_resize.anim
                  } else {
-@@ -1418,18 +1767,18 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1448,18 +1797,18 @@
              return 0.;
          }
  
@@ -3250,15 +3593,16 @@ index 007bcaf5..e67537ab 100644
  
 -        let new_col_x = self.column_x(column_idx);
 -        let from_view_offset = target_x - new_col_x;
+-
+-        (from_view_offset - new_view_offset).abs() / self.working_area.size.w
 +        let target_column_main = self.column_main_pos(column_idx);
 +        let current_offset_from_column = target_view_main - target_column_main;
- 
--        (from_view_offset - new_view_offset).abs() / self.working_area.size.w
++
 +        (current_offset_from_column - new_view_offset).abs() / self.working_area.size.w
      }
  
      pub fn activate_window(&mut self, window: &W::Id) -> bool {
-@@ -1451,6 +1800,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1481,6 +1830,7 @@
          window: &W::Id,
          blocker: TransactionBlocker,
      ) {
@@ -3266,7 +3610,7 @@ index 007bcaf5..e67537ab 100644
          let (tile, mut tile_pos) = self
              .tiles_with_render_positions_mut(false)
              .find(|(tile, _)| tile.window().id() == window)
-@@ -1460,7 +1810,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1490,7 +1840,7 @@
              return;
          };
  
@@ -3275,7 +3619,7 @@ index 007bcaf5..e67537ab 100644
  
          let (col_idx, tile_idx) = self
              .columns
-@@ -1482,11 +1832,11 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1512,11 +1862,11 @@
              return;
          }
  
@@ -3289,7 +3633,7 @@ index 007bcaf5..e67537ab 100644
              } else {
                  self.data[col_idx].width
                      - col
-@@ -1500,7 +1850,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1530,7 +1880,7 @@
                          .map(NotNan::into_inner)
                          .unwrap()
              };
@@ -3298,7 +3642,7 @@ index 007bcaf5..e67537ab 100644
          }
  
          self.start_close_animation_for_tile(renderer, snapshot, tile_size, tile_pos, blocker);
-@@ -1682,8 +2032,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1712,8 +2062,8 @@
              return;
          }
  
@@ -3309,7 +3653,7 @@ index 007bcaf5..e67537ab 100644
  
          let mut column = self.columns.remove(self.active_column_idx);
          let data = self.data.remove(self.active_column_idx);
-@@ -1691,23 +2041,23 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1721,16 +2071,16 @@
          self.columns.insert(new_idx, column);
          self.data.insert(new_idx, data);
  
@@ -3321,27 +3665,19 @@ index 007bcaf5..e67537ab 100644
  
          // The column we just moved is offset by the difference between its new and old position.
 -        let new_col_x = self.column_x(new_idx);
--        self.columns[new_idx].animate_move_from(current_col_x - new_col_x);
-+        let new_column_main = self.column_main_pos(new_idx);
-+        self.columns[new_idx].animate_move_from(current_column_main - new_column_main);
- 
+-        self.columns[new_idx].animate_move_x_from(current_col_x - new_col_x);
+-
 -        // All columns in between moved by the width of the column that we just moved.
 -        let others_x_offset = next_col_x - current_col_x;
++        let new_column_main = self.column_main_pos(new_idx);
++        self.columns[new_idx].animate_move_x_from(current_column_main - new_column_main);
++
 +        // All columns in between move by the span of the column that we just moved.
-+        let between_columns_main_delta = next_column_main - current_column_main;
++        let others_x_offset = next_column_main - current_column_main;
          if self.active_column_idx < new_idx {
              for col in &mut self.columns[self.active_column_idx..new_idx] {
--                col.animate_move_from(others_x_offset);
-+                col.animate_move_from(between_columns_main_delta);
-             }
-         } else {
-             for col in &mut self.columns[new_idx + 1..=self.active_column_idx] {
--                col.animate_move_from(-others_x_offset);
-+                col.animate_move_from(-between_columns_main_delta);
-             }
-         }
- 
-@@ -1798,17 +2148,17 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+                 col.animate_move_x_from(others_x_offset);
+@@ -1828,17 +2178,17 @@
              // Move into adjacent column.
              let target_column_idx = source_col_idx - 1;
  
@@ -3364,24 +3700,26 @@ index 007bcaf5..e67537ab 100644
  
              if source_tile_was_active {
                  // Make sure the previous (target) column is activated so the animation looks right.
-@@ -1817,10 +2167,10 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1847,10 +2197,10 @@
                  // improves the workflow that has become common with tabbed columns: open a new
                  // window, then immediately consume it left as a new tab.
                  self.activate_prev_column_on_removal
 -                    .get_or_insert(self.view_offset.stationary() + offset.x);
+-            }
+-
+-            offset += self.columns[source_col_idx].render_offset();
 +                    .get_or_insert(self.view_offset.stationary() + main_delta);
-             }
- 
--            offset.x += self.columns[source_col_idx].render_offset().x;
++            }
++
 +            move_offset += self.columns[source_col_idx].render_offset();
              let RemovedTile { tile, .. } = self.remove_tile_by_idx(
                  source_col_idx,
                  0,
-@@ -1830,14 +2180,14 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1860,14 +2210,14 @@
              self.add_tile_to_column(target_column_idx, None, tile, source_tile_was_active);
  
              let target_column = &mut self.columns[target_column_idx];
--            offset.x -= target_column.render_offset().x;
+-            offset -= target_column.render_offset();
 -            offset += prev_off - target_column.tile_offset(target_column.tiles.len() - 1);
 +            move_offset -= target_column.render_offset();
 +            move_offset += prev_off - target_column.tile_offset(target_column.tiles.len() - 1);
@@ -3391,12 +3729,12 @@ index 007bcaf5..e67537ab 100644
 +            new_tile.animate_move_from(move_offset);
          } else {
              // Move out of column.
--            let mut offset = Point::from((source_column.render_offset().x, 0.));
+-            let mut offset = source_column.render_offset();
 +            let mut move_offset = source_column.render_offset();
  
              let removed =
                  self.remove_tile_by_idx(source_col_idx, source_tile_idx, Transaction::new(), None);
-@@ -1860,13 +2210,16 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1890,13 +2240,16 @@
              }
  
              if target_column_idx <= self.active_column_idx {
@@ -3417,7 +3755,7 @@ index 007bcaf5..e67537ab 100644
          }
      }
  
-@@ -1892,10 +2245,10 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1922,10 +2275,10 @@
              (source_col_idx, source_tile_idx)
          };
  
@@ -3425,24 +3763,24 @@ index 007bcaf5..e67537ab 100644
 +        let source_column_main = self.column_main_pos(source_col_idx);
  
          let source_column = &self.columns[source_col_idx];
--        let mut offset = Point::from((source_column.render_offset().x, 0.));
+-        let mut offset = source_column.render_offset();
 +        let mut move_offset = source_column.render_offset();
          let prev_off = source_column.tile_offset(source_tile_idx);
  
          let source_tile_was_active = self.active_column_idx == source_col_idx
-@@ -1909,8 +2262,9 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1939,8 +2292,9 @@
              // Move into adjacent column.
              let target_column_idx = source_col_idx;
  
 -            offset.x += cur_x - self.column_x(source_col_idx + 1);
--            offset.x -= self.columns[source_col_idx + 1].render_offset().x;
+-            offset -= self.columns[source_col_idx + 1].render_offset();
 +            move_offset +=
 +                main_space_vec(source_column_main - self.column_main_pos(source_col_idx + 1));
 +            move_offset -= self.columns[source_col_idx + 1].render_offset();
  
              if source_tile_was_active {
                  // Make sure the target column gets activated.
-@@ -1926,10 +2280,10 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1956,10 +2310,10 @@
              self.add_tile_to_column(target_column_idx, None, tile, source_tile_was_active);
  
              let target_column = &mut self.columns[target_column_idx];
@@ -3455,7 +3793,7 @@ index 007bcaf5..e67537ab 100644
          } else {
              // Move out of column.
              let prev_width = self.data[source_col_idx].width;
-@@ -1948,17 +2302,17 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -1978,17 +2332,17 @@
                  Some(self.options.animations.window_movement.0),
              );
  
@@ -3480,36 +3818,19 @@ index 007bcaf5..e67537ab 100644
          }
      }
  
-@@ -1974,21 +2328,21 @@ impl<W: LayoutElement> ScrollingSpace<W> {
-         let target_column_idx = self.active_column_idx;
+@@ -2005,8 +2359,9 @@
          let source_column_idx = self.active_column_idx + 1;
  
--        let offset = self.column_x(source_column_idx)
--            + self.columns[source_column_idx].render_offset().x
--            - self.column_x(target_column_idx);
--        let mut offset = Point::from((offset, 0.));
-+        let main_delta =
-+            self.column_main_pos(source_column_idx) - self.column_main_pos(target_column_idx);
-+        let mut move_offset = self.columns[source_column_idx].render_offset();
-+        move_offset += main_space_vec(main_delta);
+         let mut offset = self.columns[source_column_idx].render_offset();
+-        offset.x += self.column_x(source_column_idx);
+-        offset.x -= self.column_x(target_column_idx);
++        offset += main_space_vec(
++            self.column_main_pos(source_column_idx) - self.column_main_pos(target_column_idx),
++        );
          let prev_off = self.columns[source_column_idx].tile_offset(0);
  
          let removed = self.remove_tile_by_idx(source_column_idx, 0, Transaction::new(), None);
-         self.add_tile_to_column(target_column_idx, None, removed.tile, false);
- 
-         let target_column = &mut self.columns[target_column_idx];
--        offset += prev_off - target_column.tile_offset(target_column.tiles.len() - 1);
--        offset.x -= target_column.render_offset().x;
-+        move_offset += prev_off - target_column.tile_offset(target_column.tiles.len() - 1);
-+        move_offset -= target_column.render_offset();
- 
-         let new_tile = target_column.tiles.last_mut().unwrap();
--        new_tile.animate_move_from(offset);
-+        new_tile.animate_move_from(move_offset);
-     }
- 
-     pub fn expel_from_column(&mut self) {
-@@ -1998,7 +2352,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2027,7 +2382,7 @@
  
          let source_col_idx = self.active_column_idx;
          let target_col_idx = self.active_column_idx + 1;
@@ -3518,16 +3839,16 @@ index 007bcaf5..e67537ab 100644
  
          let source_column = &self.columns[self.active_column_idx];
          if source_column.tiles.len() == 1 {
-@@ -2007,7 +2361,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2036,7 +2391,7 @@
  
          let source_tile_idx = source_column.tiles.len() - 1;
  
--        let mut offset = Point::from((source_column.render_offset().x, 0.));
+-        let mut offset = source_column.render_offset();
 +        let mut move_offset = source_column.render_offset();
          let prev_off = source_column.tile_offset(source_tile_idx);
  
          let removed =
-@@ -2022,11 +2376,11 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2051,11 +2406,11 @@
              Some(self.options.animations.window_movement.0),
          );
  
@@ -3542,7 +3863,7 @@ index 007bcaf5..e67537ab 100644
      }
  
      pub fn swap_window_in_direction(&mut self, direction: ScrollDirection) {
-@@ -2074,8 +2428,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2103,8 +2458,8 @@
              self.columns[target_column_idx].render_offset()
                  + self.columns[target_column_idx].tile_offset(target_tile_idx),
          );
@@ -3553,7 +3874,7 @@ index 007bcaf5..e67537ab 100644
  
          let transaction = Transaction::new();
  
-@@ -2242,40 +2596,41 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2271,40 +2626,41 @@
              return;
          }
  
@@ -3587,11 +3908,12 @@ index 007bcaf5..e67537ab 100644
              }
  
 -            leftmost_col_x.get_or_insert(col_x);
-+            first_visible_column_main.get_or_insert(column_main);
- 
+-
 -            let width = self.data[idx].width;
 -            if view_x + working_x + working_w < col_x + width + gap {
 -                // Column goes off-screen to the right. We can stop here.
++            first_visible_column_main.get_or_insert(column_main);
++
 +            let column_span = self.data[idx].width;
 +            if target_view_main + work_area_main + work_area_span < column_main + column_span + gap
 +            {
@@ -3601,28 +3923,33 @@ index 007bcaf5..e67537ab 100644
  
              if idx == self.active_column_idx {
 -                active_col_x = Some(col_x);
-+                active_column_main = Some(column_main);
-             }
- 
+-            }
+-
 -            width_taken += width + gap;
-+            occupied_span += column_span + gap;
-         }
- 
+-        }
+-
 -        if active_col_x.is_none() {
++                active_column_main = Some(column_main);
++            }
++
++            occupied_span += column_span + gap;
++        }
++
 +        if active_column_main.is_none() {
              // The active column wasn't fully on screen, so we can't meaningfully do anything.
              return;
          }
-@@ -2283,53 +2638,67 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2312,53 +2668,67 @@
          let col = &mut self.columns[self.active_column_idx];
          cancel_resize_for_column(&mut self.interactive_resize, col);
  
 -        let free_space = working_w - width_taken + gap;
 -        let new_view_x = leftmost_col_x.unwrap() - free_space / 2. - working_x;
+-
+-        self.animate_view_offset(self.active_column_idx, new_view_x - active_col_x.unwrap());
 +        let free_span = work_area_span - occupied_span + gap;
 +        let new_view_main = first_visible_column_main.unwrap() - free_span / 2. - work_area_main;
- 
--        self.animate_view_offset(self.active_column_idx, new_view_x - active_col_x.unwrap());
++
 +        self.animate_view_offset(
 +            self.active_column_idx,
 +            new_view_main - active_column_main.unwrap(),
@@ -3658,9 +3985,10 @@ index 007bcaf5..e67537ab 100644
 +    ) -> impl Iterator<Item = f64> {
          let gaps = self.options.layout.gaps;
 -        let mut x = 0.;
-+        let mut main = 0.;
- 
+-
 -        // Chain with a dummy value to be able to get one past all columns' X.
++        let mut main = 0.;
++
 +        // Chain with a dummy value to be able to get one past all columns' position.
          let dummy = ColumnData { width: 0. };
          let data = data.chain(iter::once(dummy));
@@ -3696,7 +4024,7 @@ index 007bcaf5..e67537ab 100644
              .enumerate()
              .filter_map(move |(idx, pos)| (idx != active_idx).then_some(pos));
          iter::once(active_pos).chain(offsets)
-@@ -2340,12 +2709,12 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2369,12 +2739,12 @@
      }
  
      fn columns_mut(&mut self) -> impl Iterator<Item = (&mut Column<W>, f64)> + '_ {
@@ -3711,7 +4039,7 @@ index 007bcaf5..e67537ab 100644
  
          let (first, active, rest) = if self.columns.is_empty() {
              (&[][..], &[][..], &[][..])
-@@ -2360,7 +2729,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2389,7 +2759,7 @@
      }
  
      fn columns_in_render_order_mut(&mut self) -> impl Iterator<Item = (&mut Column<W>, f64)> + '_ {
@@ -3720,45 +4048,35 @@ index 007bcaf5..e67537ab 100644
  
          let (first, active, rest) = if self.columns.is_empty() {
              (&mut [][..], &mut [][..], &mut [][..])
-@@ -2378,7 +2747,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2431,11 +2801,12 @@
          &self,
      ) -> impl Iterator<Item = (&Tile<W>, Point<f64, Logical>, bool)> {
          let scale = self.scale;
--        let view_off = Point::from((-self.view_pos(), 0.));
 +        let axis = self.axis();
-+        let view_off = Point::from((-self.view_main_pos(), 0.));
-         self.columns_in_render_order()
-             .flat_map(move |(col, col_x)| {
-                 let col_off = Point::from((col_x, 0.));
-@@ -2387,6 +2757,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+         self.columns_with_render_positions()
+             .flat_map(move |(col, col_pos)| {
+                 col.tiles_in_render_order()
                      .map(move |(tile, tile_off, visible)| {
-                         let pos =
-                             view_off + col_off + col_render_off + tile_off + tile.render_offset();
-+                        let pos = axis.point_out(pos);
+-                        let pos = col_pos + tile_off + tile.render_offset();
++                        let pos = axis.point_out(col_pos + tile_off + tile.render_offset());
                          // Round to physical pixels.
                          let pos = pos.to_physical_precise_round(scale).to_logical(scale);
                          (tile, pos, visible)
-@@ -2399,15 +2770,17 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2448,11 +2819,12 @@
          round: bool,
      ) -> impl Iterator<Item = (&mut Tile<W>, Point<f64, Logical>)> {
          let scale = self.scale;
--        let view_off = Point::from((-self.view_pos(), 0.));
 +        let axis = self.axis();
-+        let view_off = Point::from((-self.view_main_pos(), 0.));
-         self.columns_in_render_order_mut()
-             .flat_map(move |(col, col_x)| {
-                 let col_off = Point::from((col_x, 0.));
-                 let col_render_off = col.render_offset();
+         self.columns_with_render_positions_mut()
+             .flat_map(move |(col, col_pos)| {
                  col.tiles_in_render_order_mut()
                      .map(move |(tile, tile_off)| {
--                        let mut pos =
-+                        let pos =
-                             view_off + col_off + col_render_off + tile_off + tile.render_offset();
-+                        let mut pos = axis.point_out(pos);
+-                        let mut pos = col_pos + tile_off + tile.render_offset();
++                        let mut pos = axis.point_out(col_pos + tile_off + tile.render_offset());
                          // Round to physical pixels.
                          if round {
                              pos = pos.to_physical_precise_round(scale).to_logical(scale);
-@@ -2418,19 +2791,32 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2463,19 +2835,32 @@
      }
  
      pub fn tiles_with_ipc_layouts(&self) -> impl Iterator<Item = (&Tile<W>, WindowLayout)> {
@@ -3804,7 +4122,7 @@ index 007bcaf5..e67537ab 100644
      }
  
      pub(super) fn insert_hint_area(
-@@ -2445,7 +2831,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2490,7 +2875,7 @@
                          self.working_area.size.h - self.options.layout.gaps * 2.,
                      ));
                      let mut loc = Point::from((
@@ -3813,7 +4131,7 @@ index 007bcaf5..e67537ab 100644
                          self.working_area.loc.y + self.options.layout.gaps,
                      ));
                      if column_index == 0 && !self.columns.is_empty() {
-@@ -2461,7 +2847,9 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2506,7 +2891,9 @@
                          self.working_area.size.h - self.options.layout.gaps * 2.,
                      ));
                      let loc = Point::from((
@@ -3824,7 +4142,7 @@ index 007bcaf5..e67537ab 100644
                          self.working_area.loc.y + self.options.layout.gaps,
                      ));
                      Rectangle::new(loc, size)
-@@ -2513,7 +2901,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2558,7 +2945,7 @@
                  };
  
                  let size = Size::from((self.data[column_index].width - extra_w, height));
@@ -3833,50 +4151,60 @@ index 007bcaf5..e67537ab 100644
                  Rectangle::new(loc, size)
              }
              InsertPosition::Floating => return None,
-@@ -2534,10 +2922,10 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2579,10 +2966,10 @@
              };
              hint_area.loc.x -= view_offset;
          } else {
 -            hint_area.loc.x -= self.view_pos();
-+            hint_area.loc.x -= self.view_main_pos();
-         }
- 
+-        }
+-
 -        Some(hint_area)
++            hint_area.loc.x -= self.view_main_pos();
++        }
++
 +        Some(self.map_rect_out(hint_area))
      }
  
-     /// Returns the geometry of the active tile relative to and clamped to the view.
-@@ -2557,6 +2945,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+     /// Returns the geometry of the active window relative to and clamped to the view.
+@@ -2602,11 +2989,12 @@
  
          let view = Rectangle::from_size(self.view_size);
-         view.intersection(tile_rect)
+         view.intersection(window_rect)
 +            .map(|rect| self.map_rect_out(rect))
      }
  
-     pub fn popup_target_rect(&self, id: &W::Id) -> Option<Rectangle<f64, Logical>> {
-@@ -2567,15 +2956,18 @@ impl<W: LayoutElement> ScrollingSpace<W> {
-                     // window geometry (so they remain visible even if the window scrolls flush with
-                     // the left/right edge of the screen), and vertically within the whole parent
-                     // working area.
--                    let width = tile.window_size().w;
-+                    let axis = self.axis();
-+                    let window_size = axis.size_out(tile.window_size());
-+                    let window_loc = axis.point_out(tile.window_loc());
-+                    let width = window_size.w;
-                     let height = self.parent_area.size.h;
+     pub fn popup_target_rect(&self, id: &W::Id, overflow: bool) -> Option<Rectangle<f64, Logical>> {
+-        let view_pos = self.target_view_pos();
+-        let col_xs = self.column_xs(self.data.iter().copied());
++        let view_pos = self.target_view_main_pos();
++        let col_xs = self.column_main_positions(self.data.iter().copied());
+         for (col, col_x) in zip(&self.columns, col_xs) {
+             for (tile, pos) in col.tiles() {
+                 if tile.window().id() == id {
+@@ -2625,17 +3013,19 @@
+                         target.loc -= tile.window_loc();
+                         target
+                     } else {
+-                        let width = tile.window_size().w;
++                        let axis = self.axis();
++                        let width = axis.size_out(tile.window_size()).w;
++                        let window_loc = axis.point_out(tile.window_loc());
+                         let height = self.parent_area.size.h;
  
-                     let mut target = Rectangle::from_size(Size::from((width, height)));
-                     target.loc.y += self.parent_area.loc.y;
-                     target.loc.y -= pos.y;
--                    target.loc.y -= tile.window_loc().y;
-+                    target.loc.y -= window_loc.y;
+                         let mut target = Rectangle::from_size(Size::from((width, height)));
+                         target.loc.y += self.parent_area.loc.y;
+                         target.loc.y -= pos.y;
+-                        target.loc.y -= tile.window_loc().y;
++                        target.loc.y -= window_loc.y;
+                         target
+                     };
  
 -                    return Some(target);
 +                    return Some(self.map_rect_out(target));
                  }
              }
          }
-@@ -2749,51 +3141,52 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2809,51 +3199,52 @@
          // NOTE: This logic won't work entirely correctly with small fixed-size maximized windows
          // (they have a different area and padding).
  
@@ -3911,11 +4239,12 @@ index 007bcaf5..e67537ab 100644
              }
  
 -            leftmost_col_x.get_or_insert(col_x);
-+            first_visible_column_main.get_or_insert(column_main);
- 
+-
 -            let width = self.data[idx].width;
 -            if view_x + working_x + working_w < col_x + width + gap {
 -                // Column goes off-screen to the right. We can stop here.
++            first_visible_column_main.get_or_insert(column_main);
++
 +            let column_span = self.data[idx].width;
 +            if target_view_main + work_area_main + work_area_span < column_main + column_span + gap
 +            {
@@ -3931,10 +4260,12 @@ index 007bcaf5..e67537ab 100644
              }
  
 -            width_taken += width + gap;
-+            occupied_span += column_span + gap;
-         }
- 
+-        }
+-
 -        if active_col_x.is_none() {
++            occupied_span += column_span + gap;
++        }
++
 +        if active_column_main.is_none() {
              // The active column wasn't fully on screen, so we can't meaningfully do anything.
              return;
@@ -3949,7 +4280,7 @@ index 007bcaf5..e67537ab 100644
              // Nowhere to expand.
              return;
          }
-@@ -2808,15 +3201,18 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -2868,15 +3259,18 @@
              return;
          }
  
@@ -3973,65 +4304,44 @@ index 007bcaf5..e67537ab 100644
          // Just in case.
          self.animate_view_offset_to_column(None, self.active_column_idx, None);
      }
-@@ -2908,10 +3304,14 @@ impl<W: LayoutElement> ScrollingSpace<W> {
-         let scale = Scale::from(self.scale);
+@@ -2970,7 +3364,10 @@
  
          // Draw the closing windows on top of the other windows.
--        let view_rect = Rectangle::new(Point::from((self.view_pos(), 0.)), self.view_size);
--        for closing in self.closing_windows.iter().rev() {
--            let elem = closing.render(ctx.as_gles(), view_rect, scale);
--            push(elem.into());
-+        {
-+            let view_size = self.map_size_out(self.view_size);
-+            let view_loc = self.map_point_out(main_space_vec(self.view_main_pos()));
-+            let view_rect = Rectangle::new(view_loc, view_size);
-+            for closing in self.closing_windows.iter().rev() {
-+                let elem = closing.render(ctx.as_gles(), view_rect, scale);
-+                push(elem.into());
-+            }
-         }
- 
-         if self.columns.is_empty() {
-@@ -2921,22 +3321,23 @@ impl<W: LayoutElement> ScrollingSpace<W> {
-         let mut first = true;
- 
-         // This matches self.tiles_in_render_order().
--        let view_off = Point::from((-self.view_pos(), 0.));
-+        let view_off = Point::from((-self.view_main_pos(), 0.));
-         for (col, col_x) in self.columns_in_render_order() {
-             let col_off = Point::from((col_x, 0.));
-             let col_render_off = col.render_offset();
+         if layer.is_normal() {
+-            let view_rect = Rectangle::new(Point::from((self.view_pos(), 0.)), self.view_size);
++            let view_rect = Rectangle::new(
++                self.map_point_out(main_space_vec(self.view_main_pos())),
++                self.map_size_out(self.view_size),
++            );
+             for closing in self.closing_windows.iter().rev() {
+                 let elem = closing.render(ctx.as_gles(), view_rect, scale);
+                 push(elem.into());
+@@ -2993,13 +3390,14 @@
  
              // Draw the tab indicator on top.
              {
--                let pos = view_off + col_off + col_render_off;
-+                let pos = self.map_point_out(view_off + col_off + col_render_off);
-                 let pos = pos.to_physical_precise_round(scale).to_logical(scale);
+-                let pos = col_pos.to_physical_precise_round(scale).to_logical(scale);
++                let pos = self.map_point_out(col_pos);
++                let pos = pos.to_physical_precise_round(scale).to_logical(scale);
                  col.tab_indicator
                      .render(ctx.renderer, pos, &mut |elem| push(elem.into()));
              }
  
              for (tile, tile_off, visible) in col.tiles_in_render_order() {
--                let tile_pos =
--                    view_off + col_off + col_render_off + tile_off + tile.render_offset();
-+                let tile_pos = self.map_point_out(
-+                    view_off + col_off + col_render_off + tile_off + tile.render_offset(),
-+                );
+-                let tile_pos = col_pos + tile_off + tile.render_offset();
++                let tile_pos = self.map_point_out(col_pos + tile_off + tile.render_offset());
                  // Round to physical pixels.
                  let tile_pos = tile_pos.to_physical_precise_round(scale).to_logical(scale);
  
-@@ -2966,8 +3367,9 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -3029,6 +3427,7 @@
  
      pub fn window_under(&self, pos: Point<f64, Logical>) -> Option<(&W, HitType)> {
          // This matches self.tiles_with_render_positions().
 +        let pos_in = self.map_point_in(pos);
          let scale = self.scale;
--        let view_off = Point::from((-self.view_pos(), 0.));
-+        let view_off = Point::from((-self.view_main_pos(), 0.));
-         for (col, col_x) in self.columns_in_render_order() {
-             let col_off = Point::from((col_x, 0.));
-             let col_render_off = col.render_offset();
-@@ -2981,7 +3383,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+         for (col, col_pos) in self.columns_with_render_positions() {
+             // Hit the tab indicator.
+@@ -3039,7 +3438,7 @@
                      col.tab_indicator_area(),
                      col.tiles.len(),
                      scale,
@@ -4040,20 +4350,21 @@ index 007bcaf5..e67537ab 100644
                  ) {
                      let hit = HitType::Activate {
                          is_tab_indicator: true,
-@@ -2999,9 +3401,10 @@ impl<W: LayoutElement> ScrollingSpace<W> {
-                     view_off + col_off + col_render_off + tile_off + tile.render_offset();
+@@ -3056,9 +3455,10 @@
+                 let tile_pos = col_pos + tile_off + tile.render_offset();
                  // Round to physical pixels.
                  let tile_pos = tile_pos.to_physical_precise_round(scale).to_logical(scale);
-+                let tile_pos = self.map_point_out(tile_pos);
- 
+-
 -                if let Some(rv) = HitType::hit_tile(tile, tile_pos, pos) {
 -                    return Some(rv);
++                let tile_pos = self.map_point_out(tile_pos);
++
 +                if let Some((win, hit)) = HitType::hit_tile(tile, tile_pos, pos) {
 +                    return Some((win, hit));
                  }
              }
          }
-@@ -3123,34 +3526,34 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -3180,34 +3580,34 @@
          let view_offset = gesture.tracker.pos() + gesture.delta_from_tracker;
  
          // Clamp it so that it doesn't go too much out of bounds.
@@ -4075,11 +4386,12 @@ index 007bcaf5..e67537ab 100644
 -                .fold(0., |col_x, col| col_x + col.width() + gaps);
 -            let last_col_width = self.data[last_col_idx].width;
 -            let mut rightmost = last_col_x + last_col_width - self.working_area.loc.x;
+-
+-            let active_col_x = self
 +                .fold(0., |column_main, col| column_main + col.width() + gaps);
 +            let last_column_span = self.data[last_col_idx].width;
 +            let mut endmost_offset = last_column_main + last_column_span - self.working_area.loc.x;
- 
--            let active_col_x = self
++
 +            let active_column_main = self
                  .columns
                  .iter()
@@ -4087,11 +4399,12 @@ index 007bcaf5..e67537ab 100644
 -                .fold(0., |col_x, col| col_x + col.width() + gaps);
 -            leftmost -= active_col_x;
 -            rightmost -= active_col_x;
+-
+-            (leftmost, rightmost)
 +                .fold(0., |column_main, col| column_main + col.width() + gaps);
 +            startmost_offset -= active_column_main;
 +            endmost_offset -= active_column_main;
- 
--            (leftmost, rightmost)
++
 +            (startmost_offset, endmost_offset)
          };
 -        let min_offset = f64::min(leftmost, rightmost);
@@ -4101,7 +4414,7 @@ index 007bcaf5..e67537ab 100644
          let clamped_offset = view_offset.clamp(min_offset, max_offset);
  
          gesture.delta_from_tracker += clamped_offset - view_offset;
-@@ -3194,275 +3597,19 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -3251,275 +3651,19 @@
          let end_pos = gesture.tracker.projected_end_pos() * norm_factor;
          let target_view_offset = end_pos + gesture.delta_from_tracker;
  
@@ -4299,8 +4612,7 @@ index 007bcaf5..e67537ab 100644
 -            .unwrap();
 -
 -        let mut new_col_idx = target_snap.col_idx;
-+        let snapping_points = self.collect_view_snaps();
- 
+-
 -        if !self.is_centering_focused_column() {
 -            // Focus the furthest window towards the direction of the gesture.
 -            if target_view_offset >= current_view_offset {
@@ -4372,6 +4684,11 @@ index 007bcaf5..e67537ab 100644
 -                }
 -            }
 -        }
+-
+-        let new_col_x = self.column_x(new_col_idx);
+-        let delta = active_col_x - new_col_x;
++        let snapping_points = self.collect_view_snaps();
++
 +        let active_column_main = self.column_main_pos(self.active_column_idx);
 +        let target_view_main = active_column_main + target_view_offset;
 +        let target_snap = self.closest_view_snap(&snapping_points, target_view_main);
@@ -4380,15 +4697,13 @@ index 007bcaf5..e67537ab 100644
 +            target_view_offset,
 +            current_view_offset,
 +        );
- 
--        let new_col_x = self.column_x(new_col_idx);
--        let delta = active_col_x - new_col_x;
++
 +        let new_column_main = self.column_main_pos(new_col_idx);
 +        let main_delta = active_column_main - new_column_main;
  
          if self.active_column_idx != new_col_idx {
              self.view_offset_to_restore = None;
-@@ -3470,11 +3617,11 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -3527,11 +3671,11 @@
  
          self.active_column_idx = new_col_idx;
  
@@ -4402,7 +4717,7 @@ index 007bcaf5..e67537ab 100644
              target_view_offset,
              velocity,
              self.options.animations.horizontal_view_movement.0,
-@@ -3519,6 +3666,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -3576,6 +3720,8 @@
              return false;
          }
  
@@ -4411,7 +4726,7 @@ index 007bcaf5..e67537ab 100644
          let col = self
              .columns
              .iter_mut()
-@@ -3535,7 +3684,8 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -3592,7 +3738,8 @@
              .find(|tile| tile.window().id() == &window)
              .unwrap();
  
@@ -4421,7 +4736,7 @@ index 007bcaf5..e67537ab 100644
  
          let resize = InteractiveResize {
              window,
-@@ -3562,6 +3712,7 @@ impl<W: LayoutElement> ScrollingSpace<W> {
+@@ -3619,6 +3766,7 @@
              return false;
          }
  
@@ -4429,7 +4744,7 @@ index 007bcaf5..e67537ab 100644
          let is_centering = self.is_centering_focused_column();
  
          let col = self
-@@ -3890,18 +4041,18 @@ impl ColumnData {
+@@ -3947,18 +4095,18 @@
  }
  
  impl TileData {
@@ -4452,7 +4767,7 @@ index 007bcaf5..e67537ab 100644
          self.interactively_resizing_by_left_edge = tile
              .window()
              .interactive_resize_data()
-@@ -4011,6 +4162,9 @@ impl<W: LayoutElement> Column<W> {
+@@ -4074,6 +4222,9 @@
          scale: f64,
          options: Rc<Options>,
      ) {
@@ -4462,7 +4777,7 @@ index 007bcaf5..e67537ab 100644
          let mut update_sizes = false;
  
          if self.view_size != view_size
-@@ -4031,6 +4185,10 @@ impl<W: LayoutElement> Column<W> {
+@@ -4094,6 +4245,10 @@
              update_sizes = true;
          }
  
@@ -4473,7 +4788,7 @@ index 007bcaf5..e67537ab 100644
          if self.options.layout.gaps != options.layout.gaps {
              update_sizes = true;
          }
-@@ -4046,8 +4204,8 @@ impl<W: LayoutElement> Column<W> {
+@@ -4109,8 +4264,8 @@
          }
  
          for (tile, data) in zip(&mut self.tiles, &mut self.data) {
@@ -4484,10 +4799,12 @@ index 007bcaf5..e67537ab 100644
          }
  
          self.tab_indicator
-@@ -4153,6 +4311,18 @@ impl<W: LayoutElement> Column<W> {
+@@ -4249,6 +4404,18 @@
+         } else {
+             SizingMode::Normal
          }
-     }
- 
++    }
++
 +    fn axis(&self) -> AxisMap {
 +        AxisMap::new(self.options.layout.main_axis)
 +    }
@@ -4498,12 +4815,10 @@ index 007bcaf5..e67537ab 100644
 +
 +    fn map_size_out(&self, size: Size<f64, Logical>) -> Size<f64, Logical> {
 +        self.axis().size_out(size)
-+    }
-+
-     pub fn render_offset(&self) -> Point<f64, Logical> {
-         let mut offset = Point::from((0., 0.));
+     }
  
-@@ -4295,10 +4465,14 @@ impl<W: LayoutElement> Column<W> {
+     pub fn render_offset(&self) -> Point<f64, Logical> {
+@@ -4441,10 +4608,14 @@
      }
  
      fn add_tile_at(&mut self, idx: usize, mut tile: Tile<W>) {
@@ -4520,7 +4835,7 @@ index 007bcaf5..e67537ab 100644
          let mut prev_offsets = Vec::with_capacity(self.tiles.len() + 1);
          prev_offsets.extend(self.tile_offsets().take(self.tiles.len()));
  
-@@ -4307,8 +4481,10 @@ impl<W: LayoutElement> Column<W> {
+@@ -4453,8 +4624,10 @@
              self.is_pending_maximized = false;
          }
  
@@ -4533,7 +4848,7 @@ index 007bcaf5..e67537ab 100644
          self.tiles.insert(idx, tile);
          self.update_tile_sizes(true);
  
-@@ -4324,6 +4500,8 @@ impl<W: LayoutElement> Column<W> {
+@@ -4470,6 +4643,8 @@
      }
  
      fn update_window(&mut self, window: &W::Id) {
@@ -4542,7 +4857,7 @@ index 007bcaf5..e67537ab 100644
          let (tile_idx, tile) = self
              .tiles
              .iter_mut()
-@@ -4334,7 +4512,7 @@ impl<W: LayoutElement> Column<W> {
+@@ -4480,7 +4655,7 @@
          let prev_height = self.data[tile_idx].size.h;
  
          tile.update_window();
@@ -4551,7 +4866,7 @@ index 007bcaf5..e67537ab 100644
  
          let offset = prev_height - self.data[tile_idx].size.h;
  
-@@ -4350,7 +4528,7 @@ impl<W: LayoutElement> Column<W> {
+@@ -4496,7 +4671,7 @@
              if tile.resize_animation().is_some() {
                  // If there's a resize animation (that may have just started in
                  // tile.update_window()), then the apparent size change is smooth with no sudden
@@ -4560,7 +4875,7 @@ index 007bcaf5..e67537ab 100644
                  for tile in &mut self.tiles[tile_idx + 1..] {
                      tile.animate_move_y_from_with_config(
                          offset,
-@@ -4366,9 +4544,9 @@ impl<W: LayoutElement> Column<W> {
+@@ -4512,9 +4687,9 @@
                  // The latter case could also cancel an ongoing resize animation.
                  //
                  // Now, stationary tiles below shouldn't react to this offset change in any way,
@@ -4573,7 +4888,7 @@ index 007bcaf5..e67537ab 100644
                  //
                  // Notably, this is necessary to fix the animation jump when resizing height back
                  // and forth in quick succession (in a way that cancels the resize animation).
-@@ -4388,17 +4566,17 @@ impl<W: LayoutElement> Column<W> {
+@@ -4534,17 +4709,17 @@
          }
      }
  
@@ -4594,7 +4909,7 @@ index 007bcaf5..e67537ab 100644
          let working_size = self.working_area.size;
          let gaps = self.options.layout.gaps;
          let extra = self.extra_size();
-@@ -4411,11 +4589,24 @@ impl<W: LayoutElement> Column<W> {
+@@ -4557,11 +4732,24 @@
          }
      }
  
@@ -4619,7 +4934,7 @@ index 007bcaf5..e67537ab 100644
          let sizing_mode = self.pending_sizing_mode();
          if matches!(sizing_mode, SizingMode::Fullscreen | SizingMode::Maximized) {
              for (tile_idx, tile) in self.tiles.iter_mut().enumerate() {
-@@ -4430,7 +4621,11 @@ impl<W: LayoutElement> Column<W> {
+@@ -4576,7 +4764,11 @@
                  if matches!(sizing_mode, SizingMode::Fullscreen) {
                      tile.request_fullscreen(animate, transaction);
                  } else {
@@ -4632,7 +4947,7 @@ index 007bcaf5..e67537ab 100644
                  }
              }
              return;
-@@ -4442,6 +4637,7 @@ impl<W: LayoutElement> Column<W> {
+@@ -4588,6 +4780,7 @@
              .tiles
              .iter()
              .map(Tile::min_size_nonfullscreen)
@@ -4640,7 +4955,7 @@ index 007bcaf5..e67537ab 100644
              .map(|mut size| {
                  size.w = size.w.max(1.);
                  size.h = size.h.max(1.);
-@@ -4452,31 +4648,32 @@ impl<W: LayoutElement> Column<W> {
+@@ -4598,31 +4791,32 @@
              .tiles
              .iter()
              .map(Tile::max_size_nonfullscreen)
@@ -4674,27 +4989,29 @@ index 007bcaf5..e67537ab 100644
              .map(NotNan::into_inner)
              .unwrap_or(f64::from(i32::MAX));
 -        let max_width = f64::max(max_width, min_width);
-+        let max_main_span = f64::max(max_main_span, min_main_span);
- 
+-
 -        let width = if self.is_full_width {
++        let max_main_span = f64::max(max_main_span, min_main_span);
++
 +        let desired_width = if self.is_full_width {
              ColumnWidth::Proportion(1.)
          } else {
              self.width
-@@ -4485,20 +4682,20 @@ impl<W: LayoutElement> Column<W> {
+@@ -4631,20 +4825,20 @@
          let working_size = self.working_area.size;
          let extra_size = self.extra_size();
  
 -        let width = self.resolve_column_width(width);
 -        let width = f64::max(f64::min(width, max_width), min_width);
 -        let max_tile_height = working_size.h - self.options.layout.gaps * 2. - extra_size.h;
-+        let column_main_span = self.resolve_column_main_span(desired_width);
-+        let column_main_span = f64::max(f64::min(column_main_span, max_main_span), min_main_span);
-+        let max_tile_cross_span = working_size.h - self.options.layout.gaps * 2. - extra_size.h;
- 
+-
 -        // If there are multiple windows in a column, clamp the non-auto window's height according
 -        // to other windows' min sizes.
 -        let mut max_non_auto_window_height = None;
++        let column_main_span = self.resolve_column_main_span(desired_width);
++        let column_main_span = f64::max(f64::min(column_main_span, max_main_span), min_main_span);
++        let max_tile_cross_span = working_size.h - self.options.layout.gaps * 2. - extra_size.h;
++
 +        // If there are multiple windows in a column, clamp the non-auto window's cross span
 +        // according to other windows' min spans.
 +        let mut max_non_auto_window_cross_span = None;
@@ -4709,7 +5026,7 @@ index 007bcaf5..e67537ab 100644
                      .iter()
                      .enumerate()
                      .filter(|(idx, _)| *idx != non_auto_idx)
-@@ -4506,52 +4703,61 @@ impl<W: LayoutElement> Column<W> {
+@@ -4652,52 +4846,61 @@
                      .sum::<f64>();
  
                  let tile = &self.tiles[non_auto_idx];
@@ -4795,15 +5112,16 @@ index 007bcaf5..e67537ab 100644
                  .iter()
                  .find_map(|h| {
                      if let WindowHeight::Fixed(h) = h {
-@@ -4560,32 +4766,32 @@ impl<W: LayoutElement> Column<W> {
+@@ -4706,32 +4909,32 @@
                          None
                      }
                  })
 -                .unwrap_or(max_tile_height);
-+                .unwrap_or(max_tile_cross_span);
- 
+-
 -            // We also take min height of all tabs into account.
 -            let min_height = min_size
++                .unwrap_or(max_tile_cross_span);
++
 +            // We also take min cross span of all tabs into account.
 +            let min_cross_span = min_size
                  .iter()
@@ -4815,19 +5133,23 @@ index 007bcaf5..e67537ab 100644
 -            // size.
 -            let min_height = f64::min(max_tile_height, min_height);
 -            let tabbed_height = f64::max(tabbed_height, min_height);
+-
+-            heights.fill(WindowHeight::Fixed(tabbed_height));
+-
+-            // The following logic will apply individual min/max height, etc.
+-        }
+-
+-        let gaps_left = self.options.layout.gaps * (self.tiles.len() + 1) as f64;
+-        let mut height_left = working_size.h - gaps_left;
 +            // span.
 +            let min_cross_span = f64::min(max_tile_cross_span, min_cross_span);
 +            let tabbed_cross_span = f64::max(tabbed_cross_span, min_cross_span);
- 
--            heights.fill(WindowHeight::Fixed(tabbed_height));
++
 +            cross_spans.fill(WindowHeight::Fixed(tabbed_cross_span));
- 
--            // The following logic will apply individual min/max height, etc.
++
 +            // The following logic will apply individual min/max cross span, etc.
-         }
- 
--        let gaps_left = self.options.layout.gaps * (self.tiles.len() + 1) as f64;
--        let mut height_left = working_size.h - gaps_left;
++        }
++
 +        let gap_span_left = self.options.layout.gaps * (self.tiles.len() + 1) as f64;
 +        let mut cross_span_left = working_size.h - gap_span_left;
          let mut auto_tiles_left = self.tiles.len();
@@ -4841,7 +5163,7 @@ index 007bcaf5..e67537ab 100644
              if min_size.h == max_size.h {
                  *h = WindowHeight::Fixed(min_size.h);
              }
-@@ -4596,12 +4802,12 @@ impl<W: LayoutElement> Column<W> {
+@@ -4742,12 +4945,12 @@
                  }
                  *h = f64::max(*h, min_size.h);
  
@@ -4856,7 +5178,7 @@ index 007bcaf5..e67537ab 100644
              .iter()
              .filter_map(|h| {
                  if let WindowHeight::Auto { weight } = *h {
-@@ -4612,62 +4818,61 @@ impl<W: LayoutElement> Column<W> {
+@@ -4758,62 +4961,61 @@
              })
              .sum();
  
@@ -4897,18 +5219,20 @@ index 007bcaf5..e67537ab 100644
                      WindowHeight::Preset(_) => unreachable!(),
                  };
 -                let factor = weight / total_weight_2;
-+                let factor = weight / remaining_weight;
- 
+-
 -                // Compute the current auto height.
 -                let mut auto = height_left_2 * factor;
-+                // Compute the current auto cross span.
-+                let mut auto_cross_span = remaining_cross_span * factor;
- 
+-
 -                // Check if the auto height satisfies the min height.
 -                if min_size.h > auto {
 -                    auto = min_size.h;
 -                    *h = WindowHeight::Fixed(auto);
 -                    height_left -= auto;
++                let factor = weight / remaining_weight;
++
++                // Compute the current auto cross span.
++                let mut auto_cross_span = remaining_cross_span * factor;
++
 +                // Check if the auto cross span satisfies the min cross span.
 +                if min_size.h > auto_cross_span {
 +                    auto_cross_span = min_size.h;
@@ -4942,18 +5266,20 @@ index 007bcaf5..e67537ab 100644
  
 -                height_left_2 -= auto;
 -                total_weight_2 -= weight;
-+                remaining_cross_span -= auto_cross_span;
-+                remaining_weight -= weight;
-             }
- 
+-            }
+-
 -            // All min heights were satisfied, fill them in.
 -            for (h, tile) in zip(&mut heights, &self.tiles) {
++                remaining_cross_span -= auto_cross_span;
++                remaining_weight -= weight;
++            }
++
 +            // All min cross spans were satisfied, fill them in.
 +            for (h, tile) in zip(&mut cross_spans, &self.tiles) {
                  let weight = match *h {
                      WindowHeight::Auto { weight } => weight,
                      WindowHeight::Fixed(_) => continue,
-@@ -4675,14 +4880,17 @@ impl<W: LayoutElement> Column<W> {
+@@ -4821,14 +5023,17 @@
                  };
                  let factor = weight / total_weight;
  
@@ -4977,7 +5303,7 @@ index 007bcaf5..e67537ab 100644
                  total_weight -= weight;
                  auto_tiles_left -= 1;
              }
-@@ -4690,12 +4898,12 @@ impl<W: LayoutElement> Column<W> {
+@@ -4836,12 +5041,12 @@
              assert_eq!(auto_tiles_left, 0);
          }
  
@@ -4993,7 +5319,7 @@ index 007bcaf5..e67537ab 100644
  
              // In tabbed mode, only the visible window participates in the transaction.
              let is_active = tile_idx == self.active_tile_idx;
-@@ -4710,7 +4918,7 @@ impl<W: LayoutElement> Column<W> {
+@@ -4856,7 +5061,7 @@
      }
  
      fn width(&self) -> f64 {
@@ -5002,49 +5328,38 @@ index 007bcaf5..e67537ab 100644
              .data
              .iter()
              .map(|data| NotNan::new(data.size.w).unwrap())
-@@ -4720,10 +4928,10 @@ impl<W: LayoutElement> Column<W> {
+@@ -4866,10 +5071,10 @@
  
          if self.display_mode == ColumnDisplay::Tabbed && self.sizing_mode().is_normal() {
              let extra_size = self.tab_indicator.extra_size(self.tiles.len(), self.scale);
 -            tiles_width += extra_size.w;
-+            max_tile_main_span += extra_size.w;
-         }
- 
+-        }
+-
 -        tiles_width
++            max_tile_main_span += extra_size.w;
++        }
++
 +        max_tile_main_span
      }
  
      fn focus_index(&mut self, index: u8) {
-@@ -4747,50 +4955,39 @@ impl<W: LayoutElement> Column<W> {
+@@ -4893,50 +5098,39 @@
          self.activate_idx(self.tiles.len() - 1);
      }
  
--    fn move_up(&mut self) -> bool {
--        let new_idx = self.active_tile_idx.saturating_sub(1);
--        if self.active_tile_idx == new_idx {
 +    fn move_active_tile_to_adjacent(&mut self, new_idx: usize) -> bool {
 +        let old_idx = self.active_tile_idx;
 +        if old_idx == new_idx {
-             return false;
-         }
- 
--        let mut ys = self.tile_offsets().skip(self.active_tile_idx);
--        let active_y = ys.next().unwrap().y;
--        let next_y = ys.next().unwrap().y;
--        drop(ys);
++            return false;
++        }
++
 +        let active_cross_pos = self.tile_offset(old_idx).y;
 +        let adjacent_cross_pos = self.tile_offset(new_idx).y;
- 
--        self.tiles.swap(self.active_tile_idx, new_idx);
--        self.data.swap(self.active_tile_idx, new_idx);
++
 +        self.tiles.swap(old_idx, new_idx);
 +        self.data.swap(old_idx, new_idx);
-         self.active_tile_idx = new_idx;
- 
--        // Animate the movement.
--        let new_active_y = self.tile_offset(new_idx).y;
--        self.tiles[new_idx].animate_move_y_from(active_y - new_active_y);
--        self.tiles[new_idx + 1].animate_move_y_from(active_y - next_y);
++        self.active_tile_idx = new_idx;
++
 +        // Animate the movement along the cross axis.
 +        let new_active_cross_pos = self.tile_offset(new_idx).y;
 +        self.tiles[new_idx].animate_move_y_from(active_cross_pos - new_active_cross_pos);
@@ -5053,15 +5368,34 @@ index 007bcaf5..e67537ab 100644
 +        } else {
 +            self.tiles[new_idx - 1].animate_move_y_from(adjacent_cross_pos - active_cross_pos);
 +        }
- 
-         true
-     }
- 
-+    fn move_up(&mut self) -> bool {
-+        let new_idx = self.active_tile_idx.saturating_sub(1);
-+        self.move_active_tile_to_adjacent(new_idx)
++
++        true
 +    }
 +
+     fn move_up(&mut self) -> bool {
+         let new_idx = self.active_tile_idx.saturating_sub(1);
+-        if self.active_tile_idx == new_idx {
+-            return false;
+-        }
+-
+-        let mut ys = self.tile_offsets().skip(self.active_tile_idx);
+-        let active_y = ys.next().unwrap().y;
+-        let next_y = ys.next().unwrap().y;
+-        drop(ys);
+-
+-        self.tiles.swap(self.active_tile_idx, new_idx);
+-        self.data.swap(self.active_tile_idx, new_idx);
+-        self.active_tile_idx = new_idx;
+-
+-        // Animate the movement.
+-        let new_active_y = self.tile_offset(new_idx).y;
+-        self.tiles[new_idx].animate_move_y_from(active_y - new_active_y);
+-        self.tiles[new_idx + 1].animate_move_y_from(active_y - next_y);
+-
+-        true
++        self.move_active_tile_to_adjacent(new_idx)
+     }
+ 
      fn move_down(&mut self) -> bool {
          let new_idx = min(self.active_tile_idx + 1, self.tiles.len() - 1);
 -        if self.active_tile_idx == new_idx {
@@ -5087,7 +5421,7 @@ index 007bcaf5..e67537ab 100644
      }
  
      fn toggle_width(&mut self, tile_idx: Option<usize>, forwards: bool) {
-@@ -4807,15 +5004,15 @@ impl<W: LayoutElement> Column<W> {
+@@ -4953,15 +5147,15 @@
              (idx + if forwards { 1 } else { len - 1 }) % len
          } else {
              let tile = &self.tiles[tile_idx];
@@ -5106,7 +5440,7 @@ index 007bcaf5..e67537ab 100644
  
              if forwards {
                  it.position(|resolved| {
-@@ -4857,19 +5054,19 @@ impl<W: LayoutElement> Column<W> {
+@@ -5003,19 +5197,19 @@
      }
  
      fn set_column_width(&mut self, change: SizeChange, tile_idx: Option<usize>, animate: bool) {
@@ -5123,15 +5457,16 @@ index 007bcaf5..e67537ab 100644
          // FIXME: fix overflows then remove limits.
 -        const MAX_PX: f64 = 100000.;
 -        const MAX_F: f64 = 10000.;
+-
+-        let width = match (current, change) {
 +        const MAX_MAIN_SPAN: f64 = 100000.;
 +        const MAX_PROPORTION: f64 = 10000.;
- 
--        let width = match (current, change) {
++
 +        let new_width = match (current_width, change) {
              (_, SizeChange::SetFixed(fixed)) => {
                  // As a special case, setting a fixed column width will compute it in such a way
                  // that the specified (usually active) window gets that width. This is the
-@@ -4877,34 +5074,35 @@ impl<W: LayoutElement> Column<W> {
+@@ -5023,34 +5217,35 @@
                  let tile_idx = tile_idx.unwrap_or(self.active_tile_idx);
                  let tile = &self.tiles[tile_idx];
                  ColumnWidth::Fixed(
@@ -5148,12 +5483,13 @@ index 007bcaf5..e67537ab 100644
              (_, SizeChange::AdjustFixed(delta)) => {
 -                let width = (current_px + f64::from(delta)).clamp(1., MAX_PX);
 -                ColumnWidth::Fixed(width)
-+                let new_main_span = (current_main_span + f64::from(delta)).clamp(1., MAX_MAIN_SPAN);
-+                ColumnWidth::Fixed(new_main_span)
-             }
+-            }
 -            (ColumnWidth::Proportion(current), SizeChange::AdjustProportion(delta)) => {
 -                let proportion = (current + delta / 100.).clamp(0., MAX_F);
 -                ColumnWidth::Proportion(proportion)
++                let new_main_span = (current_main_span + f64::from(delta)).clamp(1., MAX_MAIN_SPAN);
++                ColumnWidth::Fixed(new_main_span)
++            }
 +            (ColumnWidth::Proportion(current_proportion), SizeChange::AdjustProportion(delta)) => {
 +                let new_proportion = (current_proportion + delta / 100.).clamp(0., MAX_PROPORTION);
 +                ColumnWidth::Proportion(new_proportion)
@@ -5181,7 +5517,7 @@ index 007bcaf5..e67537ab 100644
          self.preset_width_idx = None;
          self.is_full_width = false;
          self.is_pending_maximized = false;
-@@ -4923,55 +5121,66 @@ impl<W: LayoutElement> Column<W> {
+@@ -5069,55 +5264,66 @@
              self.convert_heights_to_auto();
          }
  
@@ -5198,10 +5534,11 @@ index 007bcaf5..e67537ab 100644
 +            WindowHeight::Fixed(window_cross_span) => window_cross_span,
          };
 -        let current_tile_px = tile.tile_height_for_window_height(current_window_px);
+-
+-        let working_size = self.working_area.size.h;
 +        let current_tile_cross_span =
 +            self.tile_cross_span_for_window_cross_span(tile, current_window_cross_span);
- 
--        let working_size = self.working_area.size.h;
++
 +        let work_area_cross_span = self.working_area.size.h;
          let gaps = self.options.layout.gaps;
 -        let extra_size = self.extra_size().h;
@@ -5218,19 +5555,21 @@ index 007bcaf5..e67537ab 100644
  
          // FIXME: fix overflows then remove limits.
 -        const MAX_PX: f64 = 100000.;
-+        const MAX_CROSS_SPAN: f64 = 100000.;
- 
+-
 -        let mut window_height = match change {
++        const MAX_CROSS_SPAN: f64 = 100000.;
++
 +        let mut new_window_cross_span = match change {
              SizeChange::SetFixed(fixed) => f64::from(fixed),
              SizeChange::SetProportion(proportion) => {
 -                let tile_height = (working_size - gaps) * (proportion / 100.) - gaps - extra_size;
 -                tile.window_height_for_tile_height(tile_height)
+-            }
+-            SizeChange::AdjustFixed(delta) => current_window_px + f64::from(delta),
 +                let tile_cross_span =
 +                    (work_area_cross_span - gaps) * (proportion / 100.) - gaps - extra_cross_span;
 +                self.window_cross_span_for_tile_cross_span(tile, tile_cross_span)
-             }
--            SizeChange::AdjustFixed(delta) => current_window_px + f64::from(delta),
++            }
 +            SizeChange::AdjustFixed(delta) => current_window_cross_span + f64::from(delta),
              SizeChange::AdjustProportion(delta) => {
 -                let proportion = current_prop + delta / 100.;
@@ -5271,7 +5610,7 @@ index 007bcaf5..e67537ab 100644
  
          // Clamp it against the window height constraints.
          let win = &self.tiles[tile_idx].window();
-@@ -4979,13 +5188,14 @@ impl<W: LayoutElement> Column<W> {
+@@ -5125,13 +5331,14 @@
          let max_h = win.max_size().h;
  
          if max_h > 0 {
@@ -5280,16 +5619,18 @@ index 007bcaf5..e67537ab 100644
          }
          if min_h > 0 {
 -            window_height = f64::max(window_height, f64::from(min_h));
-+            new_window_cross_span = f64::max(new_window_cross_span, f64::from(min_h));
-         }
- 
+-        }
+-
 -        self.data[tile_idx].height = WindowHeight::Fixed(window_height.clamp(1., MAX_PX));
++            new_window_cross_span = f64::max(new_window_cross_span, f64::from(min_h));
++        }
++
 +        self.data[tile_idx].height =
 +            WindowHeight::Fixed(new_window_cross_span.clamp(1., MAX_CROSS_SPAN));
          self.is_pending_maximized = false;
          self.update_tile_sizes(animate);
      }
-@@ -5023,7 +5233,7 @@ impl<W: LayoutElement> Column<W> {
+@@ -5169,7 +5376,7 @@
                  (idx + if forwards { 1 } else { len - 1 }) % len
              }
              _ => {
@@ -5298,7 +5639,7 @@ index 007bcaf5..e67537ab 100644
                  let tile = &self.tiles[tile_idx];
  
                  let mut it = self
-@@ -5033,23 +5243,28 @@ impl<W: LayoutElement> Column<W> {
+@@ -5179,23 +5386,28 @@
                      .iter()
                      .copied()
                      .map(|preset| {
@@ -5332,7 +5673,7 @@ index 007bcaf5..e67537ab 100644
                      })
                      .unwrap_or(len - 1)
                  }
-@@ -5068,7 +5283,7 @@ impl<W: LayoutElement> Column<W> {
+@@ -5214,7 +5426,7 @@
      /// One case where apparent heights will not be preserved is when the column is taller than the
      /// working area.
      fn convert_heights_to_auto(&mut self) {
@@ -5341,7 +5682,7 @@ index 007bcaf5..e67537ab 100644
  
          // Weights are invariant to multiplication: a column with weights 2, 2, 1 is equivalent to
          // a column with weights 4, 4, 2. So we find the median window height and use that as 1.
-@@ -5116,7 +5331,7 @@ impl<W: LayoutElement> Column<W> {
+@@ -5262,7 +5474,7 @@
          // Animate the movement.
          //
          // We're doing some shortcuts here because we know that currently normal vs. tabbed can
@@ -5350,7 +5691,7 @@ index 007bcaf5..e67537ab 100644
          //
          // Doing it this way to avoid storing all tile positions in a vector. If more display modes
          // are added it might be simpler to just collect everything into a smallvec.
-@@ -5125,18 +5340,17 @@ impl<W: LayoutElement> Column<W> {
+@@ -5271,18 +5483,17 @@
          let new_origin = self.tiles_origin();
          let origin_delta = prev_origin - new_origin;
  
@@ -5359,22 +5700,25 @@ index 007bcaf5..e67537ab 100644
          self.display_mode = ColumnDisplay::Normal;
          for (tile, pos) in self.tiles_mut() {
 -            let mut y_delta = pos.y - prev_origin.y;
-+            let mut cross_delta = pos.y - prev_origin.y;
- 
+-
 -            // Invert the Y motion when transitioning *to* normal display mode.
++            let mut cross_delta = pos.y - prev_origin.y;
++
 +            // Invert the cross-axis motion when transitioning *to* normal display mode.
              if display == ColumnDisplay::Normal {
 -                y_delta *= -1.;
-+                cross_delta *= -1.;
-             }
- 
+-            }
+-
 -            let mut delta = origin_delta;
 -            delta.y += y_delta;
++                cross_delta *= -1.;
++            }
++
 +            let delta = origin_delta + cross_space_vec(cross_delta);
              tile.animate_move_from(delta);
          }
  
-@@ -5172,13 +5386,13 @@ impl<W: LayoutElement> Column<W> {
+@@ -5318,13 +5529,13 @@
          match self.sizing_mode() {
              SizingMode::Normal => (),
              SizingMode::Maximized => {
@@ -5390,7 +5734,7 @@ index 007bcaf5..e67537ab 100644
  
          if self.display_mode == ColumnDisplay::Tabbed {
              origin += self
-@@ -5198,12 +5412,13 @@ impl<W: LayoutElement> Column<W> {
+@@ -5344,12 +5555,13 @@
          // FIXME: this should take into account always-center-single-column, which means that
          // Column should somehow know when it is being centered due to being the single column on
          // the workspace or some other reason.
@@ -5407,20 +5751,21 @@ index 007bcaf5..e67537ab 100644
              .data
              .iter()
              .map(|data| NotNan::new(data.size.w).unwrap())
-@@ -5211,9 +5426,10 @@ impl<W: LayoutElement> Column<W> {
+@@ -5357,9 +5569,10 @@
              .map(NotNan::into_inner)
              .unwrap_or(0.);
  
 -        let mut origin = self.tiles_origin();
+-
+-        // Chain with a dummy value to be able to get one past all tiles' Y.
 +        let origin = self.tiles_origin();
 +        let mut next_tile_cross_pos = origin.y;
- 
--        // Chain with a dummy value to be able to get one past all tiles' Y.
++
 +        // Chain with a dummy value to be able to get one past all tiles' cross-axis offsets.
          let dummy = TileData {
              height: WindowHeight::auto_1(),
              size: Size::default(),
-@@ -5222,16 +5438,17 @@ impl<W: LayoutElement> Column<W> {
+@@ -5368,16 +5581,17 @@
          let data = data.chain(iter::once(dummy));
  
          data.map(move |data| {
@@ -5445,7 +5790,7 @@ index 007bcaf5..e67537ab 100644
              }
  
              pos
-@@ -5304,27 +5521,28 @@ impl<W: LayoutElement> Column<W> {
+@@ -5450,27 +5664,28 @@
          // to be mindful of the case where the active tile is smaller than some other tile in the
          // column. The column assumes the size of the largest tile.
          //
@@ -5482,15 +5827,16 @@ index 007bcaf5..e67537ab 100644
  
          let tile = &self.tiles[self.active_tile_idx];
 -        let area_size = Size::from((tile.animated_tile_size().w, max_height));
+-
+-        Rectangle::new(self.tiles_origin(), area_size)
 +        let active_size = self.map_size_in(tile.animated_tile_size());
 +        let indicator_size = Size::from((active_size.w, max_tile_cross_span));
- 
--        Rectangle::new(self.tiles_origin(), area_size)
++
 +        Rectangle::new(self.tiles_origin(), indicator_size)
      }
  
      pub fn start_open_animation(&mut self, id: &W::Id) -> bool {
-@@ -5392,11 +5610,11 @@ impl<W: LayoutElement> Column<W> {
+@@ -5538,11 +5753,11 @@
                  self.pending_sizing_mode(),
                  tile.window().pending_sizing_mode()
              );
@@ -5504,7 +5850,7 @@ index 007bcaf5..e67537ab 100644
              assert_eq!(data, &data2, "tile data must be up to date");
  
              if matches!(data.height, WindowHeight::Fixed(_)) {
-@@ -5412,9 +5630,10 @@ impl<W: LayoutElement> Column<W> {
+@@ -5558,9 +5773,10 @@
              }
  
              let requested_size = tile.window().requested_size().unwrap();
@@ -5517,7 +5863,7 @@ index 007bcaf5..e67537ab 100644
  
              if !is_tabbed
                  && self.pending_sizing_mode().is_normal()
-@@ -5455,36 +5674,36 @@ impl<W: LayoutElement> Column<W> {
+@@ -5601,36 +5817,36 @@
  }
  
  fn compute_new_view_offset(
@@ -5540,12 +5886,13 @@ index 007bcaf5..e67537ab 100644
  
 -    // Compute the padding in case it needs to be smaller due to large tile width.
 -    let padding = ((view_width - new_col_width) / 2.).clamp(0., gaps);
-+    // Compute the padding in case it needs to be smaller due to large column span.
-+    let padding = ((view_main_span - new_column_span) / 2.).clamp(0., gaps);
- 
+-
 -    // Compute the desired new X with padding.
 -    let new_x = new_col_x - padding;
 -    let new_right_x = new_col_x + new_col_width + padding;
++    // Compute the padding in case it needs to be smaller due to large column span.
++    let padding = ((view_main_span - new_column_span) / 2.).clamp(0., gaps);
++
 +    // Compute the desired start/end positions with padding.
 +    let desired_start = new_column_main - padding;
 +    let desired_end = new_column_main + new_column_span + padding;
@@ -5572,11 +5919,10 @@ index 007bcaf5..e67537ab 100644
  }
  
 diff --git a/src/layout/tests.rs b/src/layout/tests.rs
-index 31265dd9..e080dfe7 100644
 --- a/src/layout/tests.rs
 +++ b/src/layout/tests.rs
-@@ -3,8 +3,8 @@ use std::cell::{Cell, OnceCell, RefCell};
- use niri_config::utils::{Flag, MergeWith as _};
+@@ -3,8 +3,8 @@
+ use niri_config::utils::Flag;
  use niri_config::workspace::WorkspaceName;
  use niri_config::{
 -    CenterFocusedColumn, FloatOrInt, OutputName, Struts, TabIndicatorLength, TabIndicatorPosition,
@@ -5586,10 +5932,12 @@ index 31265dd9..e080dfe7 100644
  };
  use proptest::prelude::*;
  use proptest_derive::Arbitrary;
-@@ -1654,6 +1654,460 @@ fn check_ops_with_options(
+@@ -1771,6 +1771,498 @@
+     let mut layout = Layout::with_options(Clock::with_time(Duration::ZERO), options);
+     check_ops_on_layout(&mut layout, ops);
      layout
- }
- 
++}
++
 +#[test]
 +fn vertical_main_axis_places_columns_vertically() {
 +    let mut options = Options::default();
@@ -5955,6 +6303,44 @@ index 31265dd9..e080dfe7 100644
 +}
 +
 +#[test]
++fn vertical_main_axis_physical_move_actions_keep_screen_directions() {
++    let mut options = Options::default();
++    options.layout.main_axis = MainAxis::Vertical;
++
++    let mut layout = check_ops_with_options(
++        options,
++        [
++            Op::AddOutput(1),
++            Op::AddWindow {
++                params: TestWindowParams::new(1),
++            },
++            Op::ToggleWindowFloating { id: None },
++        ],
++    );
++
++    let window_pos = |layout: &Layout<TestWindow>| {
++        let mut pos = None;
++        layout.with_windows(|win, _, _, window_layout| {
++            if *win.id() == 1 {
++                pos = window_layout.tile_pos_in_workspace_view;
++            }
++        });
++        pos.unwrap()
++    };
++
++    let start = window_pos(&layout);
++    layout.move_physical_right();
++    let after_right = window_pos(&layout);
++    layout.move_physical_down();
++    let after_down = window_pos(&layout);
++
++    assert!(after_right.0 > start.0);
++    assert_eq!(after_right.1, start.1);
++    assert_eq!(after_down.0, after_right.0);
++    assert!(after_down.1 > after_right.1);
++}
++
++#[test]
 +fn vertical_main_axis_floating_set_column_width_changes_window_height() {
 +    let mut options = Options::default();
 +    options.layout.main_axis = MainAxis::Vertical;
@@ -6042,16 +6428,29 @@ index 31265dd9..e080dfe7 100644
 +    });
 +
 +    assert!(tile_pos.is_some());
-+}
-+
+ }
+ 
  #[test]
- fn operations_dont_panic() {
-     if std::env::var_os("RUN_SLOW_TESTS").is_none() {
+diff --git a/src/layout/tile.rs b/src/layout/tile.rs
+--- a/src/layout/tile.rs
++++ b/src/layout/tile.rs
+@@ -661,6 +661,12 @@
+     pub fn stop_move_animations(&mut self) {
+         self.move_x_animation = None;
+         self.move_y_animation = None;
++    }
++
++    pub fn set_anim_x_between_workspaces(&mut self) {
++        if let Some(anim) = &mut self.move_x_animation {
++            anim.is_between_workspaces = true;
++        }
+     }
+ 
+     pub fn set_anim_y_between_workspaces(&mut self) {
 diff --git a/src/layout/workspace.rs b/src/layout/workspace.rs
-index 49548a83..d83297d0 100644
 --- a/src/layout/workspace.rs
 +++ b/src/layout/workspace.rs
-@@ -4,7 +4,8 @@ use std::time::Duration;
+@@ -4,7 +4,8 @@
  
  use niri_config::utils::MergeWith as _;
  use niri_config::{
@@ -6061,7 +6460,7 @@ index 49548a83..d83297d0 100644
  };
  use niri_ipc::{ColumnDisplay, PositionChange, SizeChange, WindowLayout};
  use smithay::backend::renderer::element::Kind;
-@@ -17,6 +18,7 @@ use smithay::utils::{Logical, Point, Rectangle, Serial, Size, Transform};
+@@ -17,6 +18,7 @@
  use smithay::wayland::compositor::with_states;
  use smithay::wayland::shell::xdg::SurfaceCachedState;
  
@@ -6069,7 +6468,7 @@ index 49548a83..d83297d0 100644
  use super::floating::{FloatingSpace, FloatingSpaceRenderElement};
  use super::scrolling::{
      Column, ColumnWidth, ScrollDirection, ScrollingSpace, ScrollingSpaceRenderElement,
-@@ -346,6 +348,14 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -349,6 +351,14 @@
          self.id
      }
  
@@ -6084,7 +6483,7 @@ index 49548a83..d83297d0 100644
      pub fn name(&self) -> Option<&String> {
          self.name.as_ref()
      }
-@@ -887,7 +897,10 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -917,7 +927,10 @@
          window: &W,
          width: Option<PresetSize>,
      ) -> ColumnWidth {
@@ -6096,7 +6495,7 @@ index 49548a83..d83297d0 100644
          match width {
              PresetSize::Fixed(fixed) => {
                  let mut fixed = f64::from(fixed);
-@@ -907,7 +920,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -937,7 +950,8 @@
  
      pub fn focus_left(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6106,7 +6505,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_left()
          }
-@@ -915,7 +929,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -945,7 +959,8 @@
  
      pub fn focus_right(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6116,7 +6515,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_right()
          }
-@@ -923,7 +938,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -953,7 +968,7 @@
  
      pub fn focus_column_first(&mut self) {
          if self.floating_is_active.get() {
@@ -6125,7 +6524,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_column_first();
          }
-@@ -931,7 +946,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -961,7 +976,7 @@
  
      pub fn focus_column_last(&mut self) {
          if self.floating_is_active.get() {
@@ -6134,7 +6533,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_column_last();
          }
-@@ -965,7 +980,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -995,7 +1010,8 @@
  
      pub fn focus_down(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6144,7 +6543,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_down()
          }
-@@ -973,7 +989,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1003,7 +1019,8 @@
  
      pub fn focus_up(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6154,7 +6553,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_up()
          }
-@@ -981,7 +998,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1011,7 +1028,7 @@
  
      pub fn focus_down_or_left(&mut self) {
          if self.floating_is_active.get() {
@@ -6163,7 +6562,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_down_or_left();
          }
-@@ -989,7 +1006,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1019,7 +1036,7 @@
  
      pub fn focus_down_or_right(&mut self) {
          if self.floating_is_active.get() {
@@ -6172,7 +6571,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_down_or_right();
          }
-@@ -997,7 +1014,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1027,7 +1044,7 @@
  
      pub fn focus_up_or_left(&mut self) {
          if self.floating_is_active.get() {
@@ -6181,7 +6580,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_up_or_left();
          }
-@@ -1005,7 +1022,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1035,7 +1052,7 @@
  
      pub fn focus_up_or_right(&mut self) {
          if self.floating_is_active.get() {
@@ -6190,7 +6589,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_up_or_right();
          }
-@@ -1013,7 +1030,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1043,7 +1060,7 @@
  
      pub fn focus_window_top(&mut self) {
          if self.floating_is_active.get() {
@@ -6199,7 +6598,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_top();
          }
-@@ -1021,7 +1038,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1051,7 +1068,7 @@
  
      pub fn focus_window_bottom(&mut self) {
          if self.floating_is_active.get() {
@@ -6208,7 +6607,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.focus_bottom();
          }
-@@ -1041,7 +1058,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1071,7 +1088,8 @@
  
      pub fn move_left(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6218,7 +6617,7 @@ index 49548a83..d83297d0 100644
              true
          } else {
              self.scrolling.move_left()
-@@ -1050,7 +1068,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1080,7 +1098,7 @@
  
      pub fn move_right(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6227,7 +6626,7 @@ index 49548a83..d83297d0 100644
              true
          } else {
              self.scrolling.move_right()
-@@ -1080,7 +1098,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1110,7 +1128,8 @@
  
      pub fn move_down(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6237,7 +6636,7 @@ index 49548a83..d83297d0 100644
              true
          } else {
              self.scrolling.move_down()
-@@ -1089,7 +1108,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1119,7 +1138,8 @@
  
      pub fn move_up(&mut self) -> bool {
          if self.floating_is_active.get() {
@@ -6247,7 +6646,7 @@ index 49548a83..d83297d0 100644
              true
          } else {
              self.scrolling.move_up()
-@@ -1176,7 +1196,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1206,7 +1226,7 @@
  
      pub fn toggle_width(&mut self, forwards: bool) {
          if self.floating_is_active.get() {
@@ -6256,7 +6655,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.toggle_width(forwards);
          }
-@@ -1193,7 +1213,7 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1223,7 +1243,7 @@
  
      pub fn set_column_width(&mut self, change: SizeChange) {
          if self.floating_is_active.get() {
@@ -6265,7 +6664,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.set_window_width(None, change);
          }
-@@ -1203,7 +1223,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1233,7 +1253,8 @@
          if window.map_or(self.floating_is_active.get(), |id| {
              self.floating.has_window(id)
          }) {
@@ -6275,7 +6674,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.set_window_width(window, change);
          }
-@@ -1213,7 +1234,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1243,7 +1264,8 @@
          if window.map_or(self.floating_is_active.get(), |id| {
              self.floating.has_window(id)
          }) {
@@ -6285,7 +6684,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.set_window_height(window, change);
          }
-@@ -1232,7 +1254,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1262,7 +1284,8 @@
          if window.map_or(self.floating_is_active.get(), |id| {
              self.floating.has_window(id)
          }) {
@@ -6295,7 +6694,7 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.toggle_window_width(window, forwards);
          }
-@@ -1242,7 +1265,8 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1272,7 +1295,8 @@
          if window.map_or(self.floating_is_active.get(), |id| {
              self.floating.has_window(id)
          }) {
@@ -6305,25 +6704,27 @@ index 49548a83..d83297d0 100644
          } else {
              self.scrolling.toggle_window_height(window, forwards);
          }
-@@ -1895,16 +1919,17 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -1935,16 +1959,17 @@
          let trigger_width = config.trigger_width;
  
          // This working area intentionally does not include extra struts from Options.
 -        let x = pos.x - self.working_area.loc.x;
 -        let width = self.working_area.size.w;
-+        let axis = self.axis();
-+        let coord = axis.point_main(pos) - axis.point_main(self.working_area.loc);
-+        let span = axis.size_main(self.working_area.size);
- 
+-
 -        let x = x.clamp(0., width);
 -        let trigger_width = trigger_width.clamp(0., width / 2.);
-+        let coord = coord.clamp(0., span);
-+        let trigger_width = trigger_width.clamp(0., span / 2.);
- 
+-
 -        let delta = if x < trigger_width {
 -            -(trigger_width - x)
 -        } else if width - x < trigger_width {
 -            trigger_width - (width - x)
++        let axis = self.axis();
++        let coord = axis.point_main(pos) - axis.point_main(self.working_area.loc);
++        let span = axis.size_main(self.working_area.size);
++
++        let coord = coord.clamp(0., span);
++        let trigger_width = trigger_width.clamp(0., span / 2.);
++
 +        let delta = if coord < trigger_width {
 +            -(trigger_width - coord)
 +        } else if span - coord < trigger_width {
@@ -6331,7 +6732,7 @@ index 49548a83..d83297d0 100644
          } else {
              0.
          };
-@@ -2012,8 +2037,12 @@ impl<W: LayoutElement> Workspace<W> {
+@@ -2054,8 +2079,12 @@
              options.layout.background_color.to_array_unpremul(),
          );
  
@@ -6346,11 +6747,55 @@ index 49548a83..d83297d0 100644
          assert_eq!(&self.clock, self.scrolling.clock());
          assert!(Rc::ptr_eq(&self.options, self.scrolling.options()));
          self.scrolling.verify_invariants();
+diff --git a/src/ui/hotkey_overlay.rs b/src/ui/hotkey_overlay.rs
+--- a/src/ui/hotkey_overlay.rs
++++ b/src/ui/hotkey_overlay.rs
+@@ -460,10 +460,18 @@
+         Action::Quit(_) => String::from("Exit niri"),
+         Action::ShowHotkeyOverlay => String::from("Show Important Hotkeys"),
+         Action::CloseWindow => String::from("Close Focused Window"),
++        Action::FocusLeft => String::from("Focus Left"),
++        Action::FocusRight => String::from("Focus Right"),
++        Action::FocusUp => String::from("Focus Up"),
++        Action::FocusDown => String::from("Focus Down"),
+         Action::FocusColumnLeft => String::from("Focus Column to the Left"),
+         Action::FocusColumnRight => String::from("Focus Column to the Right"),
+         Action::MoveColumnLeft => String::from("Move Column Left"),
+         Action::MoveColumnRight => String::from("Move Column Right"),
++        Action::MoveLeft => String::from("Move Left"),
++        Action::MoveRight => String::from("Move Right"),
++        Action::MoveUp => String::from("Move Up"),
++        Action::MoveDown => String::from("Move Down"),
+         Action::FocusWorkspaceDown => String::from("Switch Workspace Down"),
+         Action::FocusWorkspaceUp => String::from("Switch Workspace Up"),
+         Action::MoveColumnToWorkspaceDown(_) => String::from("Move Column to Workspace Down"),
+diff --git a/src/ui/mru.rs b/src/ui/mru.rs
+--- a/src/ui/mru.rs
++++ b/src/ui/mru.rs
+@@ -1883,7 +1883,8 @@
+ 
+     for bind in &config.binds.0 {
+         let action = match &bind.action {
+-            Action::FocusColumnRight
++            Action::FocusRight
++            | Action::FocusColumnRight
+             | Action::FocusColumnRightOrFirst
+             | Action::FocusColumnOrMonitorRight
+             | Action::FocusWindowDownOrColumnRight => Action::MruAdvance {
+@@ -1891,7 +1892,8 @@
+                 scope: None,
+                 filter: None,
+             },
+-            Action::FocusColumnLeft
++            Action::FocusLeft
++            | Action::FocusColumnLeft
+             | Action::FocusColumnLeftOrLast
+             | Action::FocusColumnOrMonitorLeft
+             | Action::FocusWindowUpOrColumnLeft => Action::MruAdvance {
 diff --git a/src/ui/screenshot_ui.rs b/src/ui/screenshot_ui.rs
-index 3ffc1362..ca273217 100644
 --- a/src/ui/screenshot_ui.rs
 +++ b/src/ui/screenshot_ui.rs
-@@ -22,6 +22,7 @@ use smithay::output::{Output, WeakOutput};
+@@ -22,6 +22,7 @@
  use smithay::utils::{Buffer, Physical, Point, Rectangle, Scale, Size, Transform};
  
  use crate::animation::{Animation, Clock};
@@ -6358,58 +6803,25 @@ index 3ffc1362..ca273217 100644
  use crate::layout::floating::DIRECTIONAL_MOVE_PX;
  use crate::niri_render_elements;
  use crate::render_helpers::primary_gpu_texture::PrimaryGpuTextureRenderElement;
-@@ -312,46 +313,26 @@ impl ScreenshotUi {
+@@ -312,6 +313,26 @@
      }
  
      pub fn move_left(&mut self) {
--        let Self::Open {
--            selection: (output, a, b),
--            output_data,
--            ..
--        } = self
--        else {
--            return;
--        };
--
--        let data = &output_data[output];
--
--        let delta: i32 = to_physical_precise_round(data.scale, DIRECTIONAL_MOVE_PX);
--        let delta = min(delta, min(a.x, b.x));
--        a.x -= delta;
--        b.x -= delta;
--
--        self.update_buffers();
 +        self.move_along(PhysicalAxis::Width, false);
-     }
- 
-     pub fn move_right(&mut self) {
--        let Self::Open {
--            selection: (output, a, b),
--            output_data,
--            ..
--        } = self
--        else {
--            return;
--        };
--
--        let data = &output_data[output];
++    }
++
++    pub fn move_right(&mut self) {
 +        self.move_along(PhysicalAxis::Width, true);
 +    }
- 
--        let delta: i32 = to_physical_precise_round(data.scale, DIRECTIONAL_MOVE_PX);
--        let delta = min(delta, data.size.w - max(a.x, b.x) - 1);
--        a.x += delta;
--        b.x += delta;
++
 +    pub fn move_up(&mut self) {
 +        self.move_along(PhysicalAxis::Height, false);
 +    }
- 
--        self.update_buffers();
++
 +    pub fn move_down(&mut self) {
 +        self.move_along(PhysicalAxis::Height, true);
-     }
- 
--    pub fn move_up(&mut self) {
++    }
++
 +    /// Move the selection by `DIRECTIONAL_MOVE_PX` along the given physical axis.
 +    ///
 +    /// `forward` is +X for `Width` and +Y for `Height`. The motion is clamped to keep the
@@ -6418,19 +6830,59 @@ index 3ffc1362..ca273217 100644
          let Self::Open {
              selection: (output, a, b),
              output_data,
-@@ -362,31 +343,21 @@ impl ScreenshotUi {
+@@ -322,71 +343,21 @@
          };
  
          let data = &output_data[output];
 -
          let delta: i32 = to_physical_precise_round(data.scale, DIRECTIONAL_MOVE_PX);
+-        let delta = min(delta, min(a.x, b.x));
+-        a.x -= delta;
+-        b.x -= delta;
+-
+-        self.update_buffers();
+-    }
+-
+-    pub fn move_right(&mut self) {
+-        let Self::Open {
+-            selection: (output, a, b),
+-            output_data,
+-            ..
+-        } = self
+-        else {
+-            return;
+-        };
+-
+-        let data = &output_data[output];
+-
+-        let delta: i32 = to_physical_precise_round(data.scale, DIRECTIONAL_MOVE_PX);
+-        let delta = min(delta, data.size.w - max(a.x, b.x) - 1);
+-        a.x += delta;
+-        b.x += delta;
+-
+-        self.update_buffers();
+-    }
+-
+-    pub fn move_up(&mut self) {
+-        let Self::Open {
+-            selection: (output, a, b),
+-            output_data,
+-            ..
+-        } = self
+-        else {
+-            return;
+-        };
+-
+-        let data = &output_data[output];
+-
+-        let delta: i32 = to_physical_precise_round(data.scale, DIRECTIONAL_MOVE_PX);
 -        let delta = min(delta, min(a.y, b.y));
 -        a.y -= delta;
 -        b.y -= delta;
 -
 -        self.update_buffers();
 -    }
- 
+-
 -    pub fn move_down(&mut self) {
 -        let Self::Open {
 -            selection: (output, a, b),
@@ -6439,18 +6891,21 @@ index 3ffc1362..ca273217 100644
 -        } = self
 -        else {
 -            return;
-+        // Project the corner points onto the chosen axis so the same logic handles X/Y.
-+        let (a_axis, b_axis, bound) = match axis {
-+            PhysicalAxis::Width => (&mut a.x, &mut b.x, data.size.w),
-+            PhysicalAxis::Height => (&mut a.y, &mut b.y, data.size.h),
-         };
- 
+-        };
+-
 -        let data = &output_data[output];
 -
 -        let delta: i32 = to_physical_precise_round(data.scale, DIRECTIONAL_MOVE_PX);
 -        let delta = min(delta, data.size.h - max(a.y, b.y) - 1);
 -        a.y += delta;
 -        b.y += delta;
++
++        // Project the corner points onto the chosen axis so the same logic handles X/Y.
++        let (a_axis, b_axis, bound) = match axis {
++            PhysicalAxis::Width => (&mut a.x, &mut b.x, data.size.w),
++            PhysicalAxis::Height => (&mut a.y, &mut b.y, data.size.h),
++        };
++
 +        let delta = if forward {
 +            min(delta, bound - max(*a_axis, *b_axis) - 1)
 +        } else {

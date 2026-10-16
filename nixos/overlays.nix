@@ -351,17 +351,23 @@ in
           ];
         });
 
-        # Carry niri PR #1856 (per-device tablet/touch config), PR #3800
-        # (virtual outputs), 0WD0's vertical layout feature, and physical
-        # direction actions on top of the nixpkgs niri package.
-        # Remove each patch once it reaches nixpkgs.
-        niri = super.niri.overrideAttrs (oldAttrs: {
+        # Carry per-device tablet/touch config, virtual outputs, and vertical
+        # layout with physical direction actions on top of upstream niri main.
+        # Keep cross-monitor fullscreen as a separate local feature patch.
+        # Remove each patch once its functionality is merged upstream.
+        niri = (inputs.niri.overlays.default self super).niri.overrideAttrs (oldAttrs: {
+          src = inputs.niri;
+          outputs = (oldAttrs.outputs or [ "out" ]) ++ [ "doc" ];
           patches = (oldAttrs.patches or [ ]) ++ [
             ./patches/niri-pr1856-per-device-tablet-touch.patch
             ./patches/niri-pr3800-virtual-outputs.patch
-            ./patches/niri-0wd0-vertical-layout.patch
-            ./patches/niri-physical-direction-actions.patch
+            ./patches/niri-vertical-layout.patch
+            ./patches/niri-spanned-fullscreen.patch
           ];
+          postInstall = (oldAttrs.postInstall or "") + ''
+            install -Dm0644 README.md resources/default-config.kdl -t $doc/share/doc/niri
+            mv docs/wiki $doc/share/doc/niri/wiki
+          '';
         });
 
       })

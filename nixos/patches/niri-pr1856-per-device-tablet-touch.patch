@@ -4,11 +4,11 @@
 # Title: input: allow configuring tablet and touch devices by name
 #
 # Derived from niri (GPL-3.0-only). This patch carries PR #1856
-# on top of the nixpkgs niri package until the PR merges upstream
-# and reaches nixpkgs. Remove this patch + overlay once that happens.
-diff -u -N '--exclude=.git' -r a/docs/wiki/Configuration:-Input.md b/docs/wiki/Configuration:-Input.md
---- a/docs/wiki/Configuration:-Input.md	2026-04-25 04:19:21.000000000 -0700
-+++ b/docs/wiki/Configuration:-Input.md	2026-06-19 13:25:33.630415534 -0700
+# on top of niri main until the PR merges upstream.
+# Remove this patch from the overlay once that happens.
+diff --git a/docs/wiki/Configuration:-Input.md b/docs/wiki/Configuration:-Input.md
+--- a/docs/wiki/Configuration:-Input.md
++++ b/docs/wiki/Configuration:-Input.md
 @@ -4,7 +4,8 @@
  
  There's a section for each device type: `keyboard`, `touchpad`, `mouse`, `trackpoint`, `trackball`, `tablet`, `touch`.
@@ -19,9 +19,9 @@ diff -u -N '--exclude=.git' -r a/docs/wiki/Configuration:-Input.md b/docs/wiki/C
  
  All settings at a glance:
  
-@@ -286,6 +287,35 @@
- 
- - `map-to-focused-output`: <sup>Since: 26.04</sup> will map the tablet to the focused output, takes precedence over `map-to-output`.
+@@ -299,6 +300,35 @@
+     When the tablet is also mapped to a specific output via `map-to-output`, the `map-to-focused-window` flag will map the tablet to the active window on that output.
+     If the tablet isn't mapped to any specific output, it will map the tablet to the current focused window regardless of where it is.
  
 +> [!TIP]
 +>
@@ -55,9 +55,9 @@ diff -u -N '--exclude=.git' -r a/docs/wiki/Configuration:-Input.md b/docs/wiki/C
  ### General Settings
  
  These settings are not specific to a particular input device.
-diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/input.rs
---- a/niri-config/src/input.rs	2026-04-25 04:19:21.000000000 -0700
-+++ b/niri-config/src/input.rs	2026-06-19 13:26:03.950500686 -0700
+diff --git a/niri-config/src/input.rs b/niri-config/src/input.rs
+--- a/niri-config/src/input.rs
++++ b/niri-config/src/input.rs
 @@ -15,8 +15,8 @@
      pub mouse: Mouse,
      pub trackpoint: Trackpoint,
@@ -113,7 +113,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
      }
  }
  
-@@ -355,8 +352,10 @@
+@@ -357,8 +354,10 @@
      }
  }
  
@@ -125,7 +125,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
      #[knuffel(child)]
      pub off: bool,
      #[knuffel(child, unwrap(arguments))]
-@@ -369,8 +368,47 @@
+@@ -373,14 +372,89 @@
      pub left_handed: bool,
  }
  
@@ -136,6 +136,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
 +    calibration_matrix: None,
 +    map_to_output: None,
 +    map_to_focused_output: false,
++    map_to_focused_window: false,
 +    left_handed: false,
 +};
 +impl Default for Tablet {
@@ -174,10 +175,11 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
      #[knuffel(child)]
      pub off: bool,
      #[knuffel(child, unwrap(arguments))]
-@@ -379,6 +417,41 @@
+     pub calibration_matrix: Option<Vec<f32>>,
+     #[knuffel(child, unwrap(argument))]
      pub map_to_output: Option<String>,
- }
- 
++}
++
 +const DEFAULT_TOUCH: Touch = Touch {
 +    name: None,
 +    off: false,
@@ -211,15 +213,16 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
 +        .or_else(|| self.0.iter().find(|t| t.name.is_none()))
 +        .unwrap_or(&DEFAULT_TOUCH)
 +    }
-+}
-+
+ }
+ 
  #[derive(knuffel::Decode, Debug, Clone, Copy, PartialEq)]
- pub struct FocusFollowsMouse {
-     #[knuffel(property, str)]
-@@ -705,6 +778,92 @@
-         )
-         "#);
-     }
+@@ -706,6 +780,94 @@
+                 ),
+                 vertical: None,
+             },
++        )
++        "#);
++    }
 +
 +    #[test]
 +    fn parse_tablets_name() {
@@ -247,6 +250,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
 +                        "eDP-1",
 +                    ),
 +                    map_to_focused_output: false,
++                    map_to_focused_window: false,
 +                    left_handed: false,
 +                },
 +                Tablet {
@@ -259,6 +263,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
 +                        "DP-1",
 +                    ),
 +                    map_to_focused_output: false,
++                    map_to_focused_window: false,
 +                    left_handed: false,
 +                },
 +            ],
@@ -303,16 +308,13 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/input.rs b/niri-config/src/inpu
 +                    ),
 +                },
 +            ],
-+        )
-+        "#);
-+    }
- 
-     #[test]
-     fn scroll_factor_h_v_factors() {
-diff -u -N '--exclude=.git' -r a/niri-config/src/lib.rs b/niri-config/src/lib.rs
---- a/niri-config/src/lib.rs	2026-04-25 04:19:21.000000000 -0700
-+++ b/niri-config/src/lib.rs	2026-06-19 13:26:03.950930213 -0700
-@@ -1097,31 +1097,41 @@
+         )
+         "#);
+     }
+diff --git a/niri-config/src/lib.rs b/niri-config/src/lib.rs
+--- a/niri-config/src/lib.rs
++++ b/niri-config/src/lib.rs
+@@ -1125,32 +1125,42 @@
                      left_handed: true,
                      middle_emulation: true,
                  },
@@ -332,6 +334,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/lib.rs b/niri-config/src/lib.rs
 -                        "eDP-1",
 -                    ),
 -                    map_to_focused_output: true,
+-                    map_to_focused_window: true,
 -                    left_handed: false,
 -                },
 -                touch: Touch {
@@ -360,6 +363,7 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/lib.rs b/niri-config/src/lib.rs
 +                                "eDP-1",
 +                            ),
 +                            map_to_focused_output: true,
++                            map_to_focused_window: true,
 +                            left_handed: false,
 +                        },
 +                    ],
@@ -379,10 +383,10 @@ diff -u -N '--exclude=.git' -r a/niri-config/src/lib.rs b/niri-config/src/lib.rs
                  disable_power_key_handling: true,
                  warp_mouse_to_focus: Some(
                      WarpMouseToFocus {
-diff -u -N '--exclude=.git' -r a/src/handlers/mod.rs b/src/handlers/mod.rs
---- a/src/handlers/mod.rs	2026-04-25 04:19:21.000000000 -0700
-+++ b/src/handlers/mod.rs	2026-06-19 13:25:33.632093664 -0700
-@@ -129,7 +129,7 @@
+diff --git a/src/handlers/mod.rs b/src/handlers/mod.rs
+--- a/src/handlers/mod.rs
++++ b/src/handlers/mod.rs
+@@ -116,7 +116,7 @@
          let keyboards = self
              .niri
              .devices
@@ -391,10 +395,10 @@ diff -u -N '--exclude=.git' -r a/src/handlers/mod.rs b/src/handlers/mod.rs
              .filter(|device| device.has_capability(input::DeviceCapability::Keyboard))
              .cloned();
  
-diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
---- a/src/input/mod.rs	2026-04-25 04:19:21.000000000 -0700
-+++ b/src/input/mod.rs	2026-06-19 13:30:29.498917493 -0700
-@@ -71,6 +71,11 @@
+diff --git a/src/input/mod.rs b/src/input/mod.rs
+--- a/src/input/mod.rs
++++ b/src/input/mod.rs
+@@ -74,6 +74,11 @@
  
  pub const DOUBLE_CLICK_TIME: Duration = Duration::from_millis(400);
  
@@ -406,7 +410,7 @@ diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
  #[derive(Debug, Clone, Copy, PartialEq)]
  pub struct TabletData {
      pub aspect_ratio: f64,
-@@ -200,7 +205,9 @@
+@@ -222,7 +227,9 @@
  
          match event {
              InputEvent::DeviceAdded { device } => {
@@ -417,64 +421,54 @@ diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
  
                  if device.has_capability(input::DeviceCapability::TabletTool) {
                      match device.size() {
-@@ -294,28 +301,33 @@
+@@ -320,14 +327,26 @@
      where
          I::Device: 'static,
      {
 -        let device_output = event.device().output(self);
 +        let device = event.device();
-+        let device_output = device.output(self);
-         let device_output = device_output.filter(|output| self.niri.output_exists(output));
-         let device_output = device_output.as_ref();
--        let (target_geo, keep_ratio, px, transform) =
--            if let Some(output) = device_output.or_else(|| self.niri.output_for_tablet()) {
--                (
--                    self.niri.global_space.output_geometry(output).unwrap(),
--                    true,
--                    1. / output.current_scale().fractional_scale(),
--                    output.current_transform(),
--                )
--            } else {
--                let geo = self.global_bounding_rectangle()?;
 +        let data = (&device as &dyn Any)
 +            .downcast_ref::<input::Device>()
 +            .and_then(|device| self.niri.devices.get(device));
-+        let (target_geo, keep_ratio, px, transform) = if let Some(output) =
-+            device_output.or_else(|| self.niri.output_for_tablet(data.map(|d| d.name.as_ref())))
-+        {
-+            (
-+                self.niri.global_space.output_geometry(output).unwrap(),
-+                true,
-+                1. / output.current_scale().fractional_scale(),
-+                output.current_transform(),
-+            )
-+        } else {
-+            let geo = self.global_bounding_rectangle()?;
++        let device_name = data.map(|data| data.name.as_ref());
++        let device_output = device.output(self);
+         let device_output = device_output.filter(|output| self.niri.output_exists(output));
+         let device_output = device_output.as_ref();
+-        let mapped_output = device_output.or_else(|| self.niri.output_for_tablet());
++        let mapped_output = device_output.or_else(|| self.niri.output_for_tablet(device_name));
  
--                // FIXME: this 1 px size should ideally somehow be computed for the rightmost output
--                // corresponding to the position on the right when clamping.
--                let output = self.niri.global_space.outputs().next().unwrap();
--                let scale = output.current_scale().fractional_scale();
-+            // FIXME: this 1 px size should ideally somehow be computed for the rightmost output
-+            // corresponding to the position on the right when clamping.
-+            let output = self.niri.global_space.outputs().next().unwrap();
-+            let scale = output.current_scale().fractional_scale();
- 
--                // Do not keep ratio for the unified mode as this is what OpenTabletDriver expects.
--                (geo, false, 1. / scale, Transform::Normal)
--            };
-+            // Do not keep ratio for the unified mode as this is what OpenTabletDriver expects.
-+            (geo, false, 1. / scale, Transform::Normal)
-+        };
- 
-         let mut pos = {
-             let size = transform.invert().transform_size(target_geo.size);
-@@ -4052,11 +4064,23 @@
+         // If the tablet is configured to map to the focused window, use that window's geometry on
+         // the mapped output (or on the focused output if no specific output is mapped).
+-        let map_to_focused_window = self.niri.config.borrow().input.tablet.map_to_focused_window;
++        let map_to_focused_window = self
++            .niri
++            .config
++            .borrow()
++            .input
++            .tablets
++            .find(device_name)
++            .map_to_focused_window;
+         // But only if the keyboard focus is on the layout, so that it doesn't trigger on the lock
+         // screen and such.
+         let window_target = if map_to_focused_window && self.niri.keyboard_focus.is_layout() {
+@@ -781,7 +800,7 @@
+             Action::ToggleTouchpad => {
+                 self.niri.touchpad_disabled_by_toggle = !self.niri.touchpad_disabled_by_toggle;
+                 let config = self.niri.config.borrow();
+-                for mut device in self.niri.devices.iter().cloned() {
++                for mut device in self.niri.devices.keys().cloned() {
+                     if device.config_tap_finger_count() > 0 {
+                         apply_libinput_settings(
+                             &config.input,
+@@ -4349,11 +4368,23 @@
      fn compute_touch_location<I: InputBackend>(
          &self,
          evt: &impl AbsolutePositionEvent<I>,
 -    ) -> Option<Point<f64, Logical>> {
 -        self.compute_absolute_location(evt, self.niri.output_for_touch())
+-    }
+-
+-    fn on_touch_down<I: InputBackend>(&mut self, evt: I::TouchDownEvent) {
 +    ) -> Option<Point<f64, Logical>>
 +    where
 +        I::Device: 'static,
@@ -486,9 +480,8 @@ diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
 +            evt,
 +            self.niri.output_for_touch(data.map(|d| d.name.as_str())),
 +        )
-     }
- 
--    fn on_touch_down<I: InputBackend>(&mut self, evt: I::TouchDownEvent) {
++    }
++
 +    fn on_touch_down<I: InputBackend>(&mut self, evt: I::TouchDownEvent)
 +    where
 +        I::Device: 'static,
@@ -496,7 +489,7 @@ diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
          let Some(handle) = self.niri.seat.get_touch() else {
              return;
          };
-@@ -4211,7 +4235,10 @@
+@@ -4505,7 +4536,10 @@
              },
          )
      }
@@ -508,7 +501,7 @@ diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
          let Some(handle) = self.niri.seat.get_touch() else {
              return;
          };
-@@ -4912,7 +4939,7 @@
+@@ -5211,7 +5245,7 @@
  
      let is_tablet = device.has_capability(input::DeviceCapability::TabletTool);
      if is_tablet {
@@ -517,7 +510,7 @@ diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
          let _ = device.config_send_events_set_mode(if c.off {
              input::SendEventsMode::DISABLED
          } else {
-@@ -4938,7 +4965,7 @@
+@@ -5237,7 +5271,7 @@
  
      let is_touch = device.has_capability(input::DeviceCapability::Touch);
      if is_touch {
@@ -526,28 +519,28 @@ diff -u -N '--exclude=.git' -r a/src/input/mod.rs b/src/input/mod.rs
          let _ = device.config_send_events_set_mode(if c.off {
              input::SendEventsMode::DISABLED
          } else {
-diff -u -N '--exclude=.git' -r a/src/niri.rs b/src/niri.rs
---- a/src/niri.rs	2026-04-25 04:19:21.000000000 -0700
-+++ b/src/niri.rs	2026-06-19 13:26:03.952453447 -0700
-@@ -133,7 +133,7 @@
- use crate::input::scroll_tracker::ScrollTracker;
+diff --git a/src/niri.rs b/src/niri.rs
+--- a/src/niri.rs
++++ b/src/niri.rs
+@@ -145,7 +145,7 @@
  use crate::input::{
-     apply_libinput_settings, mods_with_finger_scroll_binds, mods_with_mouse_binds,
--    mods_with_wheel_binds, TabletData,
-+    mods_with_wheel_binds, DeviceData, TabletData,
+     apply_libinput_settings, mods_with_finger_scroll_binds, mods_with_horizontal_wheel_binds,
+     mods_with_mouse_binds, mods_with_tablet_stylus_binds, mods_with_vertical_wheel_binds,
+-    TabletData,
++    DeviceData, TabletData,
  };
  use crate::ipc::server::IpcServer;
  use crate::layer::mapped::LayerSurfaceRenderElement;
-@@ -266,7 +266,7 @@
-     /// startup, libinput will immediately send a closed event.
-     pub is_lid_closed: bool,
+@@ -288,7 +288,7 @@
+     /// Runtime toggle for touchpad disabled state (combined with config.touchpad.off).
+     pub touchpad_disabled_by_toggle: bool,
  
 -    pub devices: HashSet<input::Device>,
 +    pub devices: HashMap<input::Device, DeviceData>,
      pub tablets: HashMap<input::Device, TabletData>,
      pub touch: HashSet<input::Device>,
  
-@@ -1505,8 +1505,8 @@
+@@ -1751,8 +1751,8 @@
              || config.input.mouse != old_config.input.mouse
              || config.input.trackball != old_config.input.trackball
              || config.input.trackpoint != old_config.input.trackpoint
@@ -558,25 +551,25 @@ diff -u -N '--exclude=.git' -r a/src/niri.rs b/src/niri.rs
          {
              libinput_config_changed = true;
          }
-@@ -1644,7 +1644,7 @@
+@@ -1872,7 +1872,7 @@
  
          if libinput_config_changed {
              let config = self.niri.config.borrow();
 -            for mut device in self.niri.devices.iter().cloned() {
 +            for mut device in self.niri.devices.keys().cloned() {
-                 apply_libinput_settings(&config.input, &mut device);
-             }
-         }
-@@ -2511,7 +2511,7 @@
-             monitors_active: true,
+                 apply_libinput_settings(
+                     &config.input,
+                     &mut device,
+@@ -2769,7 +2769,7 @@
              is_lid_closed: false,
+             touchpad_disabled_by_toggle: false,
  
 -            devices: HashSet::new(),
 +            devices: HashMap::new(),
              tablets: HashMap::new(),
              touch: HashSet::new(),
  
-@@ -3603,19 +3603,20 @@
+@@ -3883,19 +3883,20 @@
              .map(|(_, m)| m.window.clone())
      }
  

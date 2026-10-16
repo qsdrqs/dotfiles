@@ -630,10 +630,11 @@ binds {
     Mod+Ctrl+R { reset-window-height; }
     Mod+W { maximize-column; }
     Mod+F { fullscreen-window; }
+    Mod+Ctrl+F { fullscreen-window-across-monitors; }
 
     // Expand the focused column to space not taken up by other fully visible columns.
     // Makes the column "fill the rest of the space".
-    Mod+Ctrl+F { expand-column-to-available-width; }
+    // Mod+Ctrl+F { expand-column-to-available-width; }
 
     Mod+C { center-column; }
 

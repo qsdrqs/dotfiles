@@ -1,0 +1,1060 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Title: Independent fullscreen spanning connected outputs
+diff --git a/docs/wiki/Configuration:-Key-Bindings.md b/docs/wiki/Configuration:-Key-Bindings.md
+--- a/docs/wiki/Configuration:-Key-Bindings.md
++++ b/docs/wiki/Configuration:-Key-Bindings.md
+@@ -320,6 +320,25 @@
+ }
+ ```
+ 
++#### `fullscreen-window-across-monitors`
++
++Toggle the focused window fullscreen across the bounding rectangle of all connected outputs.
++The regular `fullscreen-window` action remains single-output.
++
++```kdl
++binds {
++    Mod+Shift+F { fullscreen-window-across-monitors; }
++}
++```
++
++The action is also available as `niri msg action fullscreen-window-across-monitors`.
++Repeat it to restore the previous window state.
++Changing focus, entering the overview, or changing the output arrangement ends this mode.
++Each output displays its corresponding part of the window; outputs are not mirrored.
++Output positions, rotations, and scales determine the logical bounding rectangle.
++Parts of the window falling into gaps between outputs are not visible.
++Clients are asked to render at the highest scale among the covered outputs.
++
+ #### `do-screen-transition`
+ 
+ <sup>Since: 0.1.6</sup>
+diff --git a/niri-config/src/binds.rs b/niri-config/src/binds.rs
+--- a/niri-config/src/binds.rs
++++ b/niri-config/src/binds.rs
+@@ -153,6 +153,7 @@
+     #[knuffel(skip)]
+     CloseWindowById(u64),
+     FullscreenWindow,
++    FullscreenWindowAcrossMonitors,
+     #[knuffel(skip)]
+     FullscreenWindowById(u64),
+     ToggleWindowedFullscreen,
+@@ -448,6 +449,9 @@
+             niri_ipc::Action::CloseWindow { id: None } => Self::CloseWindow,
+             niri_ipc::Action::CloseWindow { id: Some(id) } => Self::CloseWindowById(id),
+             niri_ipc::Action::FullscreenWindow { id: None } => Self::FullscreenWindow,
++            niri_ipc::Action::FullscreenWindowAcrossMonitors {} => {
++                Self::FullscreenWindowAcrossMonitors
++            }
+             niri_ipc::Action::FullscreenWindow { id: Some(id) } => Self::FullscreenWindowById(id),
+             niri_ipc::Action::ToggleWindowedFullscreen { id: None } => {
+                 Self::ToggleWindowedFullscreen
+diff --git a/niri-ipc/src/lib.rs b/niri-ipc/src/lib.rs
+--- a/niri-ipc/src/lib.rs
++++ b/niri-ipc/src/lib.rs
+@@ -327,6 +327,8 @@
+         #[cfg_attr(feature = "clap", arg(long))]
+         id: Option<u64>,
+     },
++    /// Toggle fullscreen over the bounding rectangle of all connected outputs.
++    FullscreenWindowAcrossMonitors {},
+     /// Toggle windowed (fake) fullscreen on a window.
+     #[cfg_attr(
+         feature = "clap",
+diff --git a/src/input/mod.rs b/src/input/mod.rs
+--- a/src/input/mod.rs
++++ b/src/input/mod.rs
+@@ -1008,6 +1008,9 @@
+                 if let Some((_, mapped)) = window {
+                     mapped.toplevel().send_close();
+                 }
++            }
++            Action::FullscreenWindowAcrossMonitors => {
++                self.niri.toggle_spanned_fullscreen();
+             }
+             Action::FullscreenWindow => {
+                 let focus = self.niri.layout.focus().map(|m| m.window.clone());
+diff --git a/src/layout/mod.rs b/src/layout/mod.rs
+--- a/src/layout/mod.rs
++++ b/src/layout/mod.rs
+@@ -244,6 +244,9 @@
+     fn set_active_in_column(&mut self, active: bool);
+     fn set_floating(&mut self, floating: bool);
+     fn set_bounds(&self, bounds: Size<i32, Logical>);
++    fn fullscreen_span_size(&self) -> Option<Size<i32, Logical>> {
++        None
++    }
+     fn is_ignoring_opacity_window_rule(&self) -> bool;
+ 
+     fn is_urgent(&self) -> bool;
+@@ -1478,6 +1481,14 @@
+     /// layout where popups are normally kept constrained to the column width. This is used for
+     /// IME popups where this is a more expected behavior.
+     pub fn popup_target_rect(&self, window: &W::Id, overflow: bool) -> Rectangle<f64, Logical> {
++        if let Some(size) = self
++            .windows()
++            .find(|(_, mapped)| mapped.id() == window)
++            .and_then(|(_, mapped)| mapped.fullscreen_span_size())
++        {
++            return Rectangle::from_size(size.to_f64());
++        }
++
+         if let Some(InteractiveMoveState::Moving(move_)) = &self.interactive_move {
+             if move_.tile.window().id() == window {
+                 // Follow the scrolling layout logic.
+diff --git a/src/lib.rs b/src/lib.rs
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -21,6 +21,7 @@
+ pub mod rubber_band;
+ #[cfg(feature = "xdp-gnome-screencast")]
+ pub mod screencasting;
++mod spanned_fullscreen;
+ pub mod ui;
+ pub mod utils;
+ pub mod window;
+diff --git a/src/niri.rs b/src/niri.rs
+--- a/src/niri.rs
++++ b/src/niri.rs
+@@ -176,6 +176,7 @@
+ };
+ #[cfg(feature = "xdp-gnome-screencast")]
+ use crate::screencasting::Screencasting;
++use crate::spanned_fullscreen::SpannedFullscreen;
+ use crate::ui::config_error_notification::ConfigErrorNotification;
+ use crate::ui::exit_confirm_dialog::{ExitConfirmDialog, ExitConfirmDialogRenderElement};
+ use crate::ui::hotkey_overlay::HotkeyOverlay;
+@@ -246,6 +247,7 @@
+     // Each workspace corresponds to a Space. Each workspace generally has one Output mapped to it,
+     // however it may have none (when there are no outputs connected) or multiple (when mirroring).
+     pub layout: Layout<Mapped>,
++    pub(crate) spanned_fullscreen: Option<SpannedFullscreen>,
+ 
+     // This space does not actually contain any windows, but all outputs are mapped into it
+     // according to their global position.
+@@ -2816,6 +2818,7 @@
+             clock: animation_clock,
+ 
+             layout,
++            spanned_fullscreen: None,
+             global_space: Space::default(),
+             sorted_outputs: Vec::default(),
+             output_state: HashMap::new(),
+@@ -3472,7 +3475,7 @@
+         }
+ 
+         let mon = self.layout.monitor_for_output(output).unwrap();
+-        if mon.render_above_top_layer() {
++        if self.spanned_fullscreen_for_output(output).is_some() || mon.render_above_top_layer() {
+             return false;
+         }
+ 
+@@ -3584,6 +3587,10 @@
+ 
+         if self.is_sticky_obscured_under(output, pos_within_output) {
+             return None;
++        }
++
++        if let Some((mapped, _)) = self.spanned_fullscreen_for_output(output) {
++            return Some(mapped);
+         }
+ 
+         if let Some((window, _loc)) = self
+@@ -3742,7 +3749,14 @@
+ 
+         // When rendering above the top layer, we put the regular monitor elements first.
+         // Otherwise, we will render all layer-shell pop-ups and the top layer on top.
+-        if mon.render_above_top_layer() {
++        if let Some((mapped, location)) = self.spanned_fullscreen_for_output(output) {
++            under = under.or_else(|| {
++                Some(mapped_hit_data((
++                    mapped,
++                    HitType::Input { win_pos: location },
++                )))
++            });
++        } else if mon.render_above_top_layer() {
+             under = under
+                 .or_else(interactive_moved_window_under)
+                 .or_else(window_under)
+@@ -4007,6 +4021,18 @@
+ 
+     /// Schedules an immediate redraw if one is not already scheduled.
+     pub fn queue_redraw(&mut self, output: &Output) {
++        if let Some(span) = self
++            .spanned_fullscreen
++            .as_ref()
++            .filter(|span| span.covers_output(output))
++        {
++            for (covered, _) in &span.outputs {
++                if let Some(state) = self.output_state.get_mut(covered) {
++                    state.redraw_state = mem::take(&mut state.redraw_state).queue_redraw();
++                }
++            }
++            return;
++        }
+         let state = self.output_state.get_mut(output).unwrap();
+         state.redraw_state = mem::take(&mut state.redraw_state).queue_redraw();
+     }
+@@ -4327,6 +4353,7 @@
+         };
+ 
+         self.layout.refresh(layout_is_active);
++        self.refresh_spanned_fullscreen();
+     }
+ 
+     pub fn refresh_idle_inhibit(&mut self) {
+@@ -4694,6 +4721,24 @@
+         // The overlay layer elements go next.
+         push_popups_from_layer!(Layer::Overlay);
+         push_normal_from_layer!(Layer::Overlay);
++
++        if let Some((mapped, location)) = self.spanned_fullscreen_for_output(output) {
++            let alpha = if mapped.is_ignoring_opacity_window_rule() {
++                1.
++            } else {
++                mapped.rules().opacity.unwrap_or(1.).clamp(0., 1.)
++            };
++            mapped.render(
++                ctx.r(),
++                location,
++                output_scale,
++                alpha,
++                XrayPos::new(location, 1.),
++                &mut |elem| push(elem.into()),
++            );
++            push(backdrop);
++            return;
++        }
+ 
+         // When rendering above the top layer, we put the regular monitor elements first.
+         // Otherwise, we will render all layer-shell pop-ups and the top layer on top.
+@@ -5131,16 +5176,23 @@
+             );
+         }
+ 
+-        // We're only updating the current output's windows and layer surfaces. This should be fine
+-        // as in niri they can only be rendered on a single output at a time.
++        // Include a spanning window on every covered output.
+         //
+         // The reason to do this at all is that it keeps track of whether the surface is visible or
+         // not in a unified way with the pointer surfaces, which makes the logic elsewhere simpler.
+ 
+-        for mapped in self.layout.windows_for_output(output) {
++        let spanning = self
++            .spanned_fullscreen_for_output(output)
++            .map(|(mapped, _)| &mapped.window);
++        for mapped in self.windows_rendered_on_output(output) {
+             let win = &mapped.window;
++            let is_spanned = spanning == Some(win);
+             let offscreen_data = mapped.offscreen_data();
+-            let offscreen_data = offscreen_data.as_ref();
++            let offscreen_data = if is_spanned {
++                None
++            } else {
++                offscreen_data.as_ref()
++            };
+ 
+             win.with_surfaces(|surface, states| {
+                 let primary_scanout_output = states
+@@ -5181,7 +5233,18 @@
+                     output,
+                     None,
+                     render_element_states,
+-                    |_, _, output, _| output,
++                    |current, current_state, next, next_state| {
++                        if is_spanned {
++                            default_primary_scanout_output_compare(
++                                current,
++                                current_state,
++                                next,
++                                next_state,
++                            )
++                        } else {
++                            next
++                        }
++                    },
+                 );
+             });
+         }
+@@ -5277,13 +5340,21 @@
+     ) {
+         let _span = tracy_client::span!("Niri::send_dmabuf_feedbacks");
+ 
+-        // We can unconditionally send the current output's feedback to regular and layer-shell
+-        // surfaces, as they can only be displayed on a single output at a time. Even if a surface
+-        // is currently invisible, this is the DMABUF feedback that it should know about.
+-        for mapped in self.layout.windows_for_output(output) {
++        // Spanning surfaces use their primary output to select DMABUF feedback.
++        // Regular surfaces receive their owning output's feedback even while hidden.
++        let spanning = self
++            .spanned_fullscreen_for_output(output)
++            .map(|(mapped, _)| &mapped.window);
++        for mapped in self.windows_rendered_on_output(output) {
+             mapped.window.send_dmabuf_feedback(
+                 output,
+-                |_, _| Some(output.clone()),
++                |surface, states| {
++                    if spanning == Some(&mapped.window) {
++                        surface_primary_scanout_output(surface, states)
++                    } else {
++                        Some(output.clone())
++                    }
++                },
+                 |surface, _| {
+                     select_dmabuf_feedback(
+                         surface,
+@@ -5400,14 +5471,20 @@
+ 
+         let frame_callback_time = get_monotonic_time();
+ 
+-        for mapped in self.layout.windows_for_output_mut(output) {
+-            mapped.send_frame(
+-                output,
+-                frame_callback_time,
+-                FRAME_CALLBACK_THROTTLE,
+-                should_send,
+-            );
+-        }
++        let span = self
++            .spanned_fullscreen
++            .as_ref()
++            .filter(|span| span.covers_output(output));
++        self.layout.with_windows_mut(|mapped, owner| {
++            if owner == Some(output) || span.is_some_and(|span| span.window == mapped.window) {
++                mapped.send_frame(
++                    output,
++                    frame_callback_time,
++                    FRAME_CALLBACK_THROTTLE,
++                    should_send,
++                );
++            }
++        });
+ 
+         for surface in layer_map_for_output(output).layers() {
+             surface.send_frame(
+@@ -5605,7 +5682,7 @@
+             );
+         }
+ 
+-        for mapped in self.layout.windows_for_output(output) {
++        for mapped in self.windows_rendered_on_output(output) {
+             mapped.window.take_presentation_feedback(
+                 &mut feedback,
+                 surface_primary_scanout_output,
+@@ -7042,7 +7119,11 @@
+         let current_focus = self.contents_under(pointer.current_location());
+ 
+         if let Some(output) = &new_focus.output {
+-            if current_focus.output.as_ref() != Some(output) {
++            let spanned_output = self
++                .spanned_fullscreen
++                .as_ref()
++                .is_some_and(|span| span.covers_output(output));
++            if current_focus.output.as_ref() != Some(output) && !spanned_output {
+                 self.layout.focus_output(output);
+             }
+         }
+@@ -7360,6 +7441,7 @@
+ 
+ niri_render_elements! {
+     OutputRenderElements<R> => {
++        SpannedFullscreen = LayoutElementRenderElement<R>,
+         Monitor = MonitorRenderElement<R>,
+         RescaledTile = RescaleRenderElement<TileRenderElement<R>>,
+         LayerSurface = LayerSurfaceRenderElement<R>,
+diff --git a/src/spanned_fullscreen.rs b/src/spanned_fullscreen.rs
+new file mode 100644
+--- /dev/null
++++ b/src/spanned_fullscreen.rs
+@@ -0,0 +1,205 @@
++use smithay::desktop::space::SpaceElement as _;
++use smithay::desktop::Window;
++use smithay::output::Output;
++use smithay::utils::{Logical, Point, Rectangle};
++
++use crate::layout::LayoutElement as _;
++use crate::niri::Niri;
++use crate::window::mapped::Mapped;
++
++#[derive(Debug)]
++pub(crate) struct SpannedFullscreen {
++    pub(crate) window: Window,
++    pub(crate) outputs: Vec<(Output, Rectangle<i32, Logical>)>,
++    geometry: Rectangle<i32, Logical>,
++    was_fullscreen: bool,
++    was_windowed_fullscreen: bool,
++}
++
++impl SpannedFullscreen {
++    pub(crate) fn covers_output(&self, output: &Output) -> bool {
++        self.outputs.iter().any(|(covered, _)| covered == output)
++    }
++}
++
++impl Niri {
++    pub fn toggle_spanned_fullscreen(&mut self) {
++        let Some(window) = self.layout.focus().map(|mapped| mapped.window.clone()) else {
++            return;
++        };
++
++        if self
++            .spanned_fullscreen
++            .as_ref()
++            .is_some_and(|span| span.window == window)
++        {
++            self.end_spanned_fullscreen(true);
++            return;
++        }
++        self.end_spanned_fullscreen(true);
++
++        let outputs: Vec<_> = self
++            .global_space
++            .outputs()
++            .map(|output| {
++                let geometry = self.global_space.output_geometry(output).unwrap();
++                (output.clone(), geometry)
++            })
++            .collect();
++        if outputs.len() < 2 {
++            return;
++        }
++        let geometry = outputs
++            .iter()
++            .map(|(_, geometry)| *geometry)
++            .reduce(|a, b| a.merge(b))
++            .unwrap();
++
++        let Some((_, mapped)) = self
++            .layout
++            .windows()
++            .find(|(_, mapped)| mapped.window == window)
++        else {
++            return;
++        };
++        let was_fullscreen = mapped.pending_sizing_mode().is_fullscreen();
++        let was_windowed_fullscreen = mapped.is_pending_windowed_fullscreen();
++
++        self.layout.set_fullscreen(&window, true);
++        let mut configured = false;
++        self.layout.with_windows_mut(|mapped, _| {
++            if mapped.window == window && mapped.pending_sizing_mode().is_fullscreen() {
++                mapped.set_fullscreen_span_size(Some(geometry.size));
++                for (output, _) in &outputs {
++                    mapped.output_enter(output);
++                }
++                configured = true;
++            }
++        });
++        if !configured {
++            return;
++        }
++
++        self.spanned_fullscreen = Some(SpannedFullscreen {
++            window,
++            outputs,
++            geometry,
++            was_fullscreen,
++            was_windowed_fullscreen,
++        });
++        self.queue_redraw_all();
++    }
++
++    pub(crate) fn end_spanned_fullscreen(&mut self, restore: bool) {
++        let Some(span) = self.spanned_fullscreen.take() else {
++            return;
++        };
++
++        let mut owner = None;
++        let mut mapped_window = false;
++        self.layout.with_windows_mut(|mapped, output| {
++            if mapped.window == span.window {
++                mapped.set_fullscreen_span_size(None);
++                owner = output.cloned();
++                if let Some(output) = output {
++                    mapped.set_preferred_scale_transform(
++                        output.current_scale(),
++                        output.current_transform(),
++                    );
++                }
++                mapped_window = true;
++            }
++        });
++        for (output, _) in &span.outputs {
++            if owner.as_ref() != Some(output) {
++                span.window.output_leave(output);
++            }
++        }
++
++        if restore && mapped_window {
++            self.layout
++                .set_fullscreen(&span.window, span.was_fullscreen);
++            if span.was_windowed_fullscreen {
++                self.layout.toggle_windowed_fullscreen(&span.window);
++            }
++        }
++        self.queue_redraw_all();
++    }
++
++    pub(crate) fn refresh_spanned_fullscreen(&mut self) {
++        let Some(span) = &self.spanned_fullscreen else {
++            return;
++        };
++        let mapped = self
++            .layout
++            .windows()
++            .find(|(_, mapped)| mapped.window == span.window)
++            .map(|(_, mapped)| mapped);
++        if !mapped.is_some_and(|mapped| mapped.pending_sizing_mode().is_fullscreen()) {
++            self.end_spanned_fullscreen(false);
++            return;
++        }
++
++        let output_changed = self.global_space.outputs().count() != span.outputs.len()
++            || span.outputs.iter().any(|(output, geometry)| {
++                self.global_space.output_geometry(output).as_ref() != Some(geometry)
++            });
++        let focus_changed = self
++            .layout
++            .focus()
++            .is_none_or(|mapped| mapped.window != span.window);
++        if output_changed || focus_changed || self.layout.is_overview_open() {
++            self.end_spanned_fullscreen(true);
++            return;
++        }
++
++        let preferred = span
++            .outputs
++            .iter()
++            .map(|(output, _)| output)
++            .max_by(|a, b| {
++                a.current_scale()
++                    .fractional_scale()
++                    .total_cmp(&b.current_scale().fractional_scale())
++            })
++            .unwrap();
++        self.layout.with_windows_mut(|mapped, _| {
++            if mapped.window == span.window {
++                mapped.set_preferred_scale_transform(
++                    preferred.current_scale(),
++                    preferred.current_transform(),
++                );
++            }
++        });
++    }
++
++    pub(crate) fn spanned_fullscreen_for_output(
++        &self,
++        output: &Output,
++    ) -> Option<(&Mapped, Point<f64, Logical>)> {
++        let span = self.spanned_fullscreen.as_ref()?;
++        if !span.covers_output(output) {
++            return None;
++        }
++        let (_, mapped) = self
++            .layout
++            .windows()
++            .find(|(_, mapped)| mapped.window == span.window)?;
++        let output_geometry = self.global_space.output_geometry(output)?;
++        let location = (span.geometry.loc - output_geometry.loc).to_f64();
++        Some((mapped, location))
++    }
++
++    pub(crate) fn windows_rendered_on_output(
++        &self,
++        output: &Output,
++    ) -> impl Iterator<Item = &Mapped> {
++        let spanned = self
++            .spanned_fullscreen_for_output(output)
++            .map(|(mapped, _)| mapped);
++        self.layout
++            .windows_for_output(output)
++            .filter(move |mapped| spanned.is_none_or(|span| span.window != mapped.window))
++            .chain(spanned)
++    }
++}
+diff --git a/src/tests/mod.rs b/src/tests/mod.rs
+--- a/src/tests/mod.rs
++++ b/src/tests/mod.rs
+@@ -13,2 +13,3 @@
+ mod remove_output;
++mod spanned_fullscreen;
+ mod transactions;
+diff --git a/src/tests/spanned_fullscreen.rs b/src/tests/spanned_fullscreen.rs
+new file mode 100644
+--- /dev/null
++++ b/src/tests/spanned_fullscreen.rs
+@@ -0,0 +1,390 @@
++use std::sync::atomic::Ordering;
++use std::sync::Arc;
++
++use niri_config::input::FocusFollowsMouse;
++use niri_config::Config;
++use smithay::backend::allocator::Fourcc;
++use smithay::backend::renderer::damage::OutputDamageTracker;
++use smithay::backend::renderer::element::Element as _;
++use smithay::desktop::utils::surface_primary_scanout_output;
++use smithay::reexports::wayland_protocols::xdg::shell::client::xdg_toplevel;
++use smithay::utils::{Point, Rectangle, Scale, Size, Transform};
++use smithay::wayland::compositor::with_states;
++use smithay::wayland::fractional_scale::with_fractional_scale;
++use wayland_client::protocol::wl_surface::WlSurface;
++
++use super::client::{ClientId, SyncData};
++use super::Fixture;
++use crate::layout::LayoutElement as _;
++use crate::niri::{OutputRenderElements, RedrawState};
++use crate::render_helpers::{self, RenderCtx, RenderTarget};
++
++fn set_up() -> (Fixture, ClientId, WlSurface) {
++    let mut config = Config::default();
++    config.input.focus_follows_mouse = Some(FocusFollowsMouse {
++        max_scroll_amount: None,
++    });
++    let mut f = Fixture::with_config(config);
++    f.add_output(1, (1920, 1080));
++    f.add_output(2, (1280, 720));
++
++    let id = f.add_client();
++    let window = f.client(id).create_window();
++    let surface = window.surface.clone();
++    window.commit();
++    f.roundtrip(id);
++    let window = f.client(id).window(&surface);
++    window.attach_new_buffer();
++    window.set_size(100, 100);
++    window.ack_last_and_commit();
++    f.double_roundtrip(id);
++    f.niri_complete_animations();
++    (f, id, surface)
++}
++
++#[test]
++fn spanned_fullscreen_size_input_and_restore() {
++    let (mut f, id, surface) = set_up();
++    let mapped = f.niri().layout.focus().unwrap();
++    let original_size = mapped.expected_size();
++    let window_id = mapped.window.clone();
++    let owner = f.niri().layout.active_output().unwrap().clone();
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    let configure = &f
++        .client(id)
++        .window(&surface)
++        .configures_received
++        .last()
++        .unwrap()
++        .1;
++    assert_eq!(configure.size, (3200, 1080));
++    assert_eq!(configure.bounds, Some((3200, 1080)));
++    assert!(configure.states.contains(&xdg_toplevel::State::Fullscreen));
++
++    let window = f.client(id).window(&surface);
++    window.set_size(3200, 1080);
++    window.ack_last_and_commit();
++    f.double_roundtrip(id);
++
++    let under = f.niri().contents_under(Point::from((2500., 100.)));
++    assert_eq!(under.window.as_ref().unwrap().0, window_id);
++    assert!(under.surface.is_some());
++    f.niri().handle_focus_follows_mouse(&under);
++    assert_eq!(f.niri().layout.active_output(), Some(&owner));
++    assert!(f.niri().spanned_fullscreen.is_some());
++    assert_eq!(
++        f.niri().layout.popup_target_rect(&window_id, false),
++        Rectangle::from_size(Size::from((3200., 1080.))),
++    );
++
++    for state in f.niri().output_state.values_mut() {
++        state.redraw_state = RedrawState::Idle;
++    }
++    f.niri().queue_redraw(&owner);
++    assert!(f
++        .niri()
++        .output_state
++        .values()
++        .all(|state| matches!(state.redraw_state, RedrawState::Queued,)));
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    assert!(f.niri().spanned_fullscreen.is_none());
++    let mapped = f.niri().layout.focus().unwrap();
++    assert!(!mapped.pending_sizing_mode().is_fullscreen());
++    assert_eq!(mapped.expected_size(), original_size);
++}
++
++#[test]
++fn spanned_fullscreen_restores_single_output_fullscreen() {
++    let (mut f, id, _surface) = set_up();
++    let window_id = f.niri().layout.focus().unwrap().window.clone();
++    f.niri().layout.set_fullscreen(&window_id, true);
++    f.double_roundtrip(id);
++    let original_size = f.niri().layout.focus().unwrap().expected_size();
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    let mapped = f.niri().layout.focus().unwrap();
++    assert!(mapped.pending_sizing_mode().is_fullscreen());
++    assert_eq!(mapped.expected_size(), original_size);
++}
++
++#[test]
++fn spanned_fullscreen_restores_maximized() {
++    let (mut f, id, _surface) = set_up();
++    let window_id = f.niri().layout.focus().unwrap().window.clone();
++    f.niri().layout.set_maximized(&window_id, true);
++    f.double_roundtrip(id);
++    let original_size = f.niri().layout.focus().unwrap().expected_size();
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    let mapped = f.niri().layout.focus().unwrap();
++    assert!(mapped.pending_sizing_mode().is_maximized());
++    assert_eq!(mapped.expected_size(), original_size);
++}
++
++#[test]
++fn spanned_fullscreen_restores_floating() {
++    let (mut f, id, _surface) = set_up();
++    let window_id = f.niri().layout.focus().unwrap().window.clone();
++    f.niri().layout.toggle_window_floating(Some(&window_id));
++    f.double_roundtrip(id);
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    assert!(f.niri().layout.workspaces().any(|(_, _, workspace)| {
++        workspace.has_window(&window_id) && workspace.is_floating(&window_id)
++    }));
++}
++
++#[test]
++fn spanned_fullscreen_restores_windowed_fullscreen() {
++    let (mut f, id, _surface) = set_up();
++    let window_id = f.niri().layout.focus().unwrap().window.clone();
++    f.niri().layout.toggle_windowed_fullscreen(&window_id);
++    f.double_roundtrip(id);
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    let mapped = f.niri().layout.focus().unwrap();
++    assert!(mapped.is_pending_windowed_fullscreen());
++    assert!(!mapped.pending_sizing_mode().is_fullscreen());
++}
++
++#[test]
++fn spanned_fullscreen_honors_unfullscreen_requests() {
++    let (mut f, id, _surface) = set_up();
++    let window_id = f.niri().layout.focus().unwrap().window.clone();
++    f.niri().layout.set_fullscreen(&window_id, true);
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++
++    f.niri().layout.set_fullscreen(&window_id, false);
++    f.double_roundtrip(id);
++    assert!(f.niri().spanned_fullscreen.is_none());
++    assert!(!f
++        .niri()
++        .layout
++        .focus()
++        .unwrap()
++        .pending_sizing_mode()
++        .is_fullscreen());
++}
++
++#[test]
++fn spanned_fullscreen_uses_rotated_scaled_outputs() {
++    let config = Config::parse_mem(
++        r#"
++        output "headless-1" {
++            scale 1
++        }
++        output "headless-2" {
++            scale 2
++            transform "270"
++        }
++    "#,
++    )
++    .unwrap();
++    let mut f = Fixture::with_config(config);
++    f.add_output(1, (1920, 1080));
++    f.add_output(2, (2880, 1800));
++    let id = f.add_client();
++    let window = f.client(id).create_window();
++    let surface = window.surface.clone();
++    window.commit();
++    f.roundtrip(id);
++    let window = f.client(id).window(&surface);
++    window.attach_new_buffer();
++    window.set_size(100, 100);
++    window.ack_last_and_commit();
++    f.double_roundtrip(id);
++    f.niri_complete_animations();
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    let configure = &f
++        .client(id)
++        .window(&surface)
++        .configures_received
++        .last()
++        .unwrap()
++        .1;
++    assert_eq!(configure.size, (2820, 1440));
++    let second = f.niri_output(2);
++    let (_, location) = f.niri().spanned_fullscreen_for_output(&second).unwrap();
++    assert_eq!(location, Point::from((-1920., 0.)));
++
++    let mapped = f.niri().layout.focus().unwrap();
++    let scale = with_states(mapped.toplevel().wl_surface(), |states| {
++        with_fractional_scale(states, |fractional| fractional.preferred_scale())
++    });
++    assert_eq!(scale, Some(2.));
++
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++    let mapped = f.niri().layout.focus().unwrap();
++    let scale = with_states(mapped.toplevel().wl_surface(), |states| {
++        with_fractional_scale(states, |fractional| fractional.preferred_scale())
++    });
++    assert_eq!(scale, Some(1.));
++}
++
++#[test]
++fn spanned_fullscreen_exits_when_an_output_is_removed() {
++    for output_number in [1, 2] {
++        let (mut f, id, _surface) = set_up();
++        let window_id = f.niri().layout.focus().unwrap().window.clone();
++        f.niri().toggle_spanned_fullscreen();
++        f.double_roundtrip(id);
++
++        let output = f.niri_output(output_number);
++        f.niri().remove_output(&output);
++        f.double_roundtrip(id);
++        assert!(f.niri().spanned_fullscreen.is_none());
++        let mapped = f
++            .niri()
++            .layout
++            .windows()
++            .find(|(_, mapped)| mapped.window == window_id)
++            .unwrap()
++            .1;
++        assert!(!mapped.pending_sizing_mode().is_fullscreen());
++        assert!(mapped.fullscreen_span_size().is_none());
++    }
++}
++
++#[test]
++fn spanned_fullscreen_exits_when_focus_or_overview_changes() {
++    for open_overview in [false, true] {
++        let (mut f, id, _surface) = set_up();
++        let window_id = f.niri().layout.focus().unwrap().window.clone();
++        f.niri().toggle_spanned_fullscreen();
++        f.double_roundtrip(id);
++
++        if open_overview {
++            f.niri().layout.toggle_overview();
++        } else {
++            let second = f.niri_output(2);
++            f.niri().layout.focus_output(&second);
++        }
++        f.double_roundtrip(id);
++        assert!(f.niri().spanned_fullscreen.is_none());
++        let mapped = f
++            .niri()
++            .layout
++            .windows()
++            .find(|(_, mapped)| mapped.window == window_id)
++            .unwrap()
++            .1;
++        assert!(!mapped.pending_sizing_mode().is_fullscreen());
++    }
++}
++
++#[test]
++fn spanned_fullscreen_input_uses_global_origin() {
++    let (mut f, id, surface) = set_up();
++    let first = f.niri_output(1);
++    let second = f.niri_output(2);
++    f.niri().global_space.map_output(&first, (-1920, -100));
++    f.niri().global_space.map_output(&second, (0, -100));
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++
++    let window = f.client(id).window(&surface);
++    window.set_size(3200, 1080);
++    window.ack_last_and_commit();
++    f.double_roundtrip(id);
++
++    let under = f.niri().contents_under(Point::from((500., 0.)));
++    assert_eq!(under.output.as_ref(), Some(&second));
++    assert_eq!(under.surface.unwrap().1, Point::from((-1920., -100.)));
++}
++
++#[test]
++fn egl_spanned_fullscreen_renders_and_updates_secondary_output() {
++    let (mut f, id, surface) = set_up();
++    f.niri().hotkey_overlay.hide();
++    f.niri_state().backend.headless().add_renderer().unwrap();
++    f.niri().toggle_spanned_fullscreen();
++    f.double_roundtrip(id);
++
++    let window = f.client(id).window(&surface);
++    let buffer = window
++        .spbm
++        .create_u32_rgba_buffer(u32::MAX, 0, 0, u32::MAX, &window.qh, ());
++    window.surface.attach(Some(&buffer), 0, 0);
++    window.set_size(3200, 1080);
++    window.ack_last_and_commit();
++    f.double_roundtrip(id);
++    f.niri_complete_animations();
++    f.niri().update_render_elements(None);
++
++    let second = f.niri_output(2);
++    let state = f.niri_state();
++    let states = state
++        .backend
++        .with_primary_renderer(|renderer| {
++            let elements = state.niri.render_to_vec(
++                RenderCtx {
++                    renderer,
++                    target: RenderTarget::Output,
++                    xray: None,
++                },
++                &second,
++                false,
++            );
++            let span = elements
++                .iter()
++                .find(|element| matches!(element, OutputRenderElements::SpannedFullscreen(_)))
++                .unwrap();
++            assert_eq!(
++                span.geometry(Scale::from(1.)),
++                Rectangle::new(Point::from((-1920, 0)), Size::from((3200, 1080)),)
++            );
++
++            let mut damage_tracker = OutputDamageTracker::from_output(&second);
++            let (_, states) = damage_tracker.damage_output(0, &elements).unwrap();
++            let pixels = render_helpers::render_to_vec(
++                renderer,
++                Size::from((1280, 720)),
++                Scale::from(1.),
++                Transform::Normal,
++                Fourcc::Abgr8888,
++                elements.iter().rev(),
++            )
++            .unwrap();
++            (states, pixels)
++        })
++        .unwrap();
++    let (states, pixels) = states;
++    state.niri.update_primary_scanout_output(&second, &states);
++    let mapped = state.niri.layout.focus().unwrap();
++    let primary = with_states(mapped.toplevel().wl_surface(), |states| {
++        surface_primary_scanout_output(mapped.toplevel().wl_surface(), states)
++    });
++    assert_eq!(primary, Some(second.clone()));
++    assert!(pixels
++        .chunks_exact(4)
++        .all(|pixel| pixel == [255, 0, 0, 255]));
++
++    let done = Arc::<SyncData>::default();
++    let window = f.client(id).window(&surface);
++    window.surface.frame(&window.qh, done.clone());
++    window.commit();
++    f.double_roundtrip(id);
++    f.niri().send_frame_callbacks(&second);
++    f.double_roundtrip(id);
++    assert!(done.done.load(Ordering::Relaxed));
++}
+diff --git a/src/window/mapped.rs b/src/window/mapped.rs
+--- a/src/window/mapped.rs
++++ b/src/window/mapped.rs
+@@ -120,6 +120,11 @@
+ 
+     /// State for the logic to request a size once (for floating windows).
+     request_size_once: Option<RequestSizeOnce>,
++
++    /// Fullscreen size covering multiple outputs, in window coordinates.
++    fullscreen_span_size: Option<Size<i32, Logical>>,
++    /// Single-output fullscreen size requested by the layout.
++    fullscreen_base_size: Option<Size<i32, Logical>>,
+ 
+     /// Transaction that the next configure should take part in, if any.
+     transaction_for_next_configure: Option<Transaction>,
+@@ -297,6 +302,8 @@
+             animate_serials: Vec::new(),
+             animation_snapshot: None,
+             request_size_once: None,
++            fullscreen_span_size: None,
++            fullscreen_base_size: None,
+             transaction_for_next_configure: None,
+             pending_transactions: Vec::new(),
+             interactive_resize: None,
+@@ -616,6 +623,18 @@
+ impl Drop for Mapped {
+     fn drop(&mut self) {
+         remove_pre_commit_hook(self.toplevel().wl_surface(), &self.pre_commit_hook);
++    }
++}
++
++impl Mapped {
++    pub(crate) fn set_fullscreen_span_size(&mut self, size: Option<Size<i32, Logical>>) {
++        if self.fullscreen_span_size == size {
++            return;
++        }
++        self.fullscreen_span_size = size;
++        if let Some(base_size) = self.fullscreen_base_size {
++            self.request_size(base_size, SizingMode::Fullscreen, false, None);
++        }
+     }
+ }
+ 
+@@ -774,6 +793,15 @@
+         animate: bool,
+         transaction: Option<Transaction>,
+     ) {
++        let size = if mode.is_fullscreen() {
++            self.fullscreen_base_size = Some(size);
++            self.fullscreen_span_size.unwrap_or(size)
++        } else {
++            self.fullscreen_base_size = None;
++            self.fullscreen_span_size = None;
++            size
++        };
++
+         // Going into real fullscreen resets windowed fullscreen.
+         if mode == SizingMode::Fullscreen {
+             self.is_pending_windowed_fullscreen = false;
+@@ -826,6 +854,8 @@
+     }
+ 
+     fn request_size_once(&mut self, size: Size<i32, Logical>, animate: bool) {
++        self.fullscreen_span_size = None;
++        self.fullscreen_base_size = None;
+         // Assume that when calling this function, the window is going floating, so it can no
+         // longer participate in any transactions with other windows.
+         self.transaction_for_next_configure = None;
+@@ -1002,9 +1032,14 @@
+     }
+ 
+     fn set_bounds(&self, bounds: Size<i32, Logical>) {
++        let bounds = self.fullscreen_span_size.unwrap_or(bounds);
+         self.toplevel().with_pending_state(|state| {
+             state.bounds = Some(bounds);
+         });
++    }
++
++    fn fullscreen_span_size(&self) -> Option<Size<i32, Logical>> {
++        self.fullscreen_span_size
+     }
+ 
+     fn configure_intent(&self) -> ConfigureIntent {
