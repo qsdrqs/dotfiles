@@ -173,11 +173,11 @@ statix check nixos/
 
 ### rebuild-and-fix
 
-Drive the current machine to a state where `snr-switch <machine>` completes end to end, repairing every build error it surfaces. Load the `nixos-config` skill as well; it owns option verification, the flake composition map, and the eval-before-build rules this task builds on.
+Fully build the current machine's configuration, repairing every build error it surfaces. By default, the agent completes the full system build without sudo or activation, then the user runs `snr-switch <machine>` for the final switch. Run the switch as the agent only when the user explicitly delegates activation. Load the `nixos-config` skill as well; it owns option verification, the flake composition map, and the eval-before-build rules this task builds on.
 
 #### Step 0: audit previous temporary fixes
 
-Before the first `snr-switch`, review the temporary workarounds left behind by earlier builds and drop the ones upstream has already resolved. A stale pin is a latent failure, so this runs first.
+Before the first full system build, review the temporary workarounds left behind by earlier builds and drop the ones upstream has already resolved. A stale pin is a latent failure, so this runs first.
 
 Candidates, primarily in `nixos/overlays.nix`:
 
@@ -207,7 +207,14 @@ Pick the single configuration matching this host. Remote and cross-compiled targ
 
 #### Step 2: build and fix loop
 
-Run `snr-switch <machine>` from `~/dotfiles`. It performs the full build and then the switch, so one invocation exercises everything. The build's own output is the evidence; do not pre-emptively evaluate a subset and call it done.
+From `~/dotfiles`, build the complete system toplevel without switching:
+
+```bash
+nix build --no-link --print-out-paths --keep-going --show-trace -L \
+  'path:.#nixosConfigurations.<machine>.config.system.build.toplevel'
+```
+
+The build's own output is the evidence; do not pre-emptively evaluate a subset and call it done. Do not request sudo credentials or attempt activation in this default build-only flow.
 
 Before each build, check how much will be built locally with the build-cost check in the `nixos-config` skill (`references/build-cost-and-breakage.md`, `scripts/build_cost.py dry-run <machine>`). Passing the resource gate is necessary but not sufficient. If the build conditions defined there are not met, report the list and ask the user through Step 4 before building; do not start the build.
 
@@ -215,9 +222,11 @@ On failure:
 
 1. Re-run the failing stage with `--show-trace` and read the first real error, not the last symptom or a downstream cascade.
 2. Classify it and apply the matching fix from Step 3. Smallest change that fully solves the problem, following the existing patterns in the file it belongs to.
-3. Re-run `snr-switch <machine>`. The task is done only when the switch and activation complete, not when evaluation or one package succeeds.
+3. Re-run the full system build above. The build phase is complete only when the entire toplevel succeeds, not when evaluation or one package succeeds.
 
 Repeat until it succeeds or the failure needs a decision from the user. Each iteration is a full rebuild, so budget for it: prefer one well-understood fix over several speculative ones, and re-read the failing package's expression before editing. Never weaken a build (removing a check, dropping a feature, forcing a broken substitute) just to get past an error. The resource gate in the `nixos-config` skill still applies to the underlying `nix build` work.
+
+After a successful full build, hand off `snr-switch <machine>` to the user. With an unchanged configuration, it reuses the built system closure. If the user explicitly delegated activation, run that command and verify both the switch and activation complete. A successful build alone does not verify activation.
 
 #### Step 3: fix playbook
 
@@ -253,5 +262,4 @@ Then stop. Do not apply a speculative workaround, and do not present an unverifi
 
 #### Reporting
 
-When the build succeeds, summarize: the target machine, what was removed in Step 0 and why, every fix applied with its file, and anything left for the user to do. Leave all changes uncommitted and report the diff - committing requires explicit authorization.
-
+When the build succeeds, summarize: the target machine and built store path, what was removed in Step 0 and why, every fix applied with its file, and anything left for the user to do. Explicitly distinguish "built successfully; activation pending" from "switched and activated". In the default flow, give the user the final `snr-switch <machine>` command rather than claiming the system has been switched. Leave all changes uncommitted and report the diff - committing requires explicit authorization.

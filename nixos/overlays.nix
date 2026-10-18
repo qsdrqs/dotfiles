@@ -121,18 +121,18 @@ in
 
         # Begin Temporary fixed version packages
         # freerdp = super.freerdp.override { openh264 = null; };
-        # ltrace 0.7.91 check phase fails with GCC 16 (C++20 default): testsuite demangle-lib.cpp
-        # triggers the "'volatile'-qualified return type is deprecated" warning, so DejaGnu fails
-        # every demangle.exp test. nixpkgs master has the same derivation. Use the GCC 15 build
-        # from nixpkgs-last until nixpkgs ltrace builds with GCC 16.
-        ltrace = pkgs-last.ltrace;
-        # The CUDA builds of onnxruntime and its consumers for the current nixpkgs input (after the
-        # GCC 16 staging-next, NixOS/nixpkgs#566094) are not in cache.nixos-cuda.org yet, so they
-        # would compile locally. Take Firefox and OBS (obs-backgroundremoval links onnxruntime)
-        # from nixpkgs-last, whose CUDA builds are cached. zotero above is built on nixpkgs-last
-        # for the same reason.
-        # Remove once cache.nixos-cuda.org covers the current nixpkgs input.
+        # Lix 2.95.4 fails Meson configuration because mimalloc was introduced in 2.96.
+        # https://github.com/NixOS/nixpkgs/pull/573942
+        # Remove once the locked nixpkgs includes this fix.
+        lix = super.lix.overrideAttrs (oldAttrs: {
+          mesonFlags = builtins.filter (flag: flag != "-Dmimalloc=disabled") oldAttrs.mesonFlags;
+        });
+        # Current CUDA Firefox builds are not in cache.nixos-cuda.org yet.
+        # Use nixpkgs-last for Firefox and Zotero (above) until those builds are cached.
         firefox-devedition-unwrapped = pkgs-last.firefox-devedition-unwrapped;
+        # OBS and onnxruntime are cached for the current input, but the six configured
+        # OBS plugins still build locally. Keep OBS and its plugins on nixpkgs-last
+        # until those plugins are cached.
         obs-studio = pkgs-last.obs-studio;
         obs-studio-plugins = pkgs-last.obs-studio-plugins;
         # minted 3.7.0 ships latexminted 0.6.0, whose ArgParser does not accept
