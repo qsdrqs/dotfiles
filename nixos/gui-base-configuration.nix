@@ -62,6 +62,7 @@ in
 
   # Bluetooth
   hardware.bluetooth.enable = true;
+  hardware.bluetooth.package = pkgs.bluez-master;
   services.blueman.enable = true;
 
   # Graphics

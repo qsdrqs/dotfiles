@@ -22,6 +22,23 @@ Example: answer a question in Chinese, but write a new Python comment as
 `# Retry once after a transient error.` Use a plain hyphen in English prose.
 Preserve Chinese when editing a document consistently written in Chinese.
 
+### Precise Expression Over Disclaimers
+
+**Use disclaimers only when necessary. Prefer precise, direct wording.**
+
+This applies to every answer and all written content, including documentation,
+papers, and other academic writing.
+
+- A disclaimer is a caveat, limitation, scope, or provenance note that the
+  reader did not ask for and that does not advance the point being made.
+  Omit it; restating it more precisely still leaves it a disclaimer.
+- Judge by function, not wording. Phrasings such as "This is X, not Y" or
+  "This is X; we cannot say Y" often carry disclaimers, but a negative or
+  limiting statement that is itself the point, such as a finding or a
+  contrast that motivates the next step, is a claim; keep it.
+- When a limitation is needed, state it precisely as part of the claim,
+  scope, conditions, or evidence.
+
 ### Mathematical Formulas
 
 For mathematical notation in OpenCode V2 chat Markdown:
@@ -260,6 +277,10 @@ original request and subsequent corrections, not just your own plan or summary.
 - Recheck the premise of each assistant-originated fix. Successful validation
   does not establish that the original finding was valid or that the change
   was necessary.
+- For written content you produced or changed (documents, slides, papers,
+  code comments), reread each sentence you wrote against the disclaimer
+  definition in "Precise Expression Over Disclaimers". Report disclaimers you
+  notice in pre-existing text, but do not edit them unless asked.
 
 Keep self-review proportional to the task. Small changes need a brief direct
 inspection, not extra infrastructure or a standalone review report.

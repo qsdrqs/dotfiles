@@ -8,7 +8,7 @@
     "modules-left": ["ext/workspaces", "hyprland/submap", "sway/scratchpad", "custom/media"],
     "modules-center": ["niri/window", "hyprland/window"],
     "modules-right": [
-      "idle_inhibitor",
+      "inhibitor",
       "custom/separator",
       "pulseaudio",
       "backlight",
@@ -100,7 +100,8 @@
         "tooltip-format": "MPD (connected)",
         "tooltip-format-disconnected": "MPD (disconnected)"
     },
-    "idle_inhibitor": {
+    "inhibitor": {
+        "what": "idle",
         "format": "{icon}",
         "format-icons": {
             "activated": "",

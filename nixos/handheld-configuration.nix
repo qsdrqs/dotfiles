@@ -37,6 +37,33 @@ in
     desktopSession = "plasma";
   };
 
+  services.wivrn = {
+    enable = true;
+    openFirewall = true;
+    autoStart = true;
+    steam.importOXRRuntimes = true;
+  };
+
+  xdg.portal.extraPortals = with pkgs; [
+    xdg-desktop-portal-gamescope
+    xdg-desktop-portal-holo
+  ];
+
+  systemd.user.services.xdg-desktop-portal.serviceConfig.UnsetEnvironment = [
+    "XDG_DESKTOP_PORTAL_DIR"
+  ];
+
+  home-manager.users.qsdrqs.xdg.configFile."wayvr/conf.d/10-capture.yaml".text = ''
+    capture_method: pipewire
+  '';
+
+  home-manager.users.qsdrqs.xdg.dataFile = {
+    "xdg-desktop-portal/portals/gamescope.portal".source =
+      "${pkgs.xdg-desktop-portal-gamescope}/share/xdg-desktop-portal/gamescope-portals/gamescope.portal";
+    "xdg-desktop-portal/portals/holo.portal".source =
+      "${pkgs.xdg-desktop-portal-holo}/share/xdg-desktop-portal/gamescope-portals/holo.portal";
+  };
+
   # Use Jovian's kernel
   boot.kernelPackages = pkgs.linuxPackages_jovian;
 
@@ -47,6 +74,8 @@ in
     lsp-plugins
     mda_lv2
     zam-plugins
+    xrizer
+    wayvr
   ];
 
   # Ensure CEF debugging is enabled for Decky Loader

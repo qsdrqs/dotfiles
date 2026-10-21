@@ -27,7 +27,7 @@ window#waybar {
 #custom-launcher,
 #workspaces,
 #window,
-#idle_inhibitor,
+#inhibitor,
 #pulseaudio,
 #backlight,
 #network,
@@ -57,7 +57,7 @@ window#waybar {
 #custom-launcher:hover,
 #workspaces button:hover,
 #window:hover,
-#idle_inhibitor:hover,
+#inhibitor:hover,
 #pulseaudio:hover,
 #backlight:hover,
 #network:hover,
@@ -73,11 +73,11 @@ window#waybar {
   background: @panel_bg_hover;
 }
 
-#idle_inhibitor {
+#inhibitor {
   padding: 0px 10px;
 }
 
-#idle_inhibitor.activated {
+#inhibitor.activated {
   background: @accent;
   color: #000000;
 }

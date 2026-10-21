@@ -21,7 +21,15 @@ in
     wluma
     powertop
     config.boot.kernelPackages.turbostat
+    xrizer
+    wayvr
   ];
+
+  services.wivrn = {
+    enable = true;
+    openFirewall = true;
+    autoStart = true;
+  };
 
   hardware.firmware = with pkgs; [
     linux-firmware

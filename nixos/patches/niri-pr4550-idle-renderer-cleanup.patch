@@ -1,0 +1,198 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Source: https://github.com/niri-wm/niri/pull/4550
+# Commit: 4da66421fe745aed1d6442b844ff20aa3ac7ebe6
+# Base: niri 45739bc with the local feature patch stack.
+diff --git a/src/backend/mod.rs b/src/backend/mod.rs
+--- a/src/backend/mod.rs
++++ b/src/backend/mod.rs
+@@ -6,6 +6,7 @@
+ use smithay::backend::allocator::dmabuf::Dmabuf;
+ use smithay::backend::drm::DrmNode;
+ use smithay::backend::renderer::gles::GlesRenderer;
++use smithay::backend::renderer::Renderer;
+ use smithay::output::Output;
+ use smithay::reexports::wayland_server::protocol::wl_surface::WlSurface;
+ 
+@@ -73,6 +74,24 @@
+ }
+ 
+ impl Backend {
++    /// Reclaim dead imports even when no output is being rendered.
++    ///
++    /// Importing a client buffer does not require a frame. In particular, a
++    /// client may create and destroy dmabufs while DPMS is off or all outputs
++    /// are unplugged. Leaving cleanup to frame completion pins their EGLImages
++    /// (and backing GPU/system memory) until the next rendered frame.
++    pub fn cleanup_texture_cache(&mut self) {
++        if let Self::Tty(tty) = self {
++            tty.cleanup_texture_cache();
++        } else {
++            self.with_primary_renderer(|renderer| {
++                if let Err(err) = renderer.cleanup_texture_cache() {
++                    warn!(?err, "error cleaning up renderer texture cache");
++                }
++            });
++        }
++    }
++
+     pub fn init(&mut self, niri: &mut Niri) {
+         let _span = tracy_client::span!("Backend::init");
+         match self {
+diff --git a/src/backend/tty.rs b/src/backend/tty.rs
+--- a/src/backend/tty.rs
++++ b/src/backend/tty.rs
+@@ -31,8 +31,8 @@
+ use smithay::backend::libinput::{LibinputInputBackend, LibinputSessionInterface};
+ use smithay::backend::renderer::gles::GlesRenderer;
+ use smithay::backend::renderer::multigpu::gbm::GbmGlesBackend;
+-use smithay::backend::renderer::multigpu::{GpuManager, MultiFrame, MultiRenderer};
+-use smithay::backend::renderer::{DebugFlags, ImportDma, ImportEgl, RendererSuper};
++use smithay::backend::renderer::multigpu::{ApiDevice, GpuManager, MultiFrame, MultiRenderer};
++use smithay::backend::renderer::{DebugFlags, ImportDma, ImportEgl, Renderer, RendererSuper};
+ use smithay::backend::session::libseat::LibSeatSession;
+ use smithay::backend::session::{Event as SessionEvent, Session};
+ use smithay::backend::udev::{self, UdevBackend, UdevEvent};
+@@ -1885,6 +1885,28 @@
+         Some(f(renderer.as_gles_renderer()))
+     }
+ 
++    pub fn cleanup_texture_cache(&mut self) {
++        let devices = match self.gpu_manager.devices_mut() {
++            Ok(devices) => devices,
++            Err(err) => {
++                warn!(
++                    ?err,
++                    "error enumerating renderers for texture cache cleanup"
++                );
++                return;
++            }
++        };
++
++        // Imports can reside on a non-primary GPU. Clean every device, and do
++        // not let an error on one prevent cleanup of the remaining devices.
++        for device in devices {
++            let node = *device.node();
++            if let Err(err) = device.renderer_mut().cleanup_texture_cache() {
++                warn!(?node, ?err, "error cleaning up renderer texture cache");
++            }
++        }
++    }
++
+     pub fn primary_render_node(&mut self) -> Option<DrmNode> {
+         // Only meaningful while the primary renderer exists.
+         self.gpu_manager
+diff --git a/src/niri.rs b/src/niri.rs
+--- a/src/niri.rs
++++ b/src/niri.rs
+@@ -2747,6 +2747,11 @@
+                 Timer::from_duration(Duration::from_secs(1)),
+                 |_, _, state| {
+                     state.niri.send_frame_callbacks_on_fallback_timer();
++                    // Cache maintenance must not depend on frame production:
++                    // there may be no active outputs, but clients can still
++                    // import and destroy buffers. Only dead entries are freed;
++                    // live surface textures and frame callback policy stay intact.
++                    state.backend.cleanup_texture_cache();
+                     TimeoutAction::ToDuration(Duration::from_secs(1))
+                 },
+             )
+diff --git a/src/tests/mod.rs b/src/tests/mod.rs
+--- a/src/tests/mod.rs
++++ b/src/tests/mod.rs
+@@ -11,6 +11,7 @@
+ mod fullscreen;
+ mod layer_shell;
+ mod remove_output;
++mod renderer_cleanup;
+ mod spanned_fullscreen;
+ mod transactions;
+ mod virtual_output;
+diff --git a/src/tests/renderer_cleanup.rs b/src/tests/renderer_cleanup.rs
+new file mode 100644
+--- /dev/null
++++ b/src/tests/renderer_cleanup.rs
+@@ -0,0 +1,84 @@
++use std::time::{Duration, Instant};
++
++use niri_config::Config;
++use smithay::backend::allocator::Fourcc;
++use smithay::backend::renderer::ImportMem;
++
++use super::server::Server;
++
++fn texture_exists(server: &mut Server, id: u32) -> bool {
++    server
++        .state
++        .backend
++        .with_primary_renderer(|renderer| {
++            renderer
++                .with_context(|gl| unsafe { gl.IsTexture(id) != 0 })
++                .unwrap()
++        })
++        .unwrap()
++}
++
++fn wait_for_cleanup(server: &mut Server, id: u32) {
++    let deadline = Instant::now() + Duration::from_secs(3);
++    while texture_exists(server, id) && Instant::now() < deadline {
++        server
++            .event_loop
++            .dispatch(Duration::from_millis(100), &mut server.state)
++            .unwrap();
++        server.state.refresh_and_flush_clients();
++    }
++    assert!(
++        !texture_exists(server, id),
++        "texture was not reclaimed without a frame"
++    );
++}
++
++fn check_cleanup(monitors_off: bool) {
++    let mut server = Server::new(Config::default());
++    server.state.backend.headless().add_renderer().unwrap();
++    if monitors_off {
++        let state = &mut server.state;
++        state
++            .backend
++            .headless()
++            .add_output(&mut state.niri, 1, (1280, 720));
++        state.niri.deactivate_monitors(&mut state.backend);
++    }
++
++    let (live, dead_id) = server
++        .state
++        .backend
++        .with_primary_renderer(|renderer| {
++            let live = renderer
++                .import_memory(&[255; 4], Fourcc::Abgr8888, (1, 1).into(), false)
++                .unwrap();
++            let dead = renderer
++                .import_memory(&[255; 4], Fourcc::Abgr8888, (1, 1).into(), false)
++                .unwrap();
++            let dead_id = dead.tex_id();
++            drop(dead);
++            (live, dead_id)
++        })
++        .unwrap();
++
++    // Drop queues GL destruction; it cannot delete the object immediately.
++    assert!(texture_exists(&mut server, dead_id));
++    wait_for_cleanup(&mut server, dead_id);
++    let live_id = live.tex_id();
++    assert!(texture_exists(&mut server, live_id));
++
++    // Maintenance must keep running, not just clean up once after power-off.
++    drop(live);
++    assert!(texture_exists(&mut server, live_id));
++    wait_for_cleanup(&mut server, live_id);
++}
++
++#[test]
++fn egl_cleanup_without_outputs() {
++    check_cleanup(false);
++}
++
++#[test]
++fn egl_cleanup_with_monitors_off() {
++    check_cleanup(true);
++}

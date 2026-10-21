@@ -1,0 +1,20 @@
+diff --git a/server/compositor/layer_squasher.cpp b/server/compositor/layer_squasher.cpp
+--- a/server/compositor/layer_squasher.cpp
++++ b/server/compositor/layer_squasher.cpp
+@@ -36,6 +36,7 @@
+ 
+ #include "driver/wivrn_hmd.h"
+ #include "utils/wivrn_vk_bundle.h"
++#include "vk/check.h"
+ #include "vk/specialization_constants.h"
+ 
+ #include "main/comp_compositor.h"
+@@ -583,6 +584,8 @@
+ 		for (auto & layer: std::span(ubo.layers).subspan(cur_layer))
+ 			layer.layer_data.layer_type = LAYER_COMP_TYPE_NOOP;
+ 
++		CHECK_VK(vmaFlushAllocation(vk_allocator::instance(), this->ubo[view], 0, sizeof(ubo)));
++
+ 		vk::DescriptorImageInfo target_image_info{
+ 		        .imageView = *render_view_unorm[view],
+ 		        .imageLayout = vk::ImageLayout::eGeneral,

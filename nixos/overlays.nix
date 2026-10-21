@@ -89,6 +89,44 @@ in
         # neovim-unwrapped = inputs.nvim-config.neovim.packages.${pkgs.system}.default;
 
         # Begin Temporary self updated packages, until they are merged upstream, remove them when they are merged
+        # BlueZ master fixes the A2DP endpoint cache regression in 5.87.
+        # https://github.com/bluez/bluez/commit/b7d71e5067856b0daf2f1f73b3fc95483236610e
+        # Remove this package and the hardware.bluetooth.package override once
+        # nixpkgs includes that fix.
+        bluez-master = super.bluez.overrideAttrs (oldAttrs: {
+          version = "5.87-unstable-2026-10-14";
+          src = super.fetchFromGitHub {
+            owner = "bluez";
+            repo = "bluez";
+            rev = "fa6ba55020dee3c3183041c854c347b4582448be";
+            hash = "sha256-zACKSe0Kh/hqBRZnugXICD4udfO6us4JoclQgjDu+sg=";
+          };
+          patches = [ ./patches/bluez-master-readline.patch ];
+          # gatttool was removed upstream.
+          postInstall = builtins.replaceStrings
+            [ "install -Dm755 attrib/gatttool $out/bin/gatttool" ]
+            [ "" ]
+            oldAttrs.postInstall;
+        });
+
+        # WayVR 26.8.0 closes capture frame fds before main-thread upload.
+        # Use the owned-frame fix until it reaches a stable release.
+        # https://github.com/wayvr-org/wayvr/commit/11a5c8305bba5a4bc61ed07dbf90e63ce4b4b81f
+        wayvr = super.wayvr.overrideAttrs (finalAttrs: oldAttrs: {
+          version = "26.8.0-unstable-2026-10-18";
+          src = super.fetchFromGitHub {
+            owner = "wayvr-org";
+            repo = "wayvr";
+            rev = "adf852971fa06afcf859dfe8d734493ed1d7004e";
+            hash = "sha256-QjPZYGydnkOk62kVBjqirUHS8J6yUK2PLPP0C3J5K98=";
+          };
+          cargoHash = "sha256-1452r/EUSwCgdLhU0xmNCYUKJD2girlaUMRx21P/5SU=";
+          cargoDeps = super.rustPlatform.fetchCargoVendor {
+            inherit (finalAttrs) pname version src;
+            hash = finalAttrs.cargoHash;
+          };
+        });
+
         # Zotero 10.0.2 fixes HTML indexing with Firefox ESR 140.15.
         # https://github.com/NixOS/nixpkgs/pull/562964
         # Built on nixpkgs-last because the current zotero needs a CUDA firefox-esr-153 that is not
@@ -127,14 +165,17 @@ in
         lix = super.lix.overrideAttrs (oldAttrs: {
           mesonFlags = builtins.filter (flag: flag != "-Dmimalloc=disabled") oldAttrs.mesonFlags;
         });
+        # WiVRn 26.9 leaves layer UBO writes unflushed on non-coherent memory,
+        # causing stereo corruption during head motion. Remove once fixed upstream.
+        # https://github.com/WiVRn/WiVRn/commit/22a819b8c88a1fa03e8d5b8359fed656f23126bb
+        wivrn = super.wivrn.overrideAttrs (oldAttrs: {
+          patches = (oldAttrs.patches or [ ]) ++ [
+            ./patches/wivrn-flush-layer-ubo.patch
+          ];
+        });
         # Current CUDA Firefox builds are not in cache.nixos-cuda.org yet.
         # Use nixpkgs-last for Firefox and Zotero (above) until those builds are cached.
         firefox-devedition-unwrapped = pkgs-last.firefox-devedition-unwrapped;
-        # OBS and onnxruntime are cached for the current input, but the six configured
-        # OBS plugins still build locally. Keep OBS and its plugins on nixpkgs-last
-        # until those plugins are cached.
-        obs-studio = pkgs-last.obs-studio;
-        obs-studio-plugins = pkgs-last.obs-studio-plugins;
         # minted 3.7.0 ships latexminted 0.6.0, whose ArgParser does not accept
         # the `color` keyword that Python 3.14's argparse now forwards, so every
         # minted document fails. Upstream fixed this in minted 3.8.0 with
@@ -363,6 +404,9 @@ in
             ./patches/niri-pr3800-virtual-outputs.patch
             ./patches/niri-vertical-layout.patch
             ./patches/niri-spanned-fullscreen.patch
+            # Reclaim dead GPU imports while outputs are off; remove when merged.
+            # https://github.com/niri-wm/niri/pull/4550
+            ./patches/niri-pr4550-idle-renderer-cleanup.patch
           ];
           postInstall = (oldAttrs.postInstall or "") + ''
             install -Dm0644 README.md resources/default-config.kdl -t $doc/share/doc/niri

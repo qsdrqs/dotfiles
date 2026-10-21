@@ -94,6 +94,7 @@ in
   environment.systemPackages = with pkgs; [
     # handy
     telegram-desktop
+    pdfpc
     slack
     snapper-gui
     zoom-us
