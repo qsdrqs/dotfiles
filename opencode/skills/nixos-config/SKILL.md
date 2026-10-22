@@ -24,7 +24,7 @@ Modify `~/dotfiles` NixOS + Home Manager configuration safely: make minimal, str
 2. Pick the correct flake output target
    - Prefer building/evaluating against the exact target you’re modifying.
    - Common targets in this repo:
-     - NixOS: `~/dotfiles#nixosConfigurations.<name>` where `<name>` includes `minimal`, `basic`, `develop`, `gui-minimal`, `gui-basic`, `desktop`, `laptop`, `server`, `rpi`, `wsl-desktop`, `wsl-laptop`.
+     - NixOS: `~/dotfiles#nixosConfigurations.<name>` where `<name>` includes `minimal`, `basic`, `develop`, `gui-minimal`, `gui-basic`, `desktop`, `laptop`, `vulchi`, `aliyun`, `rpi`, `wsl-desktop`, `wsl-laptop`.
      - Home Manager: `~/dotfiles#homeConfigurations.<name>` where `<name>` includes `minimal`, `basic`, `standalone`, `wsl`, `termux`, `rpi`.
 
 3. Verify the option/API exists (do not guess)
@@ -82,7 +82,8 @@ Modify `~/dotfiles` NixOS + Home Manager configuration safely: make minimal, str
 - `gui-basic`: `gui-minimal` + `gui-basic-configuration.nix`
 - `desktop`: `develop` + `gui-basic` + `desktop-configuration.nix` + `nixos/custom/desktop.nix` (adds extra `specialArgs`, e.g. `pkgs-howdy`)
 - `laptop`: `develop` + `gui-basic` + `laptop-configuration.nix`
-- `server`: `basic` + `server-configuration.nix` + `nixos/custom/server.nix` (built with `nixpkgs-stable`)
+- `serverConfig`: shared server profile, `basic` + stable Home Manager + `server-configuration.nix`
+- `vulchi` / `aliyun`: `serverConfig` + `nixos/custom/<name>.nix` (built with `nixpkgs-stable`)
 - `rpi`: `basic` (aarch64) + `rpi-configuration.nix` + `nixos/custom/rpi.nix` (built with `nixos-raspberrypi`)
 - `wsl-*`: `wsl-configuration.nix` + WSL home modules + `nixos/custom/wsl-*.nix` if present (flake references these files; create them when you actually need WSL targets)
 

@@ -120,7 +120,7 @@ in
       description = "Change ownership of .ssh directory";
       path = [ pkgs.inotify-tools pkgs.coreutils ];
       serviceConfig = {
-        ExecStart = ./scripts/chown_ssh.sh;
+        ExecStart = "${pkgs.bash}/bin/bash ${./scripts/chown_ssh.sh}";
       };
     };
   };

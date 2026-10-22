@@ -159,12 +159,6 @@ in
 
         # Begin Temporary fixed version packages
         # freerdp = super.freerdp.override { openh264 = null; };
-        # Lix 2.95.4 fails Meson configuration because mimalloc was introduced in 2.96.
-        # https://github.com/NixOS/nixpkgs/pull/573942
-        # Remove once the locked nixpkgs includes this fix.
-        lix = super.lix.overrideAttrs (oldAttrs: {
-          mesonFlags = builtins.filter (flag: flag != "-Dmimalloc=disabled") oldAttrs.mesonFlags;
-        });
         # WiVRn 26.9 leaves layer UBO writes unflushed on non-coherent memory,
         # causing stereo corruption during head motion. Remove once fixed upstream.
         # https://github.com/WiVRn/WiVRn/commit/22a819b8c88a1fa03e8d5b8359fed656f23126bb

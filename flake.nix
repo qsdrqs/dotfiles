@@ -283,7 +283,6 @@
         modules = basicConfig.modules ++ [
           stableHomeManagerModule
           ./nixos/server-configuration.nix
-          ./nixos/custom/vulchi.nix
         ];
       };
       rpiConfig = basicConfig // rec {
@@ -483,7 +482,12 @@
       nixosConfigurations.minimal = nixpkgs.lib.nixosSystem minimalConfig;
       nixosConfigurations.basic = nixpkgs.lib.nixosSystem basicConfig;
       nixosConfigurations.develop = nixpkgs.lib.nixosSystem developConfig;
-      nixosConfigurations.server = inputs.nixpkgs-stable.lib.nixosSystem serverConfig;
+      nixosConfigurations.vulchi = inputs.nixpkgs-stable.lib.nixosSystem (serverConfig // {
+        modules = serverConfig.modules ++ [ ./nixos/custom/vulchi.nix ];
+      });
+      nixosConfigurations.aliyun = inputs.nixpkgs-stable.lib.nixosSystem (serverConfig // {
+        modules = serverConfig.modules ++ [ ./nixos/custom/aliyun.nix ];
+      });
       nixosConfigurations.rpi = nixos-raspberrypi.lib.nixosSystem rpiConfig;
       nixosConfigurations.rpi-cross = nixos-raspberrypi.lib.nixosSystem rpiCrossConfig;
       nixosConfigurations.gui-minimal = nixpkgs.lib.nixosSystem guiMinimalConfig;

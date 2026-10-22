@@ -37,7 +37,7 @@ Gather the same evidence for every candidate and compare them with section 4:
 | Pin from `pkgs-last` | `nixpkgs-last` points at a revision whose builds are cached, ideally the one the running system was built from (outputs already in the store) | Its import must use the system's config (`cudaSupport`, `allowUnfree`), otherwise store paths differ. Unsuitable when `nixpkgs-last` is old or when many packages would have to come from it. |
 | Pin from stable | stable serves the package with the same config | Versions may be older; plugins must come from the same package set as their host (e.g. `obs-studio` with `obs-studio-plugins`); downloads a second dependency set. |
 | Roll back `nixpkgs` | a slightly older channel release has a clean dry-run | List candidates with `scripts/channel_revs.py`, then dry-run each with `--override-input nixpkgs github:NixOS/nixpkgs/<rev>`. |
-| Roll back `nixpkgs-stable` | a slightly older stable release serves the packages | `scripts/channel_revs.py --channel <release>`. Affects every configuration built from `nixpkgs-stable` (e.g. `server`). |
+| Roll back `nixpkgs-stable` | a slightly older stable release serves the packages | `scripts/channel_revs.py --channel <release>`. Affects every configuration built from `nixpkgs-stable` (e.g. `vulchi`, `aliyun`). |
 | Wait for Hydra | the job is queued and the jobset is progressing | No fixed timeline; do not switch to the uncached revision meanwhile. |
 | Build locally | only with explicit user consent | |
 

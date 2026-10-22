@@ -383,18 +383,6 @@ diff --git a/niri-config/src/lib.rs b/niri-config/src/lib.rs
                  disable_power_key_handling: true,
                  warp_mouse_to_focus: Some(
                      WarpMouseToFocus {
-diff --git a/src/handlers/mod.rs b/src/handlers/mod.rs
---- a/src/handlers/mod.rs
-+++ b/src/handlers/mod.rs
-@@ -116,7 +116,7 @@
-         let keyboards = self
-             .niri
-             .devices
--            .iter()
-+            .keys()
-             .filter(|device| device.has_capability(input::DeviceCapability::Keyboard))
-             .cloned();
- 
 diff --git a/src/input/mod.rs b/src/input/mod.rs
 --- a/src/input/mod.rs
 +++ b/src/input/mod.rs
@@ -539,6 +527,15 @@ diff --git a/src/niri.rs b/src/niri.rs
 +    pub devices: HashMap<input::Device, DeviceData>,
      pub tablets: HashMap<input::Device, TabletData>,
      pub touch: HashSet<input::Device>,
+ 
+@@ -1644,7 +1644,7 @@
+         let keyboards = self
+             .niri
+             .devices
+-            .iter()
++            .keys()
+             .filter(|device| device.has_capability(input::DeviceCapability::Keyboard))
+             .cloned();
  
 @@ -1751,8 +1751,8 @@
              || config.input.mouse != old_config.input.mouse

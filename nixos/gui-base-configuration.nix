@@ -60,6 +60,9 @@ in
   };
   security.rtkit.enable = true;
 
+  # linux-wifi-hotspot invokes create_ap through pkexec.
+  security.polkit.enablePkexecWrapper = true;
+
   # Bluetooth
   hardware.bluetooth.enable = true;
   hardware.bluetooth.package = pkgs.bluez-master;
@@ -147,6 +150,7 @@ in
 
   # Basic audio tools
   environment.systemPackages = with pkgs; [
+    linux-wifi-hotspot
     pavucontrol
     pulseaudio
     alsa-utils

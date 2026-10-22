@@ -11,7 +11,7 @@ Applies to the repo root and all subdirectories.
 ```bash
 # Build a NixOS configuration (dry-run)
 nix build path:.#nixosConfigurations.<name>.config.system.build.toplevel --dry-run
-# Available names: minimal, basic, develop, server, rpi, rpi-cross, handheld, desktop, laptop, wsl-desktop, wsl-laptop, gui-minimal, gui-basic
+# Available names: minimal, basic, develop, vulchi, aliyun, rpi, rpi-cross, handheld, desktop, laptop, wsl-desktop, wsl-laptop, gui-minimal, gui-basic
 
 # Build and switch (on a live NixOS system)
 # CRITICAL: always use path: prefix - repo has gitignored files required for build
@@ -82,6 +82,7 @@ statix check nixos/
 - **Module signature**: NixOS modules start with `{ config, pkgs, lib, inputs, ... }:`.
 - **Naming**: `kebab-case` for file names (`desktop-configuration.nix`). `camelCase` for Nix variables and function names (`minimalConfig`, `genZshPlugins`).
 - **Imports**: Reference sibling modules via relative path (`./module.nix`), parent repo files via `../${name}`.
+- **Shared configuration**: Declare shared packages and their associated options once in the appropriate common module, and let consuming profiles inherit them. Move an existing declaration to that shared layer rather than duplicating it across profiles.
 - **Custom packages**: Prefer defining custom package functions in `nixos/packages.nix`. Check this shared package collection before creating a standalone package file.
 - **Package references**: Normally instantiate the collection with `builtins.mapAttrs (name: value: pkgs.callPackage value { }) (import ./packages.nix)` and reference `packages.<name>` directly in the consuming module. Add an overlay only when integration specifically requires `pkgs.<name>`; convenience for a `nix run` command alone is not a reason to depart from direct references.
 - **Plugin derivations**: Reuse `commonInstallPhase` and `trivialDerivation` patterns from `nixos/nvim-plugins.nix` when packaging plugins.
@@ -200,10 +201,10 @@ Report every removal with its name and the evidence that made it obsolete.
 
 - Read `hostname`.
 - Read the hostname each configuration declares, e.g. `nix eval --raw path:.#nixosConfigurations.<name>.config.networking.hostName`, and match it against `hostname`.
-- Read the `nixos/custom/*.nix` module each configuration imports. The file name often differs from the output name (`server` imports `vulchi.nix`, `handheld` imports `rogxbox.nix`), and these modules add host-specific `specialArgs`.
+- Read the `nixos/custom/*.nix` module each configuration imports. The file name may differ from the output name (`handheld` imports `rogxbox.nix`), and these modules add host-specific `specialArgs`.
 - `nixos-rebuild list-generations` shows which targets were built before, which is a useful hint but not proof.
 
-Pick the single configuration matching this host. Remote and cross-compiled targets (`server`, `handheld`, `rpi`, `rpi-cross`, `wsl-desktop`, `wsl-laptop`) describe other machines and cannot be switched here - never pass them to `snr-switch`. If no configuration matches, or more than one plausibly does, ask the user with the candidates and their hostnames instead of guessing.
+Pick the single configuration matching this host. Remote and cross-compiled targets (`vulchi`, `aliyun`, `handheld`, `rpi`, `rpi-cross`, `wsl-desktop`, `wsl-laptop`) describe other machines and cannot be switched here - never pass them to `snr-switch`. If no configuration matches, or more than one plausibly does, ask the user with the candidates and their hostnames instead of guessing.
 
 #### Step 2: build and fix loop
 

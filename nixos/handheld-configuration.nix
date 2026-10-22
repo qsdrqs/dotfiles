@@ -44,7 +44,7 @@ in
     steam.importOXRRuntimes = true;
   };
 
-  xdg.portal.extraPortals = with pkgs; [
+  xdg.portal.extraPortals = with pkgs.jovianPackages; [
     xdg-desktop-portal-gamescope
     xdg-desktop-portal-holo
   ];
@@ -59,13 +59,13 @@ in
 
   home-manager.users.qsdrqs.xdg.dataFile = {
     "xdg-desktop-portal/portals/gamescope.portal".source =
-      "${pkgs.xdg-desktop-portal-gamescope}/share/xdg-desktop-portal/gamescope-portals/gamescope.portal";
+      "${pkgs.jovianPackages.xdg-desktop-portal-gamescope}/share/xdg-desktop-portal/gamescope-portals/gamescope.portal";
     "xdg-desktop-portal/portals/holo.portal".source =
-      "${pkgs.xdg-desktop-portal-holo}/share/xdg-desktop-portal/gamescope-portals/holo.portal";
+      "${pkgs.jovianPackages.xdg-desktop-portal-holo}/share/xdg-desktop-portal/gamescope-portals/holo.portal";
   };
 
   # Use Jovian's kernel
-  boot.kernelPackages = pkgs.linuxPackages_jovian;
+  boot.kernelPackages = pkgs.jovianPackages.linuxPackages;
 
   environment.systemPackages = with pkgs; [
     protonup-qt

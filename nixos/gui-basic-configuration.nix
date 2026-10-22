@@ -35,6 +35,16 @@ let
       # sed -i "s|Exec=.*|Exec=$out/bin/wechat|" $out/share/applications/com.tencent.wechat.desktop
     '';
   };
+  # Temporary fix: remove this override once the issue below is fixed upstream.
+  # nixpkgs' kernel.dev ships System.map, so an out-of-tree module built with
+  # modules_install runs depmod and writes modules.* into its own output.
+  # aggregateModules then fails on the collision with the kernel's own files.
+  # https://github.com/NixOS/nixpkgs/issues/576406
+  v4l2loopback = config.boot.kernelPackages.v4l2loopback.overrideAttrs (oldAttrs: {
+    postInstall = (oldAttrs.postInstall or "") + ''
+      rm -f $out/lib/modules/${config.boot.kernelPackages.kernel.modDirVersion}/modules.*
+    '';
+  });
 in
 {
   imports = [ ./grub-efi-configuration.nix ];
@@ -80,16 +90,13 @@ in
   boot.kernelModules = [
     # "v4l2loopback"
   ];
-  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+  boot.extraModulePackages = [ v4l2loopback ];
 
 
 
   nixpkgs.config.permittedInsecurePackages = [
-    "ventoy-1.1.17"
+    "ventoy-1.1.18"
   ];
-
-  # linux-wifi-hotspot invokes create_ap through pkexec.
-  security.polkit.enablePkexecWrapper = true;
 
   environment.systemPackages = with pkgs; [
     # handy
@@ -105,7 +112,6 @@ in
     wineWow64Packages.unstableFull
 
     virt-manager
-    linux-wifi-hotspot
     hotspot
     # neovide
     termshark

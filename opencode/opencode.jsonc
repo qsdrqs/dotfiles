@@ -40,7 +40,8 @@
         "command": [
           "npx",
           "chrome-devtools-mcp@latest",
-          "--autoConnect"
+          "--autoConnect",
+          "--userDataDir=/home/qsdrqs/.config/chromium"
         ]
       },
       "brave-search": {
