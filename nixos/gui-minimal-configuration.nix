@@ -9,9 +9,9 @@ let
     # waybar
     # inputs.waybar.packages.${pkgs.system}.waybar
     kdePackages.qtwayland
+    kdePackages.polkit-kde-agent-1
     hyprpaper
     hyprpicker
-    hyprpolkitagent
     hyprland-qtutils
     grim
     slurp

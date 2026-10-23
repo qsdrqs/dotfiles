@@ -305,7 +305,7 @@ spawn-at-startup "wluma"
 spawn-sh-at-startup "swaybg -i /home/qsdrqs/.local/share/wallpaper/wallpaper -m fill"
 spawn-sh-at-startup "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
 spawn-sh-at-startup "systemctl --user start hyprland-session.target"
-spawn-sh-at-startup "systemctl --user start hyprpolkitagent.service"
+spawn-sh-at-startup "QT_QPA_PLATFORM=wayland /run/current-system/sw/libexec/polkit-kde-authentication-agent-1"
 spawn-sh-at-startup "systemctl --user start hypridle.service"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
