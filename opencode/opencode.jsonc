@@ -58,16 +58,17 @@
         "type": "remote",
         "url": "https://mcp.exa.ai/mcp"
       },
-      "context7": {
-        "type": "local",
-        "command": [
-          "npx",
-          "-y",
-          "@upstash/context7-mcp",
-          "--api-key",
-          "{env:CONTEXT7_API_KEY}"
-        ]
-      }
+    },
+    "context7": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "{env:CONTEXT7_API_KEY}"
+      ],
+      "enabled": true
     }
   },
   "providers": {

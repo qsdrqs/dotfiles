@@ -22,19 +22,6 @@ let
       sed -i "s|Exec=.*/bin/qq \(.*\)|Exec=$out/bin/qq --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime \1|" $out/share/applications/qq.desktop
     '';
   };
-  wechat-hidpi = pkgs.symlinkJoin {
-    name = "wechat";
-    paths = [
-      pkgs.wechat # need to build glibc
-    ];
-    buildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/wechat \
-        --set QT_FONT_DPI 144
-      sed -i "s|Exec=.*|Exec=$out/bin/wechat|" $out/share/applications/wechat.desktop
-      # sed -i "s|Exec=.*|Exec=$out/bin/wechat|" $out/share/applications/com.tencent.wechat.desktop
-    '';
-  };
   # Temporary fix: remove this override once the issue below is fixed upstream.
   # nixpkgs' kernel.dev ships System.map, so an out-of-tree module built with
   # modules_install runs depmod and writes modules.* into its own output.
@@ -127,7 +114,7 @@ in
     # NUR
     qq-hidpi
     wemeet
-    wechat-hidpi
+    wechat
     # flameshot
     (flameshot.override {
       enableWlrSupport = true;

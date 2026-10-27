@@ -27,6 +27,7 @@ in {
     nodejs
     config.nix.package
     tree-sitter
+    gh
   ];
 
   # Mimic the default nix-ld library set that NixOS exposes at
