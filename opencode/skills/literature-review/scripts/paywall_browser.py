@@ -2,10 +2,9 @@
 """
 paywall_browser.py - Thin helper for the Stage C chrome-devtools fallback.
 
-This script does NOT drive Chrome. The main agent drives the chrome-devtools
-MCP directly because:
-  - Only the main agent has MCP tool access.
-  - Navigation state (cookies, login) is sticky inside the MCP session.
+The main agent loads the chrome-devtools-cli skill and drives the browser:
+  - The agent coordinates background CLI commands and inspects their results.
+  - Navigation state (cookies, login) persists in the browser session.
   - Detecting and clicking the right download element requires reasoning.
 
 This script is a thin helper that:
@@ -110,7 +109,8 @@ def prepare(args):
             "strategy": "user-driven",
             "hint": ("Hand off navigation to the user via chrome-devtools or "
                      "their own browser. Agent should open the landing URL "
-                     "via mcp_chrome-devtools_new_page, then use mcp_Question "
+                     "via the chrome-devtools-cli skill's new_page command, "
+                     "then use mcp_Question "
                      "to guide download. See references/paywall-fallback.md "
                      "section 'User-driven Fallback (Mode B)'."),
             "paper_dir": paper_dir,

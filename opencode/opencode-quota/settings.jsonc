@@ -1,0 +1,33 @@
+// OpenCode Quota server settings, converted on 2026-10-27 from:
+//   /home/qsdrqs/.config/opencode/opencode.jsonc (experimental.quotaToast)
+// The old file was left in place; OpenCode Quota no longer reads it.
+// Only the settings you chose there are here; a missing key uses its default.
+// Every setting and its default: https://github.com/slkiser/opencode-quota/blob/main/docs/readme/configuration.md
+{
+  "version": 6,
+  "sidebar": {
+    "hidden": [
+      "deepseek.total_balance.usd",
+      "deepseek.granted_balance.usd",
+      "deepseek.topped_up_balance.usd"
+    ]
+  },
+  "collapsed": {
+    "hidden": [
+      "deepseek.total_balance.usd",
+      "deepseek.granted_balance.usd",
+      "deepseek.topped_up_balance.usd"
+    ]
+  },
+  "toast": {
+    "afterReply": "off",
+    "afterQuestion": false
+  },
+  "providers": {
+    "off": [
+      "openrouter",
+      "opencode",
+      "copilot"
+    ]
+  }
+}

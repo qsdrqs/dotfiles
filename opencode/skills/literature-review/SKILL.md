@@ -482,8 +482,8 @@ python "$SKILL_DIR/scripts/section_splitter.py" \
    # -> emits navigation recipe (publisher + landing_url + strategy + hint)
    ```
 
-   Then YOU (main agent) drive chrome-devtools MCP per the recipe:
-   `chrome-devtools_new_page` -> `chrome-devtools_wait_for` -> extract PDF url
+   Then YOU (main agent) load the `chrome-devtools-cli` skill and follow the recipe:
+   `chrome-devtools new_page <landing_url>` -> inspect snapshots -> extract PDF url
    -> navigate/download -> save bytes to `$PAPER_DIR/paper.pdf`. Hard rule:
    max 2 strategy attempts per paper, 1 req / 5 s per publisher host.
 
@@ -500,7 +500,7 @@ python "$SKILL_DIR/scripts/section_splitter.py" \
    ```
 
    YOU (main agent) then:
-   - `mcp_chrome-devtools_new_page(url=recipe.landing_url)` to open the
+   - Load `chrome-devtools-cli` and use `chrome-devtools new_page <landing_url>` to open the
      landing page in a window the user can see and interact with.
    - `mcp_Question` to the user with the exact `expected_output` path the
      PDF must be saved to. Offer "open in your own browser" as an
@@ -801,5 +801,5 @@ Data files (not scripts):
 - `references/output-templates.md` - template selection and rendering rules.
 - `references/citation-criteria.md` - citation count sources, signals, and age-bucketed thresholds.
 - `references/citation-chasing.md` - Stage C 1-hop snowball workflow (Stage C).
-- `references/paywall-fallback.md` - chrome-devtools MCP fallback strategy (Stage C).
+- `references/paywall-fallback.md` - chrome-devtools CLI fallback strategy (Stage C).
 - `references/zotero-integration.md` - Zotero API + CrossRef pipeline (Stage B).

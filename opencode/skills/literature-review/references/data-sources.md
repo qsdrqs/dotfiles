@@ -122,7 +122,7 @@ No open API available for direct scripting. Strategy:
 
 - **Discovery**: most of their metadata is already in Semantic Scholar.
   Search S2 first; it will surface IEEE / ACM / Springer papers with `externalIds`.
-- **Paywalled full text**: Stage C uses `chrome-devtools` MCP to walk through
+- **Paywalled full text**: Stage C uses the `chrome-devtools-cli` skill to walk through
   the user's logged-in browser session. Not in Stage A.
 
 ## Layer 2: Triage
@@ -137,7 +137,7 @@ per-candidate, or skip for entries that already have `abstract` populated from
 |-------------|---------|----------|-------|
 | arXiv | `arxiv_fetch.py html <id>` piped to `section_splitter.py` | PDF via MinerU (Stage B) | HTML exists for ~90% of 2022+ papers |
 | S2 open-access PDF | Download via `openAccessPdf.url`; pipe to MinerU (Stage B) | S2 TL;DR + abstract | |
-| IEEE / ACM / paywalled | `chrome-devtools` MCP (Stage C) | S2 TL;DR + abstract | |
+| IEEE / ACM / paywalled | `chrome-devtools-cli` skill (Stage C) | S2 TL;DR + abstract | |
 
 ### arXiv HTML flow
 

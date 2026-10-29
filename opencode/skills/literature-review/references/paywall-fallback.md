@@ -6,7 +6,7 @@ main agent has decided is worth deep reading.
 
 Stage C has two sub-modes:
 
-- **Mode A: agent-driven (`prepare`)** - the agent uses chrome-devtools MCP
+- **Mode A: agent-driven (`prepare`)** - the agent uses the chrome-devtools CLI
   to follow a publisher-specific strategy (IEEE / ACM / Springer / ...).
   Pure automation, no human in the loop. See "Per-publisher strategy" below.
 - **Mode B: user-driven (`prepare --user-mode`)** - the agent hands off
@@ -31,7 +31,7 @@ Do NOT invoke for:
 - Candidates still in the Stage C batch-triage phase (abstracts suffice).
 - Papers with `status: no_identifier` (we have nothing to navigate to).
 
-## Why chrome-devtools MCP
+## Why chrome-devtools CLI
 
 We need a JavaScript-capable browser because publisher paywalls use:
 
@@ -41,10 +41,10 @@ We need a JavaScript-capable browser because publisher paywalls use:
 - Canary anti-scrape mitigations (simple curl returns 403; Chrome with a real
   UA + accepted cookies returns 200).
 
-The chrome-devtools MCP is driven by the main agent (not a Python script)
-because:
+The main agent loads the `chrome-devtools-cli` skill and drives the browser
+through the shell because:
 
-1. Only main agent has MCP tool access.
+1. The agent coordinates browser commands and inspects their results.
 2. Session state (cookies, login) is sticky across calls in a page.
 3. We need ad-hoc reasoning (detect login forms, click the right button) that
    is awkward to script.
@@ -65,9 +65,9 @@ paywall_browser.py prepare
         {doi, landing_url, publisher, strategy, expected_download_pattern}
     |
     v
-Main agent reads recipe, invokes chrome-devtools MCP:
+Main agent reads recipe, loads chrome-devtools-cli, and invokes the CLI:
     1. new_page (or navigate)            -> landing_url
-    2. wait_for                          -> landing text / PDF link element
+    2. take_snapshot / evaluate_script   -> check landing text / PDF link element
     3. evaluate_script                   -> extract direct PDF url
     4. navigate                          -> PDF url (or click download button)
     5. list_network_requests / pdf blob  -> capture the download
@@ -137,7 +137,7 @@ paywall_browser.py prepare --user-mode --manifest papers/<id>/manifest.json
     |
     v
 Main agent reads recipe and:
-    1. mcp_chrome-devtools_new_page(url=recipe.landing_url)
+    1. Load chrome-devtools-cli, then chrome-devtools new_page <landing_url>
        (creates a Chrome window the user can see and click in)
     2. mcp_Question to the user, e.g.:
        "I opened the publisher landing page. Please:
@@ -177,7 +177,7 @@ Same do-no-harm constraints as Mode A, plus:
   user. The user enters their own credentials, or declines.
 - Do not exfiltrate or persist any login form contents from the
   chrome-devtools session beyond what the user explicitly asks (e.g. saving
-  the downloaded PDF). Cookies remain in the MCP session and are not
+  the downloaded PDF). Cookies remain in the browser session and are not
   serialized to disk.
 - The agent's `mcp_Question` MUST surface the exact `expected_output` path so
   the user can save the PDF without ambiguity. Relative paths are forbidden.
@@ -203,7 +203,7 @@ patterns); fall back to Mode B only on Mode A failure.
 | Landing page returns 404 / deleted DOI | Record in session_log, status=doi_dead, continue |
 | Publisher requires institution login we do not have | Switch to Mode B (user-driven) and let the user log in; if user skips, record status=paywalled_no_access |
 | PDF download starts but file is corrupted / non-PDF | Retry once; if still bad, switch to Mode B; if Mode B also fails, record status=paywall_failed |
-| chrome-devtools MCP unavailable on this host | Skip Mode A. Mode B can still work via "open this URL in your own browser" prompt - the agent does not strictly need chrome-devtools to drive a user-driven flow. |
+| chrome-devtools CLI unavailable on this host | Skip Mode A. Mode B can still work via "open this URL in your own browser" prompt - the agent does not strictly need chrome-devtools to drive a user-driven flow. |
 | Sci-Hub / mirror policy requires explicit user consent | Do NOT auto-scrape; require user opt-in flag `--allow-mirrors` |
 
 **Hard rule:** never attempt >= 3 paywall bypasses on the same paper in one
@@ -213,7 +213,7 @@ max. Total Stage C attempts per paper <= 3. Stage C must not loop.
 ## Do-no-harm constraints
 
 - Do not log in to paywalled services as the user unless explicitly told.
-- Do not store download cookies outside the MCP session.
+- Do not store download cookies outside the browser session.
 - Do not send >= 1 req / 5 s to the same publisher host.
 - Do not mirror or cache downloaded PDFs outside `$LITREV_WORKDIR/papers/<id>/`.
 - Never attempt bypass on a paper flagged `consent_required=false` in the
@@ -236,8 +236,7 @@ Each paywall fallback attempt appends to `$LITREV_WORKDIR/session_log.md`:
 
 ## Primary sources
 
-- chrome-devtools MCP tool set: upstream Chrome DevTools Protocol wrapped as
-  MCP (see OpenCode's chrome-devtools MCP catalog).
+- Chrome DevTools CLI: https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/main/docs/cli.md
 - Unpaywall policy on direct PDF links:
   https://unpaywall.org/faq (why some OA papers still fail direct download)
 - Publisher-specific download routes: empirical; document per host as you

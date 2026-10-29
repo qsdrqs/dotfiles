@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+exec timeout --kill-after=5s "${CDT_TIMEOUT:-30s}" \
+    npx --yes --package="chrome-devtools-mcp@${CDT_VERSION:-latest}" chrome-devtools "$@"

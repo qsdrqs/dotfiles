@@ -2,15 +2,22 @@
 description: External library and OSS source researcher. Use for official docs, dependency behavior, GitHub source, issues, PRs, releases, and evidence-backed usage examples. Read-only for the workspace and never spawns subagents.
 mode: subagent
 model: openai/gpt-6.1-sol#max
-permission:
-  edit: deny
-  task: deny
-  todowrite: deny
-  bash:
-    "*": allow
-  external_directory:
-    "/tmp/**": allow
-    "/var/tmp/**": allow
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: allow
+  - action: external_directory
+    resource: "/tmp/**"
+    effect: allow
+  - action: external_directory
+    resource: "/var/tmp/**"
+    effect: allow
 ---
 
 # THE LIBRARIAN
