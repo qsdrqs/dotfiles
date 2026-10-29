@@ -242,6 +242,10 @@ in
             run ln -s ${homeDir}/dotfiles/opencode/${cfg} ${homeDir}/.config/opencode
           fi
         '') files}
+        if [ ! -e "${homeDir}/.config/opencode/opencode-quota" ]; then
+          run ln -s "${homeDir}/dotfiles/opencode/opencode-quota" "${homeDir}/.config/opencode/opencode-quota"
+        fi
+
         if [ -L "${homeDir}/.config/opencode/agents" ]; then
           run rm "${homeDir}/.config/opencode/agents"
         fi

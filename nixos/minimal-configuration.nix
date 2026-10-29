@@ -110,8 +110,9 @@ in
   # anyone in the "sudo-nopasswd" group gets NOPASSWD: ALL.
   # Toggle with the idempotent "sudo-nopasswd" script (packages.nix),
   # no rebuild needed:
-  #   sudo sudo-nopasswd on     # create group + add user
-  #   sudo sudo-nopasswd off    # remove user + delete group
+  #   sudo sudo-nopasswd on      # create group + add user, expires in 2h
+  #   sudo sudo-nopasswd on 8h   # same, expires in 8h
+  #   sudo sudo-nopasswd off     # remove user + delete group
   security.sudo.extraRules = [
     {
       groups = [ "sudo-nopasswd" ];
@@ -408,7 +409,34 @@ in
           timedatectl set-timezone "$timezone"
         fi
       '';
+
+      # Expiry for the temporary passwordless sudo: the deadline lives in
+      # /var/lib/sudo-nopasswd/expires, so the check runs from a persistent
+      # timer (below). Imperatively created group memberships are merged into
+      # /etc/group by users.mutableUsers and therefore survive reboots, while a
+      # transient timer would not.
+      sudo-nopasswd-expire = {
+        description = "Disable expired passwordless sudo";
+        # The default service PATH lacks shadow tools (groupdel) and getent.
+        path = [
+          pkgs.shadow
+          pkgs.glibc.getent
+        ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${packages.sudo-nopasswd}/bin/sudo-nopasswd expire";
+        };
+      };
     };
+  systemd.timers.sudo-nopasswd-expire = {
+    description = "Check for expired passwordless sudo";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "1min";
+      OnUnitActiveSec = "1min";
+      Unit = "sudo-nopasswd-expire.service";
+    };
+  };
 
   environment.variables = {
     NIX_CURR_PROFILE_SOURCE = ../.;

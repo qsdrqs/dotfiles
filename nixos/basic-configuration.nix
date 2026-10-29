@@ -29,6 +29,7 @@ in
     openssl.out # openssl lib
     parted
     gh
+    rclone
     exiftool
     socat
     xray
