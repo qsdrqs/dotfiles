@@ -28,16 +28,15 @@
   "share": "disabled",
   "mcp": {
     "servers": {
-      "chrome-devtools": {
-        "type": "local",
-        "disabled": true,
-        "command": [
-          "npx",
-          "chrome-devtools-mcp@latest",
-          "--autoConnect",
-          "--userDataDir=/home/qsdrqs/.config/chromium"
-        ]
-      },
+      // "chrome-devtools": {
+      //   "type": "local",
+      //   "command": [
+      //     "npx",
+      //     "chrome-devtools-mcp@latest",
+      //     "--autoConnect",
+      //     "--userDataDir=/home/qsdrqs/.config/chromium"
+      //   ]
+      // },
       "brave-search": {
         "type": "local",
         "command": [
@@ -51,6 +50,22 @@
       "exa": {
         "type": "remote",
         "url": "https://mcp.exa.ai/mcp"
+      },
+      "notion": {
+        "type": "remote",
+        "url": "https://mcp.notion.com/mcp"
+      },
+      "codex-connectors": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@wileai/codex-connectors-mcp@0.2.0"
+        ],
+        "environment": {
+          // CODEX_CONNECTORS_ALLOW omitted: expose every enabled and callable app.
+          "CODEX_CONNECTORS_WEB_SEARCH": "indexed"
+        }
       },
     },
     "context7": {
@@ -473,6 +488,107 @@
                 "thinking": {
                   "type": "disabled"
                 }
+              }
+            }
+          ]
+        }
+      }
+    },
+    // The catalog entry for this provider reads ABLIT_KEY; the key available
+    // here is exported as ABLITERATION_API_KEY.
+    "abliteration-ai": {
+      "settings": {
+        "apiKey": "{env:ABLITERATION_API_KEY}"
+      },
+      "models": {
+        // models.dev does not list Large Flash yet.
+        "abliterated-model-large-flash": {
+          "name": "Abliterated Large Flash",
+          "limit": {
+            "context": 1048576,
+            "output": 262144
+          },
+          "cost": {
+            "input": 1,
+            "output": 2,
+            "cache": { "read": 0.1, "write": 1 }
+          },
+          "capabilities": {
+            "tools": true,
+            "input": ["text", "image"],
+            "output": ["text"]
+          }
+        },
+        // models.dev pricing for this model is stale; values follow the official pricing page.
+        "abliterated-model-large-v2": {
+          "cost": {
+            "input": 3,
+            "output": 5,
+            "cache": { "read": 0.3, "write": 3 }
+          }
+        }
+      }
+    },
+    // Local Strata server (~/Strata, `nix develop -c ./run-iq3_xxs.sh`).
+    // Thinking defaults to xhigh effort; the official variant turns off the refusal-direction projection.
+    "strata": {
+      "name": "Strata (local)",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "http://127.0.0.1:8080/v1",
+        "apiKey": "strata-local"
+      },
+      "models": {
+        "qwen3.8-flash-next": {
+          "modelID": "qwen3.8-flash-next-iq3_xxs",
+          "name": "Qwen3.8-Flash-Next IQ3_XXS (local)",
+          "limit": {
+            "context": 262144,
+            "input": 229376,
+            "output": 32768
+          },
+          "capabilities": {
+            "tools": true,
+            "input": ["text", "image"],
+            "output": ["text"],
+            "reasoning": {
+              "supported": true
+            }
+          },
+          "compatibility": {
+            "reasoningField": "reasoning_content"
+          },
+          "variants": [
+            {
+              "id": "low",
+              "body": {
+                "reasoning_effort": "low"
+              }
+            },
+            {
+              "id": "medium",
+              "body": {
+                "reasoning_effort": "medium"
+              }
+            },
+            {
+              "id": "xhigh",
+              "body": {
+                "reasoning_effort": "xhigh"
+              }
+            },
+            {
+              "id": "instruct",
+              "body": {
+                "chat_template_kwargs": {
+                  "enable_thinking": false
+                }
+              }
+            },
+            {
+              "id": "official",
+              "body": {
+                "experimental_speed_projection": false
               }
             }
           ]

@@ -354,6 +354,19 @@ and invoke that file from the host script or program. Keep inline code limited t
 
 ### Python
 
+#### Temporary Python Packages (PREFERRED)
+
+**Create a venv under `/tmp` and install packages with pip.**
+
+For one-off Python dependencies, create a temporary venv with a task-specific
+name and install into it:
+
+```bash
+python3 -m venv /tmp/opencode/venv-<task>
+/tmp/opencode/venv-<task>/bin/pip install pillow
+/tmp/opencode/venv-<task>/bin/python script.py
+```
+
 #### Multi-line String Composition (PREFERRED)
 
 **Avoid consecutive `print()` or `list.append()` calls.**
