@@ -12,7 +12,7 @@ let
     kdePackages.polkit-kde-agent-1
     hyprpaper
     hyprpicker
-    hyprland-qtutils
+    hyprland-guiutils
     grim
     slurp
     jq
@@ -126,9 +126,13 @@ in
   programs.ydotool.enable = true;
   programs.waybar.enable = true;
   # Forward the NixOS module's systemdSupport override to the underlying package.
+  # Cava is disabled: the Waybar git source expects a cava subproject that its
+  # flake recipe no longer stages (its libcava.wrap switched to wrap-git).
   programs.waybar.package = lib.makeOverridable
     (args: inputs.waybar.packages.${pkgs.stdenv.hostPlatform.system}.waybar.override {
-      waybar = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.waybar.override args;
+      waybar = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.waybar.override (
+        args // { cavaSupport = false; }
+      );
     })
     { };
 

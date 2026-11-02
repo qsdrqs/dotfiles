@@ -83,6 +83,12 @@ in
 
   nixpkgs.config.permittedInsecurePackages = [
     "ventoy-1.1.18"
+
+    # Temporary: Zotero 10 requires the EOL Firefox ESR 140 runtime.
+    # Remove when the pinned pkgs.zotero no longer depends on this package
+    # (expected with Zotero 11 / Gecko 153).
+    # https://github.com/NixOS/nixpkgs/pull/572466
+    "firefox-esr-140-bin-unwrapped-140.17.0esr"
   ];
 
   environment.systemPackages = with pkgs; [

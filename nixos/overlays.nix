@@ -127,21 +127,6 @@ in
           };
         });
 
-        # Zotero 10.0.2 fixes HTML indexing with Firefox ESR 140.15.
-        # https://github.com/NixOS/nixpkgs/pull/562964
-        # Built on nixpkgs-last because the current zotero needs a CUDA firefox-esr-153 that is not
-        # in cache.nixos-cuda.org yet; remove together with the nixpkgs-last overrides below.
-        zotero =
-          let
-            zoteroNixpkgs = super.fetchFromGitHub {
-              owner = "NixOS";
-              repo = "nixpkgs";
-              rev = "363fdbe57ed052c76e816e6270206b0cb348e53a";
-              hash = "sha256-eaIzbbImStaHMgxftbumWoZuMC+Xm7TraQSsf6da+VI=";
-            };
-          in
-          pkgs-last.callPackage "${zoteroNixpkgs}/pkgs/by-name/zo/zotero/package.nix" { };
-
         tzupdate = super.rustPlatform.buildRustPackage {
           pname = "tzupdate";
           version = "unstable-2025-09-02";
@@ -167,9 +152,6 @@ in
             ./patches/wivrn-flush-layer-ubo.patch
           ];
         });
-        # Current CUDA Firefox builds are not in cache.nixos-cuda.org yet.
-        # Use nixpkgs-last for Firefox and Zotero (above) until those builds are cached.
-        firefox-devedition-unwrapped = pkgs-last.firefox-devedition-unwrapped;
         # minted 3.7.0 ships latexminted 0.6.0, whose ArgParser does not accept
         # the `color` keyword that Python 3.14's argparse now forwards, so every
         # minted document fails. Upstream fixed this in minted 3.8.0 with
