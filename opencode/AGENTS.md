@@ -367,6 +367,10 @@ python3 -m venv /tmp/opencode/venv-<task>
 /tmp/opencode/venv-<task>/bin/python script.py
 ```
 
+On NixOS host, a `missing shared libraries` error from a native extension
+is a Nix library-path problem: load the `nix` skill and apply its
+"Missing shared libraries" section.
+
 #### Multi-line String Composition (PREFERRED)
 
 **Avoid consecutive `print()` or `list.append()` calls.**

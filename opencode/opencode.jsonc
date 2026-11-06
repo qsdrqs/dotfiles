@@ -478,20 +478,6 @@
     "deepseek": {
       "settings": {
         "apiKey": "{env:DEEPSEEK_API_KEY}"
-      },
-      "models": {
-        "deepseek-flash": {
-          "variants": [
-            {
-              "id": "instruct",
-              "body": {
-                "thinking": {
-                  "type": "disabled"
-                }
-              }
-            }
-          ]
-        }
       }
     },
     // The catalog entry for this provider reads ABLIT_KEY; the key available
@@ -516,8 +502,19 @@
           "capabilities": {
             "tools": true,
             "input": ["text", "image"],
-            "output": ["text"]
-          }
+            "output": ["text"],
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "effort": ["low", "high", "max"]
+            }
+          },
+          "variants": [
+            { "id": "none", "settings": { "reasoningEffort": "none" } },
+            { "id": "low", "settings": { "reasoningEffort": "low" } },
+            { "id": "high", "settings": { "reasoningEffort": "high" } },
+            { "id": "max", "settings": { "reasoningEffort": "max" } }
+          ]
         },
         // models.dev pricing for this model is stale; values follow the official pricing page.
         "abliterated-model-large-v2": {
